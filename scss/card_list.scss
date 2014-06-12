@@ -1,0 +1,41 @@
+.card_list_row {
+    border-top:solid 1px;
+    border-bottom:solid 1px;
+}
+
+.card_list_row.master {
+    background-color:#ffffff;
+}
+
+.card_list_row.monster_front {
+    background-color:#ffeeee;
+}
+
+.card_list_row.monster_back {
+    background-color:#eeeeff;
+}
+
+$super_back_color : #ffffee;
+.card_list_row.super_front {
+    background-color:$super_back_color;
+}
+
+.card_list_row.super_back {
+    background-color:$super_back_color;
+}
+
+.card_list_row.magic {
+    background-color:#eeffee;
+}
+
+.card_list_row>.card_image {
+    background-image:url("/images/card/card.jpg");
+    background-position:center;
+    background-repeat:no-repeat;
+    background-size:100%;
+}
+
+div.card_data>div.proposer {
+    float:right;
+    padding-right:2px;
+}

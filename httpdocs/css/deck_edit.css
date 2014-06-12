@@ -1,0 +1,89 @@
+#deck_frame {
+  margin-top: 2px;
+  border: solid 2px; }
+  #deck_frame div.deck_header div {
+    float: left; }
+  #deck_frame div.deck_header div.master_image {
+    padding: 3px; }
+    #deck_frame div.deck_header div.master_image img {
+      border: solid 1px;
+      width: 45px;
+      height: 45px; }
+  #deck_frame div.deck_header div.deck_summary div.title {
+    margin-top: 6px; }
+    #deck_frame div.deck_header div.deck_summary div.title input {
+      width: 15em; }
+  #deck_frame div.master_select {
+    margin-top: 0;
+    margin-left: 3px;
+    margin-bottom: 12px; }
+    #deck_frame div.master_select a {
+      margin-left: 10px; }
+  #deck_frame div.card_list_in_deck {
+    margin: 2px;
+    border: solid 2px; }
+    #deck_frame div.card_list_in_deck div.card_image_frame {
+      min-height: 60px; }
+      #deck_frame div.card_list_in_deck div.card_image_frame img {
+        width: 45px;
+        height: 45px;
+        border: solid 1px;
+        margin-left: 1px;
+        margin-top: 1px; }
+    #deck_frame div.card_list_in_deck div.deck {
+      border-bottom: solid 1px; }
+    #deck_frame div.card_list_in_deck div.front {
+      background-color: #ffeeee;
+      border-bottom: solid 1px; }
+    #deck_frame div.card_list_in_deck div.back {
+      background-color: #eeeeff;
+      border-bottom: solid 1px; }
+    #deck_frame div.card_list_in_deck div.magic {
+      background-color: #eeffee;
+      border-bottom: solid 1px; }
+    #deck_frame div.card_list_in_deck div.super {
+      background-color: #ffffee;
+      border-bottom: solid 1px; }
+    #deck_frame div.card_list_in_deck div span[id] {
+      font-weight: bold;
+      color: blue; }
+
+div.submit {
+  width: 100%;
+  margin-bottom: 2px; }
+  div.submit div {
+    padding: 12px 0;
+    text-align: center;
+    border-left: solid 2px;
+    border-right: solid 2px;
+    border-bottom: solid 2px; }
+
+.card_catalog .catalog {
+  padding: 2px;
+  float: left;
+  border: solid 1px; }
+.card_catalog .monster_front {
+  background-color: #ffcccc; }
+.card_catalog .monster_back {
+  background-color: #ccccff; }
+.card_catalog .magic {
+  background-color: #ccffcc; }
+.card_catalog .super_front {
+  background-color: #ffffcc; }
+.card_catalog .super_back {
+  background-color: #ffffcc; }
+.card_catalog img {
+  width: 45px;
+  height: 45px;
+  border: solid 1px; }
+.card_catalog .selected_card div {
+  float: left;
+  margin-top: 9px; }
+.card_catalog .selected_card div.card_image_frame {
+  margin: 2px; }
+.card_catalog .selected_card div.card_detail {
+  float: right;
+  margin-top: 12px;
+  padding-right: 15px; }
+  .card_catalog .selected_card div.card_detail a {
+    font-size: 16px; }

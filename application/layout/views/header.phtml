@@ -1,0 +1,22 @@
+<?php
+$aUserInfo = Common::checkLogin();
+$sLoginInfo = '<a href="/user/login-input/">ログイン</a>';
+if (isset($aUserInfo)) {
+    $sLoginInfo = "ようこそ{$aUserInfo['nick_name']}さん <a href=\"/user/\">管理</a>";
+}
+?>
+<div id='header'>
+    <div class="title">
+        <h1>
+            <img src="/images/cardhero-game.net.jpg" alt="カードヒーロー@スマホ" />
+        </h1>
+    </div>
+    <div class="links clearfix">
+        <div class="top_link">
+            <a href="/">メインメニュー</a>
+        </div>
+        <div class="user_info">
+            <?php echo $sLoginInfo . "\n"; ?>
+        </div>
+    </div>
+</div>

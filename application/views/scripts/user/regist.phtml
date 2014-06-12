@@ -1,0 +1,41 @@
+<?php
+if ($this->registOk) {
+    $this->message = 'ユーザー登録が完了しました。';
+} else {
+    $this->message = 'ユーザー登録に失敗しました。';
+}
+
+$sDivs = '';
+foreach ($this->aInput as $key => $val) {
+    $sColName = '';
+    $sDispVal = $val;
+    if ($key == 'password') {
+        $sDispVal = preg_replace('/./', '*', $val);
+    }
+    if (isset($this->aCols[$key])) {
+        $sColName = $this->aCols[$key];
+    }
+    $sDivs .= <<<_eos_
+    <div class="clearfix">
+        <div class="column_name">{$sColName}：</div>
+        <div class="input_box">{$sDispVal}</div>
+    </div>
+
+_eos_;
+}
+$sRegistLink = '<a href="/user/regist-input/">ユーザー登録 入力画面へ</a>'; 
+if (isset($this->sConfirmErrorMessage)) {
+    $sRegistLink = ''; 
+}
+?>
+<h2>新規ユーザー登録</h2>
+<?php echo <<<_eos_
+    <div id="message">{$this->message}</div>
+    {$sDivs}
+    <div class="submit">
+        <a href="/">トップへ戻る</a>
+        {$sRegistLink}
+    </div>
+
+_eos_;
+?>

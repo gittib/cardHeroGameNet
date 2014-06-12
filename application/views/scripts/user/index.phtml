@@ -1,0 +1,20 @@
+<?php
+    $aUserInfo = Common::checkLogin();
+    if (isset($aUserInfo)) {
+        echo <<<_eos_
+<ul class="main_menu">
+<li><a href='/user/update-input/'>登録情報変更</a></li>
+<li><a href='/user/logout/'>ログアウト</a></li>
+</ul>
+
+_eos_;
+    } else {
+        echo <<<_eos_
+<p>
+ログイン情報を確認できません。
+申し訳ありませんが再度<a href="/user/login-input/">ログイン</a>しなおして下さい。
+</p>
+
+_eos_;
+    }
+?>

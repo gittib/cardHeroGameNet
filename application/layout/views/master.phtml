@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<?php
+// title
+$sTitle = '';
+if (isSet($this->layout()->title)) {
+    $sTitle = $this->layout()->title . ' - ';
+}
+// stylesheet
+$sStylesheet = '';
+if (isSet($this->layout()->stylesheet)) {
+    foreach ($this->layout()->stylesheet as $key => $val) {
+        if ($val != '') {
+            $sStylesheet .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"{$val}\" media=\"all\" />\n";
+        }
+    }
+}
+
+// javascript
+$sJavascript = '';
+if (isSet($this->layout()->javascript)) {
+    foreach ($this->layout()->javascript as $key => $val) {
+        if ($val != '') {
+            $sJavascript .= "<script type=\"text/javascript\" src=\"{$val}\"></script>\n";
+        }
+    }
+}
+if (isSet($this->layout()->javascriptCode)) {
+    $sJavascript .= <<<_eos_
+<script type="text/javascript">
+<!--
+{$this->layout()->javascriptCode}
+-->
+</script>
+
+_eos_;
+}
+?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title><?php echo $sTitle; ?>カードヒーロー＠スマホ</title>
+<meta name="keywords" content="カードヒーロー,スマホ" />
+<meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1,minimum-scale=1" />
+<link rel="stylesheet" type="text/css" href="/css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="/css/header.css" media="all" />
+<?php echo $sStylesheet; ?>
+<script type="text/javascript" src="/js/jquery-2.0.2.min.js"></script>
+<?php echo $sJavascript; ?>
+</head>
+<body>
+<?php
+    echo $this->render('header.phtml');
+    echo $this->layout()->content;
+    echo $this->render('footer.phtml');
+?>
+</body>
+</html>

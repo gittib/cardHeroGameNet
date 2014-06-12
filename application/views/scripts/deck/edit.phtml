@@ -1,0 +1,114 @@
+<?php
+$deckIdHtml = '';
+if (isset($this->input_deck_id) && $this->input_deck_id != '') {
+    $deckIdHtml = <<<_eos_
+    <input type="hidden" name="input_deck_id" value="{$this->input_deck_id}" />
+
+_eos_;
+}
+$aDeckCardImages = array(
+    'front' => '',
+    'back'  => '',
+    'magic' => '',
+    'super' => '',
+);
+if (isset($this->aDeckInfo['cards']) && is_array($this->aDeckInfo['cards'])) {
+    foreach ($this->aDeckInfo['cards'] as $val) {
+        $aDeckCardImages[$val['cate']] .= "<img src='/images/card/{$val['image_file_name']}' cate='{$val['cate']}' cardid='{$val['card_id']}' />\n";
+    }
+}
+
+$nRowImg = 0;
+$sMasterImages = '';
+$sMasterCatalog = '';
+$sDeckName = '';
+$sCardCatalog = '';
+
+if (isset($this->aDeckInfo['deck_name'])) {
+    $sDeckName = $this->escape($this->aDeckInfo['deck_name']);
+}
+foreach ($this->card_list as $val) {
+    if ($val['category'] == 'master') {
+        $sMasterImages .= <<<_eos_
+                <div cardid="{$val['card_id']}">
+                    <img src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}" cardid="{$val['card_id']}" />
+                </div>
+
+_eos_;
+        if (isset ($this->aDeckInfo['master_card_id']) && $val['card_id'] == $this->aDeckInfo['master_card_id']) {
+            $selected = ' selected';
+        } else {
+            $selected = '';
+        }
+        $sMasterCatalog .= <<<_eos_
+                <option value="{$val['card_id']}"{$selected}>{$val['card_name']}</option>
+
+_eos_;
+    } else {
+        $sCardCatalog .= <<<_eos_
+    <div class="catalog {$val['category']}">
+        <img class="yet" alt="{$val['card_name']}" cardid="{$val['card_id']}" rare="{$val['rare']}" ref="/images/card/{$val['image_file_name']}" />
+    </div>
+
+_eos_;
+        $nRowImg++;
+        if ($nRowImg >= 6) {
+            $sCardCatalog .= <<<_eos_
+</div>
+<div class="card_catalog clearfix">
+
+_eos_;
+            $nRowImg = 0;
+        }
+    }
+}
+?>
+<form name="deck_edit_form" method="post">
+<?php echo $deckIdHtml; ?>
+    <div id="deck_frame">
+        <div class="deck_header clearfix">
+            <div class="master_image">
+<?php echo $sMasterImages; ?>
+            </div>
+            <div class="deck_summary">
+                <div class="title">
+                    デッキ名：<br />
+                    <input type="text" name="deck_name" value="<?php echo $sDeckName; ?>" />
+                </div>
+            </div>
+        </div>
+        <div class="master_select">
+            <select name="master">
+<?php echo $sMasterCatalog; ?>
+            </select>
+            <a class="blank_link" href="/card/detail/1002/" target="_blank">マスター詳細</a>
+        </div>
+        <div class="card_list_in_deck">
+            <div class="deck">デッキ枚数:<span id="deck_cards_num">0</span>枚</div>
+            <div class="front">前衛モンスター枚数:<span id="front_cards_num">0</span>枚</div>
+            <div class="front card_image_frame">
+<?php echo $aDeckCardImages['front']; ?>
+            </div>
+            <div class="back">後衛モンスター枚数:<span id="back_cards_num">0</span>枚</div>
+            <div class="back card_image_frame">
+<?php echo $aDeckCardImages['back']; ?>
+            </div>
+            <div class="magic">マジック枚数:<span id="magic_cards_num">0</span>枚</div>
+            <div class="magic card_image_frame">
+<?php echo $aDeckCardImages['magic']; ?>
+            </div>
+            <div class="super">スーパー枚数:<span id="super_cards_num">0</span>枚</div>
+            <div class="super card_image_frame">
+<?php echo $aDeckCardImages['super']; ?>
+            </div>
+        </div>
+    </div>
+    <div class="submit">
+        <div>
+            <input type="button" value="デッキ登録" />
+        </div>
+    </div>
+</form>
+<div class="card_catalog clearfix">
+<?php echo $sCardCatalog; ?>
+</div>

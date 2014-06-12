@@ -1,0 +1,83 @@
+.links {
+    padding:1px 3px;
+}
+
+
+table.monster_data {
+    td {
+        border:solid 1px;
+    }
+
+    div {
+        padding:1px;
+    }
+
+    $dot_sep: dotted 1px;
+
+    div.special_attack {
+        border-top:$dot_sep;
+    }
+
+    div.skill {
+        border-top:$dot_sep;
+    }
+}
+
+div.art_icon {
+    float:left;
+}
+
+div.art_name {
+    float:left;
+}
+
+div.art_range {
+    float:left;
+    margin-left:5px;
+    color:#0080ff;
+
+    .range_caption {
+        display:none;
+    }
+}
+
+div.art_power {
+    float:right;
+}
+
+div.art_stone {
+    width:30px;
+    float:right;
+    text-align:right;
+}
+
+#explain {
+    margin-top:25px;
+    border:solid 1px;
+
+    div {
+        padding: 3px;
+        padding-bottom: 2px;
+        border:solid 1px;
+    }
+
+    .range_label {
+        background-color:#eeeeff;
+    }
+}
+
+
+
+div.magic {
+    padding:2px;
+    border:solid 2px;
+}
+div.magic_caption {
+    float:left;
+    width:85%;
+}
+div.magic_stone {
+    float:right;
+    width:10%;
+    font-size:16px;
+}

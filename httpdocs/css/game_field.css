@@ -1,0 +1,71 @@
+body {
+    -webkit-text-size-adjust: 100%;
+    margin: 0;
+    font-family:'Lucida Grande', 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W3','Meiryo, メイリオ', sans-serif;
+}
+
+#game_field {
+    width: 100%;
+    border: 1px solid;
+    border-collapse: collapse;
+}
+
+#game_field td {
+    width: 30%;
+    border: 1px solid;
+}
+
+#game_field td>.pict {
+    float: left;
+    height: 50px;
+}
+
+#game_field td>.pict img {
+    height: 100%;
+}
+
+#game_field td>.param {
+    float: left;
+    padding-left: 3px;
+    font-size: 12px;
+}
+
+.mini-font {
+    font-size: 6px;
+}
+
+#game_field td>.param .power {
+    color: #ff0000;
+}
+
+#game_field td>.param .shield {
+    color: #0060ff;
+}
+
+#game_field td>.param .magic {
+    color: #00aa00;
+}
+
+#game_field td>.param .charge {
+    color: #ffffff;
+    background-color: #ff0000;
+}
+
+#hand_card {
+    border: 1px solid;
+    text-align:center;
+    padding: 2px;
+}
+
+#hand_card img {
+    height: 50px;
+}
+
+div.card_name {
+    float: left;
+}
+
+div.close_button {
+    float: right;
+    padding: 2px;
+}

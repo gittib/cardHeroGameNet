@@ -1,0 +1,20 @@
+#header {
+  width: 100%; }
+  #header h1 {
+    margin: 0;
+    border: 1px solid;
+    text-align: center; }
+    #header h1 img {
+      width: 100%;
+      padding: 0;
+      margin: 0; }
+  #header div.links {
+    padding: 3px;
+    border: 1px solid;
+    border-bottom: 2px solid;
+    background-color: #eeeeff; }
+  #header div.top_link {
+    float: left; }
+  #header div.user_info {
+    float: right;
+    text-align: right; }

@@ -1,0 +1,178 @@
+$img_size : 45px;
+$list_card_back_color : 'cc';
+$deck_card_back_color : 'ee';
+
+$list_front_back_color : unquote('#ff' + $list_card_back_color + $list_card_back_color);
+$list_back_back_color  : unquote('#' + $list_card_back_color + $list_card_back_color + 'ff');
+$list_magic_back_color : unquote('#' + $list_card_back_color + 'ff' + $list_card_back_color);
+$list_super_back_color : unquote('#ffff' + $list_card_back_color);
+
+$deck_front_back_color : unquote('#ff' + $deck_card_back_color + $deck_card_back_color);
+$deck_back_back_color  : unquote('#' + $deck_card_back_color + $deck_card_back_color + 'ff');
+$deck_magic_back_color : unquote('#' + $deck_card_back_color + 'ff' + $deck_card_back_color);
+$deck_super_back_color : unquote('#ffff' + $deck_card_back_color);
+
+#deck_frame {
+    margin-top: 2px;
+    border: solid 2px;
+
+    div.deck_header {
+        div {
+            float: left;
+        }
+
+        div.master_image {
+            padding: 3px;
+
+            img {
+                border: solid 1px;
+                width: $img_size;
+                height: $img_size;
+            }
+        }
+
+        div.deck_summary {
+            div.title {
+                margin-top: 6px;
+
+                input {
+                    width: 15em;
+                }
+            }
+        }
+    }
+
+    div.master_select {
+        margin-top: 0;
+        margin-left: 3px;
+        margin-bottom: 12px;
+
+        a {
+            margin-left: 10px;
+        }
+    }
+
+    div.card_list_in_deck {
+        $bottom_border_style : solid 1px;
+
+        margin: 2px;
+        border: solid 2px;
+
+        div.card_image_frame {
+            min-height:60px;
+
+            img {
+                $img_margin : 1px;
+
+                width: $img_size;
+                height: $img_size;
+                border: solid 1px;
+                margin-left: $img_margin;
+                margin-top:  $img_margin;
+            }
+        }
+
+        div.deck {
+            border-bottom: $bottom_border_style;
+        }
+
+        div.front {
+            background-color: $deck_front_back_color;
+            border-bottom: $bottom_border_style;
+        }
+
+        div.back {
+            background-color: $deck_back_back_color;
+            border-bottom: $bottom_border_style;
+        }
+
+        div.magic {
+            background-color: $deck_magic_back_color;
+            border-bottom: $bottom_border_style;
+        }
+
+        div.super {
+            background-color: $deck_super_back_color;
+            border-bottom: $bottom_border_style;
+        }
+
+        div {
+            span[id] {
+                font-weight: bold;
+                color: rgb(0, 0, 255);
+            }
+        }
+    }
+}
+
+div.submit {
+    width: 100%;
+    margin-bottom: 2px;
+
+    div {
+        $submit_border_style : solid 2px;
+
+        padding: 12px 0;
+        text-align: center;
+        border-left: $submit_border_style;
+        border-right: $submit_border_style;
+        border-bottom: $submit_border_style;
+    }
+}
+
+.card_catalog {
+    .catalog {
+        padding: 2px;
+        float: left;
+        border: solid 1px;
+    }
+
+    .monster_front {
+        background-color: $list_front_back_color;
+    }
+
+    .monster_back {
+        background-color: $list_back_back_color;
+    }
+
+    .magic {
+        background-color: $list_magic_back_color;
+    }
+
+    .super_front {
+        background-color: $list_super_back_color;
+    }
+
+    .super_back {
+        background-color: $list_super_back_color;
+    }
+
+    img {
+        width: $img_size;
+        height: $img_size;
+        border: solid 1px;
+    }
+
+    .selected_card {
+
+        div {
+            float:left;
+            margin-top: 9px;
+        }
+
+        div.card_image_frame {
+            margin: 2px;
+        }
+
+        div.card_detail {
+            float: right;
+            margin-top: 12px;
+            padding-right: 15px;
+
+            a {
+                font-size: 16px;
+            }
+        }
+    }
+
+}

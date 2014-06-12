@@ -1,0 +1,91 @@
+<table class="monster_data" cellspacing=0 cellpadding=0>
+<tr><td>
+<table class="monster_data" cellspacing=0 cellpadding=0>
+<?php
+    foreach ($this->aMonsterInfo as $val) {
+        $sArtsHtml = <<<_eos_
+            <div class="normal_attack clearfix">
+                <div class="art_icon"><img src='/images/charge_icon.png' alt='charge' /></div>
+                <div class="art_name">{$val['attack_name']}</div>
+                <div class="art_range">{$val['attack_range']}</div>
+                <div class="art_stone">{$val['attack_stone']}</div>
+                <div class="art_power">{$val['attack_power']}P</div>
+            </div>
+
+_eos_;
+        if (isset($val['m_arts'])) {
+            foreach ($val['m_arts'] as $vArt) {
+                if (!isset($vArt['art_name']) || $vArt['art_name'] == '') {
+                    continue;
+                }
+                $sArtsHtml .= <<<_eos_
+            <div class="special_attack clearfix">
+                <div class="art_icon"><img src='/images/special_icon.png' alt='special' /></div>
+                <div class="art_name">{$vArt['art_name']}</div>
+                <div class="art_range">
+                    <span class="range_type_name">
+                        <a href="javascript:void(0)">{$vArt['range_type_name']}</a>
+                    </span>
+                    <span class="range_caption">
+                        {$vArt['range_caption']}
+                    </span>
+                    <img height=9 src="/images/range/{$vArt['range_type_id']}.png" alt="{$vArt['range_type_name']}"/>
+                </div>
+                <div class="art_stone">{$vArt['stone']}コ</div>
+                <div class="art_power">{$vArt['sArtPower']}</div>
+            </div>
+
+_eos_;
+                if (isset($vArt['caption']) && $vArt['caption'] != '') {
+                    $sArtsHtml .= <<<_eos_
+            <div class="special_caption">
+                <span class="art_caption">{$vArt['caption']}</span>
+            </div>
+
+_eos_;
+                }
+            }
+        }
+        if ($val['skill_name'] != '') {
+            $sArtsHtml .= <<<_eos_
+            <div class="skill clearfix">
+                <div class="skill_name">性格「{$val['skill_name']}」</div>
+            </div>
+            <div class="skill_caption">
+                <span class="skill_caption">{$val['skill_caption']}</span>
+            </div>
+
+_eos_;
+        }
+        echo <<<_eos_
+    <tr>
+        <td class="basic">
+            {$val['monster_name']}
+            LV{$val['lv']}　HP{$val['hp']}
+        </td>
+        <td class="arts">
+            {$sArtsHtml}
+        </td>
+    </tr>
+
+_eos_;
+    }
+?>
+</table>
+</td></tr>
+</table>
+<div id="explain">
+    <div class="range_label">＜攻撃範囲　説明欄＞</div>
+    <div class="range_name"> - </div>
+    <div class="main">攻撃範囲名をタップすると、ここに説明が表示されます。</div>
+</div>
+<script type="text/javascript">
+<!--
+    $(function() {
+        $(".art_range").click(function() {
+            $("#explain>.range_name").text($(this).find(".range_type_name").text());
+            $("#explain>.main").text($(this).find(".range_caption").text());
+        })
+    })
+-->
+</script>

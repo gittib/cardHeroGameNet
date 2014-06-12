@@ -1,0 +1,66 @@
+<?php
+for ($i = 0 ; $i < 10 ; $i++) {
+    for ($j = 0 ; $j < 10 ; $j++) {
+        $imgName = sprintf('co%03d', rand(1,150));
+        $sLV = 'LV';
+        if ($j == 3 || $j == 6) {
+            $sLV = 's';
+            $imgName = 'm' . rand(2, 3);
+        }
+        $aMonsterData[$j] = <<<_eos_
+            <div class="pict">
+                <img src="/images/card/{$imgName}.jpg" alt=""/>
+            </div>
+            <div class="param">
+                <span class="mini-font">{$sLV}</span><span class="lv">?</span>
+                <span class="mini-font">HP</span><span class="hp">?</span>
+            </div>
+            <div class="param">
+                <span class="power">P</span><span class="shield">S</span><span class="magic">M</span><span class="charge">！</span>
+            </div>
+
+_eos_;
+    }
+    echo <<<_eos_
+<div href="/game/field/{$i}/" class="game_row">
+    <div class="field-title">
+        <div>
+            フィールドタイトル
+        </div>
+    </div>
+    <table class="game_field">
+        <tr>
+            <td>{$aMonsterData[0]}</td>
+            <td></td>
+            <td>{$aMonsterData[1]}</td>
+            <td colspan=3 rowspan=4 class="explain">フィールド説明あいうえおかきくけこさしすせそたちつてと</td>
+        </tr>
+        <tr>
+            <td>{$aMonsterData[2]}</td>
+            <td>{$aMonsterData[3]}</td>
+            <td>{$aMonsterData[4]}</td>
+        </tr>
+        <tr>
+            <td>{$aMonsterData[5]}</td>
+            <td>{$aMonsterData[6]}</td>
+            <td>{$aMonsterData[7]}</td>
+        </tr>
+        <tr>
+            <td>{$aMonsterData[8]}</td>
+            <td></td>
+            <td>{$aMonsterData[9]}</td>
+        </tr>
+    </table>
+    <div class="hand_card">
+        <img src="/images/card/card.jpg" alt=""/>
+        <img src="/images/card/card.jpg" alt=""/>
+        <img src="/images/card/card.jpg" alt=""/>
+        <img src="/images/card/card.jpg" alt=""/>
+        <img src="/images/card/card.jpg" alt=""/>
+        <img src="/images/card/card.jpg" alt=""/>
+    </div>
+</div>
+
+_eos_;
+}
+?>

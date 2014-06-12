@@ -1,0 +1,35 @@
+<h2>ログインフォーム</h2>
+<form name="login_form" action="/user/login/" method="post">
+    <div id="message"><?php
+    if (isset($this->message)) {
+        echo $this->message;
+    }
+    ?></div>
+<?php
+
+$aCols = array(
+    'login_id'  => 'ログインID',
+    'password'  => 'パスワード',
+);
+
+foreach ($aCols as $key => $val) {
+    $sType = 'text';
+    if ($key == 'password') {
+        $sType = 'password';
+    }
+    echo <<<_eos_
+    <div class="clearfix">
+        <div class="column_name">{$val}：</div>
+        <div class="input_box">
+            <input class="wide" type="{$sType}" name="{$key}" />
+        </div>
+    </div>
+
+_eos_;
+}
+?>
+    <div class="submit"><input type="submit" value="ログイン" /></div>
+</form>
+<div class="regist_link">
+    <a href="/user/regist-input/">新規ユーザー登録</a>
+</div>

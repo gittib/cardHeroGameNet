@@ -1,0 +1,37 @@
+$img_size : 46px;
+
+.edit_link {
+    margin: 5px;
+    text-align:center;
+
+    a {
+        font-size: 12px;
+    }
+}
+
+.deck_frame {
+    border: solid 3px;
+    div {
+        .card_list {
+            padding: 3px;
+            float: left;
+            border: solid 1px;
+        }
+    }
+
+    div.deck_header>div {
+        padding: 2px;
+        float:left;
+    }
+
+    div.edit_link.mine {
+        margin-bottom: 20px;
+    }
+
+    img {
+        border: solid 1px;
+        width: $img_size;
+        height: $img_size;
+    }
+}
+
