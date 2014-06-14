@@ -1,0 +1,68 @@
+#game_field {
+    width: 100%;
+    border: 1px solid;
+    border-collapse: collapse;
+
+    td {
+        width: 30%;
+        border: 1px solid;
+
+        .pict {
+            float: left;
+            height: 50px;
+
+            img {
+                height: 100%;
+            }
+        }
+
+        .param {
+            float: left;
+            padding-left: 3px;
+            font-size: 12px;
+
+            span.power {
+                color: #ff0000;
+            }
+
+            span.shield {
+                color: #0060ff;
+            }
+
+            span.magic {
+                color: #00aa00;
+            }
+
+            span.charge {
+                color: #ffffff;
+                background-color: #ff0000;
+            }
+        }
+    }
+}
+
+.mini-font {
+    font-size: 6px;
+}
+
+#hand_card {
+    $img_size : 45px;
+
+    border: 1px solid;
+    text-align:center;
+    padding: 2px;
+
+    img {
+        height: $img_size;
+        width: $img_size;
+    }
+}
+
+div.card_name {
+    float: left;
+}
+
+div.close_button {
+    float: right;
+    padding: 2px;
+}

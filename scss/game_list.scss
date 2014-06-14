@@ -1,0 +1,85 @@
+body {
+    background-color: #eeeeff;
+}
+
+.mini-font {
+    font-size: 6px;
+}
+
+.game_row {
+    background-color: #FFFFFF;
+    border: 1px solid;
+    margin: 15px 0;
+
+    div.field-title {
+        div {
+            border: 1px solid;
+            padding:1px;
+        }
+    }
+
+    table.game_field {
+        height: 100%;
+        width: 100%;
+        border: 1px solid;
+        border-collapse: collapse;
+
+        td {
+            border: 1px solid;
+
+            .pict {
+                height: 50px;
+
+                img {
+                    height: 100%;
+                }
+            }
+
+            .param {
+                padding-left: 3px;
+                font-size: 12px;
+
+                span.power {
+                    color: #ff0000;
+                }
+
+                span.shield {
+                    color: #0060ff;
+                }
+
+                span.magic {
+                    color: #00aa00;
+                }
+
+                span.charge {
+                    color: #ffffff;
+                    background-color: #ff0000;
+                }
+            }
+        }
+
+        td.explain {
+            vertical-align:top;
+        }
+    }
+
+    .hand_card {
+        border: 1px solid;
+        height: 50px;
+        padding: 2px;
+        text-align:center;
+
+        img {
+            width: 49px;
+        }
+    }
+}
+
+div.card_name {
+    float: left;
+}
+
+div.close_button {
+    float: right;
+    padding: 2px;
+}
