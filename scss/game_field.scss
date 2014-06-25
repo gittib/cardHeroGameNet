@@ -1,3 +1,5 @@
+@charset "utf-8";
+
 #game_field {
     width: 100%;
     border: 1px solid;
@@ -39,6 +41,14 @@
             }
         }
     }
+
+    td.actor {
+        background-color: #ffff00;
+    }
+
+    td.target {
+        background-color: #ffeeee;
+    }
 }
 
 .mini-font {
@@ -49,12 +59,25 @@
     $img_size : 45px;
 
     border: 1px solid;
-    text-align:center;
-    padding: 2px;
+    text-align: center;
+    padding: 12px 0;
 
-    img {
-        height: $img_size;
-        width: $img_size;
+    div {
+        float: left;
+        width: 16%;
+        img {
+            border: solid 1px;
+            height: $img_size;
+            width: $img_size;
+        }
+
+        img.actor {
+            border-color: #eeee00;
+        }
+
+        img.target {
+            border-color: #ff0000;
+        }
     }
 }
 
@@ -65,4 +88,47 @@ div.card_name {
 div.close_button {
     float: right;
     padding: 2px;
+}
+
+#card_info {
+    $border_style: solid 2px;
+
+    margin: 1em 0;
+    border: $border_style;
+
+    div {
+        width: 100%;
+
+        div.card_info_title {
+            border-bottom: $border_style;
+        }
+
+        div.card_summary {
+            min-height: 1em;
+
+            div {
+                float: left;
+            }
+        }
+    }
+}
+
+#buttons_frame {
+    width: 100%;
+
+    div.cancel_button {
+        $upper_line_color : #ffdddd;
+        $under_line_color : #880000;
+
+        margin: 20px;
+        padding: 3px 0;
+        background-color: #ffeeee;
+        border: solid 2px;
+        border-top-color:    $upper_line_color;
+        border-left-color:   $upper_line_color;
+        border-right-color:  $under_line_color;
+        border-bottom-color: $under_line_color;
+        font-size: 18px;
+        text-align: center;
+    }
 }

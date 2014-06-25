@@ -1,71 +1,82 @@
-body {
-    -webkit-text-size-adjust: 100%;
-    margin: 0;
-    font-family:'Lucida Grande', 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W3','Meiryo, メイリオ', sans-serif;
-}
-
+@charset "utf-8";
 #game_field {
-    width: 100%;
-    border: 1px solid;
-    border-collapse: collapse;
-}
-
-#game_field td {
+  width: 100%;
+  border: 1px solid;
+  border-collapse: collapse; }
+  #game_field td {
     width: 30%;
-    border: 1px solid;
-}
-
-#game_field td>.pict {
-    float: left;
-    height: 50px;
-}
-
-#game_field td>.pict img {
-    height: 100%;
-}
-
-#game_field td>.param {
-    float: left;
-    padding-left: 3px;
-    font-size: 12px;
-}
+    border: 1px solid; }
+    #game_field td .pict {
+      float: left;
+      height: 50px; }
+      #game_field td .pict img {
+        height: 100%; }
+    #game_field td .param {
+      float: left;
+      padding-left: 3px;
+      font-size: 12px; }
+      #game_field td .param span.power {
+        color: #ff0000; }
+      #game_field td .param span.shield {
+        color: #0060ff; }
+      #game_field td .param span.magic {
+        color: #00aa00; }
+      #game_field td .param span.charge {
+        color: #ffffff;
+        background-color: #ff0000; }
+  #game_field td.actor {
+    background-color: #ffff00; }
+  #game_field td.target {
+    background-color: #ffeeee; }
 
 .mini-font {
-    font-size: 6px;
-}
-
-#game_field td>.param .power {
-    color: #ff0000;
-}
-
-#game_field td>.param .shield {
-    color: #0060ff;
-}
-
-#game_field td>.param .magic {
-    color: #00aa00;
-}
-
-#game_field td>.param .charge {
-    color: #ffffff;
-    background-color: #ff0000;
-}
+  font-size: 6px; }
 
 #hand_card {
-    border: 1px solid;
-    text-align:center;
-    padding: 2px;
-}
-
-#hand_card img {
-    height: 50px;
-}
+  border: 1px solid;
+  text-align: center;
+  padding: 12px 0; }
+  #hand_card div {
+    float: left;
+    width: 16%; }
+    #hand_card div img {
+      border: solid 1px;
+      height: 45px;
+      width: 45px; }
+    #hand_card div img.actor {
+      border-color: #eeee00; }
+    #hand_card div img.target {
+      border-color: #ff0000; }
 
 div.card_name {
-    float: left;
-}
+  float: left; }
 
 div.close_button {
-    float: right;
-    padding: 2px;
-}
+  float: right;
+  padding: 2px; }
+
+#card_info {
+  margin: 1em 0;
+  border: solid 2px; }
+  #card_info div {
+    width: 100%; }
+    #card_info div div.card_info_title {
+      border-bottom: solid 2px; }
+    #card_info div div.card_summary {
+      min-height: 1em; }
+      #card_info div div.card_summary div {
+        float: left; }
+
+#buttons_frame {
+  width: 100%; }
+  #buttons_frame div.cancel_button {
+    margin: 20px;
+    padding: 3px 0;
+    background-color: #ffeeee;
+    border: solid 2px;
+    border-top-color: #ffdddd;
+    border-left-color: #ffdddd;
+    border-right-color: #880000;
+    border-bottom-color: #880000;
+    font-size: 18px;
+    text-align: center; }
