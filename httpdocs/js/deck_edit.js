@@ -1,6 +1,6 @@
 function oneImageLoad(imgTag) {
     imgTag.removeClass("yet");
-    imgTag.attr("src", imgTag.attr("ref"));
+    imgTag.attr("src", imgTag.attr("data-original"));
 }
 
 function refreshDeckCardNum() {
@@ -23,6 +23,8 @@ function refreshDeckCardNum() {
 }
 
 $(function() {
+    oneImageLoad($('img.yet:first'));
+    oneImageLoad($('img.yet:first'));
     oneImageLoad($('img.yet:first'));
     $('.catalog img').load(function() {
         oneImageLoad($('img.yet:first'));

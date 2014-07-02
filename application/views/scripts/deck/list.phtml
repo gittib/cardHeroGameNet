@@ -5,15 +5,41 @@
     }
 ?>
 </div>
+<?php
+if (isset($this->bDeckEdit) && $this->bDeckEdit) {
+    echo <<<_eos_
 <div class="edit_link">
     <a href="/deck/edit/">デッキ新規作成</a>
 </div>
-<?php
+
+_eos_;
+}
 $aUserInfo = Common::checkLogin();
 foreach ($this->aDeckList as $deckId => $val) {
-    $sEditLink = '';
-    if ($val['owner_id'] != null && $val['owner_id'] == $aUserInfo['user_id']) {
-        $sEditLink = <<<_eos_
+    $sDeckLink = '';
+    if (isset($this->bGameStandby) && $this->bGameStandby) {
+        $sDeckLink = <<<_eos_
+    <div class="edit_link">
+        <form action="/game/standby/" method="post">
+            <input type="submit" value="このデッキを使ってゲームを始める" />
+            <input type="hidden" name="deck_id" value="{$deckId}" />
+        </form>
+    </div>
+
+_eos_;
+    } else if (isset($this->bGameStart) && $this->bGameStart) {
+        $sDeckLink = <<<_eos_
+    <div class="edit_link">
+        <form action="/game/start/" method="post">
+            <input type="submit" value="このデッキを使ってゲームを受ける" />
+            <input type="hidden" name="game_field_id" value="{$this->gameId}" />
+            <input type="hidden" name="deck_id" value="{$deckId}" />
+        </form>
+    </div>
+
+_eos_;
+    } else if ($val['owner_id'] != null && $val['owner_id'] == $aUserInfo['user_id']) {
+        $sDeckLink = <<<_eos_
     <div class="edit_link mine">
         <a href="/deck/edit/{$deckId}/">デッキ編集</a>
     </div>
@@ -58,12 +84,17 @@ _eos_;
     <div class="card_list">
 {$sCardListHtml}
     </div>
-{$sEditLink}
+{$sDeckLink}
+</div>
+
+_eos_;
+}
+if (isset($this->bDeckEdit) && $this->bDeckEdit) {
+    echo <<<_eos_
+<div class="edit_link">
+    <a href="/deck/edit/">デッキ新規作成</a>
 </div>
 
 _eos_;
 }
 ?>
-<div class="edit_link">
-    <a href="/deck/edit/">デッキ新規作成</a>
-</div>

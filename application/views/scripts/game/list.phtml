@@ -7,6 +7,19 @@ for ($i = 0 ; $i < 10 ; $i++) {
             $sLV = 's';
             $imgName = 'm' . rand(2, 3);
         }
+        $sEffect = '';
+        if (true) {
+            $sEffect .= '<span class="power">P</span>';
+        }
+        if (true) {
+            $sEffect .= '<span class="shield">S</span>';
+        }
+        if (true) {
+            $sEffect .= '<span class="magic">M</span>';
+        }
+        if (true) {
+            $sEffect .= '<span class="charge">！</span>';
+        }
         $aMonsterData[$j] = <<<_eos_
             <div class="pict">
                 <img src="/images/card/{$imgName}.jpg" alt=""/>
@@ -16,7 +29,7 @@ for ($i = 0 ; $i < 10 ; $i++) {
                 <span class="mini-font">HP</span><span class="hp">?</span>
             </div>
             <div class="param">
-                <span class="power">P</span><span class="shield">S</span><span class="magic">M</span><span class="charge">！</span>
+                {$sEffect}
             </div>
 
 _eos_;

@@ -47,7 +47,7 @@ _eos_;
     } else {
         $sCardCatalog .= <<<_eos_
     <div class="catalog {$val['category']}">
-        <img class="yet" alt="{$val['card_name']}" cardid="{$val['card_id']}" rare="{$val['rare']}" ref="/images/card/{$val['image_file_name']}" />
+        <img class="yet" alt="{$val['card_name']}" cardid="{$val['card_id']}" rare="{$val['rare']}" data-original="/images/card/{$val['image_file_name']}" />
     </div>
 
 _eos_;

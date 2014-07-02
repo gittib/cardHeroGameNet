@@ -5,11 +5,15 @@
   border-collapse: collapse; }
   #game_field td {
     width: 30%;
-    border: 1px solid; }
+    height: 51px;
+    border: 1px solid;
+    padding-top: 0;
+    padding-left: 0; }
     #game_field td .pict {
       float: left;
       height: 50px; }
       #game_field td .pict img {
+        border: 1px solid;
         height: 100%; }
     #game_field td .param {
       float: left;
@@ -58,14 +62,33 @@ div.close_button {
 #card_info {
   margin: 1em 0;
   border: solid 2px; }
-  #card_info div {
-    width: 100%; }
-    #card_info div div.card_info_title {
-      border-bottom: solid 2px; }
-    #card_info div div.card_summary {
-      min-height: 1em; }
-      #card_info div div.card_summary div {
-        float: left; }
+  #card_info #card_info_frame div.card_info_title {
+    border-bottom: solid 2px; }
+  #card_info #card_info_frame div.card_summary {
+    min-height: 50px; }
+    #card_info #card_info_frame div.card_summary div {
+      float: left; }
+    #card_info #card_info_frame div.card_summary div.card_image img {
+      margin: 1px;
+      border: solid 1px;
+      width: 50px;
+      height: 50px; }
+    #card_info #card_info_frame div.card_summary div.card_name {
+      font-size: 18px; }
+    #card_info #card_info_frame div.card_summary div.dtl_link {
+      float: right;
+      text-align: right;
+      padding-right: 1em; }
+      #card_info #card_info_frame div.card_summary div.dtl_link a {
+        font-size: 18px; }
+  #card_info #card_info_frame div.act_commands {
+    border-top: solid 1px; }
+    #card_info #card_info_frame div.act_commands div.command_row {
+      border-top: solid 1px;
+      padding: 12px 3px;
+      font-size: 18px; }
+    #card_info #card_info_frame div.act_commands div.command_row.selected_act {
+      background-color: #ffff00; }
 
 #buttons_frame {
   width: 100%; }

@@ -1,73 +1,134 @@
 <?php
-    for ($j = 0 ; $j < 10 ; $j++) {
-        $sLV = 'LV';
-        if ($j == 3 || $j == 6) {
-            $sLV = 's';
+    $aCardInfo = $this->aCardInfo;
+
+    $aPosId = array(
+        0 => array(
+            'enemyBack2',
+            'enemyPlayersInfo',
+            'enemyBack1',
+        ),
+        1 => array(
+            'enemyFront2',
+            'enemyMaster',
+            'enemyFront1',
+        ),
+        2 => array(
+            'myFront1',
+            'myMaster',
+            'myFront2',
+        ),
+        3 => array(
+            'myBack1',
+            'myPlayersInfo',
+            'myBack2',
+        ),
+    );
+    foreach ($aCardInfo['field_cards'] as $pos => $val) {
+        $sLvLabel = 'LV';
+        $sLv = $val['lv'];
+        if ($val['category'] == 'master') {
+            $sLvLabel = 'S';
+            $sLv = $val['stone_stock'];
         }
-        $aMonsterData[$j] = <<<_eos_
+        $sHp = $val['hp'];
+        $sEffect  = '<span class="power"></span>';
+        $sEffect .= '<span class="shield"></span>';
+        $sEffect .= '<span class="magic"></span>';
+        $sEffect .= '<span class="charge"></span>';
+        if (isset($val['power_effect']) && $val['power_effect'] != '') {
+            $sEffect = str_replace('"power">', '"power">P', $sEffect);
+        }
+        if (isset($val['shield_effect']) && $val['shield_effect'] != '') {
+            $sEffect = str_replace('"shield">', '"shield">S', $sEffect);
+        }
+        if (isset($val['magic_effect']) && $val['magic_effect'] != '') {
+            $sEffect = str_replace('"magic">', '"magic">M', $sEffect);
+        }
+        if (isset($val['charge']) && $val['charge']) {
+            $sEffect = str_replace('"charge">', '"charge">！', $sEffect);
+        }
+        $aMonsterData[$pos] = <<<_eos_
             <div class="pict">
-                <img src="/images/card/card.jpg" alt=""/>
+                <img src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
             </div>
             <div class="param">
-                <span class="mini-font">{$sLV}</span><span class="lv">?</span>
-                <span class="mini-font">HP</span><span class="hp">?</span>
+                <span class="mini-font">{$sLvLabel}</span><span class="lv">{$sLv}</span>
+                <span class="mini-font">HP</span><span class="hp">{$sHp}</span>
             </div>
             <div class="param">
-                <span class="power">P</span><span class="shield">S</span><span class="magic">M</span><span class="charge">！</span>
+                {$sEffect}
             </div>
 
 _eos_;
     }
+    $aMonsterData['enemyPlayersInfo'] = <<<_eos_
+            <div class="num_info stone">
+            </div>
+            <div class="num_info hand">
+            </div>
+            <div class="num_info deck">
+            </div>
+            <div class="num_info used">
+            </div>
+
+_eos_;
+    $aMonsterData['myPlayersInfo'] = <<<_eos_
+            <div class="num_info stone">
+            </div>
+            <div class="num_info hand">
+            </div>
+            <div class="num_info deck">
+            </div>
+            <div class="num_info used">
+            </div>
+
+_eos_;
 ?>
 <table id="game_field">
-    <tr>
-        <td id="enemyBack2"><?php echo $aMonsterData[0]; ?></td>
-        <td></td>
-        <td id="enemyBack1"><?php echo $aMonsterData[1]; ?></td>
-    </tr>
-    <tr>
-        <td id="enemyFront2"><?php echo $aMonsterData[2]; ?></td>
-        <td id="enemyMaster"><?php echo $aMonsterData[3]; ?></td>
-        <td id="enemyFront1"><?php echo $aMonsterData[4]; ?></td>
-    </tr>
-    <tr>
-        <td id="myFront1"><?php echo $aMonsterData[5]; ?></td>
-        <td id="myMaster"><?php echo $aMonsterData[6]; ?></td>
-        <td id="myFront2"><?php echo $aMonsterData[7]; ?></td>
-    </tr>
-    <tr>
-        <td id="myBack1"><?php echo $aMonsterData[8]; ?></td>
-        <td></td>
-        <td id="myBack2"><?php echo $aMonsterData[9]; ?></td>
-    </tr>
-</table>
-<div id="hand_card">
-    <img src="/images/card/card.jpg" alt=""/>
-    <img src="/images/card/card.jpg" alt=""/>
-    <img src="/images/card/card.jpg" alt=""/>
-    <img src="/images/card/card.jpg" alt=""/>
-    <img src="/images/card/card.jpg" alt=""/>
-</div>
 <?php
-    $cards = array();
-    foreach ($cards as $key => $val) {
-        $dtlLink = '';
-        if (isset($val['card_id'])) {
-            $dtlLink = "<a target=\"_blank\" href=\"/card/detail/{$val['card_id']}/\">詳細</a>";
+    foreach ($aPosId as $aLine) {
+        echo "    <tr>\n";
+        foreach ($aLine as $posId) {
+            if (!isset($aMonsterData[$posId])) {
+                $aMonsterData[$posId] = '<div class="pict"></div>';
+            }
+            echo "        <td id='{$posId}' monster_id=''>{$aMonsterData[$posId]}</td>\n";
         }
+        echo "    </tr>\n";
+    }
+?>
+</table>
+<div id="hand_card" class="clearfix">
+<?php
+    foreach ($aCardInfo['hand_cards'] as $val) {
         echo <<<_eos_
-<div class="card_info clearfix" ref="{$key}">
-    <div class="clearfix">
-        <div class="card_name">
-            {$val['cardName']}
-            {$dtlLink}
+    <div>
+        <img src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}" card_id="{$val['card_id']}"/>
+    </div>
+
+_eos_;
+    }
+?>
+</div>
+<div id="card_info">
+    <div id="card_info_frame">
+        <div class="card_info_title">
+            Card Infomation
         </div>
-        <div class="close_button">
-            <a href="javascript:void(0)">閉じる</a>
+        <div class="card_summary clearfix">
+            <div class="card_image"></div>
+            <div class="card_name"></div>
+            <div class="dtl_link"></div>
+        </div>
+        <div class="act_commands">
+            <div class="command_row">
+            </div>
         </div>
     </div>
 </div>
+<div id="buttons_frame">
+    <div class="cancel_button">
+        キャンセル
+    </div>
+</div>
 
-_eos_;
-    }
-?>

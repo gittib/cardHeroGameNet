@@ -36,6 +36,7 @@ class DeckController extends Zend_Controller_Action
         $ret = $this->_model->getDeckList($nPage);
 
         $this->view->assign('aDeckList', $ret);
+        $this->view->assign('bDeckEdit', true);
     }
 
     public function editAction()

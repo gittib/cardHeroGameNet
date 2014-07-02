@@ -75,20 +75,6 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         );
         $router->addRoute('game_list', $route);
 
-        // ゲームフィールド。ajaxで遊べるようにする
-        $route = new Zend_Controller_Router_Route_Regex(
-            'game/field/(\d+)/?',
-            array(
-                'controller'    =>  'game',
-                'action'        =>  'field',
-                1               =>  1,
-            ),
-            array(
-                1   => 'game_field_id',
-            )
-        );
-        $router->addRoute('game_fleld', $route);
-
         // カード詳細
         $route = new Zend_Controller_Router_Route_Regex(
             'card/detail/(\d+)/?',
@@ -105,7 +91,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         // 画像が無かった時のリダイレクト用
         $route = new Zend_Controller_Router_Route_Regex(
-            '.*/([^/]+)\.(png|jpg|gif)',
+            '.*/?([^/]+)\.(png|jpg|gif)',
             array(
                 'controller'    =>  'api',
                 'action'        =>  'no-image',

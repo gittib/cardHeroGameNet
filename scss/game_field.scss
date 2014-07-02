@@ -7,13 +7,17 @@
 
     td {
         width: 30%;
+        height: 51px;
         border: 1px solid;
+        padding-top: 0;
+        padding-left: 0;
 
         .pict {
             float: left;
             height: 50px;
 
             img {
+                border: 1px solid;
                 height: 100%;
             }
         }
@@ -96,18 +100,57 @@ div.close_button {
     margin: 1em 0;
     border: $border_style;
 
-    div {
-        width: 100%;
+    #card_info_frame {
+        $cmd_img_size : 50px;
+        $cmd_font_size: 18px;
 
         div.card_info_title {
             border-bottom: $border_style;
         }
 
         div.card_summary {
-            min-height: 1em;
+
+            min-height: $cmd_img_size;
 
             div {
                 float: left;
+            }
+
+            div.card_image {
+                img {
+                    margin: 1px;
+                    border: solid 1px;
+                    width: $cmd_img_size;
+                    height: $cmd_img_size;
+                }
+            }
+
+            div.card_name {
+                font-size: $cmd_font_size;
+            }
+
+            div.dtl_link {
+                float: right;
+                text-align: right;
+                padding-right: 1em;
+
+                a {
+                    font-size: $cmd_font_size;
+                }
+            }
+        }
+
+        div.act_commands {
+            border-top:solid 1px;
+
+            div.command_row {
+                border-top:solid 1px;
+                padding: 12px 3px;
+                font-size: $cmd_font_size;
+            }
+
+            div.command_row.selected_act {
+                background-color: #ffff00;
             }
         }
     }
