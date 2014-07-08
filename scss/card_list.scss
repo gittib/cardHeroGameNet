@@ -3,6 +3,13 @@
 .card_list_row {
     border-top:solid 1px;
     border-bottom:solid 1px;
+
+    > .card_image {
+        background-image:url("/images/card/card.jpg");
+        background-position:center;
+        background-repeat:no-repeat;
+        background-size:100%;
+    }
 }
 
 .card_list_row.master {
@@ -30,14 +37,9 @@ $super_back_color : #ffffee;
     background-color:#eeffee;
 }
 
-.card_list_row>.card_image {
-    background-image:url("/images/card/card.jpg");
-    background-position:center;
-    background-repeat:no-repeat;
-    background-size:100%;
-}
-
-div.card_data>div.proposer {
-    float:right;
-    padding-right:2px;
+div.card_data {
+    > div.proposer {
+        float:right;
+        padding-right:2px;
+    }
 }

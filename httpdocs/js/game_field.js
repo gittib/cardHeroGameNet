@@ -11,17 +11,29 @@ var g_command = {
     command_id      : '',
 };
 
+
+// メインルーチン
 $(function() {
     var actorDom = '';
 
     $(".card_info").hide();
 
-    $("#game_field td").on('click', function() {
+    $(document).on('click', "#game_field td", function() {
         clickCard(this);
     });
 
-    $("#hand_card img").on('click', function() {
-        clickCard(this);
+    $(document).on('click', "#hand_card img", function() {
+        var df = $.Deferred();
+        var dom = this;
+
+        df.always(clickCard(dom))
+        .pipe(function(arg) {
+            return getInfo(g_actor.id_type, g_actor.card_id, handCardDetail);
+        }).done(function(arg) {
+            handCardDetail(arg);
+        });
+
+        df.resolve();
     });
 
     $(document).on('click', "#card_info_frame div.act_commands div", function() {
@@ -40,6 +52,11 @@ $(function() {
     });
 });
 
+
+
+// 以下、関数定義
+
+
 function clickCard(dom) {
     if ($(dom).hasClass('valid_target')) {
         // 対象として適正なオブジェクトを選択された場合、それを対象にする
@@ -54,22 +71,28 @@ function clickCard(dom) {
         // 何も選択されていない場合、行動者の選択と判断する
         if ($(dom).attr('card_id')) {
             $('.actor').removeClass('actor');
+
             g_actor.id_type = 'card_id';
             g_actor.card_id = $(dom).attr('card_id');
             g_actor.actor_id = $(dom).attr('field_card_id');
+
             $(dom).addClass('actor');
-            getInfo(g_actor.id_type, g_actor.card_id, handCardDetail);
+
         } else if ($(dom).attr('monster_id')) {
             $('.actor').removeClass('actor');
+
             g_actor.id_type = 'monster_id';
             g_actor.monster_id = $(dom).attr('monster_id');
             g_actor.actor_id = $(dom).attr('field_card_id');
+
             $(dom).addClass('actor');
         }
     }
 }
 
 function getInfo(data_type, data_id, callbackfunc) {
+    var df = $.Deferred();
+
     var sessionStorage_ = null;
     var storageData_ = '';
     var baseUrl = '/api/card-data/';
@@ -83,9 +106,9 @@ function getInfo(data_type, data_id, callbackfunc) {
         var url = sprintf("%s?data_type=%s&data_id=%s", baseUrl, data_type, data_id);
         storageData_ = null;
         $.getJSON(url, null, function(json) {
-            callbackfunc(json[data_id]);
+            df.resolve(json[data_id]);
         });
-        return;
+        return df.promise();
     }
 
     try{
@@ -103,12 +126,12 @@ function getInfo(data_type, data_id, callbackfunc) {
                 sessionStorage_.setItem(key, JSON.stringify(val));
             });
             storageData_ = JSON.parse(sessionStorage_.getItem(data_type));
-            callbackfunc(storageData_[data_id]);
+            df.resolve(storageData_[data_id]);
         });
-        return;
+        return df.promise();
     }
-    callbackfunc(storageData_[data_id]);
-    return;
+    df.resolve(storageData_[data_id]);
+    return df.promise();
 }
 
 function handCardDetail(cardInfo) {
@@ -122,24 +145,65 @@ function handCardDetail(cardInfo) {
     $("#card_info div.card_image").html(imgHtml);
     $("#card_info div.act_commands").empty();
 
-    switch (cardInfo['category'])
+    switch (cardInfo['card_id'])
     {
-        case 'monster_front':
-        case 'monster_back':
-            $("#card_info div.act_commands").html(
-                '<div class="selected_act command_row">' +
-                    '場に出す' +
+        case 93:
+            // ローテーション
+            $("#card_info div.act_commands").append(
+                '<div class="command_row">' +
+                    '時計回り' +
+                '</div>' +
+                '<div class="command_row">' +
+                    '反時計回り' +
                 '</div>'
             );
             break;
-        case 'magic':
-            $("#card_info div.act_commands").html(
+        case 123:
+            // カードサーチ
+            $("#card_info div.act_commands").append(
                 '<div class="command_row">' +
-                    '発動' +
+                    '前衛モンスターをサーチ' +
                 '</div>' +
                 '<div class="command_row">' +
-                    '発動２' +
+                    '後衛モンスターをサーチ' +
+                '</div>' +
+                '<div class="command_row">' +
+                    'マジックをサーチ' +
+                '</div>' +
+                '<div class="command_row">' +
+                    'スーパーカードをサーチ' +
                 '</div>'
             );
+            break;
+        default:
+            switch (cardInfo['category'])
+            {
+                case 'monster_front':
+                case 'monster_back':
+                    $("#card_info div.act_commands").append(
+                        '<div class="command_row" range_type_id="1001">' +
+                            '場に出す' +
+                        '</div>'
+                    );
+                    break;
+                case 'magic':
+                    var r = 0;
+                    $("#card_info div.act_commands").append(
+                        '<div class="command_row" range_type_id="' + r + '">' +
+                            '発動' +
+                        '</div>'
+                    );
+                    break;
+            }
+            break;
     }
+    var oDom = $("#card_info div.act_commands>div.command_row");
+    if (oDom.size() == 1) {
+        clickCommand(oDom);
+    }
+}
+
+function clickCommand(oDom) {
+    $(".selected_act").removeClass("selected_act");
+    oDom.addClass("selected_act");
 }

@@ -26,9 +26,11 @@ div.message {
         }
     }
 
-    div.deck_header>div {
-        padding: 2px;
-        float:left;
+    div.deck_header {
+        > div {
+            padding: 2px;
+            float:left;
+        }
     }
 
     div.edit_link.mine {
