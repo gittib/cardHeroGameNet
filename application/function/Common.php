@@ -100,6 +100,26 @@ class Common {
         if (!is_array($qp)) {
             return '';
         }
+        $sCss = <<<_eos_
+<style type="text/css">
+<!--
+table.sql_debug {
+  border: solid 1px;
+}
+table.sql_debug th {
+  border: solid 1px #eeeeee;
+  background-color: #eeeeff;
+  font-size: 10px;
+}
+table.sql_debug td {
+  border: solid 1px #eeeeee;
+  background-color: #ffffff;
+  font-size: 10px;
+}
+-->
+</style>
+
+_eos_;
         $ret = "<table cellspacing=0 cellpadding=0 border=0 class='sql_debug'>\n";
         $ret .= "    <tr><th>#</th><th>Query</th><th>time[sec]</th></tr>\n";
         $num = 1;
@@ -115,6 +135,6 @@ class Common {
         $sec = $db->getProfiler()->getTotalElapsedSecs();
         $ret .= "    <tr><td>#</td><td>Total Time</td><td>{$sec}</td></tr>\n";
         $ret .= "</table>\n";
-        return $ret;
+        return $sCss . $ret;
     }
 }

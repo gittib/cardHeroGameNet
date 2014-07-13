@@ -12,8 +12,7 @@ class ApiController extends Zend_Controller_Action
 
     public function preDispatch()
     {
-        $layout = new Zend_Layout();
-        $layout->disableLayout();
+        $this->_helper->layout->disableLayout();
     }
 
     public function noImageAction()
@@ -25,16 +24,23 @@ class ApiController extends Zend_Controller_Action
         exit();
     }
 
-    public function cardDataAction()
+    public function buildJavascriptAction()
     {
         $request = $this->getRequest();
 
-        $dataType = $request->getQuery('data_type');
-        $dataId = $request->getQuery('data_id');
+        $sScriptName = $request->getParam('script_name');
+        switch ($sScriptName) {
+            case 'master_data':
+                $aMasterData = $this->_model->getCardMasterData();
+                $json = json_encode($aMasterData);
+                break;
+            default:
+                throw new Zend_Controller_Action_Exception('Unknown script', 404);
+        }
 
-        header("Content-Type: application/json; charset=utf-8");
-        echo $this->_model->getCardInfo($dataType, $dataId);
-        exit();
+        header("Content-Type: text/javascript; charset=utf-8");
+        $this->view->assign('sScriptName', $sScriptName);
+        $this->view->assign('json', $json);
     }
 
     private function _getModel()

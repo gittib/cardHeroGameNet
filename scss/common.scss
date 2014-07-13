@@ -7,7 +7,7 @@
 
 body {
     -webkit-text-size-adjust: 100%;
-    font-family:'MotoyaCedar', 'Meiryo', 'メイリオ', 'ヒラギノ角ゴ ProN W3','Lucida Grande', 'Hiragino Kaku Gothic ProN', sans-serif;
+    font-family:'ヒラギノ角ゴ ProN W3', 'Hiragino Kaku Gothic ProN', 'Lucida Grande', 'Meiryo', 'メイリオ', sans-serif;
     margin: 0;
     padding: 0;
 }
@@ -28,22 +28,5 @@ a.blank_link {
     background-repeat: no-repeat;
     background-position: right center;
     padding-right: 15px;
-}
-
-
-
-table.sql_debug {
-    border: solid 1px;
-
-    $sql_border : solid 1px #eeeeee;
-    th {
-        border: $sql_border;
-        background-color: #eeeeff;
-    }
-
-    td {
-        border: $sql_border;
-        background-color: #ffffff;
-    }
 }
 

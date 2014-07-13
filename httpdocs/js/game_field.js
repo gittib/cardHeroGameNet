@@ -1,4 +1,6 @@
 // グローバル変数宣言
+var g_master_data = master_data.getInfo();
+
 var g_actor = {
     id_type     : '',
     actor_id    : '',
@@ -23,17 +25,8 @@ $(function() {
     });
 
     $(document).on('click', "#hand_card img", function() {
-        var df = $.Deferred();
-        var dom = this;
-
-        df.always(clickCard(dom))
-        .pipe(function(arg) {
-            return getInfo(g_actor.id_type, g_actor.card_id, handCardDetail);
-        }).done(function(arg) {
-            handCardDetail(arg);
-        });
-
-        df.resolve();
+        clickCard(this);
+        handCardDetail(g_master_data['m_card'][g_actor.card_id]);
     });
 
     $(document).on('click', "#card_info_frame div.act_commands div", function() {

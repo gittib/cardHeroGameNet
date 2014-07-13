@@ -104,6 +104,20 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             )
         );
         $router->addRoute('no_image', $route);
+
+        // マスタデータをごにょってjsにして返す
+        $route = new Zend_Controller_Router_Route_Regex(
+            'js/([^/]+)\.js',
+            array(
+                'controller'    =>  'api',
+                'action'        =>  'build-javascript',
+                1               =>  1,
+            ),
+            array(
+                1   => 'script_name',
+            )
+        );
+        $router->addRoute('build_js', $route);
     }
 }
 

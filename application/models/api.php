@@ -7,11 +7,24 @@ class model_Api {
         $this->_db = Zend_Registry::get('db');
     }
 
-    public function getCardInfo($dataType, $dataId) {
+    public function getCardMasterData() {
         $aRet = array(
-            'card_id'       => array(),
-            'monster_id'    => array(),
+            'm_card'        => array(),
+            'm_monster'     => array(),
+            'm_magic'       => array(),
         );
+
+        $subMon = $this->_db->select()
+            ->from(
+                'm_monster',
+                array(
+                    'card_id',
+                    'max_lv'        => new Zend_Db_Expr('max(lv)'),
+                )
+            )
+            ->group(array(
+                'card_id',
+            ));
 
         $sel = $this->_db->select()
             ->from(
@@ -26,45 +39,156 @@ class model_Api {
                 )
             )
             ->joinLeft(
-                array('mon' => 'm_monster'),
+                array('mon' => $subMon),
                 'mon.card_id = mc.card_id',
                 array(
-                    'max_lv' => new Zend_Db_Expr('max(lv)'),
+                    'max_lv',
                 )
             )
             ->joinLeft(
                 array('mag' => 'm_magic'),
                 'mag.card_id = mc.card_id',
                 array(
-                    'stone' => new Zend_Db_Expr('max(mag.stone)'),
+                    'stone',
                 )
             )
-            ->group(array(
-                'mc.card_id',
-                'mc.card_name',
-                'mc.rare',
-                'mc.category',
-                'mc.image_file_name',
-                'mc.caption',
-            ))
         ;
 
-        if (isset($dataType) && $dataType != '' &&
-            isset($dataId) && $dataId != '') {
-            if ($dataType == 'card_id') {
-                $sel->where('mc.card_id = ?', $dataId);
-            } else if ($dataType == 'monster_id') {
-                $sel->where('mon.monster_id = ?', $dataId);
-            } else if ($dataType == 'magic_id') {
-                $sel->where('mag.magic_id = ?', $dataId);
-            }
-        }
-        $stmt = $this->_db->fetchAll($sel);
-        foreach ($stmt as $val) {
-            $aRet['card_id'][$val['card_id']] = $val;
+        $rslt = $this->_db->fetchAll($sel);
+        foreach ($rslt as $val) {
+            $iCardId = (int)$val['card_id'];
+            $aRet['m_card'][$iCardId] = $val;
         }
 
-        return json_encode($aRet);
+        $sqlMonster = $this->_db->select()
+            ->from(
+                array('mon' => 'm_monster'),
+                array(
+                    'card_id',
+                    'monster_id',
+                    'lv',
+                    'max_hp',
+                    'image_file_name',
+                    'monster_name',
+                    'attack_power',
+                    'attack_name',
+                    'skill_id',
+                )
+            )
+            ->join(
+                array('card' => 'm_card'),
+                'card.card_id = mon.card_id',
+                array(
+                    'category',
+                )
+            )
+            ->joinLeft(
+                array('skl' => 'm_skill'),
+                'skl.skill_id = mon.skill_id',
+                array(
+                    'skill_name',
+                )
+            )
+            ->joinLeft(
+                array('art' => 'm_arts'),
+                'art.monster_id = mon.monster_id',
+                array(
+                    'art_id',
+                    'art_name',
+                    'range_type_id',
+                    'art_power'         => 'art.power',
+                    'damage_type_flg',
+                    'art_stone'         => 'art.stone',
+                    'script_id',
+                )
+            )
+            ->order(array(
+                'mon.monster_id',
+                'art.sort_no',
+                'art.art_id',
+            ));
+        $rslt = $this->_db->fetchAll($sqlMonster);
+        foreach ($rslt as $val) {
+            $iMonsterId = $val['monster_id'];
+            if (!isset($aRet['m_monster'][$iMonsterId])) {
+                if ($val['category'] == 'master') {
+                    $iAttackStone = 3;
+                } else {
+                    $iAttackStone = 0;
+                }
+                $aRet['m_monster'][$iMonsterId] = array(
+                    'card_id'           => $val['card_id'],
+                    'name'              => $val['monster_name'],
+                    'lv'                => $val['lv'],
+                    'max_hp'            => $val['max_hp'],
+                    'image_file_name'   => $val['image_file_name'],
+                    'attack'            => array(
+                        'name'              => $val['attack_name'],
+                        'power'             => $val['attack_power'],
+                        'stone'             => $iAttackStone,
+                    ),
+                    'skill'             => array(
+                        'id'                => $val['skill_id'],
+                        'name'              => $val['skill_name'],
+                    ),
+                    'arts'              => array(),
+                    'super'             => array(),
+                );
+            }
+            if (isset($val['art_id']) && $val['art_id'] != '') {
+                $iArtId = $val['art_id'];
+                $aRet['m_monster'][$iMonsterId]['arts'][] = array(
+                    'id'                => $val['art_id'],
+                    'name'              => $val['art_name'],
+                    'range_type_id'     => $val['range_type_id'],
+                    'power'             => $val['art_power'],
+                    'damage_type_flg'   => $val['damage_type_flg'],
+                    'script_id'         => $val['script_id'],
+                    'stone'             => $val['art_stone'],
+                );
+            }
+        }
+
+        $sqlSuper = $this->_db->select()
+            ->from(
+                array('evo' => 'm_evolution'),
+                array(
+                    'before_card_id',
+                    'after_card_id',
+                )
+            )
+            ->join(
+                array('before' => 'm_monster'),
+                'before.card_id = evo.before_card_id',
+                array(
+                    'before_monster_id' => 'monster_id',
+                )
+            )
+            ->join(
+                array('after' => 'm_monster'),
+                'after.card_id = evo.after_card_id',
+                array(
+                    'after_monster_id' => 'monster_id',
+                )
+            )
+            ->join(
+                array('mc_after' => 'm_card'),
+                'mc_after.card_id = evo.after_card_id',
+                array()
+            )
+            ->where('before.lv = ?', 2)
+            ->where('after.lv = ?', 3)
+            ->where('mc_after.category in(?)', array('super_front', 'super_back'));
+        $rslt = $this->_db->fetchAll($sqlSuper);
+        foreach ($rslt as $val) {
+            $iMonsterId = $val['before_monster_id'];
+            $aRet['m_monster'][$iMonsterId]['super'][] = array(
+                'card_id'       => $val['after_card_id'],
+                'monster_id'    => $val['after_monster_id'],
+            );
+        }
+
+        return $aRet;
     }
 }
 
