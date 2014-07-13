@@ -14,10 +14,115 @@ class model_Game {
         //$sel = $this->_db->select()
     }
 
-    public function field($iGameFieldId)
+    public function getFieldDetail($iGameFieldId)
     {
         // 工事中
-        //$sel = $ths->_db->select()
+
+        $sel = $this->_db->select()
+            ->from(
+                array('field' => 't_game_field'),
+                array(
+                    'game_field_id',
+                    'turn',
+                    'stone1',
+                    'stone2',
+                )
+            )
+            ->where('game_field_id = ?', $iGameFieldId)
+            ;
+        $aField = $this->_db->fetchRow($sel);
+
+        $aRet = array(
+            'field_info'    => $aField,
+            'field_cards'   => array(),
+            'hand_cards'    => array(),
+            'deck_cards'    => array(),
+        );
+        $sel = $this->_db->select()
+            ->from(
+                array('card' => 't_game_cards'),
+                array(
+                    'game_card_id',
+                    'card_id',
+                    'owner',
+                    'position_category',
+                )
+            )
+            ->join(
+                array('mc' => 'm_card'),
+                'mc.card_id = card.card_id',
+                array(
+                    'card_image_file_name'  => 'image_file_name',
+                    'card_name',
+                    'category',
+                )
+            )
+            ->joinLeft(
+                array('monster' => 't_game_monster'),
+                'monster.game_card_id = card.game_card_id',
+                array(
+                    'monster_id',
+                    'field_position'    => 'position',
+                    'hp',
+                )
+            )
+            ->joinLeft(
+                array('mmon' => 'm_monster'),
+                'mmon.monster_id = monster.monster_id',
+                array(
+                    'monster_name',
+                    'monster_image'     => 'image_file_name',
+                    'lv',
+                )
+            )
+            ->joinLeft(
+                array('status' => 't_game_monster_status'),
+                'status.game_card_id = monster.game_card_id',
+                array(
+                    'status_id',
+                    'status_param1' => 'param1',
+                    'status_param2' => 'param2',
+                )
+            )
+            ->where('card.game_field_id = ?', $iGameFieldId)
+            ->order(array(
+                'position_category',
+                'sort_no',
+                'game_card_id',
+            ));
+        $rslt = $this->_db->fetchAll($sel);
+        $aDeckCard = array();
+        foreach ($rslt as $val) {
+            $sPos = $val['position_category'];
+            $iGameCardId = $val['game_card_id'];
+            if (!isset($aRet[$sPos][$iGameCardId])) {
+                $aRet[$sPos][$iGameCardId] = array(
+                    'card_id'           => $val['card_id'],
+                    'owner'             => $val['owner'],
+                    'image_file_name'   => $val['card_image_file_name'],
+                    'card_name'         => $val['card_name'],
+                    'category'          => $val['category'],
+                );
+                if (isset($val['monster_id']) && $val['monster_id'] != '') {
+                    $aRet[$sPos][$iGameCardId]['monster_id']        = $val['monster_id'];
+                    $aRet[$sPos][$iGameCardId]['position']          = $val['field_position'];
+                    $aRet[$sPos][$iGameCardId]['monster_name']      = $val['monster_name'];
+                    $aRet[$sPos][$iGameCardId]['image_file_name']   = $val['monster_image'];
+                    $aRet[$sPos][$iGameCardId]['lv']                = $val['lv'];
+                    $aRet[$sPos][$iGameCardId]['hp']                = $val['hp'];
+                    $aRet[$sPos][$iGameCardId]['status']            = array();
+                }
+            }
+            if (isset($val['status_id']) && $val['status_id'] != '') {
+                $aRet[$sPos][$iGameCardId]['status'][] = array(
+                    'id'        => $val['status_id'],
+                    'param1'    => $val['status_param1'],
+                    'param2'    => $val['status_param2'],
+                );
+            }
+        }
+
+        return $aRet;
     }
 
     public function standby($deckId)
@@ -152,11 +257,13 @@ class model_Game {
             }
 
             $this->_db->commit();
+
         } catch (Exception $e) {
             $this->_db->rollBack();
+            return null;
         }
 
-        return $aCardInfo;
+        return $iGameFieldId;
     }
 
     private function _insertGameCard($row) {

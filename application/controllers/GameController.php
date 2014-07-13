@@ -57,14 +57,16 @@ class GameController extends Zend_Controller_Action
 
         $this->_getModel();
 
-        $aCardInfo = $this->_model->standby($deckId);
-        $request->setParam('aCardInfo', $aCardInfo);
+        $iGameFieldId = $this->_model->standby($deckId);
+        $request->setParam('game_field_id', $iGameFieldId);
 
         $this->forward('field');
     }
 
     public function fieldAction()
     {
+        $this->_getModel();
+
         $request = $this->getRequest();
         $nGameFieldId = $request->getParam('game_field_id');
         $this->_stylesheet[] = '/css/game_field.css';
@@ -72,9 +74,8 @@ class GameController extends Zend_Controller_Action
         $this->_javascript[] = '/js/game_field.js';
         $this->_layout->title = 'ゲームフィールド';
 
-        if ($request->getParam('aCardInfo') != '') {
-            $this->view->assign('aCardInfo', $request->getParam('aCardInfo'));
-        }
+        $aCardInfo = $this->_model->getFieldDetail($nGameFieldId);
+        $this->view->assign('aCardInfo', $aCardInfo);
     }
 
     public function listAction()

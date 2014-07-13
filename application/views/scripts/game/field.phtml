@@ -23,12 +23,17 @@
             'myBack2',
         ),
     );
-    foreach ($aCardInfo['field_cards'] as $pos => $val) {
+    foreach ($aCardInfo['field'] as $val) {
+        $pos = $val['position'];
         $sLvLabel = 'LV';
         $sLv = $val['lv'];
         if ($val['category'] == 'master') {
             $sLvLabel = 'S';
-            $sLv = $val['stone_stock'];
+            if ($val['owner'] == 1) {
+                $sLv = $aCardInfo['field_info']['stone1'];
+            } else {
+                $sLv = $aCardInfo['field_info']['stone2'];
+            }
         }
         $sHp = $val['hp'];
         $sEffect  = '<span class="power"></span>';
@@ -100,7 +105,7 @@ _eos_;
 </table>
 <div id="hand_card" class="clearfix">
 <?php
-    foreach ($aCardInfo['hand_cards'] as $val) {
+    foreach ($aCardInfo['hand'] as $val) {
         echo <<<_eos_
     <div>
         <img src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}" card_id="{$val['card_id']}"/>
