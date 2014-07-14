@@ -52,7 +52,7 @@ class model_Game {
                 array('mc' => 'm_card'),
                 'mc.card_id = card.card_id',
                 array(
-                    'card_image_file_name'  => 'image_file_name',
+                    'card_image'    => 'image_file_name',
                     'card_name',
                     'category',
                 )
@@ -100,7 +100,7 @@ class model_Game {
                 $aRet[$sPos][$iGameCardId] = array(
                     'card_id'           => $val['card_id'],
                     'owner'             => $val['owner'],
-                    'image_file_name'   => $val['card_image_file_name'],
+                    'image_file_name'   => $val['card_image'],
                     'card_name'         => $val['card_name'],
                     'category'          => $val['category'],
                 );
@@ -137,15 +137,19 @@ class model_Game {
 
         $sub = $this->_db->select()
             ->from(
-                'm_monster',
+                array('mm' => 'm_monster'),
                 array(
                     'card_id',
-                    'monster_id' => new Zend_Db_Expr('min(monster_id)'),
+                    'monster_id',
                 )
             )
-            ->group(array(
-                'card_id',
-            ));
+            ->join(
+                array('mc' => 'm_card'),
+                'mc.card_id = mm.card_id',
+                array()
+            )
+            ->where('mc.category = ?', 'master')
+            ->where('mm.lv = ?', 1);
         $sel = $this->_db->select()
             ->from(
                 array('td' => 't_deck'),
@@ -188,7 +192,6 @@ class model_Game {
                 )
             )
             ->where('td.deck_id = ?', $deckId)
-            ->where('master.category = ?', 'master')
             ->where('td.open_flg = 1 or td.user_id = ?', $userId)
             ->order(array(
                 'card_id',
@@ -200,11 +203,12 @@ class model_Game {
             'deck_cards'        => array(),
         );
         $arr = reset($rslt);
-        $aCardInfo['field_cards']['myMaster'] = array(
+        $aCardInfo['field_cards'][] = array(
             'card_id'           => $arr['master_card_id'],
             'card_name'         => $arr['master_card_name'],
             'stone_stock'       => 3,
             'category'          => 'master',
+            'position'          => 'Master',
             'image_file_name'   => $arr['master_image_file_name'],
             'monster_id'        => $arr['master_monster_id'],
             'lv'                => 1,
@@ -251,10 +255,9 @@ class model_Game {
                 $val['position_category']   = 'hand';
                 $this->_insertGameCard($val);
             }
-            foreach ($aCardInfo['field_cards'] as $pos => $val) {
+            foreach ($aCardInfo['field_cards'] as $val) {
                 $val['game_field_id']       = $iGameFieldId;
                 $val['position_category']   = 'field';
-                $val['position']            = $pos;
                 $this->_insertGameCard($val);
             }
 

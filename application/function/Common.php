@@ -111,16 +111,29 @@ class Common {
             ->where('tgf.upd_date <= ?', $limitDate);
         $where = array("game_card_id in({$sub})");
 
-        $db->beginTransaction();
+        $bInTransaction = Common::isInTransaction();
+        if (!$bInTransaction) {
+            $db->beginTransaction();
+        }
         try {
             $db->delete('t_game_monster_status', $where);
             $db->delete('t_game_monster', $where);
             $db->delete('t_game_cards', $where);
 
-            $db->commit();
+            if (!$bInTransaction) {
+                $db->commit();
+            }
         } catch (Exception $e) {
-            $db->rollBack();
+            if (!$bInTransaction) {
+                $db->rollBack();
+            }
         }
+    }
+
+    public function isInTransaction()
+    {
+        // 判定方法わからんので工事中
+        return false;
     }
 
     /**

@@ -24,7 +24,11 @@
         ),
     );
     foreach ($aCardInfo['field'] as $val) {
-        $pos = $val['position'];
+        if ($aCardInfo['field_info']['turn'] == $val['owner']) {
+            $pos = 'my' . $val['position'];
+        } else {
+            $pos = 'enemy' . $val['position'];
+        }
         $sLvLabel = 'LV';
         $sLv = $val['lv'];
         if ($val['category'] == 'master') {
@@ -53,6 +57,7 @@
             $sEffect = str_replace('"charge">', '"charge">！', $sEffect);
         }
         $aMonsterData[$pos] = <<<_eos_
+        <td id="{$pos}" monster_id="{$val['monster_id']}">
             <div class="pict">
                 <img src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
             </div>
@@ -63,10 +68,12 @@
             <div class="param">
                 {$sEffect}
             </div>
+        </td>
 
 _eos_;
     }
     $aMonsterData['enemyPlayersInfo'] = <<<_eos_
+        <td>
             <div class="num_info stone">
             </div>
             <div class="num_info hand">
@@ -75,9 +82,11 @@ _eos_;
             </div>
             <div class="num_info used">
             </div>
+        </td>
 
 _eos_;
     $aMonsterData['myPlayersInfo'] = <<<_eos_
+        <td>
             <div class="num_info stone">
             </div>
             <div class="num_info hand">
@@ -86,6 +95,7 @@ _eos_;
             </div>
             <div class="num_info used">
             </div>
+        </td>
 
 _eos_;
 ?>
@@ -95,9 +105,9 @@ _eos_;
         echo "    <tr>\n";
         foreach ($aLine as $posId) {
             if (!isset($aMonsterData[$posId])) {
-                $aMonsterData[$posId] = '<div class="pict"></div>';
+                $aMonsterData[$posId] = "        <td id='{$posId}'><div class='pict'></div></td>\n";
             }
-            echo "        <td id='{$posId}' monster_id=''>{$aMonsterData[$posId]}</td>\n";
+            echo $aMonsterData[$posId];
         }
         echo "    </tr>\n";
     }
