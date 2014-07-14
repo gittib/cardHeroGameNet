@@ -89,6 +89,41 @@ class Common {
     }
 
     /**
+     * 一週間以上ターンエンドされていないフィールドを削除する
+     */
+    public function deleteUnlinkedField()
+    {
+        $db = Zend_Registry::get('db');
+        $limitDate = date('Y-m-d', time() - 3600*24*7);
+        $sub = $db->select()
+            ->from(
+                array('tgc' => 't_game_cards'),
+                array(
+                    'game_card_id',
+                )
+            )
+            ->join(
+                array('tgf' => 't_game_field'),
+                'tgf.game_field_id = tgc.game_field_id',
+                array()
+            )
+            ->where('tgf.end_flg = 0')
+            ->where('tgf.upd_date <= ?', $limitDate);
+        $where = array("game_card_id in({$sub})");
+
+        $db->beginTransaction();
+        try {
+            $db->delete('t_game_monster_status', $where);
+            $db->delete('t_game_monster', $where);
+            $db->delete('t_game_cards', $where);
+
+            $db->commit();
+        } catch (Exception $e) {
+            $db->rollBack();
+        }
+    }
+
+    /**
      * 投げてるSQLの確認
      *
      * @return 投げてるSQL一覧のHTML

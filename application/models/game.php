@@ -16,7 +16,7 @@ class model_Game {
 
     public function getFieldDetail($iGameFieldId)
     {
-        // 工事中
+        Common::deleteUnlinkedField();
 
         $sel = $this->_db->select()
             ->from(
@@ -80,8 +80,9 @@ class model_Game {
                 'status.game_card_id = monster.game_card_id',
                 array(
                     'status_id',
-                    'status_param1' => 'param1',
-                    'status_param2' => 'param2',
+                    'status_turn_count' => 'turn_count',
+                    'status_param1'     => 'param1',
+                    'status_param2'     => 'param2',
                 )
             )
             ->where('card.game_field_id = ?', $iGameFieldId)
@@ -116,6 +117,7 @@ class model_Game {
             if (isset($val['status_id']) && $val['status_id'] != '') {
                 $aRet[$sPos][$iGameCardId]['status'][] = array(
                     'id'        => $val['status_id'],
+                    'turn'      => $val['status_turn_count'],
                     'param1'    => $val['status_param1'],
                     'param2'    => $val['status_param2'],
                 );
@@ -260,7 +262,7 @@ class model_Game {
 
         } catch (Exception $e) {
             $this->_db->rollBack();
-            return null;
+            throw $e;
         }
 
         return $iGameFieldId;

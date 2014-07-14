@@ -2,10 +2,7 @@
 var g_master_data = master_data.getInfo();
 
 var g_actor = {
-    id_type     : '',
-    actor_id    : '',
-    card_id     : '',
-    monster_id  : '',
+    game_card_id    : '',
 };
 
 var g_command = {

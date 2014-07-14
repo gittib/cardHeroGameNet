@@ -75,6 +75,20 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         );
         $router->addRoute('game_list', $route);
 
+        // ゲームプレイ
+        $route = new Zend_Controller_Router_Route_Regex(
+            'game/field/(\d+)/?',
+            array(
+                'controller'    =>  'game',
+                'action'        =>  'field',
+                1               =>  1,
+            ),
+            array(
+                1   => 'game_field_id',
+            )
+        );
+        $router->addRoute('game_list', $route);
+
         // カード詳細
         $route = new Zend_Controller_Router_Route_Regex(
             'card/detail/(\d+)/?',
