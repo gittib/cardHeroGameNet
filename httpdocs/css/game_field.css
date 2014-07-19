@@ -94,14 +94,21 @@ div.close_button {
 
 #buttons_frame {
   width: 100%; }
-  #buttons_frame div.cancel_button {
+  #buttons_frame div {
     margin: 20px;
     padding: 3px 0;
-    background-color: #ffeeee;
     border: solid 2px;
+    font-size: 18px;
+    text-align: center; }
+  #buttons_frame div.cancel_button {
+    background-color: #ffeeee;
     border-top-color: #ffdddd;
     border-left-color: #ffdddd;
     border-right-color: #880000;
-    border-bottom-color: #880000;
-    font-size: 18px;
-    text-align: center; }
+    border-bottom-color: #880000; }
+  #buttons_frame div.turn_end_button {
+    background-color: #eeffee;
+    border-top-color: #ddffdd;
+    border-left-color: #ddffdd;
+    border-right-color: #008800;
+    border-bottom-color: #008800; }

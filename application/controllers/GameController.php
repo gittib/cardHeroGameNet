@@ -34,6 +34,7 @@ class GameController extends Zend_Controller_Action
         $this->_stylesheet[] = '/css/game_list.css';
         $this->_stylesheet[] = '/css/deck_list.css';
         $this->_javascript[] = '/js/game_list.js';
+        $this->_javascript[] = '/js/img_delay_load.js';
         $this->_layout->title = 'ゲーム開始';
         $iPage = $request->getParam('page_no');
         $ret = $modelDeck->getDeckList($iPage);
@@ -59,6 +60,7 @@ class GameController extends Zend_Controller_Action
 
         $iGameFieldId = $this->_model->standby($deckId);
         $request->setParam('game_field_id', $iGameFieldId);
+        $request->setParam('ignore_open_flg', true);
 
         $this->forward('field');
     }
@@ -80,6 +82,7 @@ class GameController extends Zend_Controller_Action
 
         $aCardInfoArray = $this->_model->getFieldDetail(array(
             'game_field_id' => $nGameFieldId,
+            'open_flg'      => 1,
         ));
         $aDeckList = $modelDeck->getDeckList($iPage);
         $this->view->assign('aCardInfoArray', $aCardInfoArray);
@@ -100,9 +103,14 @@ class GameController extends Zend_Controller_Action
         $this->_javascript[] = '/js/game_field.js';
         $this->_layout->title = 'ゲームフィールド';
 
-        $aFields = $this->_model->getFieldDetail(array(
+        $aSelectCond = array(
             'game_field_id' => $nGameFieldId,
-        ));
+        );
+        $iOpenFlg = $request->getParam('ignore_open_flg');
+        if (!isset($iOpenFlg) || $iOpenFlg == '') {
+            $aSelectCond['open_flg'] = 1;
+        }
+        $aFields = $this->_model->getFieldDetail($aSelectCond);
         $aCardInfo = reset($aFields);
         $this->view->assign('aCardInfo', $aCardInfo);
     }
@@ -117,12 +125,11 @@ class GameController extends Zend_Controller_Action
         $this->_javascript[] = '/js/img_delay_load.js';
         $this->_layout->title = 'ゲームフィールド一覧';
         $iPage = $request->getParam('page_no');
-        $aCardInfoArray = $this->_model->getFieldDetail(
-            array(
-                'page_no'   => $iPage,
-                'open_flg'  => 1,
-            )
-        );
+        $aCardInfoArray = $this->_model->getFieldDetail(array(
+            'page_no'           => $iPage,
+            'open_flg'          => 1,
+            'allow_no_field'    => 1,
+        ));
         $this->view->assign('aCardInfoArray', $aCardInfoArray);
     }
 

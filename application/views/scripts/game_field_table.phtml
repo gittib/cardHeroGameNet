@@ -39,6 +39,9 @@ foreach ($this->aCardInfoArray as $aCardInfo) {
             $sLv = $val['lv'];
             $sHp = $val['hp'];
         }
+        $sLvHp  = '<span class="mini-font">LV</span><span class="lv">' . $sLv . '</span>';
+        $sLvHp .= '<span class="mini-font">HP</span><span class="hp">' . $sHp . '</span>';
+
         $sEffect  = '<span class="power"></span>';
         $sEffect .= '<span class="shield"></span>';
         $sEffect .= '<span class="magic"></span>';
@@ -67,7 +70,7 @@ foreach ($this->aCardInfoArray as $aCardInfo) {
                 <img src="/images/card/card.jpg" original-src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
             </div>
             <div class="param">
-                <span class="mini-font">LV</span><span class="lv">{$sLv}</span><span class="mini-font">HP</span><span class="hp">{$sHp}</span>
+                {$sLvHp}
             </div>
             <div class="param">
                 {$sEffect}

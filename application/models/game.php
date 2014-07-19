@@ -17,10 +17,11 @@ class model_Game {
     }
 
     /**
-        option:
-            game_field_id   : 抽出対象フィールドのID
-            page_no         : ページング用ページ番号
-            open_flg        : t_game_fieldのopen_flgを指定
+     *  aOption:
+     *      game_field_id   : 抽出対象フィールドのID
+     *      page_no         : ページング用ページ番号を指定
+     *      open_flg        : t_game_fieldのopen_flgを指定
+     *      allow_no_field  : フィールドが抽出できなくても例外を投げない
      */
     public function getFieldDetail($aOption = array())
     {
@@ -30,9 +31,12 @@ class model_Game {
                 array(
                     'game_field_id',
                 )
-            );
+            )
+            ->order(array(
+                'game_field_id',
+            ));
         if (isset($aOption['game_field_id']) && $aOption['game_field_id'] != '') {
-            $selField->where('t_game_field.game_field_id = ?', $aOption['game_field_id']);
+            $selField->where('t_game_field.game_field_id in(?)', $aOption['game_field_id']);
         }
         if (isset($aOption['page_no']) && $aOption['page_no'] != '') {
             $selField->limitPage($aOption['page_no'], $this->_nFieldsInPage);
@@ -57,6 +61,9 @@ class model_Game {
             ))
             ;
         $rslt = $this->_db->fetchAll($sel);
+        if (count($rslt) <= 0 && !isset($aOption['allow_no_field'])) {
+            throw new Zend_Controller_Action_Exception('Field data not found', 404);
+        }
 
         $aRet = array();
         foreach ($rslt as $val) {
@@ -132,12 +139,16 @@ class model_Game {
                 'game_card_id',
             ));
         $rslt = $this->_db->fetchAll($sel);
+        $iGameCardId  = -1;
+        $iGameFieldId = -1;
+        $sPosCategory = -1;
+        $aTmpRow = null;
         foreach ($rslt as $val) {
-            $iGameFieldId = $val['game_field_id'];
-            $sPosCategory = $val['position_category'];
-            $iGameCardId  = $val['game_card_id'];
-            if (!isset($aRet[$iGameFieldId][$sPosCategory][$iGameCardId])) {
-                $aRet[$iGameFieldId][$sPosCategory][$iGameCardId] = array(
+            if ($iGameCardId != $val['game_card_id']) {
+                if (isset($aTmpRow)) {
+                    $aRet[$iGameFieldId][$sPosCategory][$iGameCardId] = $aTmpRow;
+                }
+                $aTmpRow = array(
                     'card_id'           => $val['card_id'],
                     'owner'             => $val['owner'],
                     'image_file_name'   => $val['card_image'],
@@ -145,18 +156,21 @@ class model_Game {
                     'category'          => $val['category'],
                 );
                 if (isset($val['monster_id']) && $val['monster_id'] != '') {
-                    $aRet[$iGameFieldId][$sPosCategory][$iGameCardId]['monster_id']        = $val['monster_id'];
-                    $aRet[$iGameFieldId][$sPosCategory][$iGameCardId]['position']          = $val['field_position'];
-                    $aRet[$iGameFieldId][$sPosCategory][$iGameCardId]['monster_name']      = $val['monster_name'];
-                    $aRet[$iGameFieldId][$sPosCategory][$iGameCardId]['image_file_name']   = $val['monster_image'];
-                    $aRet[$iGameFieldId][$sPosCategory][$iGameCardId]['standby_flg']       = $val['standby_flg'];
-                    $aRet[$iGameFieldId][$sPosCategory][$iGameCardId]['lv']                = $val['lv'];
-                    $aRet[$iGameFieldId][$sPosCategory][$iGameCardId]['hp']                = $val['hp'];
-                    $aRet[$iGameFieldId][$sPosCategory][$iGameCardId]['status']            = array();
+                    $aTmpRow['monster_id']      = $val['monster_id'];
+                    $aTmpRow['position']        = $val['field_position'];
+                    $aTmpRow['monster_name']    = $val['monster_name'];
+                    $aTmpRow['image_file_name'] = $val['monster_image'];
+                    $aTmpRow['standby_flg']     = $val['standby_flg'];
+                    $aTmpRow['lv']              = $val['lv'];
+                    $aTmpRow['hp']              = $val['hp'];
+                    $aTmpRow['status']          = array();
                 }
             }
+            $iGameFieldId = $val['game_field_id'];
+            $sPosCategory = $val['position_category'];
+            $iGameCardId  = $val['game_card_id'];
             if (isset($val['status_id']) && $val['status_id'] != '') {
-                $aRet[$iGameFieldId][$sPosCategory][$iGameCardId]['status'][] = array(
+                $aTmpRow['status'][] = array(
                     'id'        => $val['status_id'],
                     'type'      => $val['status_type'],
                     'turn'      => $val['status_turn_count'],
@@ -164,6 +178,9 @@ class model_Game {
                     'param2'    => $val['status_param2'],
                 );
             }
+        }
+        if (isset($aTmpRow)) {
+            $aRet[$iGameFieldId][$sPosCategory][$iGameCardId] = $aTmpRow;
         }
 
         return $aRet;

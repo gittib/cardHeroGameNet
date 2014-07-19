@@ -23,7 +23,7 @@
             'myBack2',
         ),
     );
-    foreach ($aCardInfo['field'] as $val) {
+    foreach ($aCardInfo['field'] as $iGameCardId => $val) {
         if ($aCardInfo['field_info']['turn'] == $val['owner']) {
             $pos = 'my' . $val['position'];
         } else {
@@ -36,6 +36,9 @@
             $sLv = $val['lv'];
             $sHp = $val['hp'];
         }
+        $sLvHp  = '<span class="mini-font">LV</span><span class="lv">' . $sLv . '</span>';
+        $sLvHp .= '<span class="mini-font">HP</span><span class="hp">' . $sHp . '</span>';
+
         $sStatusDetail = '';
         $sEffect  = '<span class="power"></span>';
         $sEffect .= '<span class="shield"></span>';
@@ -60,16 +63,17 @@
             }
         }
         $aMonsterData[$pos] = <<<_eos_
-        <td id="{$pos}" monster_id="{$val['monster_id']}">
+        <td id="{$pos}" monster_id="{$val['monster_id']}" game_card_id="{$iGameCardId}">
             <div class="pict">
                 <img src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
             </div>
             <div class="param">
-                <span class="mini-font">LV</span><span class="lv">{$sLv}</span><span class="mini-font">HP</span><span class="hp">{$sHp}</span>
+                {$sLvHp}
             </div>
             <div class="param">
                 {$sEffect}
                 <div class="status_hidden_param" style="display:none;">
+                    {$sStatusDetail}
                 </div>
             </div>
         </td>
@@ -176,6 +180,9 @@ _eos_;
 <div id="buttons_frame">
     <div class="cancel_button">
         キャンセル
+    </div>
+    <div class="turn_end_button">
+        ターンエンド
     </div>
 </div>
 
