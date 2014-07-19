@@ -32,6 +32,7 @@ class DeckController extends Zend_Controller_Action
         $this->_layout->title = 'デッキ一覧';
         $this->_stylesheet[] = '/css/deck_list.css';
         $this->_javascript[] = '/js/deck_list.js';
+        $this->_javascript[] = '/js/img_delay_load.js';
         $nPage = $request->getParam('page_no');
         $ret = $this->_model->getDeckList($nPage);
 
@@ -46,6 +47,7 @@ class DeckController extends Zend_Controller_Action
         $this->_layout->title = 'デッキ編集';
         $this->_stylesheet[] = '/css/deck_edit.css';
         $this->_javascript[] = '/js/deck_edit.js';
+        $this->_javascript[] = '/js/img_delay_load.js';
 
         $aDeckInfo = $this->_model->initDeckCard($deckId);
         $aList = $this->_model->getCardList();

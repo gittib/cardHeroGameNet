@@ -14,7 +14,10 @@ $aDeckCardImages = array(
 );
 if (isset($this->aDeckInfo['cards']) && is_array($this->aDeckInfo['cards'])) {
     foreach ($this->aDeckInfo['cards'] as $val) {
-        $aDeckCardImages[$val['cate']] .= "<img src='/images/card/{$val['image_file_name']}' cate='{$val['cate']}' cardid='{$val['card_id']}' />\n";
+        $aDeckCardImages[$val['cate']] .= <<<_eos_
+<img src="/images/card/card.jpg" original-src="/images/card/{$val['image_file_name']}" cate="{$val['cate']}" cardid="{$val['card_id']}" />
+
+_eos_;
     }
 }
 
@@ -31,7 +34,7 @@ foreach ($this->card_list as $val) {
     if ($val['category'] == 'master') {
         $sMasterImages .= <<<_eos_
                 <div cardid="{$val['card_id']}">
-                    <img src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}" cardid="{$val['card_id']}" />
+                    <img src="/images/card/card.jpg" original-src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}" cardid="{$val['card_id']}" />
                 </div>
 
 _eos_;
@@ -47,7 +50,7 @@ _eos_;
     } else {
         $sCardCatalog .= <<<_eos_
     <div class="catalog {$val['category']}">
-        <img class="yet" alt="{$val['card_name']}" cardid="{$val['card_id']}" rare="{$val['rare']}" data-original="/images/card/{$val['image_file_name']}" />
+        <img alt="{$val['card_name']}" cardid="{$val['card_id']}" rare="{$val['rare']}" original-src="/images/card/{$val['image_file_name']}" src="/images/card/card.jpg" />
     </div>
 
 _eos_;

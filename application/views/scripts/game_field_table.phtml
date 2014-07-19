@@ -1,5 +1,8 @@
 <?php
-    $aCardInfo = $this->aCardInfo;
+foreach ($this->aCardInfoArray as $aCardInfo) {
+    
+    $sExplain ='';
+    $sExplain ='あいうえおかきくけこさしすせそたちつてとあいうえおかきくけこさしすせそたちつてと';
 
     $aPosId = array(
         0 => array(
@@ -29,47 +32,31 @@
         } else {
             $pos = 'enemy' . $val['position'];
         }
-        $sLvLabel = 'LV';
         $sLv = $val['lv'];
-        if ($val['category'] == 'master') {
-            $sLvLabel = 'S';
-            if ($val['owner'] == 1) {
-                $sLv = $aCardInfo['field_info']['stone1'];
-            } else {
-                $sLv = $aCardInfo['field_info']['stone2'];
-            }
-        }
         $sHp = $val['hp'];
         $sEffect  = '<span class="power"></span>';
         $sEffect .= '<span class="shield"></span>';
         $sEffect .= '<span class="magic"></span>';
         $sEffect .= '<span class="charge"></span>';
-        if (isset($val['status']) && $val['status'] != '') {
-            foreach ($val['status'] as $aStatusVal) {
-                switch ($aStatusVal['type']) {
-                    case '!':
-                        $sEffect = str_replace('"charge">', '"charge">！', $sEffect);
-                        break;
-                    case 'P':
-                        $sEffect = str_replace('"power">', '"power">P', $sEffect);
-                        break;
-                    case 'S':
-                        $sEffect = str_replace('"shield">', '"shield">S', $sEffect);
-                        break;
-                    case 'M':
-                        $sEffect = str_replace('"magic">', '"magic">M', $sEffect);
-                        break;
-                }
-            }
+        if (isset($val['power_effect']) && $val['power_effect'] != '') {
+            $sEffect = str_replace('"power">', '"power">P', $sEffect);
+        }
+        if (isset($val['shield_effect']) && $val['shield_effect'] != '') {
+            $sEffect = str_replace('"shield">', '"shield">S', $sEffect);
+        }
+        if (isset($val['magic_effect']) && $val['magic_effect'] != '') {
+            $sEffect = str_replace('"magic">', '"magic">M', $sEffect);
+        }
+        if (isset($val['charge']) && $val['charge']) {
+            $sEffect = str_replace('"charge">', '"charge">！', $sEffect);
         }
         $aMonsterData[$pos] = <<<_eos_
-        <td id="{$pos}" monster_id="{$val['monster_id']}">
+        <td pos_id="{$pos}" monster_id="{$val['monster_id']}">
             <div class="pict">
-                <img src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
+                <img src="/images/card/card.jpg" original-src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
             </div>
             <div class="param">
-                <span class="mini-font">{$sLvLabel}</span><span class="lv">{$sLv}</span>
-                <span class="mini-font">HP</span><span class="hp">{$sHp}</span>
+                <span class="mini-font">LV</span><span class="lv">{$sLv}</span><span class="mini-font">HP</span><span class="hp">{$sHp}</span>
             </div>
             <div class="param">
                 {$sEffect}
@@ -84,13 +71,11 @@ _eos_;
         'my'    => 0,
         'enemy' => 0,
     );
-    foreach ($this->aCardInfo['hand'] as $val) {
+    foreach ($aCardInfo['hand'] as $val) {
         if ($aCardInfo['field_info']['turn'] == $val['owner']) {
             $aHandCount['my']++;
             $sMyHandHtml .= <<<_eos_
-    <div>
-        <img src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}" card_id="{$val['card_id']}"/>
-    </div>
+        <img src="/images/card/card.jpg" alt=""/>
 
 _eos_;
         } else {
@@ -143,41 +128,31 @@ _eos_;
         </td>
 
 _eos_;
-?>
-<table id="game_field">
-<?php
-    foreach ($aPosId as $aLine) {
-        echo "    <tr>\n";
-        foreach ($aLine as $posId) {
-            if (!isset($aMonsterData[$posId])) {
-                $aMonsterData[$posId] = "        <td id='{$posId}'><div class='pict'></div></td>\n";
-            }
-            echo $aMonsterData[$posId];
+
+echo <<<_eos_
+<div href="/game/field/{$aCardInfo['field_info']['game_field_id']}/" class="game_row">
+    <table class="game_field">
+
+_eos_;
+foreach ($aPosId as $i => $aLine) {
+    echo "        <tr>\n";
+    foreach ($aLine as $posId) {
+        if (!isset($aMonsterData[$posId])) {
+            $aMonsterData[$posId] = "            <td pos_id=\"{$posId}\"><div class=\"pict\"></div></td>\n";
         }
-        echo "    </tr>\n";
+        echo $aMonsterData[$posId];
     }
-?>
-</table>
-<div id="hand_card" class="clearfix">
-<?php echo $sMyHandHtml; ?>
-</div>
-<div id="card_info">
-    <div id="card_info_frame">
-        <div class="card_info_title">
-            Card Infomation
-        </div>
-        <div class="card_summary clearfix">
-            <div class="card_image"></div>
-            <div class="card_name"></div>
-            <div class="dtl_link"></div>
-        </div>
-        <div class="act_commands">
-        </div>
-    </div>
-</div>
-<div id="buttons_frame">
-    <div class="cancel_button">
-        キャンセル
+    if ($i == 0) {
+        echo "            <td colspan=3 rowspan=4 class=\"explain\">{$sExplain}</td>\n";
+    }
+    echo "        </tr>\n";
+}
+    echo <<<_eos_
+    </table>
+    <div class="hand_card">
+{$sMyHandHtml}
     </div>
 </div>
 
+_eos_;
+}

@@ -8,11 +8,11 @@ foreach ($this->aCardInfo as $val) {
     echo <<<_eos_
 <div class="card_data card_list_row {$val['category']} clearfix">
     <div class="card_image">
-        <img src="/images/card/card.jpg" ref="{$val['image_file_name']}" width=50 height=50 alt="{$val['card_name']}" />
+        <img src="/images/card/card.jpg" original-src="{$val['image_file_name']}" width=50 height=50 alt="{$val['card_name']}" />
     </div>
     <div class="card_text">
         <div class="card_name">
-            <a href="/card/detail/{$val['card_id']}/">{$val['card_name']}</a>
+            <a horiginal-src="/card/detail/{$val['card_id']}/">{$val['card_name']}</a>
             　★{$val['rare']}
         </div>
         <div class="card_type">{$val['category_name']}</div>
@@ -27,22 +27,3 @@ foreach ($this->aCardInfo as $val) {
 _eos_;
 }
 ?>
-<script type="text/javascript">
-<!--
-$(function() {
-    // 引き金となる要素を設定
-    var triggerNode = $("div.card_image img");
-    // 画面スクロール毎に判定を行う
-    $(window).scroll(function(){
-        triggerNode.each(function() {
-            // 引き金となる要素の位置を取得
-            var triggerNodePosition = $(this).offset().top - $(window).height();    
-            // 現在のスクロール位置が引き金要素の位置より下にあれば‥
-            if ($(window).scrollTop() > triggerNodePosition) {
-                $(this).attr("src", $(this).attr("ref"));
-            }
-        })
-    });
-})
--->
-</script>

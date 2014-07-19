@@ -16,8 +16,6 @@ class model_Game {
 
     public function getFieldDetail($iGameFieldId)
     {
-        Common::deleteUnlinkedField();
-
         $sel = $this->_db->select()
             ->from(
                 array('field' => 't_game_field'),
@@ -34,9 +32,9 @@ class model_Game {
 
         $aRet = array(
             'field_info'    => $aField,
-            'field_cards'   => array(),
-            'hand_cards'    => array(),
-            'deck_cards'    => array(),
+            'field'         => array(),
+            'hand'          => array(),
+            'deck'          => array(),
         );
         $sel = $this->_db->select()
             ->from(
@@ -85,6 +83,13 @@ class model_Game {
                     'status_param2'     => 'param2',
                 )
             )
+            ->joinLeft(
+                array('mstatus' => 'm_status'),
+                'mstatus.status_id = status.status_id',
+                array(
+                    'status_type',
+                )
+            )
             ->where('card.game_field_id = ?', $iGameFieldId)
             ->order(array(
                 'position_category',
@@ -92,12 +97,11 @@ class model_Game {
                 'game_card_id',
             ));
         $rslt = $this->_db->fetchAll($sel);
-        $aDeckCard = array();
         foreach ($rslt as $val) {
-            $sPos = $val['position_category'];
-            $iGameCardId = $val['game_card_id'];
-            if (!isset($aRet[$sPos][$iGameCardId])) {
-                $aRet[$sPos][$iGameCardId] = array(
+            $sPosCategory = $val['position_category'];
+            $iGameCardId  = $val['game_card_id'];
+            if (!isset($aRet[$sPosCategory][$iGameCardId])) {
+                $aRet[$sPosCategory][$iGameCardId] = array(
                     'card_id'           => $val['card_id'],
                     'owner'             => $val['owner'],
                     'image_file_name'   => $val['card_image'],
@@ -105,18 +109,19 @@ class model_Game {
                     'category'          => $val['category'],
                 );
                 if (isset($val['monster_id']) && $val['monster_id'] != '') {
-                    $aRet[$sPos][$iGameCardId]['monster_id']        = $val['monster_id'];
-                    $aRet[$sPos][$iGameCardId]['position']          = $val['field_position'];
-                    $aRet[$sPos][$iGameCardId]['monster_name']      = $val['monster_name'];
-                    $aRet[$sPos][$iGameCardId]['image_file_name']   = $val['monster_image'];
-                    $aRet[$sPos][$iGameCardId]['lv']                = $val['lv'];
-                    $aRet[$sPos][$iGameCardId]['hp']                = $val['hp'];
-                    $aRet[$sPos][$iGameCardId]['status']            = array();
+                    $aRet[$sPosCategory][$iGameCardId]['monster_id']        = $val['monster_id'];
+                    $aRet[$sPosCategory][$iGameCardId]['position']          = $val['field_position'];
+                    $aRet[$sPosCategory][$iGameCardId]['monster_name']      = $val['monster_name'];
+                    $aRet[$sPosCategory][$iGameCardId]['image_file_name']   = $val['monster_image'];
+                    $aRet[$sPosCategory][$iGameCardId]['lv']                = $val['lv'];
+                    $aRet[$sPosCategory][$iGameCardId]['hp']                = $val['hp'];
+                    $aRet[$sPosCategory][$iGameCardId]['status']            = array();
                 }
             }
             if (isset($val['status_id']) && $val['status_id'] != '') {
-                $aRet[$sPos][$iGameCardId]['status'][] = array(
+                $aRet[$sPosCategory][$iGameCardId]['status'][] = array(
                     'id'        => $val['status_id'],
+                    'type'      => $val['status_type'],
                     'turn'      => $val['status_turn_count'],
                     'param1'    => $val['status_param1'],
                     'param2'    => $val['status_param2'],

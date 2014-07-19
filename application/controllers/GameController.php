@@ -63,6 +63,31 @@ class GameController extends Zend_Controller_Action
         $this->forward('field');
     }
 
+    public function receiveAction()
+    {
+        $this->_getModel();
+        require_once APPLICATION_PATH . '/models/deck.php';
+        $modelDeck = new model_Deck();
+
+        $request = $this->getRequest();
+        $nGameFieldId   = $request->getParam('game_field_id');
+        $nPage          = $request->getParam('page_no');
+        $this->_stylesheet[] = '/css/game_list.css';
+        $this->_stylesheet[] = '/css/deck_list.css';
+        $this->_stylesheet[] = '/css/game_receive.css';
+        $this->_javascript[] = '/js/img_delay_load.js';
+        $this->_layout->title = 'ゲーム開始';
+
+        $aCardInfoArray = array();
+        $aCardInfoArray[] = $this->_model->getFieldDetail($nGameFieldId);
+        $aDeckList = $modelDeck->getDeckList($nPage);
+        $this->view->assign('aCardInfoArray', $aCardInfoArray);
+        $this->view->assign('aDeckList', $aDeckList);
+        $this->view->assign('bGameStart', true);
+        $this->view->assign('sDispMessage', '使用するデッキを選んでください。');
+        $this->render('deck/list', null, true);
+    }
+
     public function fieldAction()
     {
         $this->_getModel();
@@ -83,6 +108,7 @@ class GameController extends Zend_Controller_Action
         $request = $this->getRequest();
         $this->_stylesheet[] = '/css/game_list.css';
         $this->_javascript[] = '/js/game_list.js';
+        $this->_javascript[] = '/js/img_delay_load.js';
         $this->_layout->title = 'ゲームフィールド一覧';
         $nPage = $request->getParam('page_no');
         //$ret = $this->_model->getFieldList($nPage);

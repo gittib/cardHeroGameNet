@@ -1,3 +1,14 @@
+<?php
+    if (isset($this->bGameStart) && $this->bGameStart) {
+        echo <<<_eos_
+<div class="message">
+    フィールド状況
+</div>
+
+_eos_;
+        echo $this->render('game_field_table.phtml');
+    }
+?>
 <div class="message">
 <?php
     if (isset($this->sDispMessage)) {
@@ -32,7 +43,7 @@ _eos_;
     <div class="edit_link">
         <form action="/game/start/" method="post">
             <input type="submit" value="このデッキを使ってゲームを受ける" />
-            <input type="hidden" name="game_field_id" value="{$this->gameId}" />
+            <input type="hidden" name="game_field_id" value="{$this->aCardInfo['field_info']['game_field_id']}" />
             <input type="hidden" name="deck_id" value="{$deckId}" />
         </form>
     </div>
@@ -50,7 +61,7 @@ _eos_;
     foreach ($val['cards'] as $listCard) {
         for ($i = 0 ; $i < $listCard['num'] ; $i++)
         $sCardListHtml .= <<<_eos_
-        <img src="/images/card/{$listCard['image_file_name']}" alt="{$listCard['card_name']}" />
+        <img src="/images/card/card.jpg" original-src="/images/card/{$listCard['image_file_name']}" alt="{$listCard['card_name']}" />
 
 _eos_;
     }

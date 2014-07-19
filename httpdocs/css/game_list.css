@@ -18,11 +18,15 @@ body {
     border: 1px solid;
     border-collapse: collapse; }
     .game_row table.game_field td {
-      border: 1px solid; }
+      border: 1px solid;
+      width: 16%; }
+      .game_row table.game_field td > div {
+        text-align: center; }
       .game_row table.game_field td .pict {
-        height: 50px; }
+        min-height: 50px; }
         .game_row table.game_field td .pict img {
-          height: 100%; }
+          width: 100%;
+          max-width: 50px; }
       .game_row table.game_field td .param {
         padding-left: 3px;
         font-size: 12px; }
@@ -35,11 +39,14 @@ body {
         .game_row table.game_field td .param span.charge {
           color: #ffffff;
           background-color: #ff0000; }
+      .game_row table.game_field td div.num_info img {
+        height: 13px; }
     .game_row table.game_field td.explain {
+      width: 50%;
       vertical-align: top; }
   .game_row .hand_card {
     border: 1px solid;
-    height: 50px;
+    height: 48px;
     padding: 2px;
     text-align: center; }
     .game_row .hand_card img {

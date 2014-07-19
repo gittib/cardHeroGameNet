@@ -34,14 +34,15 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         // デッキ一覧
         $route = new Zend_Controller_Router_Route_Regex(
-            'deck/list(/\d+)?/?',
+            'deck/list(/(\d+))?/?',
             array(
                 'controller'    =>  'deck',
                 'action'        =>  'list',
                 1               =>  1,
+                2               =>  1,
             ),
             array(
-                1   => 'page_no',
+                2   => 'page_no',
             )
         );
         $router->addRoute('deck_list', $route);
@@ -74,6 +75,23 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             )
         );
         $router->addRoute('game_list', $route);
+
+        // ゲーム受領
+        $route = new Zend_Controller_Router_Route_Regex(
+            'game/receive/(\d+)(/(\d+))?/?',
+            array(
+                'controller'    =>  'game',
+                'action'        =>  'receive',
+                1               =>  1,
+                2               =>  1,
+                3               =>  1,
+            ),
+            array(
+                1   => 'game_field_id',
+                3   => 'page_no',
+            )
+        );
+        $router->addRoute('game_receive', $route);
 
         // ゲームプレイ
         $route = new Zend_Controller_Router_Route_Regex(

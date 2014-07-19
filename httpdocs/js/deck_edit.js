@@ -1,8 +1,3 @@
-function oneImageLoad(imgTag) {
-    imgTag.removeClass("yet");
-    imgTag.attr("src", imgTag.attr("data-original"));
-}
-
 function refreshDeckCardNum() {
     var nFront = $("div.card_image_frame.front img").size();
     var nBack  = $("div.card_image_frame.back img").size();
@@ -23,13 +18,6 @@ function refreshDeckCardNum() {
 }
 
 $(function() {
-    oneImageLoad($('img.yet:first'));
-    oneImageLoad($('img.yet:first'));
-    oneImageLoad($('img.yet:first'));
-    $('.catalog img').load(function() {
-        oneImageLoad($('img.yet:first'));
-    });
-
     var master_card_id = $('div.master_select select[name=master]').val();
     $('div.master_select a.blank_link').attr('href', '/card/detail/' + master_card_id + '/');
     $('div.master_image div').hide();
