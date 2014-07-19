@@ -12,6 +12,7 @@ class model_Api {
             'm_card'        => array(),
             'm_monster'     => array(),
             'm_magic'       => array(),
+            'm_queue'       => array(),
         );
 
         $subMon = $this->_db->select()
@@ -186,6 +187,20 @@ class model_Api {
                 'card_id'       => $val['after_card_id'],
                 'monster_id'    => $val['after_monster_id'],
             );
+        }
+
+        $sel = $this->_db->select()
+            ->from(
+                array('mq' => 'm_queue_type'),
+                array(
+                    'id'    => 'queue_type_id',
+                    'memo',
+                )
+            );
+        $rslt = $this->_db->fetchAll($sel);
+        foreach ($rslt as $val) {
+            $iQueueId = (int)$val['id'];
+            $aRet['m_queue'][$iQueueId] = $val;
         }
 
         return $aRet;

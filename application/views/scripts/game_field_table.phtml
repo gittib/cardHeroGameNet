@@ -32,23 +32,34 @@ foreach ($this->aCardInfoArray as $aCardInfo) {
         } else {
             $pos = 'enemy' . $val['position'];
         }
-        $sLv = $val['lv'];
-        $sHp = $val['hp'];
+        if ($val['standby_flg']) {
+            $sLv = '?';
+            $sHp = '?';
+        } else {
+            $sLv = $val['lv'];
+            $sHp = $val['hp'];
+        }
         $sEffect  = '<span class="power"></span>';
         $sEffect .= '<span class="shield"></span>';
         $sEffect .= '<span class="magic"></span>';
         $sEffect .= '<span class="charge"></span>';
-        if (isset($val['power_effect']) && $val['power_effect'] != '') {
-            $sEffect = str_replace('"power">', '"power">P', $sEffect);
-        }
-        if (isset($val['shield_effect']) && $val['shield_effect'] != '') {
-            $sEffect = str_replace('"shield">', '"shield">S', $sEffect);
-        }
-        if (isset($val['magic_effect']) && $val['magic_effect'] != '') {
-            $sEffect = str_replace('"magic">', '"magic">M', $sEffect);
-        }
-        if (isset($val['charge']) && $val['charge']) {
-            $sEffect = str_replace('"charge">', '"charge">！', $sEffect);
+        if (isset($val['status']) && $val['status'] != '') {
+            foreach ($val['status'] as $aStatusVal) {
+                switch ($aStatusVal['type']) {
+                    case '!':
+                        $sEffect = str_replace('"charge">', '"charge">！', $sEffect);
+                        break;
+                    case 'P':
+                        $sEffect = str_replace('"power">', '"power">P', $sEffect);
+                        break;
+                    case 'S':
+                        $sEffect = str_replace('"shield">', '"shield">S', $sEffect);
+                        break;
+                    case 'M':
+                        $sEffect = str_replace('"magic">', '"magic">M', $sEffect);
+                        break;
+                }
+            }
         }
         $aMonsterData[$pos] = <<<_eos_
         <td pos_id="{$pos}" monster_id="{$val['monster_id']}">

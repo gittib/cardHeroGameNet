@@ -2,10 +2,12 @@
 
 class model_Game {
     private $_db;
+    private $_nFieldsInPage;
 
     public function __construct()
     {
         $this->_db = Zend_Registry::get('db');
+        $this->_nFieldsInPage = 10;
     }
 
     public function getFieldList($nPage = 1)
@@ -14,8 +16,31 @@ class model_Game {
         //$sel = $this->_db->select()
     }
 
-    public function getFieldDetail($iGameFieldId)
+    /**
+        option:
+            game_field_id   : 抽出対象フィールドのID
+            page_no         : ページング用ページ番号
+            open_flg        : t_game_fieldのopen_flgを指定
+     */
+    public function getFieldDetail($aOption = array())
     {
+        $selField = $this->_db->select()
+            ->from(
+                't_game_field',
+                array(
+                    'game_field_id',
+                )
+            );
+        if (isset($aOption['game_field_id']) && $aOption['game_field_id'] != '') {
+            $selField->where('t_game_field.game_field_id = ?', $aOption['game_field_id']);
+        }
+        if (isset($aOption['page_no']) && $aOption['page_no'] != '') {
+            $selField->limitPage($aOption['page_no'], $this->_nFieldsInPage);
+        }
+        if (isset($aOption['open_flg']) && $aOption['open_flg'] != '') {
+            $selField->where('t_game_field.open_flg = ?', $aOption['open_flg']);
+        }
+
         $sel = $this->_db->select()
             ->from(
                 array('field' => 't_game_field'),
@@ -26,20 +51,28 @@ class model_Game {
                     'stone2',
                 )
             )
-            ->where('game_field_id = ?', $iGameFieldId)
+            ->where('game_field_id in(?)', $selField)
+            ->order(array(
+                'game_field_id',
+            ))
             ;
-        $aField = $this->_db->fetchRow($sel);
+        $rslt = $this->_db->fetchAll($sel);
 
-        $aRet = array(
-            'field_info'    => $aField,
-            'field'         => array(),
-            'hand'          => array(),
-            'deck'          => array(),
-        );
+        $aRet = array();
+        foreach ($rslt as $val) {
+            $iGameFieldId = $val['game_field_id'];
+            $aRet[$iGameFieldId] = array(
+                'field_info'    => $val,
+                'field'         => array(),
+                'hand'          => array(),
+                'deck'          => array(),
+            );
+        }
         $sel = $this->_db->select()
             ->from(
                 array('card' => 't_game_cards'),
                 array(
+                    'game_field_id',
                     'game_card_id',
                     'card_id',
                     'owner',
@@ -62,6 +95,7 @@ class model_Game {
                     'monster_id',
                     'field_position'    => 'position',
                     'hp',
+                    'standby_flg',
                 )
             )
             ->joinLeft(
@@ -90,18 +124,20 @@ class model_Game {
                     'status_type',
                 )
             )
-            ->where('card.game_field_id = ?', $iGameFieldId)
+            ->where('card.game_field_id in(?)', $selField)
             ->order(array(
+                'game_field_id',
                 'position_category',
                 'sort_no',
                 'game_card_id',
             ));
         $rslt = $this->_db->fetchAll($sel);
         foreach ($rslt as $val) {
+            $iGameFieldId = $val['game_field_id'];
             $sPosCategory = $val['position_category'];
             $iGameCardId  = $val['game_card_id'];
-            if (!isset($aRet[$sPosCategory][$iGameCardId])) {
-                $aRet[$sPosCategory][$iGameCardId] = array(
+            if (!isset($aRet[$iGameFieldId][$sPosCategory][$iGameCardId])) {
+                $aRet[$iGameFieldId][$sPosCategory][$iGameCardId] = array(
                     'card_id'           => $val['card_id'],
                     'owner'             => $val['owner'],
                     'image_file_name'   => $val['card_image'],
@@ -109,17 +145,18 @@ class model_Game {
                     'category'          => $val['category'],
                 );
                 if (isset($val['monster_id']) && $val['monster_id'] != '') {
-                    $aRet[$sPosCategory][$iGameCardId]['monster_id']        = $val['monster_id'];
-                    $aRet[$sPosCategory][$iGameCardId]['position']          = $val['field_position'];
-                    $aRet[$sPosCategory][$iGameCardId]['monster_name']      = $val['monster_name'];
-                    $aRet[$sPosCategory][$iGameCardId]['image_file_name']   = $val['monster_image'];
-                    $aRet[$sPosCategory][$iGameCardId]['lv']                = $val['lv'];
-                    $aRet[$sPosCategory][$iGameCardId]['hp']                = $val['hp'];
-                    $aRet[$sPosCategory][$iGameCardId]['status']            = array();
+                    $aRet[$iGameFieldId][$sPosCategory][$iGameCardId]['monster_id']        = $val['monster_id'];
+                    $aRet[$iGameFieldId][$sPosCategory][$iGameCardId]['position']          = $val['field_position'];
+                    $aRet[$iGameFieldId][$sPosCategory][$iGameCardId]['monster_name']      = $val['monster_name'];
+                    $aRet[$iGameFieldId][$sPosCategory][$iGameCardId]['image_file_name']   = $val['monster_image'];
+                    $aRet[$iGameFieldId][$sPosCategory][$iGameCardId]['standby_flg']       = $val['standby_flg'];
+                    $aRet[$iGameFieldId][$sPosCategory][$iGameCardId]['lv']                = $val['lv'];
+                    $aRet[$iGameFieldId][$sPosCategory][$iGameCardId]['hp']                = $val['hp'];
+                    $aRet[$iGameFieldId][$sPosCategory][$iGameCardId]['status']            = array();
                 }
             }
             if (isset($val['status_id']) && $val['status_id'] != '') {
-                $aRet[$sPosCategory][$iGameCardId]['status'][] = array(
+                $aRet[$iGameFieldId][$sPosCategory][$iGameCardId]['status'][] = array(
                     'id'        => $val['status_id'],
                     'type'      => $val['status_type'],
                     'turn'      => $val['status_turn_count'],
@@ -298,6 +335,9 @@ class model_Game {
                 'position'      => $row['position'],
                 'hp'            => $row['hp'],
             );
+            if (isset($row['standby_flg'])) {
+                $set['standby_flg'] = $row['standby_flg'];
+            }
             $this->_db->insert('t_game_monster', $set);
         }
     }

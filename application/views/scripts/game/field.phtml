@@ -29,17 +29,14 @@
         } else {
             $pos = 'enemy' . $val['position'];
         }
-        $sLvLabel = 'LV';
-        $sLv = $val['lv'];
-        if ($val['category'] == 'master') {
-            $sLvLabel = 'S';
-            if ($val['owner'] == 1) {
-                $sLv = $aCardInfo['field_info']['stone1'];
-            } else {
-                $sLv = $aCardInfo['field_info']['stone2'];
-            }
+        if ($val['standby_flg']) {
+            $sLv = '?';
+            $sHp = '?';
+        } else {
+            $sLv = $val['lv'];
+            $sHp = $val['hp'];
         }
-        $sHp = $val['hp'];
+        $sStatusDetail = '';
         $sEffect  = '<span class="power"></span>';
         $sEffect .= '<span class="shield"></span>';
         $sEffect .= '<span class="magic"></span>';
@@ -68,11 +65,12 @@
                 <img src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
             </div>
             <div class="param">
-                <span class="mini-font">{$sLvLabel}</span><span class="lv">{$sLv}</span>
-                <span class="mini-font">HP</span><span class="hp">{$sHp}</span>
+                <span class="mini-font">LV</span><span class="lv">{$sLv}</span><span class="mini-font">HP</span><span class="hp">{$sHp}</span>
             </div>
             <div class="param">
                 {$sEffect}
+                <div class="status_hidden_param" style="display:none;">
+                </div>
             </div>
         </td>
 
