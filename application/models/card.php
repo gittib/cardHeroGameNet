@@ -16,7 +16,29 @@ class model_Card {
         if (!is_array($this->_aCardInfo['cardInfo']) || count($this->_aCardInfo['cardInfo']) <= 0) {
             throw new exception('モンスターID不明');
         }
-        $this->_aCardInfo['cardInfo']['image_file_name'] = '/images/card/' . $this->_aCardInfo['cardInfo']['image_file_name'];
+        $sel = $this->_db->select()
+            ->from(
+                'm_monster',
+                array(
+                    'card_name'         => 'monster_name',
+                    'image_file_name'   => new Zend_Db_Expr("'/images/card/' || image_file_name"),
+                    'monster_id'        => new Zend_Db_Expr('min(monster_id)'),
+                )
+            )
+            ->group(array(
+                'monster_name',
+                'image_file_name',
+            ))
+            ->where('card_id = ?', $cardId)
+            ->order(array('monster_id'));
+        $this->_aCardInfo['cardInfo']['image_info'] = $this->_db->fetchAll($sel);
+        if (count($this->_aCardInfo['cardInfo']['image_info']) <= 0) {
+            $this->_aCardInfo['cardInfo']['image_info'] = array();
+            $this->_aCardInfo['cardInfo']['image_info'][] = array(
+                'image_file_name'   => '/images/card/' . $this->_aCardInfo['cardInfo']['image_file_name'],
+                'card_name'         => $this->_aCardInfo['cardInfo']['card_name'],
+            );
+        }
         switch ($this->_aCardInfo['cardInfo']['category']) {
             case 'master':
                 $this->_aCardInfo['cardInfo']['category_name'] = 'マスター';

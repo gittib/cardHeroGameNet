@@ -14,7 +14,7 @@ td {
 }
 
 .card_text {
-    width:75%;
+    max-width:66%;
 }
 
 .card_name {

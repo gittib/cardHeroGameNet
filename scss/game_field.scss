@@ -184,11 +184,22 @@ div.close_button {
         border-bottom-color: $under_line_color;
     }
 
-    div.turn_end_button {
+    div.execute_button {
         $upper_line_color : #ddffdd;
         $under_line_color : #008800;
 
         background-color: #eeffee;
+        border-top-color:    $upper_line_color;
+        border-left-color:   $upper_line_color;
+        border-right-color:  $under_line_color;
+        border-bottom-color: $under_line_color;
+    }
+
+    div.turn_end_button {
+        $upper_line_color : #ddddff;
+        $under_line_color : #000088;
+
+        background-color: #eeeeff;
         border-top-color:    $upper_line_color;
         border-left-color:   $upper_line_color;
         border-right-color:  $under_line_color;

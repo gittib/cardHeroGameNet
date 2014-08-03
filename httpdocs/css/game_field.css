@@ -106,9 +106,15 @@ div.close_button {
     border-left-color: #ffdddd;
     border-right-color: #880000;
     border-bottom-color: #880000; }
-  #buttons_frame div.turn_end_button {
+  #buttons_frame div.execute_button {
     background-color: #eeffee;
     border-top-color: #ddffdd;
     border-left-color: #ddffdd;
     border-right-color: #008800;
     border-bottom-color: #008800; }
+  #buttons_frame div.turn_end_button {
+    background-color: #eeeeff;
+    border-top-color: #ddddff;
+    border-left-color: #ddddff;
+    border-right-color: #000088;
+    border-bottom-color: #000088; }

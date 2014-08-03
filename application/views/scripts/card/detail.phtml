@@ -1,7 +1,14 @@
 <div class="card_data clearfix">
+<?php
+    foreach ($this->aCardInfo['image_info'] as $val) {
+        echo <<<_eos_
     <div class="card_image">
-        <img src="<?php echo $this->aCardInfo['image_file_name']; ?>" width=50 height=50 alt="<?php echo $this->aCardInfo['card_name']; ?>" />
+        <img src="{$val['image_file_name']}" width=50 height=50 alt="{$val['card_name']}" />
     </div>
+
+_eos_;
+    }
+?>
     <div class="card_text">
         <div class="card_name"><?php
             echo $this->aCardInfo['card_name'];

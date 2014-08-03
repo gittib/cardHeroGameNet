@@ -29,9 +29,12 @@
         } else {
             $pos = 'enemy' . $val['position'];
         }
+
+        $sStatusDetail = '';
         if ($val['standby_flg']) {
             $sLv = '?';
             $sHp = '?';
+            $sStatusDetail .= '<div standby_flg=1></div>';
         } else {
             $sLv = $val['lv'];
             $sHp = $val['hp'];
@@ -39,7 +42,6 @@
         $sLvHp  = '<span class="mini-font">LV</span><span class="lv">' . $sLv . '</span>';
         $sLvHp .= '<span class="mini-font">HP</span><span class="hp">' . $sHp . '</span>';
 
-        $sStatusDetail = '';
         $sEffect  = '<span class="power"></span>';
         $sEffect .= '<span class="shield"></span>';
         $sEffect .= '<span class="magic"></span>';
@@ -60,10 +62,18 @@
                         $sEffect = str_replace('"magic">', '"magic">M', $sEffect);
                         break;
                 }
+                $sStatusDetail .= <<<_eos_
+                    <div class="status_row"
+                        status_id="{$aStatusVal['id']}"
+                        turn_count="{$aStatusVal['turn']}"
+                        param1="{$aStatusVal['param1']}"
+                        param2="{$aStatusVal['param2']}"></div>
+
+_eos_;
             }
         }
         $aMonsterData[$pos] = <<<_eos_
-        <td id="{$pos}" monster_id="{$val['monster_id']}" game_card_id="{$iGameCardId}">
+        <td id="{$pos}" class="monster_space" monster_id="{$val['monster_id']}" card_id="{$val['card_id']}" game_card_id="{$iGameCardId}">
             <div class="pict">
                 <img src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
             </div>
@@ -86,12 +96,12 @@ _eos_;
         'my'    => 0,
         'enemy' => 0,
     );
-    foreach ($this->aCardInfo['hand'] as $val) {
+    foreach ($this->aCardInfo['hand'] as $iGameCardId => $val) {
         if ($aCardInfo['field_info']['turn'] == $val['owner']) {
             $aHandCount['my']++;
             $sMyHandHtml .= <<<_eos_
-    <div>
-        <img src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}" card_id="{$val['card_id']}"/>
+    <div class="hand_card" game_card_id="{$iGameCardId}" card_id="{$val['card_id']}">
+        <img src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
     </div>
 
 _eos_;
@@ -112,7 +122,7 @@ _eos_;
         );
     }
     $aMonsterData['enemyPlayersInfo'] = <<<_eos_
-        <td>
+        <td id="enemyPlayersInfo">
             <div class="num_info stone">
                 <img src="/images/stone.png" alt="stone" />：
                 <span>{$aStoneCount['enemy']}</span>
@@ -129,7 +139,7 @@ _eos_;
 
 _eos_;
     $aMonsterData['myPlayersInfo'] = <<<_eos_
-        <td>
+        <td id="myPlayersInfo">
             <div class="num_info stone">
                 <img src="/images/stone.png" alt="stone" />：
                 <span>{$aStoneCount['my']}</span>
@@ -145,14 +155,47 @@ _eos_;
         </td>
 
 _eos_;
+
+    $sDeckCards = '';
+    if (isset($aCardInfo['deck']) && $aCardInfo['deck'] != '') {
+        foreach ($aCardInfo['deck'] as $iGameCardId => $val) {
+            $sDeckCards .= <<<_eos_
+<div class="deck_card"
+    game_card_id="{$iGameCardId}"
+    card_id="{$val['card_id']}"
+    owner="{$val['owner']}" ></div>
+
+_eos_;
+        }
+    }
+
+    $sUsedCards = '';
+    if (isset($aCardInfo['used']) && $aCardInfo['used'] != '') {
+        foreach ($aCardInfo['used'] as $iGameCardId => $val) {
+            $sUsedCards .= <<<_eos_
+<div class="used_card"
+    game_card_id="{$iGameCardId}"
+    card_id="{$val['card_id']}"
+    owner="{$val['owner']}" ></div>
+
+_eos_;
+        }
+    }
 ?>
+<div class="hidden_cards_info" style="display:none;">
+<?php
+    echo $sDeckCards;
+    echo $sUsedCards;
+    echo '<div turn_num="' . $aCardInfo['field_info']['turn'] . '"></div>';
+?>
+</div>
 <table id="game_field">
 <?php
     foreach ($aPosId as $aLine) {
         echo "    <tr>\n";
         foreach ($aLine as $posId) {
             if (!isset($aMonsterData[$posId])) {
-                $aMonsterData[$posId] = "        <td id='{$posId}'><div class='pict'></div></td>\n";
+                $aMonsterData[$posId] = "        <td id='{$posId}' class='monster_space'><div class='pict'></div></td>\n";
             }
             echo $aMonsterData[$posId];
         }

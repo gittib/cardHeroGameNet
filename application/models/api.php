@@ -20,7 +20,8 @@ class model_Api {
                 'm_monster',
                 array(
                     'card_id',
-                    'max_lv'        => new Zend_Db_Expr('max(lv)'),
+                    'min_monster_id'    => new Zend_Db_Expr('min(monster_id)'),
+                    'max_lv'            => new Zend_Db_Expr('max(lv)'),
                 )
             )
             ->group(array(
@@ -43,6 +44,7 @@ class model_Api {
                 array('mon' => $subMon),
                 'mon.card_id = mc.card_id',
                 array(
+                    'monster_id' => 'min_monster_id',
                     'max_lv',
                 )
             )
@@ -60,6 +62,28 @@ class model_Api {
             $iCardId = (int)$val['card_id'];
             $aRet['m_card'][$iCardId] = $val;
         }
+
+        $sub = $this->_db->select()
+            ->from(
+                array('submon' => 'm_monster'),
+                array(
+                    'before_lv_monster_id'  => 'monster_id',
+                )
+            )
+            ->joinLeft(
+                array('monaft' => 'm_monster'),
+                implode(' and ', array(
+                    'monaft.card_id = submon.card_id',
+                    'monaft.monster_name = submon.monster_name',
+                    'monaft.lv = submon.lv + 1'
+                )),
+                array(
+                    'next_lv_monster_id'   => new Zend_Db_Expr('min(monaft.monster_id)'),
+                )
+            )
+            ->group(array(
+                'submon.monster_id',
+            ));
 
         $sqlMonster = $this->_db->select()
             ->from(
@@ -81,6 +105,13 @@ class model_Api {
                 'card.card_id = mon.card_id',
                 array(
                     'category',
+                )
+            )
+            ->joinLeft(
+                array('monaft' => $sub),
+                'monaft.before_lv_monster_id = mon.monster_id',
+                array(
+                    'next_lv_monster_id',
                 )
             )
             ->joinLeft(
@@ -123,6 +154,7 @@ class model_Api {
                     'lv'                => $val['lv'],
                     'max_hp'            => $val['max_hp'],
                     'image_file_name'   => $val['image_file_name'],
+                    'next_monster_id'   => $val['next_lv_monster_id'],
                     'attack'            => array(
                         'name'              => $val['attack_name'],
                         'power'             => $val['attack_power'],
@@ -133,7 +165,7 @@ class model_Api {
                         'name'              => $val['skill_name'],
                     ),
                     'arts'              => array(),
-                    'super'             => array(),
+                    'supers'            => array(),
                 );
             }
             if (isset($val['art_id']) && $val['art_id'] != '') {
@@ -183,10 +215,18 @@ class model_Api {
         $rslt = $this->_db->fetchAll($sqlSuper);
         foreach ($rslt as $val) {
             $iMonsterId = $val['before_monster_id'];
-            $aRet['m_monster'][$iMonsterId]['super'][] = array(
+            $aRet['m_monster'][$iMonsterId]['supers'][] = array(
                 'card_id'       => $val['after_card_id'],
                 'monster_id'    => $val['after_monster_id'],
             );
+        }
+
+        $sel = $this->_db->select()
+            ->from('m_magic');
+        $rslt = $this->_db->fetchAll($sel);
+        foreach ($rslt as $val) {
+            $iCardId = $val['card_id'];
+            $aRet['m_magic'][$iCardId] = $val;
         }
 
         $sel = $this->_db->select()
@@ -202,6 +242,30 @@ class model_Api {
             $iQueueId = (int)$val['id'];
             $aRet['m_queue'][$iQueueId] = $val;
         }
+
+        $sel = $this->_db->select()
+            ->from(
+                array('mq' => 'm_queue_priority'),
+                array(
+                    'id'    => 'pri_str_id',
+                    'pri'   => 'priority',
+                )
+            );
+        $rslt = $this->_db->fetchAll($sel);
+        foreach ($rslt as $val) {
+            $str = (int)$val['id'];
+            $aRet['queue_priority'][$str] = $val['pri'];
+        }
+
+        // $aRet['queue_priority'] = array(
+        //     'command'       , 0
+        //     'system'        , 1
+        //     'react_damage'  , 2
+        //     'reaction'      , 3
+        //     'follow_damage' , 4
+        //     'follow'        , 5
+        //     'same_time'     , 6
+        // );
 
         return $aRet;
     }
