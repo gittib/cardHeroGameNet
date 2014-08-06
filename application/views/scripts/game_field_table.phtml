@@ -2,7 +2,6 @@
 foreach ($this->aCardInfoArray as $aCardInfo) {
     
     $sExplain ='';
-    $sExplain ='あいうえおかきくけこさしすせそたちつてとあいうえおかきくけこさしすせそたちつてと';
 
     $aPosId = array(
         0 => array(
@@ -27,10 +26,29 @@ foreach ($this->aCardInfoArray as $aCardInfo) {
         ),
     );
     foreach ($aCardInfo['field'] as $val) {
+        switch ($val['position'])
+        {
+            case 'Front1':
+                $sPosCode = '(a)';
+                break;
+            case 'Front2':
+                $sPosCode = '(b)';
+                break;
+            case 'Back1':
+                $sPosCode = '(c)';
+                break;
+            case 'Back2':
+                $sPosCode = '(d)';
+                break;
+            case 'Master':
+                $sPosCode = '(m)';
+                break;
+        }
         if ($aCardInfo['field_info']['turn'] == $val['owner']) {
             $pos = 'my' . $val['position'];
         } else {
             $pos = 'enemy' . $val['position'];
+            $sPosCode = strtoupper($sPosCode);
         }
         if ($val['standby_flg']) {
             $sLv = '?';
@@ -46,26 +64,43 @@ foreach ($this->aCardInfoArray as $aCardInfo) {
         $sEffect .= '<span class="shield"></span>';
         $sEffect .= '<span class="magic"></span>';
         $sEffect .= '<span class="charge"></span>';
+        $aEffectFlags = array();
         if (isset($val['status']) && $val['status'] != '') {
             foreach ($val['status'] as $aStatusVal) {
                 switch ($aStatusVal['type']) {
                     case '!':
-                        $sEffect = str_replace('"charge">', '"charge">！', $sEffect);
+                        $aEffectFlags['charge'] = true;
                         break;
                     case 'P':
-                        $sEffect = str_replace('"power">', '"power">P', $sEffect);
+                        $aEffectFlags['power'] = true;
                         break;
                     case 'S':
-                        $sEffect = str_replace('"shield">', '"shield">S', $sEffect);
+                        $aEffectFlags['shield'] = true;
                         break;
                     case 'M':
-                        $sEffect = str_replace('"magic">', '"magic">M', $sEffect);
+                        $aEffectFlags['magic'] = true;
                         break;
                 }
+                $sExplain .= $aStatusVal['explain'] . "<br />\n";
             }
+        }
+        if (isset($aEffectFlags['charge'])) {
+            $sEffect = str_replace('"charge">', '"charge">！', $sEffect);
+        }
+        if (isset($aEffectFlags['power'])) {
+            $sEffect = str_replace('"power">', '"power">P', $sEffect);
+        }
+        if (isset($aEffectFlags['shield'])) {
+            $sEffect = str_replace('"shield">', '"shield">S', $sEffect);
+        }
+        if (isset($aEffectFlags['magic'])) {
+            $sEffect = str_replace('"magic">', '"magic">M', $sEffect);
         }
         $aMonsterData[$pos] = <<<_eos_
         <td pos_id="{$pos}" monster_id="{$val['monster_id']}">
+            <div class="pos_id">
+                <span class="mini-font">{$sPosCode}</span>
+            </div>
             <div class="pict">
                 <img src="/images/card/card.jpg" original-src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
             </div>

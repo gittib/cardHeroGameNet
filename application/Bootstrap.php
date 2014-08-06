@@ -64,14 +64,14 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         // ゲームフィールド一覧
         $route = new Zend_Controller_Router_Route_Regex(
-            'game/list(/\d+)?/?',
+            'game/list(/(\d+))?/?',
             array(
                 'controller'    =>  'game',
                 'action'        =>  'list',
-                1               =>  1,
+                2               =>  1,
             ),
             array(
-                1   => 'page_no',
+                2   => 'page_no',
             )
         );
         $router->addRoute('game_list', $route);
@@ -105,7 +105,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
                 1   => 'game_field_id',
             )
         );
-        $router->addRoute('game_list', $route);
+        $router->addRoute('game_play', $route);
 
         // カード詳細
         $route = new Zend_Controller_Router_Route_Regex(

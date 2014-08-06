@@ -46,20 +46,21 @@
         $sEffect .= '<span class="shield"></span>';
         $sEffect .= '<span class="magic"></span>';
         $sEffect .= '<span class="charge"></span>';
+        $aEffectFlags = array();
         if (isset($val['status']) && $val['status'] != '') {
             foreach ($val['status'] as $aStatusVal) {
                 switch ($aStatusVal['type']) {
                     case '!':
-                        $sEffect = str_replace('"charge">', '"charge">！', $sEffect);
+                        $aEffectFlags['charge'] = true;
                         break;
                     case 'P':
-                        $sEffect = str_replace('"power">', '"power">P', $sEffect);
+                        $aEffectFlags['power'] = true;
                         break;
                     case 'S':
-                        $sEffect = str_replace('"shield">', '"shield">S', $sEffect);
+                        $aEffectFlags['shield'] = true;
                         break;
                     case 'M':
-                        $sEffect = str_replace('"magic">', '"magic">M', $sEffect);
+                        $aEffectFlags['magic'] = true;
                         break;
                 }
                 $sStatusDetail .= <<<_eos_
@@ -71,6 +72,18 @@
 
 _eos_;
             }
+        }
+        if (isset($aEffectFlags['charge'])) {
+            $sEffect = str_replace('"charge">', '"charge">！', $sEffect);
+        }
+        if (isset($aEffectFlags['power'])) {
+            $sEffect = str_replace('"power">', '"power">P', $sEffect);
+        }
+        if (isset($aEffectFlags['shield'])) {
+            $sEffect = str_replace('"shield">', '"shield">S', $sEffect);
+        }
+        if (isset($aEffectFlags['magic'])) {
+            $sEffect = str_replace('"magic">', '"magic">M', $sEffect);
         }
         $aMonsterData[$pos] = <<<_eos_
         <td id="{$pos}" class="monster_space" monster_id="{$val['monster_id']}" card_id="{$val['card_id']}" game_card_id="{$iGameCardId}">
@@ -92,6 +105,7 @@ _eos_;
     }
 
     $sMyHandHtml = '';
+    $sHandCards = '';
     $aHandCount = array(
         'my'    => 0,
         'enemy' => 0,
@@ -108,6 +122,13 @@ _eos_;
         } else {
             $aHandCount['enemy']++;
         }
+        $sHandCards .= <<<_eos_
+<div class="hand_card"
+    game_card_id="{$iGameCardId}"
+    card_id="{$val['card_id']}"
+    owner="{$val['owner']}" ></div>
+
+_eos_;
     }
 
     if ($aCardInfo['field_info']['turn'] == 1) {
@@ -182,13 +203,6 @@ _eos_;
         }
     }
 ?>
-<div class="hidden_cards_info" style="display:none;">
-<?php
-    echo $sDeckCards;
-    echo $sUsedCards;
-    echo '<div turn_num="' . $aCardInfo['field_info']['turn'] . '"></div>';
-?>
-</div>
 <table id="game_field">
 <?php
     foreach ($aPosId as $aLine) {
@@ -227,5 +241,14 @@ _eos_;
     <div class="turn_end_button">
         ターンエンド
     </div>
+</div>
+
+<div class="hidden_cards_info" style="display:none;">
+<?php
+    echo $sHandCards;
+    echo $sDeckCards;
+    echo $sUsedCards;
+    echo '<div turn_num="' . $aCardInfo['field_info']['turn'] . '"></div>';
+?>
 </div>
 

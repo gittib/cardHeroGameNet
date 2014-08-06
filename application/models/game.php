@@ -10,12 +10,6 @@ class model_Game {
         $this->_nFieldsInPage = 10;
     }
 
-    public function getFieldList($nPage = 1)
-    {
-        // 工事中
-        //$sel = $this->_db->select()
-    }
-
     /**
      *  aOption:
      *      game_field_id   : 抽出対象フィールドのID
@@ -57,6 +51,7 @@ class model_Game {
             )
             ->where('game_field_id in(?)', $selField)
             ->order(array(
+                'upd_date desc',
                 'game_field_id',
             ))
             ;
@@ -128,6 +123,7 @@ class model_Game {
                 array('mstatus' => 'm_status'),
                 'mstatus.status_id = status.status_id',
                 array(
+                    'status_name',
                     'status_type',
                 )
             )
@@ -176,6 +172,10 @@ class model_Game {
                     'turn'      => $val['status_turn_count'],
                     'param1'    => $val['status_param1'],
                     'param2'    => $val['status_param2'],
+                    'explain'   => $this->_statusExplain(array(
+                        'turn'  => $aRet[$iGameFieldId]['turn'],
+                        'row'   => $val,
+                    )),
                 );
             }
         }
@@ -186,8 +186,130 @@ class model_Game {
         return $aRet;
     }
 
-    public function standby($deckId)
-    {
+    private function _statusExplain($aArgs) {
+        $row = $aArgs['row'];
+        $sPos = $this->_getPosCode($row['position'], ($row['owner'] == $aArgs['turn']));
+        switch ($row['status_id'])
+        {
+            case 101:
+            case 102:
+            case 103:
+            case 104:
+            case 105:
+            case 106:
+            case 107:
+            case 108:
+            case 109:
+            case 111:
+            case 112:
+            case 113:
+            case 114:
+            case 115:
+            case 116:
+            case 120:
+            case 121:
+            case 122:
+            case 123:
+            case 124:
+            case 129:
+                return "{$sPos}{$row['monster_name']}に{$row['status_name']}";
+            case 119:
+                if ($row['game_card_id'] < $row['status_param1']) {
+                    return '';
+                }
+            case 117:
+            case 118:
+            case 125:
+            case 126:
+                $sel = $this->_db->select()
+                    ->from(
+                        array('tgm' => 't_game_monster'),
+                        array(
+                            'position'
+                        )
+                    )
+                    ->join(
+                        array('tgc' => 't_game_cards'),
+                        'tgc.game_card_id = tgm.game_card_id',
+                        array(
+                            'owner',
+                        )
+                    )
+                    ->join(
+                        array('mm' => 'm_monster'),
+                        'mm.monster_id = tgm.monster_id',
+                        array(
+                            'monster_name',
+                        )
+                    )
+                    ->where('tgm.game_card_id = ?', $row['status_param1'])
+                    ;
+                $aOther = $this->_db->fetchRow($sel);
+                $sOtherPos = $this->_getPosCode($aOther['position'], ($aOther['owner'] == $aArgs['turn']));
+                switch ($row['status_id'])
+                {
+                    case 118:
+                        return "{$sPos}{$row['monster_name']}が{$sOtherPos}{$aOther['monster_name']}を挑発";
+                    case 119:
+                        return "{$sPos}{$row['monster_name']}と{$sOtherPos}{$aOther['monster_name']}にデスチェーン";
+                    case 125:
+                        return "{$sPos}{$row['monster_name']}から{$sOtherPos}{$aOther['monster_name']}へスケープゴート";
+                    default:
+                        return '';
+                }
+                break;
+            case 127:
+            case 128:
+                $sel = $this->_db->select()
+                    ->from(
+                        'm_monster',
+                        array(
+                            'monster_name',
+                        )
+                    )
+                    ->where('monster_id = ?', $row['status_param1'])
+                    ;
+                $sMonsterName = $this->_db->fetchOne($sel);
+                switch ($row['status_id'])
+                {
+                    case 127:
+                    case 128:
+                        return "{$sPos}{$sMonsterName}が{$row['monster_name']}に変身";
+                }
+                break;
+            default:
+                return '';
+        }
+    }
+
+    private function _getPosCode ($pos, $bMyField) {
+        switch ($pos)
+        {
+            case 'Front1':
+                $sPos = '(a)';
+                break;
+            case 'Front2':
+                $sPos = '(b)';
+                break;
+            case 'Back1':
+                $sPos = '(c)';
+                break;
+            case 'Back2':
+                $sPos = '(d)';
+                break;
+            case 'Master':
+                $sPos = '(m)';
+                break;
+            default:
+                $sPos = '';
+        }
+        if (!$bMyField) {
+            $sPos = strtoupper($sPos);
+        }
+        return $sPos;
+    }
+
+    public function standby($deckId) {
         $aUserInfo = Common::checkLogin();
         $userId = -1;
         if (isset($aUserInfo) && $aUserInfo != '') {
