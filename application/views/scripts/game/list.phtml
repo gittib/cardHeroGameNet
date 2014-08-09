@@ -1,5 +1,54 @@
 <?php
-echo $this->render('game_field_table.phtml');
+$nPages = (int)(($this->nFields + 9) / 10);
+$nDispLinkRange = 3;
+
+$sPageLinkTag = "<div class='page_link'>\n";
+if ($this->nPage > $nDispLinkRange+1) {
+    $sPageLinkTag .= <<<_eos_
+    <span><a href="/game/list/">1</a>...</span>
+
+_eos_;
+}
+
+for ($i = $this->nPage - $nDispLinkRange ; $i <= $this->nPage + $nDispLinkRange ; $i++) {
+    if ($i < 1) {
+        continue;
+    } else if ($i > $nPages) {
+        break;
+    }
+    if ($i == $this->nPage) {
+        $sPageLinkText = $i;
+    } else {
+        $sPageLinkText = "<a href='/game/list/{$i}/'>{$i}</a>";
+    }
+    $sPageLinkTag .= "<span>{$sPageLinkText}</span>\n";
+}
+
+if ($this->nPage < $nPages - ($nDispLinkRange+1)) {
+    $sPageLinkTag .= <<<_eos_
+    <span>...<a href="/game/list/{$nPages}/">{$nPages}</a></span>
+
+_eos_;
+}
+$sPageLinkTag .= "</div>\n";
+
+
 if (empty($this->aCardInfoArray)) {
     echo '<div class="no-fields">まだフィールドが投稿されていません。</div>' . "\n";
+} else {
+    echo $sPageLinkTag;
+    foreach ($this->aCardInfoArray as $aCardInfo) {
+        $this->aCardInfoInField = $aCardInfo;
+        $sLinkTitle = "フィールドID:{$aCardInfo['field_info']['game_field_id']}({$aCardInfo['field_info']['upd_date']})";
+        echo <<<_eos_
+<div class="game_field_info">
+    <div class="field_title">
+        <a href="/game/field/{$aCardInfo['field_info']['game_field_id']}/">{$sLinkTitle}</a>
+    </div>
+    {$this->render('game_field_table.phtml')}
+</div>
+
+_eos_;
+    }
+    echo $sPageLinkTag;
 }

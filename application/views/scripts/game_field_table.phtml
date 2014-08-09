@@ -1,6 +1,6 @@
 <?php
-foreach ($this->aCardInfoArray as $aCardInfo) {
-    
+    $aCardInfo = $this->aCardInfoInField;
+
     $sExplain ='';
 
     $aPosId = array(
@@ -46,9 +46,9 @@ foreach ($this->aCardInfoArray as $aCardInfo) {
         }
         if ($aCardInfo['field_info']['turn'] == $val['owner']) {
             $pos = 'my' . $val['position'];
+            $sPosCode = strtoupper($sPosCode);
         } else {
             $pos = 'enemy' . $val['position'];
-            $sPosCode = strtoupper($sPosCode);
         }
         if ($val['standby_flg']) {
             $sLv = '?';
@@ -179,7 +179,7 @@ _eos_;
 _eos_;
 
 echo <<<_eos_
-<div href="/game/field/{$aCardInfo['field_info']['game_field_id']}/" class="game_row">
+<div class="game_row">
     <table class="game_field">
 
 _eos_;
@@ -204,4 +204,4 @@ foreach ($aPosId as $i => $aLine) {
 </div>
 
 _eos_;
-}
+

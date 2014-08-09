@@ -6,6 +6,19 @@ $sTitle = '';
 if (isSet($this->layout()->title)) {
     $sTitle = $this->layout()->title . ' - ';
 }
+
+// canonical
+$sCanonical = '';
+if (isSet($this->layout()->canonical)) {
+    $sCanonical = "<link rel='canonical' href='{$this->layout()->canonical}' />";
+}
+
+// noindex
+$sNoIndex = '';
+if (isSet($this->layout()->noindex)) {
+    $sNoIndex = '<meta name="robots" content="noindex,nofollow" />';
+}
+
 // stylesheet
 $sStylesheet = '';
 if (isSet($this->layout()->stylesheet)) {
@@ -61,6 +74,8 @@ _eos_;
 <title><?php echo $sTitle; ?>カードヒーロー＠スマホ</title>
 <meta name="keywords" content="カードヒーロー,スマホ" />
 <meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1,minimum-scale=1" />
+<?php echo $sNoIndex; ?>
+<?php echo $sCanonical; ?>
 <link rel="stylesheet" type="text/css" href="/css/common.css" media="all" />
 <link rel="stylesheet" type="text/css" href="/css/header.css" media="all" />
 <?php echo $sStylesheet; ?>

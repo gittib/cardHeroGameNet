@@ -5,10 +5,24 @@ body {
 .mini-font {
   font-size: 6px; }
 
+.page_link {
+  text-align: right;
+  margin-top: 1em;
+  margin-right: 5px; }
+  .page_link span {
+    margin-right: 15px; }
+
+.field_title {
+  background-color: #FFFFFF;
+  margin-top: 15px;
+  border: 2px solid;
+  border-bottom: none; }
+
 .game_row {
   background-color: #FFFFFF;
   border: 1px solid;
-  margin: 15px 0; }
+  margin: 0;
+  margin-bottom: 15px; }
   .game_row div.field-title div {
     border: 1px solid;
     padding: 1px; }

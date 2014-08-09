@@ -11,14 +11,41 @@ class model_Game {
     }
 
     /**
-     *  aOption:
+     *  @param aOption:
+     *      game_field_id   : 抽出対象フィールドのID
+     *      open_flg        : t_game_fieldのopen_flgを指定
+     */
+    public function getFieldCount($aOption = array())
+    {
+        $selFieldCnt = $this->_db->select()
+            ->from(
+                't_game_field',
+                array(
+                    'game_fields'   => new Zend_Db_Expr("count(game_field_id)"),
+                )
+            );
+        if (isset($aOption['game_field_id']) && $aOption['game_field_id'] != '') {
+            $selFieldCnt->where('t_game_field.game_field_id in(?)', $aOption['game_field_id']);
+        }
+        if (isset($aOption['open_flg']) && $aOption['open_flg'] != '') {
+            $selFieldCnt->where('t_game_field.open_flg = ?', $aOption['open_flg']);
+        }
+        return $this->_db->fetchOne($selFieldCnt);
+    }
+
+    /**
+     *  @param aOption:
      *      game_field_id   : 抽出対象フィールドのID
      *      page_no         : ページング用ページ番号を指定
      *      open_flg        : t_game_fieldのopen_flgを指定
      *      allow_no_field  : フィールドが抽出できなくても例外を投げない
+     *
+     *  @return array フィールド詳細の配列
      */
     public function getFieldDetail($aOption = array())
     {
+        $aRet = array();
+
         $selField = $this->_db->select()
             ->from(
                 't_game_field',
@@ -44,12 +71,22 @@ class model_Game {
                 array('field' => 't_game_field'),
                 array(
                     'game_field_id',
+                    'field_id_path',
                     'turn',
                     'stone1',
                     'stone2',
+                    'upd_date' => new Zend_Db_Expr("to_char(field.upd_date,'yyyy/mm/dd HH24:MI:SS')"),
                 )
             )
-            ->where('game_field_id in(?)', $selField)
+            ->joinLeft(
+                array('first' => 't_game_field'),
+                "to_char(first.game_field_id, '999999') = regexp_replace(field.field_id_path, '-.*$', '')",
+                array(
+                    'first_field_id'    => 'game_field_id',
+                    'start_date'        => new Zend_Db_Expr("to_char(first.upd_date,'yyyy/mm/dd HH24:MI:SS')"),
+                )
+            )
+            ->where('field.game_field_id in(?)', $selField)
             ->order(array(
                 'upd_date desc',
                 'game_field_id',
@@ -60,7 +97,6 @@ class model_Game {
             throw new Zend_Controller_Action_Exception('Field data not found', 404);
         }
 
-        $aRet = array();
         foreach ($rslt as $val) {
             $iGameFieldId = $val['game_field_id'];
             $aRet[$iGameFieldId] = array(

@@ -36,6 +36,7 @@ class GameController extends Zend_Controller_Action
         $this->_javascript[] = '/js/game_list.js';
         $this->_javascript[] = '/js/img_delay_load.js';
         $this->_layout->title = 'ゲーム開始';
+        $this->_layout->noindex = true;
         $iPage = $request->getParam('page_no');
         $ret = $modelDeck->getDeckList($iPage);
 
@@ -54,7 +55,8 @@ class GameController extends Zend_Controller_Action
         }
         $this->_stylesheet[] = '/css/game_field.css';
         $this->_javascript[] = '/js/game_field.js';
-        $this->_layout->title = 'ゲームフィールド';
+        $this->_layout->title = 'ゲーム開始';
+        $this->_layout->noindex = true;
 
         $this->_getModel();
 
@@ -79,13 +81,14 @@ class GameController extends Zend_Controller_Action
         $this->_stylesheet[] = '/css/game_receive.css';
         $this->_javascript[] = '/js/img_delay_load.js';
         $this->_layout->title = 'ゲーム開始';
+        $this->_layout->noindex = true;
 
         $aCardInfoArray = $this->_model->getFieldDetail(array(
             'game_field_id' => $nGameFieldId,
             'open_flg'      => 1,
         ));
         $aDeckList = $modelDeck->getDeckList($iPage);
-        $this->view->assign('aCardInfoArray', $aCardInfoArray);
+        $this->view->assign('aCardInfoInField', reset($aCardInfoArray));
         $this->view->assign('aDeckList', $aDeckList);
         $this->view->assign('bGameStart', true);
         $this->view->assign('sDispMessage', '使用するデッキを選んでください。');
@@ -102,6 +105,7 @@ class GameController extends Zend_Controller_Action
         $this->_javascript[] = '/js/master_data.js';
         $this->_javascript[] = '/js/game_field.js';
         $this->_layout->title = 'ゲームフィールド';
+        //$this->_layout->description = 'スマホでカードヒーローが遊べます。';
 
         $aSelectCond = array(
             'game_field_id' => $nGameFieldId,
@@ -123,14 +127,22 @@ class GameController extends Zend_Controller_Action
         $this->_stylesheet[] = '/css/game_list.css';
         $this->_javascript[] = '/js/game_list.js';
         $this->_javascript[] = '/js/img_delay_load.js';
-        $this->_layout->title = 'ゲームフィールド一覧';
-        $iPage = $request->getParam('page_no');
+        $this->_layout->title       = 'ゲームフィールド一覧';
+        $this->_layout->canonical   = '/game/list/';
+        $this->_layout->description = 'カードヒーローを実際に遊んで、1ターン分の結果を投稿できます。投稿されたフィールドに返信する形で遊ぶこともできます。';
+        $nPage = $request->getParam('page_no');
         $aCardInfoArray = $this->_model->getFieldDetail(array(
-            'page_no'           => $iPage,
+            'page_no'           => $nPage,
             'open_flg'          => 1,
             'allow_no_field'    => 1,
         ));
+        $nFields = $this->_model->getFieldCount(array(
+            'page_no'           => $nPage,
+            'open_flg'          => 1,
+        ));
         $this->view->assign('aCardInfoArray', $aCardInfoArray);
+        $this->view->assign('nFields', $nFields);
+        $this->view->assign('nPage', $nPage);
     }
 
     private function _getModel() {

@@ -236,6 +236,121 @@ function startingProc()
  */
 function updateField()
 {
+    try {
+        var nHand = {
+            'my'    : 0,
+            'enemy' : 0,
+        };
+        var sMyHandHtml = '';
+        $.each(g_field_data.cards, function (i, val) {
+            switch (val.pos_category)
+            {
+                case 'field':
+                    if (typeof val.next_game_card_id != undefined) {
+                        // 進化元は進化先が上に重なってるので非表示
+                        break;
+                    }
+                    var sImgSrc = '/images/card/' + g_master_data.m_monster[val.monster_id].image_file_name;
+                    var sImgAlt = g_master_data.m_monster[val.monster_id].monster_name;
+                    var sLv = g_master_data.m_monster[val.monster_id].lv;
+                    var sLvHp  = '<span class="mini-font">LV</span><span class="lv">' + sLv + '</span>';
+                    sLvHp += '<span class="mini-font">HP</span><span class="hp">' + val.hp + '</span>';
+                    var aEffectFlags = {
+                        power   : false,
+                        shield  : false,
+                        magic   : false,
+                        charge  : false,
+                    };
+                    $.each(val.status, function (sid, aStatus) {
+                        switch (sid)
+                        {
+                            case 101:
+                            case 102:
+                            case 103:
+                            case 104:
+                            case 105:
+                            case 130:
+                                aEffectFlags.power = true;
+                                break;
+                            case 106:
+                            case 107:
+                            case 108:
+                            case 109:
+                                aEffectFlags.shield = true;
+                                break;
+                            case 110:
+                            case 111:
+                            case 112:
+                            case 113:
+                            case 114:
+                            case 115:
+                            case 116:
+                            case 117:
+                            case 118:
+                            case 119:
+                            case 120:
+                            case 121:
+                            case 122:
+                            case 123:
+                            case 124:
+                            case 125:
+                            case 126:
+                            case 127:
+                            case 128:
+                            case 129:
+                                aEffectFlags.magic = true;
+                                break;
+                            case 100:
+                                aEffectFlags.charge = true;
+                                break;
+                        }
+                    });
+                    var sStatusEffect = '';
+                    if (aEffectFlags.power) {
+                        sStatusEffect .= '<span class="power">P</span>';
+                    }
+                    if (aEffectFlags.shield) {
+                        sStatusEffect .= '<span class="shield">S</span>';
+                    }
+                    if (aEffectFlags.magic) {
+                        sStatusEffect .= '<span class="magic">M</span>';
+                    }
+                    if (aEffectFlags.charge) {
+                        sStatusEffect .= '<span class="charge">！</span>';
+                    }
+                    $('#game_field td#' + val.pos_id).html(
+                        '<div class="pict">' +
+                            '<img src="' + sImgSrc + '" alt="' + sImgAlt + '"/>' +
+                        '</div>' +
+                        '<div class="param">' +
+                            sLvHp +
+                        '</div>' +
+                        '<div class="param">' +
+                            sStatusEffect +
+                        '</div>'
+                    );
+                    break;
+                case 'hand':
+                    var sImgSrc = '/images/card/' + g_master_data.m_card[val.card_id].image_file_name;
+                    var sImgAlt = g_master_data.m_card[val.card_id].card_name;
+                    nHand[val.owner]++;
+                    if (val.owner == 'my') {
+                        sMyHandHtml +=
+                        '<div class="hand_card">' +
+                            '<img src="' + sImgSrc + '" alt="' + sImgAlt + '"/>' +
+                        '</div>';
+                    }
+                    break;
+            }
+        });
+        $('#hand_card').html(sHandCards);
+        $('#myPlayersInfo    .stone span').txt(g_field_data.my_stone);
+        $('#myPlayersInfo    .hand  span').txt(nHand['my']);
+        $('#enemyPlayersInfo .stone span').txt(g_field_data.enemy_stone);
+        $('#enemyPlayersInfo .hand  span').txt(nHand['enemy']);
+    } catch (e) {
+        throw e;
+    }
 }
 
 /**
@@ -246,172 +361,129 @@ function updateField()
  */
 function execQueue(aArgs)
 {
+    execQueueUnit(aArgs.resolve_all);
+}
+
+function execQueueUnit(bRecursive)
+{
     var act = g_field_data.actions;
     var all_resolved = false;
-    while (!all_resolved) {
-        all_resolved = true;
-        var exec_act = null;
+    all_resolved = true;
+    var exec_act = null;
 
-        for (var i = 0 ; i < act.length ; i++) {
-            if (act[i].resolved_flg) {
+    for (var i = 0 ; i < act.length ; i++) {
+        if (act[i].resolved_flg) {
+            continue;
+        }
+        all_resolved = false;
+        if (exec_act == null || act[i].priority > exec_act.priority) {
+            exec_act = act[i];
+        }
+    }
+    if (all_resolved) {
+        return;
+    }
+    exec_act.failure_flg  = false;
+    exec_act.resolved_flg = true;
+    var bMoveQueueResolved = false;
+    var bEffectQueueResolved = false;
+    var backupFieldWhileSingleActionProcessing = {};
+    $.extend(true, backupFieldWhileSingleActionProcessing, g_field_data);
+    try {
+        for (var i = 0 ; i < exec_act.queue.length ; i++) {
+            var q = exec_act.queue[i];
+            if (!q) {
                 continue;
             }
-            all_resolved = false;
-            if (exec_act == null || act[i].priority > exec_act.priority) {
-                exec_act = act[i];
-            }
-        }
-        if (all_resolved) {
-            break;
-        }
-        exec_act.failure_flg  = false;
-        exec_act.resolved_flg = true;
-        var bMoveQueueResolved = false;
-        var bEffectQueueResolved = false;
-        var backupFieldWhileSingleActionProcessing = {};
-        $.extend(true, backupFieldWhileSingleActionProcessing, g_field_data);
-        try {
-            for (var i = 0 ; i < exec_act.queue.length ; i++) {
-                var q = exec_act.queue[i];
-                if (!q) {
-                    continue;
-                }
-                q.failure_flg = true;
-                var backupFieldWhileSingleQueueProcessing = {};
-                $.extend(true, backupFieldWhileSingleQueueProcessing, g_field_data);
-                try {
-                    switch (q.queue_type_id)
-                    {
-                        case 1000:
-                            // jsでやることは特に無い希ガス
-                            break;
-                        case 1001:
-                            var actorMon = g_field_data.cards[exec_act.actor_id];
-                            var aMonsterData = g_master_data.m_monster[actorMon.monster_id];
-                            var pow = aMonsterData.attack.power;
-                            if (actorMon.status[100]) {
-                                pow++;
-                            }
-                            pow = calcPow(exec_act.actor_id, q.target_id, pow);
-                            if (pow > 0) {
-                                var targetMon = g_field_data.cards[q.target_id];
-                                targetMon.hp -= pow;
-                            }
-                            damageReaction({
-                                actorId     : exec_act.actor_id,
-                                targetId    : q.target_id,
-                                damage      : pow,
-                            });
-                            break;
-                        case 1002:
-                            break;
-                        case 1003:
-                            break;
-                        case 1004:
-                            if (g_field_data.cards[q.target_id].pos_id == 'myMaster') {
-                                g_field_data.my_stone += q.param1;
-                                if (g_field_data.my_stone < 0) {
-                                    throw 'minus_stone';
-                                }
-                            } else if (g_field_data.cards[q.target_id].pos_id == 'myMaster') {
-                                g_field_data.enemy_stone += q.param1;
-                                if (g_field_data.enemy_stone < 0) {
-                                    throw 'minus_stone';
-                                }
-                            }
-                            break;
-                        case 1005:
-                            var pow = calcPow(exec_act.actor_id, q.target_id, q.param1);
-                            if (0 < pow) {
-                                var targetMon = g_field_data.cards[q.target_id];
-                                targetMon.hp -= pow;
-                            }
-                            damageReaction({
-                                actorId     : exec_act.actor_id,
-                                targetId    : q.target_id,
-                                damage      : pow,
-                            });
-                            break;
-                        case 1006:
-                            var dam = calcDam(exec_act.actor_id, q.target_id, q.param1);
-                            if (0 < dam) {
-                                var targetMon = g_field_data.cards[q.target_id];
-                                targetMon.hp -= dam;
-                            }
-                            damageReaction({
-                                actorId     : exec_act.actor_id,
-                                targetId    : q.target_id,
-                                damage      : pow,
-                            });
-                            break;
-                        case 1007:
-                            if (0 < q.param1) {
-                                var targetMon = g_field_data.cards[q.target_id];
-                                var iMaxHP = getMaxHP(targetMon);
-                                targetMon.hp += q.param1;
-                                if (iMaxHP < targetMon.hp) {
-                                    targetMon.hp = iMaxHP;
-                                }
-                                healReaction({
-                                    actor_id    : exec_act.actor_id,
-                                    target_id   : q.target_id,
-                                    heal        : q.param1,
-                                });
-                            }
-                            break;
-                        case 1008:
+            q.failure_flg = true;
+            var backupFieldWhileSingleQueueProcessing = {};
+            $.extend(true, backupFieldWhileSingleQueueProcessing, g_field_data);
+            try {
+                switch (q.queue_type_id)
+                {
+                    case 1000:
+                        turnEndProc();
+                        break;
+                    case 1001:
+                        var actorMon = g_field_data.cards[exec_act.actor_id];
+                        var aMonsterData = g_master_data.m_monster[actorMon.monster_id];
+                        var pow = aMonsterData.attack.power;
+                        if (actorMon.status[100]) {
+                            pow++;
+                        }
+                        pow = calcPow(exec_act.actor_id, q.target_id, pow);
+                        if (pow > 0) {
                             var targetMon = g_field_data.cards[q.target_id];
-                            $.each(g_field_data.cards, function(ii, vv) {
-                                if (vv.pos_category != 'field' || !vv.pos_id || vv.pos_id != targetMon.pos_id) {
-                                    return true;
-                                }
-                                var iSortNo = 1;
-                                $.each(g_field_data.cards, function(i, val) {
-                                    if (val.pos_category == 'used') {
-                                        if (iSortNo <= val.sort_no) {
-                                            iSortNo = val.sort_no + 1;
-                                        }
-                                    }
-                                });
-                                vv.pos_category  = 'used';
-                                vv.sort_no       = iSortNo;
-                            });
-                            removeMonsterInfoOnField(q.target_id);
-                            break;
-                        case 1009:
-                        case 1011:
-                        case 1015:
-                            g_field_data.cards[q.target_id].pos_category = 'hand';
-                            removeMonsterInfoOnField(q.target_id);
-                            break;
-                        case 1010:
-                            var targetMon = g_field_data.cards[q.target_id];
-                            targetMon.standby_flg = false;
-                            wakeupReaction({
-                                actor_id        : exec_act.actor_id,
-                                target_id       : q.target_id,
-                                system_flg      : (exec_act.priority == 'system'),
-                            });
-                            break;
-                        case 1012:
-                            break;
-                        case 1013:
-                            var iGameCardId = getGameCardId({
-                                pos_category    : 'field',
-                                pos_id          : q.param1,
-                            });
-                            if (iGameCardId) {
-                                throw 'no_target';
+                            targetMon.hp -= pow;
+                        }
+                        damageReaction({
+                            actorId     : exec_act.actor_id,
+                            targetId    : q.target_id,
+                            damage      : pow,
+                        });
+                        break;
+                    case 1002:
+                        break;
+                    case 1003:
+                        break;
+                    case 1004:
+                        if (g_field_data.cards[q.target_id].pos_id == 'myMaster') {
+                            g_field_data.my_stone += q.param1;
+                            if (g_field_data.my_stone < 0) {
+                                throw 'minus_stone';
                             }
-                            loadMonsterInfo({
-                                game_card_id    : q.target_id,
-                                pos_id          : q.param1,
-                                standby_flg     : true,
-                                check_blank     : true,
-                                reset_hp        : true,
+                        } else if (g_field_data.cards[q.target_id].pos_id == 'enemyMaster') {
+                            g_field_data.enemy_stone += q.param1;
+                            if (g_field_data.enemy_stone < 0) {
+                                throw 'minus_stone';
+                            }
+                        }
+                        break;
+                    case 1005:
+                        var pow = calcPow(exec_act.actor_id, q.target_id, q.param1);
+                        if (0 < pow) {
+                            var targetMon = g_field_data.cards[q.target_id];
+                            targetMon.hp -= pow;
+                        }
+                        damageReaction({
+                            actorId     : exec_act.actor_id,
+                            targetId    : q.target_id,
+                            damage      : pow,
+                        });
+                        break;
+                    case 1006:
+                        var dam = calcDam(exec_act.actor_id, q.target_id, q.param1);
+                        if (0 < dam) {
+                            var targetMon = g_field_data.cards[q.target_id];
+                            targetMon.hp -= dam;
+                        }
+                        damageReaction({
+                            actorId     : exec_act.actor_id,
+                            targetId    : q.target_id,
+                            damage      : pow,
+                        });
+                        break;
+                    case 1007:
+                        if (0 < q.param1) {
+                            var targetMon = g_field_data.cards[q.target_id];
+                            var iMaxHP = getMaxHP(targetMon);
+                            targetMon.hp += q.param1;
+                            if (iMaxHP < targetMon.hp) {
+                                targetMon.hp = iMaxHP;
+                            }
+                            healReaction({
+                                actor_id    : exec_act.actor_id,
+                                target_id   : q.target_id,
+                                heal        : q.param1,
                             });
-                            break;
-                        case 1014:
+                        }
+                        break;
+                    case 1008:
+                        var targetMon = g_field_data.cards[q.target_id];
+                        $.each(g_field_data.cards, function(ii, vv) {
+                            if (vv.pos_category != 'field' || !vv.pos_id || vv.pos_id != targetMon.pos_id) {
+                                return true;
+                            }
                             var iSortNo = 1;
                             $.each(g_field_data.cards, function(i, val) {
                                 if (val.pos_category == 'used') {
@@ -420,238 +492,283 @@ function execQueue(aArgs)
                                     }
                                 }
                             });
-                            var target = g_field_data.cards[q.target_id];
-                            target.pos_category = 'used';
-                            target.sort_no = iSortNo;
-                            break;
-                        case 1016:
+                            vv.pos_category  = 'used';
+                            vv.sort_no       = iSortNo;
+                        });
+                        removeMonsterInfoOnField(q.target_id);
+                        break;
+                    case 1009:
+                    case 1011:
+                    case 1015:
+                        g_field_data.cards[q.target_id].pos_category = 'hand';
+                        removeMonsterInfoOnField(q.target_id);
+                        break;
+                    case 1010:
+                        var targetMon = g_field_data.cards[q.target_id];
+                        targetMon.standby_flg = false;
+                        wakeupReaction({
+                            actor_id        : exec_act.actor_id,
+                            target_id       : q.target_id,
+                            system_flg      : (exec_act.priority == 'system'),
+                        });
+                        break;
+                    case 1012:
+                        break;
+                    case 1013:
+                        var iGameCardId = getGameCardId({
+                            pos_category    : 'field',
+                            pos_id          : q.param1,
+                        });
+                        if (iGameCardId) {
+                            throw 'no_target';
+                        }
+                        loadMonsterInfo({
+                            game_card_id    : q.target_id,
+                            pos_id          : q.param1,
+                            standby_flg     : true,
+                            check_blank     : true,
+                            reset_hp        : true,
+                        });
+                        break;
+                    case 1014:
+                        var iSortNo = 1;
+                        $.each(g_field_data.cards, function(i, val) {
+                            if (val.pos_category == 'used') {
+                                if (iSortNo <= val.sort_no) {
+                                    iSortNo = val.sort_no + 1;
+                                }
+                            }
+                        });
+                        var target = g_field_data.cards[q.target_id];
+                        target.pos_category = 'used';
+                        target.sort_no = iSortNo;
+                        break;
+                    case 1016:
+                        loadMonsterInfo({
+                            game_card_id    : mon.game_card_id,
+                            check_blank     : true,
+                            reset_hp        : true,
+                        });
+                        break;
+                    case 1017:
+                        g_field_data.cards[q.target_id].lvup_standby += q.param1;
+                        break;
+                    case 1018:
+                        g_field_data.cards[q.target_id].lvup_standby = 0;
+                        break;
+                    case 1019:
+                        var mon = g_field_data.cards[q.target_id];
+                        var aMonsterData = g_master_data.m_monster[mon.monster_id];
+                        if (q.param1) {
+                            // q.param1にgame_card_idが入ってたらスーパーに進化
+                            var aSuperInHand = g_field_data.cards[q.param1];
+                            isValidSuper({
+                                before_game_card_id : q.target_id,
+                                after_game_card_id  : q.param1,
+                            });
+                            mon.super_game_card_id = q.param1;
+                            aSuperInHand.monster_id = g_master_data.m_card[aSuperInHand.card_id].monster_id;
                             loadMonsterInfo({
-                                game_card_id    : mon.game_card_id,
-                                check_blank     : true,
+                                game_card_id    : aSuperInHand.game_card_id,
+                                pos_id          : mon.pos_id,
                                 reset_hp        : true,
                             });
-                            break;
-                        case 1017:
-                            g_field_data.cards[q.target_id].lvup_standby += q.param1;
-                            break;
-                        case 1018:
-                            g_field_data.cards[q.target_id].lvup_standby = 0;
-                            break;
-                        case 1019:
-                            var mon = g_field_data.cards[q.target_id];
-                            var aMonsterData = g_master_data.m_monster[mon.monster_id];
-                            if (q.param1) {
-                                // q.param1にgame_card_idが入ってたらスーパーに進化
-                                var aSuperInHand = g_field_data.cards[q.param1];
-                                isValidSuper({
-                                    before_game_card_id : q.target_id,
-                                    after_game_card_id  : q.param1,
-                                });
-                                mon.super_game_card_id = q.param1;
-                                aSuperInHand.monster_id = g_master_data.m_card[aSuperInHand.card_id].monster_id;
-                                loadMonsterInfo({
-                                    game_card_id    : aSuperInHand.game_card_id,
-                                    pos_id          : mon.pos_id,
-                                    reset_hp        : true,
-                                });
-                            } else if (aMonsterData.next_monster_id) {
-                                // next_monster_idに値が入ってる場合は1枚のカードで完結するレベルアップ
+                        } else if (aMonsterData.next_monster_id) {
+                            // next_monster_idに値が入ってる場合は1枚のカードで完結するレベルアップ
+                            loadMonsterInfo({
+                                game_card_id    : mon.game_card_id,
+                                monster_id      : aMonsterData.next_monster_id,
+                                reset_hp        : true,
+                            });
+                        } else {
+                            throw 'argument_error';
+                        }
+                        break;
+                    case 1020:
+                        var mon = g_field_data.cards[q.target_id];
+                        var bResolved = false;
+                        $.each(g_master_data.m_monster, function(i, val) {
+                            if (val.next_monster_id == mon.monster_id) {
                                 loadMonsterInfo({
                                     game_card_id    : mon.game_card_id,
-                                    monster_id      : aMonsterData.next_monster_id,
+                                    monster_id      : val.monster_id,
                                     reset_hp        : true,
                                 });
-                            } else {
-                                throw 'argument_error';
+                                bResolved = true;
+                                return false;
                             }
-                            break;
-                        case 1020:
-                            var mon = g_field_data.cards[q.target_id];
-                            var bResolved = false;
-                            $.each(g_master_data.m_monster, function(i, val) {
-                                if (val.next_monster_id == mon.monster_id) {
-                                    loadMonsterInfo({
-                                        game_card_id    : mon.game_card_id,
-                                        monster_id      : val.monster_id,
-                                        reset_hp        : true,
-                                    });
-                                    bResolved = true;
-                                    return false;
-                                }
-                            });
-                            if (!bResolved) {
-                                // 普通にレベルダウンできない場合はスーパーから退化
-                                g_field_data.cards[mon.before_game_card_id].next_game_card_id = null;
-                                g_field_data.actions.push({
-                                    actor_id        : exec_act.game_card_id,
-                                    log_message     : 'レベルダウンによって墓地送り',
-                                    resolved_flg    : 0,
-                                    priority        : g_master_data.queue_priority['system'],
-                                    queue : [
-                                        {
-                                            queue_type_id   : 1008,
-                                            target_id       : mon.game_card_id,
-                                        }
-                                    ],
-                                });
-                            }
-                            break;
-                        case 1021:
-                            loadMonsterInfo({
-                                game_card_id    : q.target_id,
-                                monster_id      : q.param1,
-                                reset_hp        : q.param2,
-                            });
-                            break;
-                        case 1022:
-                            g_field_data.cards[q.target_id].pos_id = q.param1;
-                            bMoveQueueResolved = true;
-                            break;
-                        case 1023:
-                            var aCard = g_field_data.cards[q.target_id];
-                            if (!q.param1) {
-                                q.param1 = 1;
-                            }
-                            if (aCard.owner == 'my') {
-                                var iGameCardId = getGameCardId({
-                                    pos_category    : 'field',
-                                    pos_id          : 'myMaster',
-                                });
-                                g_field_data.cards[iGameCardId].hp -= q.param1;
-                            } else if (aCard.owner == 'enemy') {
-                                var iGameCardId = getGameCardId({
-                                    pos_category    : 'field',
-                                    pos_id          : 'enemyMaster',
-                                });
-                                g_field_data.cards[iGameCardId].hp -= q.param1;
-                            }
-                            break;
-                        case 1024:
-                            var mon = g_field_data.cards[q.target_id];
-                            var aMonsterData = g_master_data.m_monster[mon.monster_id];
-                            var nMaxAct = 1;
-                            if (mon.pos_id == 'myMaster' || mon.pos_id == 'enemyMaster') {
-                                nMaxAct = 10000;
-                            }
-                            else if (aMonsterData.skill.id == 4) {
-                                nMaxAct = 2;
-                            } else if (aMonsterData.skill.id == 5) {
-                                nMaxAct = 3;
-                            }
-                            if (nMaxAct <= mon.act_count) {
-                                throw 'already_acted';
-                            }
-                            mon.act_count++;
-                            actedReaction({
-                                actor_id    : exec_act.actor_id,
-                                target_id   : q.target_id,
-                            });
-                            break;
-                        case 1025:
-                            var mon = g_field_data.cards[q.target_id];
-                            mon.status[100] = {
-                                status_id   : 100,
-                                turn_count  : 1000,
-                            };
-                            break;
-                        case 1026:
-                            var mon = g_field_data.cards[q.target_id];
-                            var iTurnCount = 2;
-                            switch (q.param1)
-                            {
-                                case 100:
-                                case 105:
-                                case 112:
-                                case 122:
-                                case 123:
-                                case 124:
-                                case 128:
-                                    iTurnCount = 1000;
-                                    break;
-                            }
-                            mon.status[q.param1] = {
-                                status_id   : q.param1,
-                                turn_count  : iTurnCount,
-                            };
-                            switch (q.param1)
-                            {
-                                case 127:
-                                    mon.status[q.param1].param1 = mon.monster_id;
-                                    mon.monster_id = q.param2;
-                                    break;
-                                case 128:
-                                    mon.status[q.param1].param1 = mon.monster_id;
-                                    mon.monster_id = g_master_data.m_card[2].monster_id;
-                                    break;
-                            }
-                            break;
-                        case 1027:
-                            var mon = g_field_data.cards[q.target_id];
-                            if (!mon.status[q.param1]) {
-                                throw 'no_target';
-                            }
-                            switch (q.param1)
-                            {
-                                case 116:
-                                    if (q.param2) {
-                                        g_field_data.actions.push({
-                                            actor_id        : mon.game_card_id,
-                                            log_message     : 'ダークホールにより消滅',
-                                            resolved_flg    : 0,
-                                            priority        : g_master_data.queue_priority['follow'],
-                                            queue : [
-                                                {
-                                                    queue_type_id   : 1008,
-                                                    target_id       : mon.game_card_id,
-                                                }
-                                            ],
-                                        });
+                        });
+                        if (!bResolved) {
+                            // 普通にレベルダウンできない場合はスーパーから退化
+                            g_field_data.cards[mon.before_game_card_id].next_game_card_id = null;
+                            g_field_data.actions.push({
+                                actor_id        : exec_act.game_card_id,
+                                log_message     : 'レベルダウンによって墓地送り',
+                                resolved_flg    : 0,
+                                priority        : g_master_data.queue_priority['system'],
+                                queue : [
+                                    {
+                                        queue_type_id   : 1008,
+                                        target_id       : mon.game_card_id,
                                     }
-                                    break;
-                                case 127:
-                                case 128:
-                                    mon.monster_id = mon.status[q.param1].param1;
-                                    break;
-                            }
-                            delete mon.status[q.param1];
-                            break;
-                        case 1028:
-                            g_field_data.cards[q.target_id].skill_disable_flg = 1;
-                            break;
-                        case 1029:
-                            g_field_data.cards[q.target_id].skill_disable_flg = 0;
-                            break;
-                        default:
-                            throw 'invalid_queue_type';
-                            break;
-                    }
-                    delete q.failure_flg;
-                    if (!q.cost_flg) {
-                        bEffectQueueResolved = true;
-                    }
-                } catch (e) {
-                    if (q.cost_flg) {
-                        throw e;
-                    }
-                    g_field_data = backupFieldWhileSingleQueueProcessing;
+                                ],
+                            });
+                        }
+                        break;
+                    case 1021:
+                        loadMonsterInfo({
+                            game_card_id    : q.target_id,
+                            monster_id      : q.param1,
+                            reset_hp        : q.param2,
+                        });
+                        break;
+                    case 1022:
+                        g_field_data.cards[q.target_id].pos_id = q.param1;
+                        bMoveQueueResolved = true;
+                        break;
+                    case 1023:
+                        var aCard = g_field_data.cards[q.target_id];
+                        if (!q.param1) {
+                            q.param1 = 1;
+                        }
+                        if (aCard.owner == 'my') {
+                            var iGameCardId = getGameCardId({
+                                pos_category    : 'field',
+                                pos_id          : 'myMaster',
+                            });
+                            g_field_data.cards[iGameCardId].hp -= q.param1;
+                        } else if (aCard.owner == 'enemy') {
+                            var iGameCardId = getGameCardId({
+                                pos_category    : 'field',
+                                pos_id          : 'enemyMaster',
+                            });
+                            g_field_data.cards[iGameCardId].hp -= q.param1;
+                        }
+                        break;
+                    case 1024:
+                        var mon = g_field_data.cards[q.target_id];
+                        var aMonsterData = g_master_data.m_monster[mon.monster_id];
+                        var nMaxAct = 1;
+                        if (mon.pos_id == 'myMaster' || mon.pos_id == 'enemyMaster') {
+                            nMaxAct = 10000;
+                        }
+                        else if (aMonsterData.skill.id == 4) {
+                            nMaxAct = 2;
+                        } else if (aMonsterData.skill.id == 5) {
+                            nMaxAct = 3;
+                        }
+                        if (nMaxAct <= mon.act_count) {
+                            throw 'already_acted';
+                        }
+                        mon.act_count++;
+                        actedReaction({
+                            actor_id    : exec_act.actor_id,
+                            target_id   : q.target_id,
+                        });
+                        break;
+                    case 1025:
+                        var mon = g_field_data.cards[q.target_id];
+                        mon.status[100] = {
+                            status_id   : 100,
+                            turn_count  : 1000,
+                        };
+                        break;
+                    case 1026:
+                        var mon = g_field_data.cards[q.target_id];
+                        var iTurnCount = 2;
+                        switch (q.param1)
+                        {
+                            case 100:
+                            case 105:
+                            case 112:
+                            case 122:
+                            case 123:
+                            case 124:
+                            case 128:
+                                iTurnCount = 1000;
+                                break;
+                        }
+                        mon.status[q.param1] = {
+                            status_id   : q.param1,
+                            turn_count  : iTurnCount,
+                        };
+                        switch (q.param1)
+                        {
+                            case 127:
+                                mon.status[q.param1].param1 = mon.monster_id;
+                                mon.monster_id = q.param2;
+                                break;
+                            case 128:
+                                mon.status[q.param1].param1 = mon.monster_id;
+                                mon.monster_id = g_master_data.m_card[2].monster_id;
+                                break;
+                        }
+                        break;
+                    case 1027:
+                        var mon = g_field_data.cards[q.target_id];
+                        if (!mon.status[q.param1]) {
+                            throw 'no_target';
+                        }
+                        switch (q.param1)
+                        {
+                            case 116:
+                                if (q.param2) {
+                                    g_field_data.actions.push({
+                                        actor_id        : mon.game_card_id,
+                                        log_message     : 'ダークホールにより消滅',
+                                        resolved_flg    : 0,
+                                        priority        : g_master_data.queue_priority['follow'],
+                                        queue : [
+                                            {
+                                                queue_type_id   : 1008,
+                                                target_id       : mon.game_card_id,
+                                            }
+                                        ],
+                                    });
+                                }
+                                break;
+                            case 127:
+                            case 128:
+                                mon.monster_id = mon.status[q.param1].param1;
+                                break;
+                        }
+                        delete mon.status[q.param1];
+                        break;
+                    case 1028:
+                        g_field_data.cards[q.target_id].skill_disable_flg = 1;
+                        break;
+                    case 1029:
+                        g_field_data.cards[q.target_id].skill_disable_flg = 0;
+                        break;
+                    default:
+                        throw 'invalid_queue_type';
+                        break;
                 }
-            }
-            if (!bEffectQueueResolved) {
-                throw 'no_q_resolved';
-            }
-            if (bMoveQueueResolved) {
-                if (isDuplicateFieldPos()) {
-                    throw 'duplicate_field_pos';
+                delete q.failure_flg;
+                if (!q.cost_flg) {
+                    bEffectQueueResolved = true;
                 }
+            } catch (e) {
+                if (q.cost_flg) {
+                    throw e;
+                }
+                g_field_data = backupFieldWhileSingleQueueProcessing;
             }
-            delete exec_act.failure_flg;
-        } catch (e) {
-            g_field_data = backupFieldWhileSingleActionProcessing;
         }
-        if (!aArgs.resolve_all) {
-            return;
+        if (!bEffectQueueResolved) {
+            throw 'no_q_resolved';
         }
+        if (bMoveQueueResolved) {
+            if (isDuplicateFieldPos()) {
+                throw 'duplicate_field_pos';
+            }
+        }
+        delete exec_act.failure_flg;
+    } catch (e) {
+        g_field_data = backupFieldWhileSingleActionProcessing;
     }
+
+    // アニメーションを挟んで完了時のコールバックでexecQueueUnitを再帰呼び出し
 }
 
 function calcPow(actorId, targetId, pow)
@@ -868,6 +985,11 @@ function calcDam(actorId, targetId, dam)
         }
     }
     return dam;
+}
+
+function turnEndProc()
+{
+
 }
 
 /**
