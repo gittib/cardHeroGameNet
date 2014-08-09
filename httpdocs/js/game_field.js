@@ -82,7 +82,7 @@ function initField()
         g_field_data.cards[$(this).attr('game_card_id')] = {
             game_card_id    : Number($(this).attr('game_card_id')),
             card_id         : Number($(this).attr('card_id')),
-            owner           : $(this).attr('owner'),
+            owner           : sOwner,
             pos_category    : 'hand',
             sort_no         : iSortNo,
         };
@@ -99,7 +99,7 @@ function initField()
         g_field_data.cards[$(this).attr('game_card_id')] = {
             game_card_id    : Number($(this).attr('game_card_id')),
             card_id         : Number($(this).attr('card_id')),
-            owner           : $(this).attr('owner'),
+            owner           : sOwner,
             pos_category    : 'deck',
             sort_no         : iSortNo,
         };
@@ -116,7 +116,7 @@ function initField()
         g_field_data.cards[$(this).attr('game_card_id')] = {
             game_card_id    : Number($(this).attr('game_card_id')),
             card_id         : Number($(this).attr('card_id')),
-            owner           : $(this).attr('owner'),
+            owner           : sOwner,
             pos_category    : 'used',
             sort_no         : iSortNo,
         };
@@ -307,16 +307,16 @@ function updateField()
                     });
                     var sStatusEffect = '';
                     if (aEffectFlags.power) {
-                        sStatusEffect .= '<span class="power">P</span>';
+                        sStatusEffect += '<span class="power">P</span>';
                     }
                     if (aEffectFlags.shield) {
-                        sStatusEffect .= '<span class="shield">S</span>';
+                        sStatusEffect += '<span class="shield">S</span>';
                     }
                     if (aEffectFlags.magic) {
-                        sStatusEffect .= '<span class="magic">M</span>';
+                        sStatusEffect += '<span class="magic">M</span>';
                     }
                     if (aEffectFlags.charge) {
-                        sStatusEffect .= '<span class="charge">！</span>';
+                        sStatusEffect += '<span class="charge">！</span>';
                     }
                     $('#game_field td#' + val.pos_id).html(
                         '<div class="pict">' +
@@ -343,11 +343,11 @@ function updateField()
                     break;
             }
         });
-        $('#hand_card').html(sHandCards);
-        $('#myPlayersInfo    .stone span').txt(g_field_data.my_stone);
-        $('#myPlayersInfo    .hand  span').txt(nHand['my']);
-        $('#enemyPlayersInfo .stone span').txt(g_field_data.enemy_stone);
-        $('#enemyPlayersInfo .hand  span').txt(nHand['enemy']);
+        $('#hand_card').html(sMyHandHtml);
+        $('#myPlayersInfo    .stone span').text(g_field_data.my_stone);
+        $('#myPlayersInfo    .hand  span').text(nHand['my']);
+        $('#enemyPlayersInfo .stone span').text(g_field_data.enemy_stone);
+        $('#enemyPlayersInfo .hand  span').text(nHand['enemy']);
     } catch (e) {
         throw e;
     }
@@ -769,6 +769,12 @@ function execQueueUnit(bRecursive)
     }
 
     // アニメーションを挟んで完了時のコールバックでexecQueueUnitを再帰呼び出し
+    if (bRecursive) {
+        setTimeout( function () {
+            updateField();
+            execQueueUnit(true);
+        }, 1);
+    }
 }
 
 function calcPow(actorId, targetId, pow)
