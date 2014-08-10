@@ -15,7 +15,7 @@ var g_animations = [];
 $(function () {
     initField();
 
-    startingProc();
+    setTimeout(function () { startingProc(); }, 333);
 
     $(document).on('click', '#game_field td.monster_space', function () {
     });
@@ -827,6 +827,7 @@ function execAnimation (bRecursive)
     var iAnimationTime = 100;
     if (g_animations.length > 0) {
         var aArgs = g_animations.shift();
+        console.log(aArgs);
         $(aArgs.target_dom).animate(
             aArgs.param,
             iAnimationTime,
