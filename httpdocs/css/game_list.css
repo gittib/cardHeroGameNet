@@ -6,9 +6,13 @@ body {
   font-size: 6px; }
 
 .page_link {
+  border-top: 1px solid;
+  border-bottom: 1px solid;
+  border-color: #AA00FF;
   text-align: right;
-  margin-top: 1em;
-  margin-right: 5px; }
+  margin-top: 2em;
+  padding-right: 5px;
+  background-color: #f7f7ff; }
   .page_link span {
     margin-right: 15px; }
 

@@ -269,5 +269,42 @@ class model_Api {
 
         return $aRet;
     }
+
+    public function getUrl() {
+        $aUrls = array(
+            '/',
+            '/card/list/',
+            '/deck/list/',
+            '/game/',
+            '/game/list/',
+        );
+
+        $sel = $this->_db->select()
+            ->from(
+                't_game_field',
+                array(
+                    'game_field_id',
+                )
+            )
+            ->where('open_flg = 1');
+        $rslt = $this->_db->fetchCol($sel);
+        foreach ($rslt as $val) {
+            $aUrls[] = '/game/field/' . $val . '/';
+        }
+
+        $sel = $this->_db->select()
+            ->from(
+                'm_card',
+                array(
+                    'card_id',
+                )
+            );
+        $rslt = $this->_db->fetchCol($sel);
+        foreach ($rslt as $val) {
+            $aUrls[] = '/card/detail/' . $val . '/';
+        }
+
+        return $aUrls;
+    }
 }
 

@@ -43,6 +43,12 @@ class ApiController extends Zend_Controller_Action
         $this->view->assign('json', $json);
     }
 
+    public function sitemapAction()
+    {
+        $this->_helper->layout->disableLayout();
+        $this->view->assign('aUrls', $this->_model->getUrl());
+    }
+
     private function _getModel()
     {
         require_once APPLICATION_PATH . '/models/api.php';

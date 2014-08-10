@@ -9,6 +9,8 @@ var g_field_data    = {
     actions         : [],
 };
 
+var g_animations = [];
+
 
 $(function () {
     initField();
@@ -427,17 +429,34 @@ function execQueueUnit(bRecursive)
                     case 1003:
                         break;
                     case 1004:
-                        if (g_field_data.cards[q.target_id].pos_id == 'myMaster') {
+                        var posId = g_field_data.cards[q.target_id].pos_id;
+                        if (posId == 'myMaster') {
                             g_field_data.my_stone += q.param1;
                             if (g_field_data.my_stone < 0) {
                                 throw 'minus_stone';
                             }
-                        } else if (g_field_data.cards[q.target_id].pos_id == 'enemyMaster') {
+                            posId = '#myPlayersInfo div.stone';
+                        } else if (posId == 'enemyMaster') {
                             g_field_data.enemy_stone += q.param1;
                             if (g_field_data.enemy_stone < 0) {
                                 throw 'minus_stone';
                             }
+                            posId = '#enemyPlayersInfo div.stone';
+                        } else {
+                            throw 'no_target';
                         }
+                        g_animations.push({
+                            target_dom  : posId,
+                            param       : {
+                                'opacity'   : 'hide',
+                            },
+                        });
+                        g_animations.push({
+                            target_dom  : posId,
+                            param       : {
+                                'opacity'   : 'show',
+                            },
+                        });
                         break;
                     case 1005:
                         var pow = calcPow(exec_act.actor_id, q.target_id, q.param1);
@@ -502,6 +521,35 @@ function execQueueUnit(bRecursive)
                     case 1015:
                         g_field_data.cards[q.target_id].pos_category = 'hand';
                         removeMonsterInfoOnField(q.target_id);
+                        if (g_field_data.cards[q.target_id].owner == 'my') {
+                            var posId = '#myPlayersInfo div.hand';
+                        } else {
+                            var posId = '#enemyPlayersInfo div.hand';
+                        }
+                        g_animations.push({
+                            target_dom  : posId,
+                            param       : {
+                                'opacity'   : 'hide',
+                            },
+                        });
+                        g_animations.push({
+                            target_dom  : posId,
+                            param       : {
+                                'opacity'   : 'show',
+                            },
+                        });
+                        g_animations.push({
+                            target_dom  : posId,
+                            param       : {
+                                'opacity'   : 'hide',
+                            },
+                        });
+                        g_animations.push({
+                            target_dom  : posId,
+                            param       : {
+                                'opacity'   : 'show',
+                            },
+                        });
                         break;
                     case 1010:
                         var targetMon = g_field_data.cards[q.target_id];
@@ -764,15 +812,35 @@ function execQueueUnit(bRecursive)
             }
         }
         delete exec_act.failure_flg;
+
+        // アニメーションを挟んで完了時のコールバックでexecQueueUnitを再帰呼び出し
+        setTimeout( function () {
+            execAnimation(bRecursive);
+        }, 1);
     } catch (e) {
         g_field_data = backupFieldWhileSingleActionProcessing;
     }
+}
 
-    // アニメーションを挟んで完了時のコールバックでexecQueueUnitを再帰呼び出し
-    if (bRecursive) {
+function execAnimation (bRecursive)
+{
+    var iAnimationTime = 100;
+    if (g_animations.length > 0) {
+        var aArgs = g_animations.shift();
+        $(aArgs.target_dom).animate(
+            aArgs.param,
+            iAnimationTime,
+            'linear',
+            function () {
+                execAnimation(bRecursive);
+            }
+        );
+    } else {
         setTimeout( function () {
             updateField();
-            execQueueUnit(true);
+            if (bRecursive) {
+                execQueueUnit(true);
+            }
         }, 1);
     }
 }

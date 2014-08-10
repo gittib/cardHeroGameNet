@@ -150,6 +150,17 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             )
         );
         $router->addRoute('build_js', $route);
+
+        // サイトマップXML
+        $route = new Zend_Controller_Router_Route_Regex(
+            'sitemap.xml',
+            array(
+                'controller'    =>  'api',
+                'action'        =>  'sitemap',
+            ),
+            array()
+        );
+        $router->addRoute('sitemap', $route);
     }
 }
 

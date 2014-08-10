@@ -36,7 +36,6 @@ class GameController extends Zend_Controller_Action
         $this->_javascript[] = '/js/game_list.js';
         $this->_javascript[] = '/js/img_delay_load.js';
         $this->_layout->title = 'ゲーム開始';
-        $this->_layout->noindex = true;
         $iPage = $request->getParam('page_no');
         $ret = $modelDeck->getDeckList($iPage);
 
