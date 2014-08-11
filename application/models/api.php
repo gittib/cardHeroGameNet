@@ -37,6 +37,7 @@ class model_Api {
                     'rare',
                     'category',
                     'image_file_name',
+                    'proposer',
                     'card_caption'      => 'caption',
                 )
             )

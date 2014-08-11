@@ -11,8 +11,12 @@ var g_field_data    = {
 
 var g_animations = [];
 
+var g_base_color = {
+    background  : '#fff',
+};
 
 $(function () {
+    initSetting();
     initField();
 
     setTimeout(function () { startingProc(); }, 333);
@@ -21,6 +25,45 @@ $(function () {
     });
 
     $(document).on('click', '#hand_card div.hand_card', function () {
+        var aCard = g_field_data.cards[$(this).attr('game_card_id')];
+        var aCardData = g_master_data.m_card[aCard.card_id];
+
+        $('.actor').removeClass('actor');
+        $(this).addClass('actor');
+        switch (aCardData.category)
+        {
+            case 'monster_front':
+            case 'monster_back':
+                break;
+            case 'magic':
+                break;
+            case 'super_front':
+            case 'super_back':
+                break;
+        }
+        var sImg        = '<img src="/images/card/' + aCardData.image_file_name + '" alt="' + aCardData.card_name + '" />';
+        var sProposer   = '';
+        if (aCardData.proposer) {
+            sProposer   = '<div class="proposer"> arranged by ' + aCardData.proposer + '</div>';
+        }
+        var sDtlLink    = '<a class="blank_link" target="_blank" href="/card/detail/' + aCardData.card_id + '/">詳細</a>';
+        var sHtml       =
+            '<div class="card_info_title clearfix">' +
+                '<div class="card_infomation">Card Infomation</div>' +
+                sProposer +
+            '</div>' +
+            '<div class="card_summary clearfix">' +
+                '<div class="card_image">' + sImg + '</div>' +
+                '<div class="card_name">' + aCardData.card_name + '</div>' +
+                '<div class="dtl_link">' + sDtlLink + '</div>' +
+            '</div>' +
+            '<div class="act_commands">' +
+                '<div class="command_row">' +
+                    '場に出す' +
+                '</div>' +
+            '</div>'
+        ;
+        $('#card_info_frame').html(sHtml);
     });
 });
 
@@ -123,6 +166,37 @@ function initField()
             sort_no         : iSortNo,
         };
         iSortNo++;
+    });
+}
+
+// localStorageから設定情報読み出し＆設定系domにイベント設置
+function initSetting()
+{
+    try {
+        var stor = localStorage.game_settings;
+        if (typeof stor == 'undefined') {
+            stor = '{}';
+            localStorage.setItem('game_settings', stor);
+        }
+        var param = JSON.parse(stor);
+        $('[name=animation_speed]').val([param.animation_speed]);
+    } catch (e) {
+        console.log(e);
+    }
+
+    $(document).on('click', 'input.toggle_setting', function () {
+        $('div.settings').toggle();
+        $('input.disp_button').toggle();
+    });
+
+    $(document).on('change', 'input[name=animation_speed]', function () {
+        try {
+            var param = JSON.parse(localStorage.game_settings);
+            param.animation_speed = $('input[name=animation_speed]:checked').val();
+            localStorage.setItem('game_settings', JSON.stringify(param));
+        } catch (e) {
+            console.log(e);
+        }
     });
 }
 
@@ -248,7 +322,7 @@ function updateField()
             switch (val.pos_category)
             {
                 case 'field':
-                    if (typeof val.next_game_card_id != undefined) {
+                    if (typeof val.next_game_card_id != 'undefined') {
                         // 進化元は進化先が上に重なってるので非表示
                         break;
                     }
@@ -338,7 +412,7 @@ function updateField()
                     nHand[val.owner]++;
                     if (val.owner == 'my') {
                         sMyHandHtml +=
-                        '<div class="hand_card">' +
+                        '<div class="hand_card" game_card_id="' + val.game_card_id + '">' +
                             '<img src="' + sImgSrc + '" alt="' + sImgAlt + '"/>' +
                         '</div>';
                     }
@@ -390,8 +464,39 @@ function execQueueUnit(bRecursive)
     var bMoveQueueResolved = false;
     var bEffectQueueResolved = false;
     var backupFieldWhileSingleActionProcessing = {};
+    var backupAnimationWhileSingleActionProcessing = {};
     $.extend(true, backupFieldWhileSingleActionProcessing, g_field_data);
+    $.extend(true, backupAnimationWhileSingleActionProcessing, g_animations);
     try {
+        if (typeof g_field_data.cards[exec_act.actor_id] != 'undefined') {
+            if (g_field_data.cards[exec_act.actor_id].pos_category == 'field') {
+                var sDom = '#' + g_field_data.cards[exec_act.actor_id].pos_id;
+                g_animations.push({
+                    target_dom  : sDom,
+                    animation_param : {
+                        'background-color'  : '#ee0',
+                    },
+                });
+                g_animations.push({
+                    target_dom  : sDom,
+                    animation_param : {
+                        'background-color'  : g_base_color.background,
+                    },
+                });
+                g_animations.push({
+                    target_dom  : sDom,
+                    animation_param : {
+                        'background-color'  : '#ee0',
+                    },
+                });
+                g_animations.push({
+                    target_dom  : sDom,
+                    animation_param : {
+                        'background-color'  : g_base_color.background,
+                    },
+                });
+            }
+        }
         for (var i = 0 ; i < exec_act.queue.length ; i++) {
             var q = exec_act.queue[i];
             if (!q) {
@@ -399,7 +504,9 @@ function execQueueUnit(bRecursive)
             }
             q.failure_flg = true;
             var backupFieldWhileSingleQueueProcessing = {};
+            var backupAnimationWhileSingleQueueProcessing = {};
             $.extend(true, backupFieldWhileSingleQueueProcessing, g_field_data);
+            $.extend(true, backupAnimationWhileSingleQueueProcessing, g_field_data);
             try {
                 switch (q.queue_type_id)
                 {
@@ -447,13 +554,13 @@ function execQueueUnit(bRecursive)
                         }
                         g_animations.push({
                             target_dom  : posId,
-                            param       : {
+                            animation_param : {
                                 'opacity'   : 'hide',
                             },
                         });
                         g_animations.push({
                             target_dom  : posId,
-                            param       : {
+                            animation_param : {
                                 'opacity'   : 'show',
                             },
                         });
@@ -528,25 +635,25 @@ function execQueueUnit(bRecursive)
                         }
                         g_animations.push({
                             target_dom  : posId,
-                            param       : {
+                            animation_param : {
                                 'opacity'   : 'hide',
                             },
                         });
                         g_animations.push({
                             target_dom  : posId,
-                            param       : {
+                            animation_param : {
                                 'opacity'   : 'show',
                             },
                         });
                         g_animations.push({
                             target_dom  : posId,
-                            param       : {
+                            animation_param : {
                                 'opacity'   : 'hide',
                             },
                         });
                         g_animations.push({
                             target_dom  : posId,
-                            param       : {
+                            animation_param : {
                                 'opacity'   : 'show',
                             },
                         });
@@ -801,6 +908,7 @@ function execQueueUnit(bRecursive)
                     throw e;
                 }
                 g_field_data = backupFieldWhileSingleQueueProcessing;
+                g_animations = backupAnimationWhileSingleQueueProcessing;
             }
         }
         if (!bEffectQueueResolved) {
@@ -819,23 +927,42 @@ function execQueueUnit(bRecursive)
         }, 1);
     } catch (e) {
         g_field_data = backupFieldWhileSingleActionProcessing;
+        g_animations = backupAnimationWhileSingleActionProcessing;
     }
 }
 
 function execAnimation (bRecursive)
 {
-    var iAnimationTime = 100;
+    try {
+        var param = JSON.parse(localStorage.game_settings);
+        var iAnimationTime = Number(param.animation_speed);
+        if (isNaN(iAnimationTime) || iAnimationTime <= 0) {
+            throw 'no_setting';
+        }
+    } catch (e) {
+        iAnimationTime = 100;
+    }
     if (g_animations.length > 0) {
         var aArgs = g_animations.shift();
-        console.log(aArgs);
-        $(aArgs.target_dom).animate(
-            aArgs.param,
-            iAnimationTime,
-            'linear',
-            function () {
+        if (typeof aArgs.css_param != 'undefined') {
+            $.each(aArgs.css_param, function (key, val) {
+                $(aArgs.target_dom).css(key, val);
+            });
+        }
+        if (typeof aArgs.animation_param != 'undefined') {
+            $(aArgs.target_dom).animate(
+                aArgs.animation_param,
+                iAnimationTime,
+                'linear',
+                function () {
+                    execAnimation(bRecursive);
+                }
+            );
+        } else {
+            setTimeout( function () {
                 execAnimation(bRecursive);
-            }
-        );
+            }, 1);
+        }
     } else {
         setTimeout( function () {
             updateField();
@@ -1364,7 +1491,7 @@ function wakeupReaction(aArgs)
                 bReactionPushed = true;
                 break;
             case 29:
-                if (typeof aArgs.system_flg == undefined) {
+                if (typeof aArgs.system_flg == 'undefined') {
                     throw 'argument_error';
                 }
                 if (!aArgs.system_flg) {

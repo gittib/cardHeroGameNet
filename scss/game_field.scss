@@ -74,7 +74,7 @@
 
     div {
         float: left;
-        width: 16%;
+        min-width: 53px;
         img {
             border: solid 1px;
             height: $img_size;
@@ -112,6 +112,14 @@ div.close_button {
 
         div.card_info_title {
             border-bottom: $border_style;
+
+            div {
+                float: left;
+            }
+
+            div.proposer {
+                float: right;
+            }
         }
 
         div.card_summary {
@@ -205,4 +213,29 @@ div.close_button {
         border-right-color:  $under_line_color;
         border-bottom-color: $under_line_color;
     }
+}
+
+$left_margin : 15px;
+
+.disp_button {
+    margin-left: $left_margin;
+}
+
+.settings {
+    display: none;
+    margin-left: $left_margin;
+
+    $spacing : 18px;
+
+    .setting_item {
+        margin-top:     $spacing;
+    }
+
+    .toggle_setting.last {
+        margin-top:     $spacing;
+    }
+}
+
+.hidden_cards_info {
+    display: none;
 }

@@ -44,7 +44,7 @@
   padding: 12px 0; }
   #hand_card div {
     float: left;
-    width: 16%; }
+    min-width: 53px; }
     #hand_card div img {
       border: solid 1px;
       height: 45px;
@@ -66,6 +66,10 @@ div.close_button {
   border: solid 2px; }
   #card_info #card_info_frame div.card_info_title {
     border-bottom: solid 2px; }
+    #card_info #card_info_frame div.card_info_title div {
+      float: left; }
+    #card_info #card_info_frame div.card_info_title div.proposer {
+      float: right; }
   #card_info #card_info_frame div.card_summary {
     min-height: 50px; }
     #card_info #card_info_frame div.card_summary div {
@@ -118,3 +122,17 @@ div.close_button {
     border-left-color: #ddddff;
     border-right-color: #000088;
     border-bottom-color: #000088; }
+
+.disp_button {
+  margin-left: 15px; }
+
+.settings {
+  display: none;
+  margin-left: 15px; }
+  .settings .setting_item {
+    margin-top: 18px; }
+  .settings .toggle_setting.last {
+    margin-top: 18px; }
+
+.hidden_cards_info {
+  display: none; }

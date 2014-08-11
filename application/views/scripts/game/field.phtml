@@ -242,8 +242,20 @@ _eos_;
         ターンエンド
     </div>
 </div>
+<input type="BUTTON" class="disp_button toggle_setting" value="設定" />
+<div class="settings">
+    <input type="BUTTON" class="toggle_setting" value="設定非表示" />
+    <div class="setting_item animation_speed">
+        <span>アニメーションスピード</span><br/>
+        <input type="RADIO" name="animation_speed" value="1"   />一瞬
+        <input type="RADIO" name="animation_speed" value="100" />速い
+        <input type="RADIO" name="animation_speed" value="300" />普通
+        <input type="RADIO" name="animation_speed" value="500" />遅い
+    </div>
+    <input type="BUTTON" class="toggle_setting last" value="設定非表示" />
+</div>
 
-<div class="hidden_cards_info" style="display:none;">
+<div class="hidden_cards_info">
 <?php
     echo $sHandCards;
     echo $sDeckCards;

@@ -6,6 +6,9 @@ $sTitle = '';
 if (isSet($this->layout()->title)) {
     $sTitle = $this->layout()->title . ' - ';
 }
+if (APPLICATION_ENV != 'production') {
+    $sTitle = '【DEV】' . $sTitle;
+}
 
 // canonical
 $sCanonical = '';
