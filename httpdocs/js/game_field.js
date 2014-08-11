@@ -2,11 +2,14 @@
 var g_master_data = master_data.getInfo();
 
 var g_field_data    = {
-    turn            : null,
-    my_stone        : 0,
-    enemy_stone     : 0,
-    cards           : {},
-    actions         : [],
+    turn        : null,
+    my_stone    : 0,
+    enemy_stone : 0,
+    cards       : {},
+    actions     : [],
+    actor       : {
+        game_card_id    : null,
+    }
 };
 
 var g_animations = [];
@@ -25,45 +28,12 @@ $(function () {
     });
 
     $(document).on('click', '#hand_card div.hand_card', function () {
-        var aCard = g_field_data.cards[$(this).attr('game_card_id')];
-        var aCardData = g_master_data.m_card[aCard.card_id];
+        g_field_data.actor.game_card_id = $(this).attr('game_card_id');
 
         $('.actor').removeClass('actor');
         $(this).addClass('actor');
-        switch (aCardData.category)
-        {
-            case 'monster_front':
-            case 'monster_back':
-                break;
-            case 'magic':
-                break;
-            case 'super_front':
-            case 'super_back':
-                break;
-        }
-        var sImg        = '<img src="/images/card/' + aCardData.image_file_name + '" alt="' + aCardData.card_name + '" />';
-        var sProposer   = '';
-        if (aCardData.proposer) {
-            sProposer   = '<div class="proposer"> arranged by ' + aCardData.proposer + '</div>';
-        }
-        var sDtlLink    = '<a class="blank_link" target="_blank" href="/card/detail/' + aCardData.card_id + '/">詳細</a>';
-        var sHtml       =
-            '<div class="card_info_title clearfix">' +
-                '<div class="card_infomation">Card Infomation</div>' +
-                sProposer +
-            '</div>' +
-            '<div class="card_summary clearfix">' +
-                '<div class="card_image">' + sImg + '</div>' +
-                '<div class="card_name">' + aCardData.card_name + '</div>' +
-                '<div class="dtl_link">' + sDtlLink + '</div>' +
-            '</div>' +
-            '<div class="act_commands">' +
-                '<div class="command_row">' +
-                    '場に出す' +
-                '</div>' +
-            '</div>'
-        ;
-        $('#card_info_frame').html(sHtml);
+
+        updateActorDom();
     });
 });
 
@@ -424,9 +394,54 @@ function updateField()
         $('#myPlayersInfo    .hand  span').text(nHand['my']);
         $('#enemyPlayersInfo .stone span').text(g_field_data.enemy_stone);
         $('#enemyPlayersInfo .hand  span').text(nHand['enemy']);
+
+        updateActorDom();
     } catch (e) {
         throw e;
     }
+}
+
+function updateActorDom()
+{
+    try {
+        var aCard = g_field_data.cards[g_field_data.actor.game_card_id];
+        var aCardData = g_master_data.m_card[aCard.card_id];
+
+        switch (aCardData.category)
+        {
+            case 'monster_front':
+            case 'monster_back':
+                break;
+            case 'magic':
+                break;
+            case 'super_front':
+            case 'super_back':
+                break;
+        }
+        var sImg        = '<img src="/images/card/' + aCardData.image_file_name + '" alt="' + aCardData.card_name + '" />';
+        var sProposer   = '';
+        if (aCardData.proposer) {
+            sProposer   = '<div class="proposer"> arranged by ' + aCardData.proposer + '</div>';
+        }
+        var sDtlLink    = '<a class="blank_link" target="_blank" href="/card/detail/' + aCardData.card_id + '/">詳細</a>';
+        var sHtml       =
+            '<div class="card_info_title clearfix">' +
+                '<div class="card_infomation">Card Infomation</div>' +
+                sProposer +
+            '</div>' +
+            '<div class="card_summary clearfix">' +
+                '<div class="card_image">' + sImg + '</div>' +
+                '<div class="card_name">' + aCardData.card_name + '</div>' +
+                '<div class="dtl_link">' + sDtlLink + '</div>' +
+            '</div>' +
+            '<div class="act_commands">' +
+                '<div class="command_row">' +
+                    '場に出す' +
+                '</div>' +
+            '</div>'
+        ;
+        $('#card_info_frame').html(sHtml);
+    } catch (e) {}
 }
 
 /**
