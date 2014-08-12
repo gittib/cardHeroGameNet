@@ -53,6 +53,7 @@ class model_Api {
                 array('mag' => 'm_magic'),
                 'mag.card_id = mc.card_id',
                 array(
+                    'magic_id',
                     'stone',
                 )
             )

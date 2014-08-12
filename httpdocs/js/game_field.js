@@ -9,10 +9,9 @@ var g_field_data    = {
     actions     : [],
     actor       : {
         game_card_id    : null,
-    }
+    },
+    animations  : [],
 };
-
-var g_animations = [];
 
 var g_base_color = {
     background  : '#fff',
@@ -25,14 +24,48 @@ $(function () {
     setTimeout(function () { startingProc(); }, 333);
 
     $(document).on('click', '#game_field td.monster_space', function () {
+        var oDom = $(this);
+        g_field_data.actor.game_card_id = oDom.attr('game_card_id');
+
+        $('.actor').removeClass('actor');
+        oDom.addClass('actor');
+
+        updateActorDom();
     });
 
     $(document).on('click', '#hand_card div.hand_card', function () {
-        g_field_data.actor.game_card_id = $(this).attr('game_card_id');
+        var oDom = $(this);
+        g_field_data.actor.game_card_id = oDom.attr('game_card_id');
 
         $('.actor').removeClass('actor');
-        $(this).addClass('actor');
+        oDom.addClass('actor');
 
+        updateActorDom();
+    });
+
+    $(document).on('click', '.command_row', function () {
+        var oDom = $(this);
+        var aCard = g_field_data.cards[g_field_data.actor.game_card_id];
+        switch (aCard.pos_category)
+        {
+            case 'field':
+                g_field_data.actor.art_id = oDom.attr('art_id');
+                g_field_data.actor.act_type = 'skill';
+                if (typeof g_field_data.actor.art_id == 'undefined') {
+                    g_field_data.actor.art_id = null;
+                    g_field_data.actor.act_type = 'attack';
+                }
+                break;
+            case 'hand':
+                break;
+        }
+        $('.command_row').removeClass('selected_act');
+        oDom.addClass('selected_act');
+    });
+
+    $(document).on('click', '#buttons_frame div.cancel_button', function () {
+        g_field_data.actor = {game_card_id : null};
+        $('.actor').removeClass('actor');
         updateActorDom();
     });
 });
@@ -407,24 +440,155 @@ function updateActorDom()
         var aCard = g_field_data.cards[g_field_data.actor.game_card_id];
         var aCardData = g_master_data.m_card[aCard.card_id];
 
-        switch (aCardData.category)
-        {
-            case 'monster_front':
-            case 'monster_back':
-                break;
-            case 'magic':
-                break;
-            case 'super_front':
-            case 'super_back':
-                break;
-        }
         var sImg        = '<img src="/images/card/' + aCardData.image_file_name + '" alt="' + aCardData.card_name + '" />';
         var sProposer   = '';
         if (aCardData.proposer) {
             sProposer   = '<div class="proposer"> arranged by ' + aCardData.proposer + '</div>';
         }
         var sDtlLink    = '<a class="blank_link" target="_blank" href="/card/detail/' + aCardData.card_id + '/">詳細</a>';
-        var sHtml       =
+        var sCommandsHtml = '';
+
+        if (aCard.pos_category == 'hand') {
+            switch (aCardData.card_name)
+            {
+                case 'ローテーション':
+                    g_field_data.actor.act_type = 'magic';
+                    sCommandsHtml =
+                        '<div class="command_row" param="1">' +
+                            '時計回り' +
+                        '</div>' +
+                        '<div class="command_row" param="2">' +
+                            '反時計回り' +
+                        '</div>';
+                    break;
+                case 'カードサーチ':
+                    g_field_data.actor.act_type = 'magic';
+                    sCommandsHtml =
+                        '<div class="command_row" param="front">' +
+                            '前衛モンスターをサーチ' +
+                        '</div>' +
+                        '<div class="command_row" param="back">' +
+                            '後衛モンスターをサーチ' +
+                        '</div>' +
+                        '<div class="command_row" param="magic">' +
+                            'マジックをサーチ' +
+                        '</div>' +
+                        '<div class="command_row" param="super">' +
+                            'スーパーをサーチ' +
+                        '</div>';
+                    break;
+                default:
+                    switch (aCardData.category)
+                    {
+                        case 'monster_front':
+                        case 'monster_back':
+                            g_field_data.actor.act_type = 'into_field';
+                            sCommandsHtml =
+                                '<div class="command_row selected_act">' +
+                                    '場に出す' +
+                                '</div>';
+                            break;
+                        case 'magic':
+                            g_field_data.actor.act_type = 'magic';
+                            sCommandsHtml =
+                                '<div class="command_row selected_act">' +
+                                    '発動' +
+                                '</div>';
+                            break;
+                        case 'super_front':
+                        case 'super_back':
+                            break;
+                    }
+                    break;
+            }
+        } else if (aCard.pos_category == 'field') {
+            var mon = g_master_data.m_monster[aCard.monster_id];
+
+            // アタック
+            var sCost = '';
+            var iStone = parseInt(mon.attack.stone);
+            if (typeof aCard.status != 'undefined') {
+                if (typeof aCard.status[123] != 'undefined') {
+                    iStone += 2;
+                }
+            }
+            if (iStone > 0) {
+                sCost =
+                    ' ' +
+                    '<span class="stone_cost">' +
+                        iStone + 'コ' +
+                    '</span>';
+            }
+            sCommandsHtml =
+                '<div class="command_row" act_type="attack">' +
+                    mon.attack.name +
+                    '<div class="num_info">' +
+                        mon.attack.power + 'P' +
+                        sCost +
+                    '</div>' +
+                '</div>';
+
+            // 特技
+            $.each(mon.arts, function(i, val) {
+                var sPower = '';
+                var iStone = val.stone;
+                if (val.damage_type_flg == 'P' || val.damage_type_flg == 'D') {
+                    sPower = val.power + '' + val.damage_type_flg;
+                }
+                if (typeof aCard.status != 'undefined') {
+                    if (typeof aCard.status[120] != 'undefined' && aCard.status[120].param1 == i) {
+                        iStone *= 2;
+                    }
+                    if (typeof aCard.status[123] != 'undefined') {
+                        iStone += 2;
+                    }
+                }
+                sCommandsHtml +=
+                    '<div class="command_row" art_id="' + val.id + '" act_type="skill">' +
+                        val.name +
+                        '<div class="num_info">' +
+                            sPower +
+                            ' ' +
+                            '<span class="stone_cost">' +
+                                iStone + 'コ' +
+                            '</span>' +
+                        '</div>' +
+                    '</div>';
+            });
+
+            // 移動、逃げる
+            if (aCardData.category != 'master') {
+                var sCost = '';
+                var iStone = 0;
+                if (typeof aCard.status != 'undefined') {
+                    if (typeof aCard.status[123] != 'undefined') {
+                        iStone += 2;
+                    }
+                }
+                if (iStone > 0) {
+                    sCost =
+                        ' ' +
+                        '<span class="stone_cost">' +
+                            iStone + 'コ' +
+                        '</span>';
+                }
+                sCommandsHtml +=
+                    '<div class="command_row" act_type="move">' +
+                        '移動' +
+                        '<div class="num_info">' +
+                            sCost +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="command_row" act_type="escape">' +
+                        '逃げる' +
+                        '<div class="num_info">' +
+                            sCost +
+                        '</div>' +
+                    '</div>';
+            }
+        }
+
+        $('#card_info_frame').html(
             '<div class="card_info_title clearfix">' +
                 '<div class="card_infomation">Card Infomation</div>' +
                 sProposer +
@@ -435,13 +599,25 @@ function updateActorDom()
                 '<div class="dtl_link">' + sDtlLink + '</div>' +
             '</div>' +
             '<div class="act_commands">' +
-                '<div class="command_row">' +
-                    '場に出す' +
-                '</div>' +
+                sCommandsHtml +
             '</div>'
-        ;
-        $('#card_info_frame').html(sHtml);
-    } catch (e) {}
+        );
+    } catch (e) {
+        console.log(e);
+        // 選択情報を正しく処理できなかった場合、選択されてないと見なす
+        $('#card_info_frame').html(
+            '<div class="card_info_title">' +
+                'Card Infomation' +
+            '</div>' +
+            '<div class="card_summary clearfix">' +
+                '<div class="card_image"></div>' +
+                '<div class="card_name"></div>' +
+                '<div class="dtl_link"></div>' +
+            '</div>' +
+            '<div class="act_commands">' +
+            '</div>'
+        );
+    }
 }
 
 /**
@@ -452,11 +628,7 @@ function updateActorDom()
  */
 function execQueue(aArgs)
 {
-    execQueueUnit(aArgs.resolve_all);
-}
-
-function execQueueUnit(bRecursive)
-{
+    var bRecursive = aArgs.resolve_all;
     var act = g_field_data.actions;
     var all_resolved = false;
     all_resolved = true;
@@ -479,32 +651,30 @@ function execQueueUnit(bRecursive)
     var bMoveQueueResolved = false;
     var bEffectQueueResolved = false;
     var backupFieldWhileSingleActionProcessing = {};
-    var backupAnimationWhileSingleActionProcessing = {};
     $.extend(true, backupFieldWhileSingleActionProcessing, g_field_data);
-    $.extend(true, backupAnimationWhileSingleActionProcessing, g_animations);
     try {
         if (typeof g_field_data.cards[exec_act.actor_id] != 'undefined') {
             if (g_field_data.cards[exec_act.actor_id].pos_category == 'field') {
                 var sDom = '#' + g_field_data.cards[exec_act.actor_id].pos_id;
-                g_animations.push({
+                g_field_data.animations.push({
                     target_dom  : sDom,
                     animation_param : {
                         'background-color'  : '#ee0',
                     },
                 });
-                g_animations.push({
+                g_field_data.animations.push({
                     target_dom  : sDom,
                     animation_param : {
                         'background-color'  : g_base_color.background,
                     },
                 });
-                g_animations.push({
+                g_field_data.animations.push({
                     target_dom  : sDom,
                     animation_param : {
                         'background-color'  : '#ee0',
                     },
                 });
-                g_animations.push({
+                g_field_data.animations.push({
                     target_dom  : sDom,
                     animation_param : {
                         'background-color'  : g_base_color.background,
@@ -519,9 +689,7 @@ function execQueueUnit(bRecursive)
             }
             q.failure_flg = true;
             var backupFieldWhileSingleQueueProcessing = {};
-            var backupAnimationWhileSingleQueueProcessing = {};
             $.extend(true, backupFieldWhileSingleQueueProcessing, g_field_data);
-            $.extend(true, backupAnimationWhileSingleQueueProcessing, g_field_data);
             try {
                 switch (q.queue_type_id)
                 {
@@ -567,13 +735,13 @@ function execQueueUnit(bRecursive)
                         } else {
                             throw 'no_target';
                         }
-                        g_animations.push({
+                        g_field_data.animations.push({
                             target_dom  : posId,
                             animation_param : {
                                 'opacity'   : 'hide',
                             },
                         });
-                        g_animations.push({
+                        g_field_data.animations.push({
                             target_dom  : posId,
                             animation_param : {
                                 'opacity'   : 'show',
@@ -648,25 +816,25 @@ function execQueueUnit(bRecursive)
                         } else {
                             var posId = '#enemyPlayersInfo div.hand';
                         }
-                        g_animations.push({
+                        g_field_data.animations.push({
                             target_dom  : posId,
                             animation_param : {
                                 'opacity'   : 'hide',
                             },
                         });
-                        g_animations.push({
+                        g_field_data.animations.push({
                             target_dom  : posId,
                             animation_param : {
                                 'opacity'   : 'show',
                             },
                         });
-                        g_animations.push({
+                        g_field_data.animations.push({
                             target_dom  : posId,
                             animation_param : {
                                 'opacity'   : 'hide',
                             },
                         });
-                        g_animations.push({
+                        g_field_data.animations.push({
                             target_dom  : posId,
                             animation_param : {
                                 'opacity'   : 'show',
@@ -923,7 +1091,6 @@ function execQueueUnit(bRecursive)
                     throw e;
                 }
                 g_field_data = backupFieldWhileSingleQueueProcessing;
-                g_animations = backupAnimationWhileSingleQueueProcessing;
             }
         }
         if (!bEffectQueueResolved) {
@@ -936,13 +1103,12 @@ function execQueueUnit(bRecursive)
         }
         delete exec_act.failure_flg;
 
-        // アニメーションを挟んで完了時のコールバックでexecQueueUnitを再帰呼び出し
+        // アニメーションを挟んで完了時のコールバックでexecQueueを再帰呼び出し
         setTimeout( function () {
             execAnimation(bRecursive);
         }, 1);
     } catch (e) {
         g_field_data = backupFieldWhileSingleActionProcessing;
-        g_animations = backupAnimationWhileSingleActionProcessing;
     }
 }
 
@@ -950,15 +1116,18 @@ function execAnimation (bRecursive)
 {
     try {
         var param = JSON.parse(localStorage.game_settings);
-        var iAnimationTime = Number(param.animation_speed);
+        var iAnimationTime = parseInt(param.animation_speed);
         if (isNaN(iAnimationTime) || iAnimationTime <= 0) {
             throw 'no_setting';
         }
     } catch (e) {
         iAnimationTime = 100;
     }
-    if (g_animations.length > 0) {
-        var aArgs = g_animations.shift();
+    if (g_field_data.animations.length > 0) {
+        var aArgs = g_field_data.animations.shift();
+        if (typeof aArgs.html_param != 'undefined') {
+            $(aArgs.target_dom).html(aArgs.html_param);
+        }
         if (typeof aArgs.css_param != 'undefined') {
             $.each(aArgs.css_param, function (key, val) {
                 $(aArgs.target_dom).css(key, val);
@@ -982,7 +1151,7 @@ function execAnimation (bRecursive)
         setTimeout( function () {
             updateField();
             if (bRecursive) {
-                execQueueUnit(true);
+                execQueue({ resolve_all : true });
             }
         }, 1);
     }

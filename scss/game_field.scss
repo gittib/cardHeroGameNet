@@ -80,12 +80,16 @@
             height: $img_size;
             width: $img_size;
         }
+    }
 
-        img.actor {
+    div.actor {
+        img {
             border-color: #eeee00;
         }
+    }
 
-        img.target {
+    div.target {
+        img {
             border-color: #ff0000;
         }
     }
@@ -161,6 +165,15 @@ div.close_button {
                 border-top:solid 1px;
                 padding: 12px 3px;
                 font-size: $cmd_font_size;
+
+                div.num_info {
+                    float: right;
+                    font-size: $cmd_font_size;
+
+                    span.stone_cost {
+                        font-size: 16px;
+                    }
+                }
             }
 
             div.command_row.selected_act {
