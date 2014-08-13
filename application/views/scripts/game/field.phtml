@@ -244,13 +244,22 @@ _eos_;
 </div>
 <input type="BUTTON" class="disp_button toggle_setting" value="設定" />
 <div class="settings">
-    <input type="BUTTON" class="toggle_setting" value="設定非表示" />
+    <input type="BUTTON" class="toggle_setting first" value="設定非表示" />
+    <div class="setting_item first"></div>
     <div class="setting_item animation_speed">
         <span>アニメーションスピード</span><br/>
         <input type="RADIO" name="animation_speed" value="1"   />一瞬
         <input type="RADIO" name="animation_speed" value="100" />速い
         <input type="RADIO" name="animation_speed" value="300" />普通
         <input type="RADIO" name="animation_speed" value="500" />遅い
+    </div>
+    <div class="setting_item actor_auto_change">
+        <span>カード選択切り替え</span><br/>
+        <span class="mini-font">不適切な対象を選択した時、選択したカードに切り替える</span><br/>
+        <input type="RADIO" name="actor_auto_change" value="all" />全て
+        <input type="RADIO" name="actor_auto_change" value="hand" />手札のみ
+        <input type="RADIO" name="actor_auto_change" value="field" />フィールドのみ
+        <input type="RADIO" name="actor_auto_change" value="off" />OFF
     </div>
     <input type="BUTTON" class="toggle_setting last" value="設定非表示" />
 </div>

@@ -36,7 +36,7 @@
     background-color: #ffeeee; }
 
 .mini-font {
-  font-size: 6px; }
+  font-size: 8px; }
 
 #hand_card {
   border: 1px solid;
@@ -129,15 +129,29 @@ div.close_button {
     border-bottom-color: #000088; }
 
 .disp_button {
+  display: none;
+  margin-top: 1em;
   margin-left: 15px; }
 
 .settings {
-  display: none;
-  margin-left: 15px; }
+  margin-top: 1em; }
   .settings .setting_item {
-    margin-top: 18px; }
+    padding-top: 9px;
+    padding-bottom: 9px;
+    padding-left: 15px;
+    padding-right: 9px;
+    border-left: solid 1px;
+    border-right: solid 1px;
+    border-bottom: solid 1px; }
+  .settings .setting_item.first {
+    margin-top: 1em;
+    padding: 0;
+    height: 0; }
+  .settings .toggle_setting {
+    margin-top: 1em;
+    margin-left: 15px; }
   .settings .toggle_setting.last {
-    margin-top: 18px; }
+    margin-top: 9px; }
 
 .hidden_cards_info {
   display: none; }

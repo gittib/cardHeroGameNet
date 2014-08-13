@@ -62,7 +62,7 @@
 }
 
 .mini-font {
-    font-size: 6px;
+    font-size: 8px;
 }
 
 #hand_card {
@@ -228,24 +228,44 @@ div.close_button {
     }
 }
 
+$top_margin  : 1em;
 $left_margin : 15px;
 
 .disp_button {
+    display: none;
+    margin-top:  $top_margin;
     margin-left: $left_margin;
 }
 
 .settings {
-    display: none;
-    margin-left: $left_margin;
+    margin-top:  $top_margin;
 
-    $spacing : 18px;
+    $spacing : 9px;
+    $border_style : solid 1px;
 
     .setting_item {
-        margin-top:     $spacing;
+        padding-top:    $spacing;
+        padding-bottom: $spacing;
+        padding-left:   $left_margin;
+        padding-right:  $spacing;
+        border-left:    $border_style;
+        border-right:   $border_style;
+        border-bottom:  $border_style;
+    }
+
+    .setting_item.first {
+        margin-top: $top_margin;
+        padding:    0;
+        height:     0;
+    }
+
+    .toggle_setting {
+        margin-top: $top_margin;
+        margin-left:$left_margin;
     }
 
     .toggle_setting.last {
-        margin-top:     $spacing;
+        margin-top: $spacing;
     }
 }
 
