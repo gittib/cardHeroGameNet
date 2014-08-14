@@ -30,7 +30,7 @@ new function () {
             var oDom = $(this);
             var sActorAutoChange = $('[name=actor_auto_change]:checked').val();
             if (!sActorAutoChange) {
-                sActorAutoChange = 'all';
+                sActorAutoChange = 'hand';
             }
             try {
                 var sActorPos = g_field_data.cards[g_field_data.actor.game_card_id].pos_category;
@@ -38,7 +38,11 @@ new function () {
                 sActorPos = 'unknown';
             }
             var _updateActorInfo = function () {
-                g_field_data.actor = {game_card_id : oDom.attr('game_card_id')};
+                var iGameCardId = getGameCardId({
+                    pos_category    : 'field',
+                    pos_id          : oDom.attr('id'),
+                });
+                g_field_data.actor = {game_card_id : iGameCardId};
 
                 $('.actor').removeClass('actor');
                 oDom.addClass('actor');
@@ -48,10 +52,43 @@ new function () {
 
             if (!g_field_data.actor.act_type) {
                 _updateActorInfo();
-            } else if (rangeCheck({check_type : 'select'})) {
-                console.log('rangeCheck ok');
-            } else if (sActorAutoChange == sActorPos || sActorAutoChange == 'all') {
-                _updateActorInfo();
+            } else {
+                var actor = g_field_data.actor;
+                var bRange = rangeCheck({
+                    check_type  : 'select',
+                    actor_id    : actor.game_card_id,
+                    target_id   : oDom.attr('game_card_id'),
+                    pos_id      : oDom.attr('id'),
+                });
+                if (bRange) {
+                    switch (actor.act_type) {
+                        case 'into_field':
+                            g_field_data.actions.push({
+                                actor_id        : actor.game_card_id,
+                                log_message     : 'モンスターをセット',
+                                resolved_flg    : 0,
+                                priority        : g_master_data.queue_priority['command'],
+                                queue : [
+                                    {
+                                        queue_type_id   : 1004,
+                                        target_id       : actor.game_card_id,
+                                        param1          : -1,
+                                        cost_flg        : true,
+                                    },
+                                    {
+                                        queue_type_id   : 1013,
+                                        target_id       : actor.game_card_id,
+                                        param1          : oDom.attr('id'),
+                                    }
+                                ],
+                            });
+                            g_field_data.actor = {game_card_id : null};
+                            execQueue({ resolve_all : true });
+                            break;
+                    }
+                } else if (sActorAutoChange == sActorPos || sActorAutoChange == 'all') {
+                    _updateActorInfo();
+                }
             }
         });
 
@@ -59,7 +96,7 @@ new function () {
             var oDom = $(this);
             var sActorAutoChange = $('[name=actor_auto_change]:checked').val();
             if (!sActorAutoChange) {
-                sActorAutoChange = 'all';
+                sActorAutoChange = 'hand';
             }
             try {
                 var sActorPos = g_field_data.cards[g_field_data.actor.game_card_id].pos_category;
@@ -79,10 +116,18 @@ new function () {
 
             if (!g_field_data.actor.act_type) {
                 _updateActorInfo();
-            } else if (rangeCheck({check_type : 'select'})) {
-                console.log('rangeCheck ok');
-            } else if (sActorAutoChange == sActorPos || sActorAutoChange == 'all') {
-                _updateActorInfo();
+            } else {
+                var bRange = rangeCheck({
+                    check_type  : 'select',
+                    actor_id    : g_field_data.actor.game_card_id,
+                    target_id   : oDom.attr('game_card_id'),
+                    pos_id      : oDom.attr('id'),
+                });
+                if (bRange) {
+                    console.log('rangeCheck ok');
+                } else if (sActorAutoChange == sActorPos || sActorAutoChange == 'all') {
+                    _updateActorInfo();
+                }
             }
         });
 
@@ -357,9 +402,36 @@ new function () {
         execQueue({ resolve_all : true });
     }
 
+    /**
+     * rangeCheck
+     * 適切に対象に取れるかどうか確認する
+     *
+     * @param   aArgs.check_type    状況。クリックした時とかキューのバリデーションチェックだとか
+     * @param   aArgs.actor_id      行動者のgame_card_id
+     * @param   aArgs.target_id     対象のgame_card_id
+     * @param   aArgs.pos_id        選択したマスのpos_id
+     *
+     * @return  true:適正対象、false:不適正
+     */
     function rangeCheck (aArgs)
     {
-        // 工事中
+        switch (aArgs.check_type) {
+            case 'select':
+                // 対象選択操作中
+                switch (g_field_data.actor.act_type) {
+                    case 'into_field':
+                        if (aArgs.target_id) {
+                            return false;
+                        }
+                        var tmp = getXYFromPosId(aArgs.pos_id);
+                        if (!tmp || tmp.y <= 1) {
+                            return false;
+                        }
+                        return true;
+                        break;
+                }
+                break;
+        }
         return false;
     }
 
@@ -376,18 +448,24 @@ new function () {
             };
             var sMyHandHtml = '';
             $.each(g_field_data.cards, function (i, val) {
-                switch (val.pos_category)
-                {
+                switch (val.pos_category) {
                     case 'field':
                         if (typeof val.next_game_card_id != 'undefined') {
                             // 進化元は進化先が上に重なってるので非表示
                             break;
                         }
-                        var sImgSrc = '/images/card/' + g_master_data.m_monster[val.monster_id].image_file_name;
-                        var sImgAlt = g_master_data.m_monster[val.monster_id].monster_name;
-                        var sLv = g_master_data.m_monster[val.monster_id].lv;
+                        var sImgSrc = '/images/card/card.jpg';
+                        var sImgAlt = '？？？';
+                        var sLv = '?';
                         var sLvHp  = '<span class="mini-font">LV</span><span class="lv">' + sLv + '</span>';
-                        sLvHp += '<span class="mini-font">HP</span><span class="hp">' + val.hp + '</span>';
+                        sLvHp += '<span class="mini-font">HP</span><span class="hp">?</span>';
+                        if (!val.standby_flg) {
+                            sImgSrc = '/images/card/' + g_master_data.m_monster[val.monster_id].image_file_name;
+                            sImgAlt = g_master_data.m_monster[val.monster_id].monster_name;
+                            sLv = g_master_data.m_monster[val.monster_id].lv;
+                            sLvHp  = '<span class="mini-font">LV</span><span class="lv">' + sLv + '</span>';
+                            sLvHp += '<span class="mini-font">HP</span><span class="hp">' + val.hp + '</span>';
+                        }
                         var aEffectFlags = {
                             power   : false,
                             shield  : false,
@@ -558,6 +636,10 @@ new function () {
                 }
             } else if (aCard.pos_category == 'field') {
                 var mon = g_master_data.m_monster[aCard.monster_id];
+
+                if (aCard.owner == 'enemy' && aCard.standby_flg) {
+                    throw 'standby monster';
+                }
 
                 // アタック
                 var sCost = '';
@@ -774,19 +856,27 @@ new function () {
                         case 1003:
                             break;
                         case 1004:
-                            var posId = g_field_data.cards[q.target_id].pos_id;
-                            if (posId == 'myMaster') {
+                            var sOwner = g_field_data.cards[q.target_id].owner;
+                            if (sOwner == 'my') {
                                 g_field_data.my_stone += q.param1;
                                 if (g_field_data.my_stone < 0) {
-                                    throw 'minus_stone';
+                                    if (q.cost_flg) {
+                                        throw 'minus_stone';
+                                    } else {
+                                        g_field_data.my_stone = 0;
+                                    }
                                 }
-                                posId = '#myPlayersInfo div.stone';
-                            } else if (posId == 'enemyMaster') {
+                                var posId = '#myPlayersInfo div.stone';
+                            } else if (sOwner == 'enemy') {
                                 g_field_data.enemy_stone += q.param1;
                                 if (g_field_data.enemy_stone < 0) {
-                                    throw 'minus_stone';
+                                    if (q.cost_flg) {
+                                        throw 'minus_stone';
+                                    } else {
+                                        g_field_data.enemy_stone = 0;
+                                    }
                                 }
-                                posId = '#enemyPlayersInfo div.stone';
+                                var posId = '#enemyPlayersInfo div.stone';
                             } else {
                                 throw 'no_target';
                             }
@@ -1142,6 +1232,7 @@ new function () {
                         bEffectQueueResolved = true;
                     }
                 } catch (e) {
+                    console.log(e);
                     if (q.cost_flg) {
                         throw e;
                     }
@@ -1163,8 +1254,12 @@ new function () {
                 execAnimation(bRecursive);
             }, 1);
         } catch (e) {
+            console.log(e);
             g_field_data = backupFieldWhileSingleActionProcessing;
         }
+        setTimeout( function () {
+            execAnimation(bRecursive);
+        }, 1);
     }
 
     function execAnimation (bRecursive)
@@ -1840,7 +1935,7 @@ new function () {
         if (!aArgs.monster_id) {
             aArgs.monster_id = targetMon.monster_id;
             if (!aArgs.monster_id) {
-                aArgs.monster_id = g_master_data.m_card[aArgs.card_id].monster_id;
+                aArgs.monster_id = g_master_data.m_card[targetMon.card_id].monster_id;
                 if (!aArgs.monster_id) {
                     throw 'argument_error';
                 }
@@ -1865,10 +1960,12 @@ new function () {
 
         var mon = g_master_data.m_monster[aArgs.monster_id];
 
+        console.log('aiueo');
+        console.log(mon);
         targetMon.pos_category      = 'field';
         targetMon.pos_id            = aArgs.pos_id;
         targetMon.card_id           = Number(mon.card_id);
-        targetMon.monster_id        = Number(mon.monster_id);
+        targetMon.monster_id        = Number(aArgs.monster_id);
         targetMon.standby_flg       = aArgs.standby_flg;
         targetMon.skill_disable_flg = 0;
         targetMon.sort_no           = 0;
