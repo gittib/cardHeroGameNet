@@ -115,6 +115,13 @@ div.close_button {
     border-left-color: #ffdddd;
     border-right-color: #880000;
     border-bottom-color: #880000; }
+  #buttons_frame div.rollback_button {
+    display: none;
+    background-color: #ffeeee;
+    border-top-color: #ffdddd;
+    border-left-color: #ffdddd;
+    border-right-color: #880000;
+    border-bottom-color: #880000; }
   #buttons_frame div.execute_button {
     background-color: #eeffee;
     border-top-color: #ddffdd;

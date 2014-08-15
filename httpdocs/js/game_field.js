@@ -14,6 +14,8 @@ new function () {
         animations  : [],
     };
 
+    var g_backup_field_data = null;
+
     var g_base_color = {
         background  : '#fff',
     };
@@ -54,38 +56,10 @@ new function () {
                 _updateActorInfo();
             } else {
                 var actor = g_field_data.actor;
-                var bRange = rangeCheck({
-                    check_type  : 'select',
-                    actor_id    : actor.game_card_id,
-                    target_id   : oDom.attr('game_card_id'),
-                    pos_id      : oDom.attr('id'),
+                var bRange = addTarget({
+                    oDom    : oDom,
                 });
                 if (bRange) {
-                    switch (actor.act_type) {
-                        case 'into_field':
-                            g_field_data.actions.push({
-                                actor_id        : actor.game_card_id,
-                                log_message     : 'モンスターをセット',
-                                resolved_flg    : 0,
-                                priority        : g_master_data.queue_priority['command'],
-                                queue : [
-                                    {
-                                        queue_type_id   : 1004,
-                                        target_id       : actor.game_card_id,
-                                        param1          : -1,
-                                        cost_flg        : true,
-                                    },
-                                    {
-                                        queue_type_id   : 1013,
-                                        target_id       : actor.game_card_id,
-                                        param1          : oDom.attr('id'),
-                                    }
-                                ],
-                            });
-                            g_field_data.actor = {game_card_id : null};
-                            execQueue({ resolve_all : true });
-                            break;
-                    }
                 } else if (sActorAutoChange == sActorPos || sActorAutoChange == 'all') {
                     _updateActorInfo();
                 }
@@ -105,8 +79,6 @@ new function () {
             }
             var _updateActorInfo = function () {
                 g_field_data.actor = {game_card_id : oDom.attr('game_card_id')};
-                console.log(oDom.attr('game_card_id'));
-                console.log(g_field_data.actor);
 
                 $('.actor').removeClass('actor');
                 oDom.addClass('actor');
@@ -117,14 +89,11 @@ new function () {
             if (!g_field_data.actor.act_type) {
                 _updateActorInfo();
             } else {
-                var bRange = rangeCheck({
-                    check_type  : 'select',
-                    actor_id    : g_field_data.actor.game_card_id,
-                    target_id   : oDom.attr('game_card_id'),
-                    pos_id      : oDom.attr('id'),
+                var bRange = addTarget({
+                    oDom    : oDom,
                 });
                 if (bRange) {
-                    console.log('rangeCheck ok');
+                    console.log('addTarget ok');
                 } else if (sActorAutoChange == sActorPos || sActorAutoChange == 'all') {
                     _updateActorInfo();
                 }
@@ -137,6 +106,9 @@ new function () {
             switch (aCard.pos_category)
             {
                 case 'field':
+                    if (aCard.standby_flg) {
+                        return;
+                    }
                     g_field_data.actor.act_type = oDom.attr('act_type');
                     g_field_data.actor.art_id   = oDom.attr('art_id');
                     break;
@@ -403,34 +375,220 @@ new function () {
     }
 
     /**
-     * rangeCheck
-     * 適切に対象に取れるかどうか確認する
+     * addTarget
+     * 適切に対象に取れるかどうか確認して、対象情報を追加する
      *
-     * @param   aArgs.check_type    状況。クリックした時とかキューのバリデーションチェックだとか
-     * @param   aArgs.actor_id      行動者のgame_card_id
-     * @param   aArgs.target_id     対象のgame_card_id
-     * @param   aArgs.pos_id        選択したマスのpos_id
+     * @param   aArgs.oDom          クリックしたDOMの情報
      *
      * @return  true:適正対象、false:不適正
      */
-    function rangeCheck (aArgs)
+    function addTarget (aArgs)
     {
-        switch (aArgs.check_type) {
-            case 'select':
-                // 対象選択操作中
-                switch (g_field_data.actor.act_type) {
-                    case 'into_field':
-                        if (aArgs.target_id) {
+        /**
+         * checkTargetPosValid
+         * range_type_idの範囲内に対象がいるか確認する
+         *
+         * @param   aArgs.actor_id      行動者のgame_card_id
+         * @param   aArgs.target_id     対象のgame_card_id
+         * @param   aArgs.range_type_id 範囲タイプ
+         *
+         * @return  true : 適正対象  false : 不適正な対象
+         */
+        var _checkTargetPos = function (aArgs) {
+            try {
+                if (!aArgs.actor_id) {
+                    aArgs.actor_id = g_field_data.actor.game_card_id;
+                }
+                var actorMon = g_field_data.cards[aArgs.actor_id];
+                var targetMon = g_field_data.cards[aArgs.target_id];
+
+                // 先に伏せ状態のチェック
+                switch (aArgs.range_type_id) {
+                    case 12:
+                        // 伏せてても関係なし
+                        break;
+                    case 23:
+                        // 伏せてなかったらアウト
+                        if (!targetMon.standby_flg) {
                             return false;
                         }
-                        var tmp = getXYFromPosId(aArgs.pos_id);
-                        if (!tmp || tmp.y <= 1) {
+                        break;
+                    default:
+                        // 伏せてたらアウト
+                        if (targetMon.standby_flg) {
                             return false;
                         }
-                        return true;
                         break;
                 }
-                break;
+
+                // 伏せ状態のチェックが終わったら各々のチェックに移る
+                switch (aArgs.range_type_id) {
+                    case 0:
+                        if (getDistance(actor.game_card_id, aArgs.target_id) == 1) {
+                            return true;
+                        }
+                        break;
+                    case 1:
+                        if (getDistance(actor.game_card_id, aArgs.target_id) == 2) {
+                            return true;
+                        }
+                        break;
+                    case 2:
+                        if (getDistance(actor.game_card_id, aArgs.target_id) == 3) {
+                            return true;
+                        }
+                        break;
+                    case 4:
+                        var p1 = getXYFromPosId(aArgs.actor_id);
+                        var p2 = getXYFromPosId(aArgs.target_id);
+                        if (p1.x == p2.x) {
+                            for (i = Math.min(p1.y, p2,y)+1 ; i < Math.max(p1.y, p2.y) ; i++) {
+                                var betweenId = getPosIdFromXY({x:p1.x, y:i});
+                                if (betweenId != '') {
+                                    if (!g_field_data.cards[betweenId].standby_flg) {
+                                        return false;
+                                    }
+                                }
+                            }
+                        }
+                        // breakは書かない
+                    case 3:
+                        var p1 = getXYFromPosId(aArgs.actor_id);
+                        var p2 = getXYFromPosId(aArgs.target_id);
+                        var p3 = {
+                            x   : (p2.x - p1.x) / 2,
+                            y   : (p2.y - p1.y) / 2,
+                        };
+                        var dist = Math.max(Math.abs(p1.x - p2.x), Math.abs(p1.y - p2.y));
+                        var betweenId = getGameCardId({
+                            pos_category    : 'field',
+                            pos_id          : getRelativePosId(aArgs.actor_id, p3),
+                        });
+                        if (betweenId) {
+                            if (g_field_data.cards[betweenId].standby_flg) {
+                                return false;
+                            }
+                        }
+                        if (dist <= 2 || (dist <= 3 && aArgs.range_type_id == 4)){
+                            return true;
+                        }
+                        break;
+                    case 5:
+                    case 6:
+                    case 10:
+                        return true;
+                        break;
+                    case 12:
+                        // berakは書かない
+                    case 7:
+                    case 11:
+                        if (g_master_data.m_card[targetMon.card_id].category == 'Master') {
+                            return false;
+                        }
+                        break;
+                    case 9:
+                        if (getDistance(actor.game_card_id, aArgs.target_id) == 3) {
+                            return true;
+                        }
+                        // berakは書かない
+                    case 8:
+                        var p1 = getXYFromPosId(aArgs.actor_id);
+                        var p2 = getXYFromPosId(aArgs.target_id);
+                        var df = {x : Math.abs(p1.x - p2.x), y : Math.abs(p1.y - p2.y)};
+                        if (Math.min(df.x, df.y) == 1 && Math.max(df.x, df.y) == 2) {
+                            return true;
+                        }
+                        break;
+                    case 13:
+                        if (g_master_data.m_card[targetMon.card_id].category == 'Master') {
+                            return false;
+                        }
+                        if (getDistance(actor.game_card_id, aArgs.target_id) == 1) {
+                            return true;
+                        }
+                        break;
+                    case 14:
+                        var dist = getDistance(actor.game_card_id, aArgs.target_id);
+                        if (dist == 2 || dist == 3) {
+                            return true;
+                        }
+                        break;
+                    case 15:
+                        if (targetMon.owner == 'my' && targetMon.pos_id != 'myMaster') {
+                            return true;
+                        }
+                        break;
+                }
+            } catch (e) {}
+            return false;
+        };
+        var _addActionFromActorInfo = function () {
+            var actor = g_field_data.actor;
+            switch (actor.act_type) {
+                case 'into_field':
+                    g_field_data.actions.push({
+                        actor_id        : actor.game_card_id,
+                        log_message     : 'モンスターをセット',
+                        resolved_flg    : 0,
+                        priority        : g_master_data.queue_priority['command'],
+                        queue : [
+                            {
+                                queue_type_id   : 1004,
+                                target_id       : actor.game_card_id,
+                                param1          : -1,
+                                cost_flg        : true,
+                            },
+                            {
+                                queue_type_id   : 1013,
+                                target_id       : actor.game_card_id,
+                                param1          : actor.param1,
+                            },
+                        ],
+                    });
+                    g_field_data.actor = {game_card_id : null};
+                    execQueue({ resolve_all : true });
+                    break;
+                case 'attack':
+                    break;
+                case 'arts':
+                    break;
+            }
+        };
+
+        try {
+            var actor = g_field_data.actor;
+            var actorMon = g_field_data.cards[actor.game_card_id];
+            switch (actor.act_type) {
+                case 'into_field':
+                    var posId = aArgs.oDom.attr('id');
+                    if (getGameCardId({
+                        pos_category    : 'field',
+                        pos_id          : posId,
+                    })) {
+                        return false;
+                    }
+                    var tmp = getXYFromPosId(aArgs.oDom.attr('id'));
+                    if (!tmp || tmp.y <= 1) {
+                        return false;
+                    }
+                    actor.param1 = aArgs.oDom.attr('id');
+                    _addActionFromActorInfo();
+                    execQueue({ resolve_all : true });
+                    return true;
+                    break;
+                case 'attack':
+                    var rangeTypeId = 0;
+                    if (typeof actorMon.status[113] != 'undefined') {
+                        rangeTypeId = 7;
+                    }
+                    break;
+                case 'arts':
+                    break;
+                case 'magic':
+                    break;
+            }
+        } catch (e) {
+            console.log(e);
         }
         return false;
     }
@@ -681,7 +839,7 @@ new function () {
                         }
                     }
                     sCommandsHtml +=
-                        '<div class="command_row" art_id="' + val.id + '" act_type="skill">' +
+                        '<div class="command_row" art_id="' + val.id + '" act_type="arts">' +
                             val.name +
                             '<div class="num_info">' +
                                 sPower +
@@ -767,8 +925,7 @@ new function () {
     {
         var bRecursive = aArgs.resolve_all;
         var act = g_field_data.actions;
-        var all_resolved = false;
-        all_resolved = true;
+        var all_resolved = true;
         var exec_act = null;
 
         for (var i = 0 ; i < act.length ; i++) {
@@ -789,6 +946,10 @@ new function () {
         var bEffectQueueResolved = false;
         var backupFieldWhileSingleActionProcessing = {};
         $.extend(true, backupFieldWhileSingleActionProcessing, g_field_data);
+        if (exec_act.priority == 'command') {
+            g_backup_field_data = {};
+            $.extend(true, g_backup_field_data, g_field_data);
+        }
         try {
             if (typeof g_field_data.cards[exec_act.actor_id] != 'undefined') {
                 if (g_field_data.cards[exec_act.actor_id].pos_category == 'field') {
@@ -821,7 +982,7 @@ new function () {
             }
             for (var i = 0 ; i < exec_act.queue.length ; i++) {
                 var q = exec_act.queue[i];
-                if (!q) {
+                if (typeof q != 'object') {
                     continue;
                 }
                 q.failure_flg = true;
@@ -906,9 +1067,13 @@ new function () {
                             });
                             break;
                         case 1006:
-                            var dam = calcDam(exec_act.actor_id, q.target_id, q.param1);
+                            var targetMon = g_field_data.cards[q.target_id];
+                            var dam = q.param1;
+                            if (q.param2 == 'damage_noroi') {
+                                dam = targetMon.hp - 1;
+                            }
+                            var dam = calcDam(exec_act.actor_id, q.target_id, dam);
                             if (0 < dam) {
-                                var targetMon = g_field_data.cards[q.target_id];
                                 targetMon.hp -= dam;
                             }
                             damageReaction({
@@ -1319,9 +1484,19 @@ new function () {
                 throw 'no_target';
             }
 
+            // 回避効果の適用
+            if (target.status) {
+                // 女神の加護
+                if (typeof target.status[115] != 'undefined') {
+                    if (Math.random() <= 0.5) {
+                        return 0;
+                    }
+                }
+            }
+
             // パワーアップ系効果の適用
             if (act && act.status) {
-                if (act.status[100] != null) {
+                if (typeof act.status[100] != 'undefined') {
                     g_field_data.actions.push({
                         actor_id        : targetId,
                         log_message     : '気合溜め解除',
@@ -1491,6 +1666,17 @@ new function () {
             if (target == null) {
                 throw 'no_target';
             }
+
+            // 回避効果の適用
+            if (target.status) {
+                // 女神の加護
+                if (typeof target.status[115] != 'undefined') {
+                    if (Math.random() <= 0.5) {
+                        return 0;
+                    }
+                }
+            }
+
             if (dam && target.status[100] != null) {
                 g_field_data.actions.push({
                     actor_id        : targetId,
@@ -1885,6 +2071,21 @@ new function () {
     {
         var targetMon = g_field_data.cards[aArgs.target_id];
 
+        if (targetMon.status[100]) {
+            g_field_data.actions.push({
+                actor_id        : aArgs.target_id,
+                log_message     : '気合溜め解除',
+                resolved_flg    : 0,
+                priority        : g_master_data.queue_priority['same_time'],
+                queue : [
+                    {
+                        queue_type_id   : 1027,
+                        param1          : 100,
+                        target_id       : aArgs.target_id,
+                    }
+                ],
+            });
+        }
         if (targetMon.status[122]) {
             if (targetMon.hp > 1) {
                 g_field_data.actions.push({

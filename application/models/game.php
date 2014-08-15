@@ -180,6 +180,9 @@ class model_Game {
                 if (isset($aTmpRow)) {
                     $aRet[$iGameFieldId][$sPosCategory][$iGameCardId] = $aTmpRow;
                 }
+                if ($val['owner'] != 1) {
+                    $aRet[$iGameFieldId]['field_info']['started_flg'] = true;
+                }
                 $aTmpRow = array(
                     'card_id'           => $val['card_id'],
                     'owner'             => $val['owner'],

@@ -205,6 +205,19 @@ div.close_button {
         border-bottom-color: $under_line_color;
     }
 
+    div.rollback_button {
+        $upper_line_color : #ffdddd;
+        $under_line_color : #880000;
+
+        display: none;
+
+        background-color: #ffeeee;
+        border-top-color:    $upper_line_color;
+        border-left-color:   $upper_line_color;
+        border-right-color:  $under_line_color;
+        border-bottom-color: $under_line_color;
+    }
+
     div.execute_button {
         $upper_line_color : #ddffdd;
         $under_line_color : #008800;
