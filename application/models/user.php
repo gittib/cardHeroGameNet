@@ -12,6 +12,22 @@ class model_User {
         $this->_salt    = $this->_config->user->salt;
     }
 
+    public function updateFrontInfo($aInput)
+    {
+        try {
+            $aLoginInfo = Common::checkLogin();
+            $where = array($this->_db->quoteInto('user_id = ?', $aLoginInfo['user_id']));
+            $set = array(
+                'nick_name' => $aInput['nickname'],
+            );
+
+            $this->_db->update('t_user', $set, $where);
+        } catch(Exception $e) {
+            return false;
+        }
+        return true;
+    }
+
     public function regist($aUserInfo)
     {
         try {

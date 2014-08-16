@@ -85,7 +85,6 @@ class Common {
         $db->delete('t_login_key', $where);
         setcookie('login_key', '', time() - 1800, '/');
         return null;
-
     }
 
     /**
