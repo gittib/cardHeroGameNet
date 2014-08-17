@@ -255,8 +255,7 @@ class model_Api {
             );
         $rslt = $this->_db->fetchAll($sel);
         foreach ($rslt as $val) {
-            $str = (int)$val['id'];
-            $aRet['queue_priority'][$str] = $val['pri'];
+            $aRet['queue_priority'][$val['id']] = $val['pri'];
         }
 
         // $aRet['queue_priority'] = array(

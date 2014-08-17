@@ -225,7 +225,8 @@ class model_Game {
         return $aRet;
     }
 
-    private function _statusExplain($aArgs) {
+    private function _statusExplain($aArgs)
+    {
         $row = $aArgs['row'];
         $sPos = $this->_getPosCode($row['position'], ($row['owner'] == $aArgs['turn']));
         switch ($row['status_id'])
@@ -321,7 +322,8 @@ class model_Game {
         }
     }
 
-    private function _getPosCode ($pos, $bMyField) {
+    private function _getPosCode ($pos, $bMyField)
+    {
         switch ($pos)
         {
             case 'Front1':
@@ -348,7 +350,8 @@ class model_Game {
         return $sPos;
     }
 
-    public function standby($deckId) {
+    public function standby($deckId)
+    {
         $aUserInfo = Common::checkLogin();
         $userId = -1;
         if (isset($aUserInfo) && $aUserInfo != '') {
@@ -491,7 +494,8 @@ class model_Game {
         return $iGameFieldId;
     }
 
-    private function _insertGameCard($row) {
+    private function _insertGameCard($row)
+    {
         $sql = "select nextval('t_game_cards_game_card_id_seq')";
         $iGameCardId = $this->_db->fetchOne($sql);
         $set = array(
@@ -517,6 +521,17 @@ class model_Game {
                 $set['standby_flg'] = $row['standby_flg'];
             }
             $this->_db->insert('t_game_monster', $set);
+        }
+    }
+
+    public function insertFieldData($aFieldData)
+    {
+        $this->_db->beginTransaction();
+        try {
+            $this->_db->commit();
+        } catch (Exception $e) {
+            $this->_db->rollBack();
+            throw $e;
         }
     }
 }

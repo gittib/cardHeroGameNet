@@ -32,6 +32,7 @@ class ErrorController extends Zend_Controller_Action
                 $this->view->message = 'このページは工事中です。';
                 break;
         }
+        $this->view->errorType = $errors->type;
         
         // Log exception, if logger available
         if ($log = $this->getLog()) {

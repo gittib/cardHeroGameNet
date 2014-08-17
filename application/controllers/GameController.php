@@ -52,9 +52,6 @@ class GameController extends Zend_Controller_Action
         if (!isset($deckId) || $deckId == '') {
             throw new Exception('デッキ情報の取得に失敗しました');
         }
-        $this->_stylesheet[] = '/css/game_field.css';
-        $this->_javascript[] = '/js/game_field.js';
-        $this->_layout->title = 'ゲーム開始';
         $this->_layout->noindex = true;
 
         $this->_getModel();
@@ -118,6 +115,19 @@ class GameController extends Zend_Controller_Action
         $this->view->assign('aCardInfo', $aCardInfo);
     }
 
+    public function turnEndAction()
+    {
+        $this->_getModel();
+
+        $request = $this->getRequest();
+        $nGameFieldId = $request->getParam('game_field_id');
+        $this->_stylesheet[] = '/css/turn_end.css';
+        $this->_layout->title = '投稿完了';
+        $this->_layout->noindex = true;
+
+        $this->_model->insertFieldData(json_decode($request->field_data, true));
+    }
+
     public function listAction()
     {
         $this->_getModel();
@@ -142,6 +152,11 @@ class GameController extends Zend_Controller_Action
         $this->view->assign('aCardInfoArray', $aCardInfoArray);
         $this->view->assign('nFields', $nFields);
         $this->view->assign('nPage', $nPage);
+
+        $bFieldSended = $request->getParam('field_sended');
+        if (isset($bFieldSended) && $bFieldSended) {
+            $this->view->assign('bFieldSended', true);
+        }
     }
 
     private function _getModel() {
