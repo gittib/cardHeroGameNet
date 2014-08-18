@@ -46,6 +46,7 @@ class ApiController extends Zend_Controller_Action
     public function sitemapAction()
     {
         $this->_helper->layout->disableLayout();
+        header("Content-Type: text/xml; charset=utf-8");
         $this->view->assign('aUrls', $this->_model->getUrl());
     }
 

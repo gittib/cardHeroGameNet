@@ -258,16 +258,6 @@ class model_Api {
             $aRet['queue_priority'][$val['id']] = $val['pri'];
         }
 
-        // $aRet['queue_priority'] = array(
-        //     'command'       , 0
-        //     'system'        , 1
-        //     'react_damage'  , 2
-        //     'reaction'      , 3
-        //     'follow_damage' , 4
-        //     'follow'        , 5
-        //     'same_time'     , 6
-        // );
-
         return $aRet;
     }
 
@@ -303,6 +293,14 @@ class model_Api {
         $rslt = $this->_db->fetchCol($sel);
         foreach ($rslt as $val) {
             $aUrls[] = '/card/detail/' . $val . '/';
+        }
+
+        foreach ($aUrls as $key => $val) {
+            $sHttp = 'http://';
+            if (isset($_SERVER['HTTPS']) && $_SERVER['https']) {
+                $sHttp = 'https://';
+            }
+            $aUrls[$key] = $sHttp . $_SERVER['SERVER_NAME'] . $val;
         }
 
         return $aUrls;
