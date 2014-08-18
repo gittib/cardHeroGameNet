@@ -30,73 +30,144 @@ new function () {
 
         $(document).on('click', '#game_field td.monster_space', function () {
             var oDom = $(this);
-            var sActorAutoChange = $('[name=actor_auto_change]:checked').val();
-            if (!sActorAutoChange) {
-                sActorAutoChange = 'hand';
-            }
-            try {
-                var sActorPos = g_field_data.cards[g_field_data.actor.game_card_id].pos_category;
-            } catch (e) {
-                sActorPos = 'unknown';
-            }
-            var _updateActorInfo = function () {
-                var iGameCardId = getGameCardId({
-                    pos_category    : 'field',
-                    pos_id          : oDom.attr('id'),
-                });
-                g_field_data.actor = {game_card_id : iGameCardId};
+            switch (checkGameState()) {
+                case 'normal':
+                    var sActorAutoChange = $('[name=actor_auto_change]:checked').val();
+                    if (!sActorAutoChange) {
+                        sActorAutoChange = 'hand';
+                    }
+                    try {
+                        var sActorPos = g_field_data.cards[g_field_data.actor.game_card_id].pos_category;
+                    } catch (e) {
+                        sActorPos = 'unknown';
+                    }
+                    var _updateActorInfo = function () {
+                        var iGameCardId = getGameCardId({
+                            pos_category    : 'field',
+                            pos_id          : oDom.attr('id'),
+                        });
+                        g_field_data.actor = {game_card_id : iGameCardId};
 
-                $('.actor').removeClass('actor');
-                oDom.addClass('actor');
+                        $('.actor').removeClass('actor');
+                        oDom.addClass('actor');
 
-                updateActorDom();
-            };
+                        updateActorDom();
+                    };
 
-            if (!g_field_data.actor.act_type) {
-                _updateActorInfo();
-            } else {
-                var actor = g_field_data.actor;
-                var bRange = addTarget({
-                    oDom    : oDom,
-                });
-                if (bRange) {
-                } else if (sActorAutoChange == sActorPos || sActorAutoChange == 'all') {
-                    _updateActorInfo();
-                }
+                    if (!g_field_data.actor.act_type) {
+                        _updateActorInfo();
+                    } else {
+                        var actor = g_field_data.actor;
+                        var bRange = addTarget({
+                            oDom    : oDom,
+                        });
+                        if (bRange) {
+                        } else if (sActorAutoChange == sActorPos || sActorAutoChange == 'all') {
+                            _updateActorInfo();
+                        }
+                    }
+                    break;
+                case 'lvup_standby':
+                    var iGameCardId = getGameCardId({
+                        pos_category    : 'field',
+                        pos_id          : oDom.attr('id'),
+                    });
+                    if (g_field_data.cards[iGameCardId].lvup_standby <= 0) {
+                        break;
+                    }
+                    var mon = g_master_data.m_monster[g_field_data.cards[iGameCardId].monster_id];
+                    if (mon.next_monster_id) {
+                        g_field_data.cards[iGameCardId].lvup_standby--;
+                        g_field_data.actions.push({
+                            actor_id        : iGameCardId,
+                            log_message     : '',
+                            resolved_flg    : 0,
+                            priority        : g_master_data.queue_priority['system'],
+                            queue : [
+                                {
+                                    queue_type_id   : 1019,
+                                    target_id       : iGameCardId,
+                                }
+                            ],
+                        });
+                    } else if (typeof mon.supers != 'undefined' && 0 < mon.supers.length) {
+                        // スーパーに進化できそうなのでOKな手札にクラスを設置する
+                        var bChecked = false;
+                        $('.valid_super').removeClass('valid_super');
+                        $('#hand_card div.hand_card').each(function() {
+                            var oThis = $(this);
+                            $.each(mon.supers, function (i, val) {
+                                var iSuperCardId = g_field_data.cards[oThis].card_id;
+                                if (val.card_id == iSuperCardId) {
+                                    oThis.addClass('valid_super');
+                                    bChecked = true;
+                                    return true;
+                                }
+                            })
+                        });
+                        if (!bChecked) {
+                            // 進化できるスーパーが手札に無かった場合
+                        }
+                    }
+                    break;
             }
         });
 
         $(document).on('click', '#hand_card div.hand_card', function () {
             var oDom = $(this);
-            var sActorAutoChange = $('[name=actor_auto_change]:checked').val();
-            if (!sActorAutoChange) {
-                sActorAutoChange = 'hand';
-            }
-            try {
-                var sActorPos = g_field_data.cards[g_field_data.actor.game_card_id].pos_category;
-            } catch (e) {
-                sActorPos = 'unknown';
-            }
-            var _updateActorInfo = function () {
-                g_field_data.actor = {game_card_id : oDom.attr('game_card_id')};
+            switch (checkGameState()) {
+                case 'select_super':
+                    var ret = isValidSuper({
+                        before_game_card_id : g_field_data.actor.game_card_id,
+                        after_game_card_id  : oDom.attr('game_card_id'),
+                    });
+                    if (ret) {
+                        g_field_data.actions.push({
+                            actor_id        : null,
+                            resolved_flg    : 0,
+                            priority        : g_master_data.queue_priority['system'],
+                            queue : [
+                                {
+                                    queue_type_id   : 1019,
+                                    target_id       : aArgs.target_id,
+                                    param1          : oDom.attr('game_card_id'),
+                                },
+                            ],
+                        });
+                    }
+                    break;
+                case 'normal':
+                    var sActorAutoChange = $('[name=actor_auto_change]:checked').val();
+                    if (!sActorAutoChange) {
+                        sActorAutoChange = 'hand';
+                    }
+                    try {
+                        var sActorPos = g_field_data.cards[g_field_data.actor.game_card_id].pos_category;
+                    } catch (e) {
+                        sActorPos = 'unknown';
+                    }
+                    var _updateActorInfo = function () {
+                        g_field_data.actor = {game_card_id : oDom.attr('game_card_id')};
 
-                $('.actor').removeClass('actor');
-                oDom.addClass('actor');
+                        $('.actor').removeClass('actor');
+                        oDom.addClass('actor');
 
-                updateActorDom();
-            };
+                        updateActorDom();
+                    };
 
-            if (!g_field_data.actor.act_type) {
-                _updateActorInfo();
-            } else {
-                var bRange = addTarget({
-                    oDom    : oDom,
-                });
-                if (bRange) {
-                    console.log('addTarget ok');
-                } else if (sActorAutoChange == sActorPos || sActorAutoChange == 'all') {
-                    _updateActorInfo();
-                }
+                    if (!g_field_data.actor.act_type) {
+                        _updateActorInfo();
+                    } else {
+                        var bRange = addTarget({
+                            oDom    : oDom,
+                        });
+                        if (bRange) {
+                            console.log('addTarget ok');
+                        } else if (sActorAutoChange == sActorPos || sActorAutoChange == 'all') {
+                            _updateActorInfo();
+                        }
+                    }
+                    break;
             }
         });
 
@@ -129,10 +200,33 @@ new function () {
         $(document).on('click', '#buttons_frame div.turn_end_button', function () {
             if (confirm("ターンエンドしてもよろしいですか？")) {
 
-                console.log('endo');
-
-                // ステータス継続時間更新
                 $.each(g_field_data.cards, function(i, val) {
+
+                    // フィールドのモンスターの処理
+                    if (typeof val.monster_id != 'undefined') {
+                        var aMonsterData = g_master_data.m_monster[val.monster_id];
+                        switch (aMonsterData.skill.id) {
+                            case 32:
+                                // ゼス復活
+                                g_field_data.actions.push({
+                                    actor_id        : val.game_card_id,
+                                    log_message     : '仮死から復活',
+                                    resolved_flg    : 0,
+                                    priority        : g_master_data.queue_priority['system'],
+                                    queue : [
+                                        {
+                                            queue_type_id   : 1021,
+                                            target_id       : val.game_card_id,
+                                            param1          : val.monster_id - 1,
+                                            param2          : false,
+                                        }
+                                    ],
+                                });
+                                break;
+                        }
+                    }
+
+                    // ステータス継続時間更新
                     if (typeof val.status != 'undefined') {
                         $.each(val.status, function(status_id, val2) {
                             val2.turn_count--;
@@ -418,6 +512,11 @@ new function () {
         }
 
         execQueue({ resolve_all : true });
+    }
+
+    function checkGameState()
+    {
+        return 'normal';
     }
 
     /**
@@ -1154,7 +1253,7 @@ new function () {
                 continue;
             }
             all_resolved = false;
-            if (exec_act == null || act[i].priority > exec_act.priority) {
+            if (exec_act == null || exec_act.priority < act[i].priority) {
                 exec_act = act[i];
             }
         }
@@ -1167,7 +1266,7 @@ new function () {
         var bEffectQueueResolved = false;
         var backupFieldWhileSingleActionProcessing = {};
         $.extend(true, backupFieldWhileSingleActionProcessing, g_field_data);
-        if (exec_act.priority == 'command') {
+        if (exec_act.priority == g_master_data.queue_priority['command']) {
             g_backup_field_data = {};
             $.extend(true, g_backup_field_data, g_field_data);
         }
@@ -1213,7 +1312,11 @@ new function () {
                     switch (q.queue_type_id)
                     {
                         case 1000:
-                            turnEndProc();
+                            var sHtml = '<form name="form_current_field" method="post" action="/game/turn-end/">';
+                            sHtml += '<input type="hidden" name="field_data" value=\'' + JSON.stringify(g_field_data) + '\' />';
+                            sHtml += '</form>';
+                            $('#buttons_frame').after(sHtml);
+                            document.form_current_field.submit();
                             break;
                         case 1001:
                             var actorMon = g_field_data.cards[exec_act.actor_id];
@@ -1229,6 +1332,7 @@ new function () {
                             }
                             damageReaction({
                                 actorId     : exec_act.actor_id,
+                                priority    : exec_act.priority,
                                 targetId    : q.target_id,
                                 damage      : pow,
                             });
@@ -1283,6 +1387,7 @@ new function () {
                             }
                             damageReaction({
                                 actorId     : exec_act.actor_id,
+                                priority    : exec_act.priority,
                                 targetId    : q.target_id,
                                 damage      : pow,
                             });
@@ -1312,6 +1417,7 @@ new function () {
                             }
                             damageReaction({
                                 actorId     : exec_act.actor_id,
+                                priority    : exec_act.priority,
                                 targetId    : q.target_id,
                                 damage      : pow,
                             });
@@ -1401,7 +1507,7 @@ new function () {
                             wakeupReaction({
                                 actor_id        : exec_act.actor_id,
                                 target_id       : q.target_id,
-                                system_flg      : (exec_act.priority == 'system'),
+                                system_flg      : (exec_act.priority == g_master_data.queue_priority['system']),
                             });
                             break;
                         case 1012:
@@ -1952,21 +2058,12 @@ new function () {
         return dam;
     }
 
-    function turnEndProc()
-    {
-        console.log('turnEndProc');
-        var sHtml = '<form name="current_field" method="post" action="/game/turn-end/">';
-        sHtml += '<input type="hidden" name="field_data" value=\'' + JSON.stringify(g_field_data) + '\' />';
-        sHtml += '</form>';
-        $('#buttons_frame').after(sHtml);
-        document.current_field.submit();
-    }
-
     /**
      * damageReaction
      * ダメージを受けた時の反撃行動を処理する
      *
      * @param   aArgs.actor_id  : 行動者のgame_card_id
+     * @param   aArgs.priority  : 行動のpriority。レベルアップの判定に使う
      * @param   aArgs.target_id : 対象のgame_card_id
      * @param   aArgs.damage    : ダメージ
      */
@@ -1996,7 +2093,7 @@ new function () {
                 });
             }
         }
-        if (0 < aArgs.damage) {
+        if (0 < aArgs.damage && target.hp > 0) {
             if (!target.skill_disable_flg) {
                 var targetMonsterData = g_master_data.m_monster[target.monster_id];
                 var iFrontCardId = getGameCardId({
@@ -2136,6 +2233,9 @@ new function () {
                     });
                 }
             }
+        }
+        if (target.hp <= 0 && aArgs.priority == g_master_data.queue_priority.command) {
+            act.lvup_standby += taregt.lv;
         }
         return true;
     }
