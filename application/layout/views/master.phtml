@@ -11,15 +11,16 @@ if (APPLICATION_ENV != 'production') {
 }
 
 // canonical
-$sCanonical = '';
+$sDefaultCanonical = preg_replace('/\?.*$/', '', $_SERVER['REQUEST_URI']);
+$sCanonical = "<link rel='canonical' href='{$sDefaultCanonical}' />\n";
 if (isSet($this->layout()->canonical)) {
-    $sCanonical = "<link rel='canonical' href='{$this->layout()->canonical}' />";
+    $sCanonical = "<link rel='canonical' href='{$this->layout()->canonical}' />\n";
 }
 
 // noindex
 $sNoIndex = '';
 if (isSet($this->layout()->noindex)) {
-    $sNoIndex = '<meta name="robots" content="noindex,nofollow" />';
+    $sNoIndex = '<meta name="robots" content="noindex,nofollow" />' . "\n";
 }
 
 // stylesheet

@@ -34,6 +34,8 @@
         if ($val['standby_flg']) {
             $sLv = '?';
             $sHp = '?';
+            $val['image_file_name'] = 'card.jpg';
+            $val['card_name'] = 'カードヒーロー';
             $sStatusDetail .= '<div standby_flg=1></div>';
         } else {
             $sLv = $val['lv'];
@@ -275,4 +277,7 @@ _eos_;
     echo '<div turn_num="' . $aCardInfo['field_info']['turn'] . '"></div>';
 ?>
 </div>
+<form name="form_current_field" method="post" action="/game/turn-end/">
+<input type="hidden" name="game_field_id" value="<?php echo $this->nGameFieldId; ?>" />
+</form>
 

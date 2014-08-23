@@ -113,6 +113,7 @@ class GameController extends Zend_Controller_Action
         $aFields = $this->_model->getFieldDetail($aSelectCond);
         $aCardInfo = reset($aFields);
         $this->view->assign('aCardInfo', $aCardInfo);
+        $this->view->assign('nGameFieldId', $nGameFieldId);
     }
 
     public function turnEndAction()
@@ -125,7 +126,18 @@ class GameController extends Zend_Controller_Action
         $this->_layout->title = '投稿完了';
         $this->_layout->noindex = true;
 
-        $this->_model->insertFieldData(json_decode($request->field_data, true));
+        $aFieldData = json_decode($request->field_data, true);
+
+        $this->_model->insertFieldData(array(
+            'field_id0'     => $request->game_field_id,
+            'field_data'    => $aFieldData,
+        ));
+
+        // $this->_redirect(
+        //     '/game/list/',
+        //     array('code' => 301)
+        // );
+        // exit();
     }
 
     public function listAction()

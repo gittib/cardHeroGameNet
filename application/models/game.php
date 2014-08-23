@@ -524,10 +524,163 @@ class model_Game {
         }
     }
 
-    public function insertFieldData($aFieldData)
+    /**
+     *  @param aArgs:
+     *      field_id0   : 元フィールドのID
+     *      field_data  : 入稿するフィールド情報
+     */
+    public function insertFieldData($aArgs)
     {
+        $aLoginInfo = Common::checkLogin();
+        $aFieldData = $aArgs['field_data'];
+        if ($aFieldData['turn'] == 1) {
+            $aFieldData['turn'] = 2;
+        } else {
+            $aFieldData['turn'] = 1;
+        }
+
+        if ($aFieldData['turn'] == 1) {
+            $aFieldData['stone1'] = $aFieldData['my_stone'];
+            $aFieldData['stone2'] = $aFieldData['enemy_stone'];
+        } else {
+            $aFieldData['stone1'] = $aFieldData['enemy_stone'];
+            $aFieldData['stone2'] = $aFieldData['my_stone'];
+        }
+
+        $sel = $this->_db->select()
+            ->from(
+                't_game_field',
+                array(
+                    'game_field_id',
+                    'turn',
+                    'field_id_path',
+                )
+            )
+            ->where('game_field_id = ?', $aArgs['field_id0']);
+        $aField0 = $this->_db->fetchRow($sel);
+        if ($aField0['field_id_path'] == '') {
+            $sFieldIdPath = $aArgs['field_id0'];
+        } else {
+            $sFieldIdPath = $aField0['field_id_path'] . '-' . $aArgs['field_id0'];
+        }
+
         $this->_db->beginTransaction();
         try {
+            $sql = "select nextval('t_game_field_game_field_id_seq')";
+            $iGameFieldId = $this->_db->fetchOne($sql);
+            $set = array(
+                'game_field_id' => $iGameFieldId,
+                'field_id_path' => $sFieldIdPath,
+                'user_id'       => $aLoginInfo['user_id'],
+                'turn'          => $aFieldData['turn'],
+                'stone1'        => $aFieldData['stone1'],
+                'stone2'        => $aFieldData['stone2'],
+                'open_flg'      => 1,
+                'del_flg'       => 0,
+            );
+            $this->_db->insert('t_game_field', $set);
+            foreach ($aFieldData['cards'] as $val) {
+                $sql = "select nextval('t_game_cards_game_card_id_seq')";
+                $iGameCardId = $this->_db->fetchOne($sql);
+                if ($val['owner'] == 'enemy') {
+                    // aFieldData['turn']はswwap済なのでenemyはそのまま、myをswapする
+                    $val['owner'] = $aFieldData['turn'];
+                } else {
+                    if ($aFieldData['turn'] == 1) {
+                        $val['owner'] = 2;
+                    } else {
+                        $val['owner'] = 1;
+                    }
+                }
+                $set = array(
+                    'game_card_id'      => $iGameCardId,
+                    'card_id'           => $val['card_id'],
+                    'game_field_id'     => $iGameFieldId,
+                    'owner'             => $val['owner'],
+                    'position_category' => $val['pos_category'],
+                );
+                $this->_db->insert('t_game_cards', $set);
+                if ($val['pos_category'] == 'field') {
+                    $set = array(
+                        'game_card_id'  => $iGameCardId,
+                        'monster_id'    => $val['monster_id'],
+                        'position'      => preg_replace('/^(ene)?my/', '', $val['pos_id']),
+                        'hp'            => $val['hp'],
+                        'standby_flg'   => $val['standby_flg'],
+                        'act_count'     => $val['act_count'],
+                    );
+                    $this->_db->insert('t_game_monster', $set);
+                    foreach ($val['status'] as $st) {
+                        if (!isset($st['param1'])) {
+                            $st['param1'] = '';
+                        }
+                        if (!isset($st['param2'])) {
+                            $st['param2'] = '';
+                        }
+                        $set = array(
+                            'status_id'     => $st['status_id'],
+                            'game_card_id'  => $iGameCardId,
+                            'turn_count'    => $st['turn_count'],
+                            'param1'        => $st['param1'],
+                            'param2'        => $st['param2'],
+                        );
+                        $this->_db->insert('t_game_monster_status', $set);
+                    }
+                }
+            }
+            $sel = $this->_db->select()
+                ->from(
+                    'm_queue_priority',
+                    array(
+                        'pri_str_id',
+                        'priority',
+                    )
+                );
+            $rslt = $this->_db->fetchAll($sel);
+            $aPri = array();
+            foreach ($rslt as $val) {
+                $aPri[$val['priority']] = $val['pri_str_id'];
+            }
+            foreach ($aFieldData['queues'] as $val) {
+                $sql = "select nextval('t_queue_queue_id_seq')";
+                $iQueueId = $this->_db->fetchOne($sql);
+                $set = array(
+                    'queue_id'      => $iQueueId,
+                    'game_field_id' => $iGameFieldId,
+                    'act_card_id'   => $val['actor_id'],
+                    'pri_str_id'    => $aPri[$val['priority']],
+                    'resolved_flg'  => $val['resolved_flg'],
+                    'log_message'   => $val['log_message'],
+                );
+                $this->_db->insert('t_queue', $set);
+                foreach ($val['queue_units'] as $q) {
+                    if ($q['queue_type_id'] == 1000) {
+                        // ターンエンド処理は入れない
+                        continue;
+                    }
+                    if (!isset($q['target_card_id'])) {
+                        $q['target_card_id'] = null;
+                    }
+                    if (!isset($q['cost_flg'])) {
+                        $q['cost_flg'] = 0;
+                    }
+                    if (!isset($q['param1'])) {
+                        $q['param1'] = '';
+                    }
+                    if (!isset($q['param2'])) {
+                        $q['param2'] = '';
+                    }
+                    $set = array(
+                        'queue_id'          => $iQueueId,
+                        'cost_flg'          => $q['cost_flg'],
+                        'queue_type_id'     => $q['queue_type_id'],
+                        'target_card_id'    => $q['target_card_id'],
+                        'param1'            => $q['param1'],
+                        'param2'            => $q['param2'],
+                    );
+                    $this->_db->insert('t_queue_unit', $set);
+                }
+            }
             $this->_db->commit();
         } catch (Exception $e) {
             $this->_db->rollBack();
