@@ -12,13 +12,17 @@ new function () {
         actor       : {
             game_card_id    : null,
         },
-        animations  : [],
     };
 
     var g_backup_field_data = null;
 
     var g_base_color = {
         background  : '#fff',
+    };
+
+    var g_animations = {
+        bAnimationProcessing : false,
+        animations  : [],
     };
 
 
@@ -895,6 +899,47 @@ new function () {
                     break;
                 case 'arts':
                     break;
+                case 'move':
+                    var aQueue = {
+                        actor_id        : actor.game_card_id,
+                        log_message     : '移動',
+                        resolved_flg    : 0,
+                        priority        : g_master_data.queue_priority['command'],
+                        queue_units : [
+                            {
+                                queue_type_id   : 1024,
+                                target_id       : actor.game_card_id,
+                                cost_flg        : true,
+                            },
+                            {
+                                queue_type_id   : 1022,
+                                target_id       : actor.game_card_id,
+                                param1          : actor.param1,
+                            },
+                        ],
+                    };
+                    var iPurpose = getGameCardId({
+                        pos_category    : 'field',
+                        pos_id          : actor.param1,
+                    });
+                    if (iPurpose) {
+                        aQueue.queue_units.push({
+                            queue_type_id   : 1024,
+                            target_id       : iPurpose,
+                            cost_flg        : true,
+                        });
+                        aQueue.queue_units.push({
+                            queue_type_id   : 1022,
+                            target_id       : iPurpose,
+                            param1          : g_field_data.cards[actor.game_card_id].pos_id,
+                        });
+                    }
+                    g_field_data.queues.push(aQueue);
+                    g_field_data.actor = {game_card_id : null};
+                    $('.actor').removeClass('actor');
+                    break;
+                case 'escape':
+                    break;
             }
             execQueue({ resolve_all : true });
         };
@@ -954,6 +999,18 @@ new function () {
                 case 'arts':
                     break;
                 case 'magic':
+                    break;
+                case 'move':
+                    var bRangeOk = checkTargetPosValid({
+                        actor_id        : actor.game_card_id,
+                        target_pos_id   : aTargetInfo.pos_id,
+                        range_type_id   : 12,
+                    });
+                    if (!bRangeOk) {
+                        return false;
+                    }
+                    actor.param1 = aTargetInfo.pos_id;
+                    _addActionFromActorInfo();
                     break;
             }
         } catch (e) {
@@ -1339,34 +1396,26 @@ new function () {
             if (typeof g_field_data.cards[exec_act.actor_id] != 'undefined') {
                 if (g_field_data.cards[exec_act.actor_id].pos_category == 'field') {
                     var sDom = '#' + g_field_data.cards[exec_act.actor_id].pos_id;
-                    g_field_data.animations.push({
-                        target_dom  : sDom,
-                        animation_param : {
-                            'background-color'  : '#ee0',
-                        },
-                    });
-                    g_field_data.animations.push({
-                        target_dom  : sDom,
-                        animation_param : {
-                            'background-color'  : g_base_color.background,
-                        },
-                    });
-                    g_field_data.animations.push({
-                        target_dom  : sDom,
-                        animation_param : {
-                            'background-color'  : '#ee0',
-                        },
-                    });
-                    g_field_data.animations.push({
-                        target_dom  : sDom,
-                        animation_param : {
-                            'background-color'  : g_base_color.background,
-                        },
-                    });
+                    for (var i = 0 ; i < 2 ; i++) {
+                        g_animations.animations.push({
+                            target_dom              : sDom,
+                            animation_time_rate     : 0.5,
+                            animation_param : {
+                                'background-color'  : '#ee0',
+                            },
+                        });
+                        g_animations.animations.push({
+                            target_dom              : sDom,
+                            animation_time_rate     : 0.5,
+                            animation_param : {
+                                'background-color'  : g_base_color.background,
+                            },
+                        });
+                    }
                 }
             }
-            for (var i = 0 ; i < exec_act.queue_units.length ; i++) {
-                var q = exec_act.queue_units[i];
+            for (var iterator_of_queue_now_proc = 0 ; iterator_of_queue_now_proc < exec_act.queue_units.length ; iterator_of_queue_now_proc++) {
+                var q = exec_act.queue_units[iterator_of_queue_now_proc];
                 if (typeof q != 'object') {
                     continue;
                 }
@@ -1428,13 +1477,13 @@ new function () {
                             } else {
                                 throw 'no_target';
                             }
-                            g_field_data.animations.push({
+                            g_animations.animations.push({
                                 target_dom  : posId,
                                 animation_param : {
                                     'opacity'   : 'hide',
                                 },
                             });
-                            g_field_data.animations.push({
+                            g_animations.animations.push({
                                 target_dom  : posId,
                                 animation_param : {
                                     'opacity'   : 'show',
@@ -1454,7 +1503,7 @@ new function () {
                                 damage      : pow,
                             });
                             var sPosId = '#' + targetMon.pos_id;
-                            g_field_data.animations.push({
+                            g_animations.animations.push({
                                 target_dom  : sPosId,
                                 css_param       : {
                                     'background-color'  : '#f00',
@@ -1484,7 +1533,7 @@ new function () {
                                 damage      : dam,
                             });
                             var sPosId = '#' + targetMon.pos_id;
-                            g_field_data.animations.push({
+                            g_animations.animations.push({
                                 target_dom  : sPosId,
                                 css_param       : {
                                     'background-color'  : '#f00',
@@ -1527,7 +1576,7 @@ new function () {
                                 vv.sort_no       = iSortNo;
                             });
                             removeMonsterInfoOnField(q.target_id);
-                            g_field_data.animations.push({
+                            g_animations.animations.push({
                                 target_dom  : '#' + targetMon.pos_id + ' .pict img',
                                 animation_param : {
                                     width   : 0,
@@ -1546,25 +1595,25 @@ new function () {
                             } else {
                                 var posId = '#enemyPlayersInfo div.hand';
                             }
-                            g_field_data.animations.push({
+                            g_animations.animations.push({
                                 target_dom  : posId,
                                 animation_param : {
                                     'opacity'   : 'hide',
                                 },
                             });
-                            g_field_data.animations.push({
+                            g_animations.animations.push({
                                 target_dom  : posId,
                                 animation_param : {
                                     'opacity'   : 'show',
                                 },
                             });
-                            g_field_data.animations.push({
+                            g_animations.animations.push({
                                 target_dom  : posId,
                                 animation_param : {
                                     'opacity'   : 'hide',
                                 },
                             });
-                            g_field_data.animations.push({
+                            g_animations.animations.push({
                                 target_dom  : posId,
                                 animation_param : {
                                     'opacity'   : 'show',
@@ -1711,6 +1760,22 @@ new function () {
                             if ((aCard.owner == 'my' && 2 <= p.y) || (aCard.owner == 'enemy' && p.y <= 1)) {
                                 aCard.pos_id = q.param1;
                                 bMoveQueueResolved = true;
+
+                                var sDom = '#' + q.param1;
+                                for (var i = 0 ; i < 2 ; i++) {
+                                    g_animations.animations.push({
+                                        target_dom  : sDom,
+                                        animation_param : {
+                                            'background-color'  : '#ee0',
+                                        },
+                                    });
+                                    g_animations.animations.push({
+                                        target_dom  : sDom,
+                                        animation_param : {
+                                            'background-color'  : g_base_color.background,
+                                        },
+                                    });
+                                }
                             } else {
                                 throw 'move_to_opponent_field';
                             }
@@ -1854,8 +1919,6 @@ new function () {
                 }
             }
             delete exec_act.failure_flg;
-
-            // アニメーションを挟んで完了時のコールバックでexecQueueを再帰呼び出し
             setTimeout( function () {
                 execAnimation(bRecursive);
             }, 1);
@@ -1863,6 +1926,8 @@ new function () {
             console.log(e);
             g_field_data = backupFieldWhileSingleActionProcessing;
         }
+
+        // アニメーションを挟んで完了時のコールバックでexecQueueを再帰呼び出し
         setTimeout( function () {
             execAnimation(bRecursive);
         }, 1);
@@ -1870,46 +1935,59 @@ new function () {
 
     function execAnimation (bRecursive)
     {
-        try {
-            var iAnimationTime = parseInt($('[name=animation_speed]:checked').val());
-            if (isNaN(iAnimationTime) || iAnimationTime <= 0) {
-                throw 'no_setting';
+        function _execAnimationUnit (bRecursive) {
+            try {
+                var iAnimationTime = parseInt($('[name=animation_speed]:checked').val());
+                if (isNaN(iAnimationTime) || iAnimationTime <= 0) {
+                    throw 'no_setting';
+                }
+            } catch (e) {
+                iAnimationTime = 100;
             }
-        } catch (e) {
-            iAnimationTime = 100;
-        }
-        if (g_field_data.animations.length > 0) {
-            var aArgs = g_field_data.animations.shift();
-            if (typeof aArgs.html_param != 'undefined') {
-                $(aArgs.target_dom).html(aArgs.html_param);
-            }
-            if (typeof aArgs.css_param != 'undefined') {
-                $.each(aArgs.css_param, function (key, val) {
-                    $(aArgs.target_dom).css(key, val);
-                });
-            }
-            if (typeof aArgs.animation_param != 'undefined') {
-                $(aArgs.target_dom).animate(
-                    aArgs.animation_param,
-                    iAnimationTime,
-                    'linear',
-                    function () {
-                        $('#game_field td[style]').removeAttr('style');
-                        execAnimation(bRecursive);
+            if (g_animations.animations.length > 0) {
+                var aArgs = g_animations.animations.shift();
+                if (typeof aArgs.html_param != 'undefined') {
+                    $(aArgs.target_dom).html(aArgs.html_param);
+                }
+                if (typeof aArgs.css_param != 'undefined') {
+                    $.each(aArgs.css_param, function (key, val) {
+                        $(aArgs.target_dom).css(key, val);
+                    });
+                }
+                if (typeof aArgs.animation_param != 'undefined') {
+                    if (typeof aArgs.animation_time_rate != 'undefined') {
+                        iAnimationTime *= aArgs.animation_time_rate;
                     }
-                );
+                    $(aArgs.target_dom).animate(
+                        aArgs.animation_param,
+                        iAnimationTime,
+                        'linear',
+                        function () {
+                            _execAnimationUnit(bRecursive);
+                        }
+                    );
+                } else {
+                    setTimeout( function () {
+                        _execAnimationUnit(bRecursive);
+                    }, 1);
+                }
             } else {
+                g_animations.bAnimationProcessing = false;
+                $('#game_field td[style]').removeAttr('style');
                 setTimeout( function () {
-                    execAnimation(bRecursive);
+                    updateField();
+                    if (bRecursive) {
+                        execQueue({ resolve_all : true });
+                    }
                 }, 1);
             }
+        }
+
+        if (!g_animations.bAnimationProcessing) {
+            g_animations.bAnimationProcessing = true;
+            _execAnimationUnit(bRecursive);
         } else {
-            setTimeout( function () {
-                updateField();
-                if (bRecursive) {
-                    execQueue({ resolve_all : true });
-                }
-            }, 1);
+            return;
         }
     }
 
