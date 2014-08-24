@@ -640,17 +640,17 @@ new function () {
             // 伏せ状態のチェックが終わったら各々のチェックに移る
             switch (aArgs.range_type_id) {
                 case 0:
-                    if (getDistance(actor.game_card_id, aArgs.target_id) == 1) {
+                    if (getDistance(actorMon.pos_id, targetMon.pos_id) == 1) {
                         return true;
                     }
                     break;
                 case 1:
-                    if (getDistance(actor.game_card_id, aArgs.target_id) == 2) {
+                    if (getDistance(actorMon.pos_id, targetMon.pos_id) == 2) {
                         return true;
                     }
                     break;
                 case 2:
-                    if (getDistance(actor.game_card_id, aArgs.target_id) == 3) {
+                    if (getDistance(actorMon.pos_id, targetMon.pos_id) == 3) {
                         return true;
                     }
                     break;
@@ -706,7 +706,7 @@ new function () {
                     return true;
                     break;
                 case 9:
-                    if (getDistance(actor.game_card_id, aArgs.target_id) == 3) {
+                    if (getDistance(actorMon.pos_id, targetMon.pos_id) == 3) {
                         return true;
                     }
                     // berakは書かない
@@ -722,12 +722,12 @@ new function () {
                     if (g_master_data.m_card[targetMon.card_id].category == 'Master') {
                         return false;
                     }
-                    if (getDistance(actor.game_card_id, aArgs.target_id) == 1) {
+                    if (getDistance(actorMon.pos_id, targetMon.pos_id) == 1) {
                         return true;
                     }
                     break;
                 case 14:
-                    var dist = getDistance(actor.game_card_id, aArgs.target_id);
+                    var dist = getDistance(actorMon.pos_id, targetMon.pos_id);
                     if (dist == 2 || dist == 3) {
                         return true;
                     }
@@ -785,7 +785,7 @@ new function () {
                     }
                     break;
                 case 22:
-                    if (getDistance(actor.game_card_id, aArgs.target_id) != 1) {
+                    if (getDistance(actorMon.pos_id, targetMon.pos_id) != 1) {
                         return false;
                     }
                     // breakは書かない
@@ -869,12 +869,13 @@ new function () {
     {
         var _addActionFromActorInfo = function () {
             var actor = g_field_data.actor;
+            var aQueue = null;
             switch (actor.act_type) {
                 case 'into_field':
                     if (!actor.game_card_id || !actor.param1) {
                         throw 'actor_info_invalid';
                     }
-                    g_field_data.queues.push({
+                    aQueue = {
                         actor_id        : actor.game_card_id,
                         log_message     : 'モンスターをセット',
                         resolved_flg    : 0,
@@ -892,15 +893,41 @@ new function () {
                                 param1          : actor.param1,
                             },
                         ],
-                    });
-                    g_field_data.actor = {game_card_id : null};
+                    };
                     break;
                 case 'attack':
+                    aQueue = {
+                        actor_id        : actor.game_card_id,
+                        log_message     : '通常攻撃',
+                        resolved_flg    : 0,
+                        priority        : g_master_data.queue_priority['command'],
+                        queue_units : [
+                            {
+                                queue_type_id   : 1024,
+                                target_id       : actor.game_card_id,
+                                cost_flg        : true,
+                            },
+                            {
+                                queue_type_id   : 1001,
+                                target_id       : actor.aTargets[0].game_card_id,
+                            },
+                        ],
+                    };
+                    var mon = g_field_data.cards[actor.game_card_id];
+                    var aCardData = g_master_data.m_card[mon.card_id];
+                    if (aCardData.category == 'master') {
+                        aQueue.queue_units.push({
+                            queue_type_id   : 1004,
+                            target_id       : actor.game_card_id,
+                            param1          : -3,
+                            cost_flg        : true,
+                        });
+                    }
                     break;
                 case 'arts':
                     break;
                 case 'move':
-                    var aQueue = {
+                    aQueue = {
                         actor_id        : actor.game_card_id,
                         log_message     : '移動',
                         resolved_flg    : 0,
@@ -934,14 +961,16 @@ new function () {
                             param1          : g_field_data.cards[actor.game_card_id].pos_id,
                         });
                     }
-                    g_field_data.queues.push(aQueue);
-                    g_field_data.actor = {game_card_id : null};
-                    $('.actor').removeClass('actor');
                     break;
                 case 'escape':
                     break;
             }
-            execQueue({ resolve_all : true });
+            if (aQueue) {
+                g_field_data.queues.push(aQueue);
+                g_field_data.actor = {game_card_id : null};
+                $('.actor').removeClass('actor');
+                execQueue({ resolve_all : true });
+            }
         };
 
         try {
@@ -994,6 +1023,7 @@ new function () {
                     });
                     if (bRangeOk) {
                         actor.aTargets.push(aTargetInfo);
+                        _addActionFromActorInfo();
                     }
                     break;
                 case 'arts':
@@ -1056,7 +1086,11 @@ new function () {
                         var sLvHp  = '<span class="mini-font">LV</span><span class="lv">' + sLv + '</span>';
                         sLvHp += '<span class="mini-font">HP</span><span class="hp">?</span>';
                         if (!val.standby_flg) {
-                            sImgSrc = '/images/card/' + g_master_data.m_monster[val.monster_id].image_file_name;
+                            sImgSrc = '/images/card/';
+                            if (getMaxActCount(val.monster_id) <= val.act_count) {
+                                sImgSrc += 'gray_';
+                            }
+                            sImgSrc += g_master_data.m_monster[val.monster_id].image_file_name;
                             sImgAlt = g_master_data.m_monster[val.monster_id].monster_name;
                             sLv = g_master_data.m_monster[val.monster_id].lv;
                             sLvHp  = '<span class="mini-font">LV</span><span class="lv">' + sLv + '</span>';
@@ -1442,9 +1476,9 @@ new function () {
                                 targetMon.hp -= pow;
                             }
                             damageReaction({
-                                actorId     : exec_act.actor_id,
+                                actor_id    : exec_act.actor_id,
                                 priority    : exec_act.priority,
-                                targetId    : q.target_id,
+                                target_id   : q.target_id,
                                 damage      : pow,
                             });
                             break;
@@ -1801,16 +1835,7 @@ new function () {
                             break;
                         case 1024:
                             var mon = g_field_data.cards[q.target_id];
-                            var aMonsterData = g_master_data.m_monster[mon.monster_id];
-                            var nMaxAct = 1;
-                            if (mon.pos_id == 'myMaster' || mon.pos_id == 'enemyMaster') {
-                                nMaxAct = 10000;
-                            }
-                            else if (aMonsterData.skill.id == 4) {
-                                nMaxAct = 2;
-                            } else if (aMonsterData.skill.id == 5) {
-                                nMaxAct = 3;
-                            }
+                            var nMaxAct = getMaxActCount(mon.monster_id);
                             if (nMaxAct <= mon.act_count) {
                                 throw 'already_acted';
                             }
@@ -1985,6 +2010,7 @@ new function () {
 
         if (!g_animations.bAnimationProcessing) {
             g_animations.bAnimationProcessing = true;
+            $('.actor').removeClass('actor');
             _execAnimationUnit(bRecursive);
         } else {
             return;
@@ -2108,7 +2134,7 @@ new function () {
             }
 
             // シールド系効果の適用
-            if (pow && g_master_data.m_card[targetId].category == 'master') {
+            if (pow && g_master_data.m_card[target.card_id].category == 'master') {
                 pow -= 2;
                 if (pow < 0) {
                     pow = 0;
@@ -2244,7 +2270,7 @@ new function () {
         if (target.pos_category != 'field') {
             throw 'invalid_target';
         }
-        if (0 < damage && (target.pos_id == 'myMaster' || target.pos_id == 'enemyMaster')) {
+        if (0 < aArgs.damage && (target.pos_id == 'myMaster' || target.pos_id == 'enemyMaster')) {
             // マスターがダメージを受けた場合、ストーンを還元する
             g_field_data.queues.push({
                 actor_id        : null,
@@ -2255,7 +2281,7 @@ new function () {
                     {
                         queue_type_id   : 1004,
                         target_id       : target.game_card_id,
-                        param1          : damage,
+                        param1          : aArgs.damage,
                     }
                 ],
             });
@@ -2965,6 +2991,24 @@ new function () {
             }
         }
         return false;
+    }
+
+    function getMaxActCount (monster_id)
+    {
+        try {
+            var aMonsterData = g_master_data.m_monster[monster_id];
+            var aCardData = g_master_data.m_card[aMonsterData.card_id];
+            if (aCardData.category == 'master') {
+                return 10000;
+            } else if (aMonsterData.skill.id == 4) {
+                nMaxAct = 2;
+            } else if (aMonsterData.skill.id == 5) {
+                nMaxAct = 3;
+            }
+            return 1;
+        } catch (e) {
+            return 0;
+        }
     }
 
     function getRelativePosId (sPosId, df)

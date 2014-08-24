@@ -137,6 +137,24 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         );
         $router->addRoute('no_image', $route);
 
+        // グレースケール画像が無かった時用
+        $route = new Zend_Controller_Router_Route_Regex(
+            '(.*)/gray_([^/]+)\.(png|jpg|gif)',
+            array(
+                'controller'    =>  'api',
+                'action'        =>  'gray-image',
+                1               =>  '/images',
+                2               =>  'dot',
+                3               =>  'png',
+            ),
+            array(
+                1   => 'file_path',
+                2   => 'file_name',
+                3   => 'ext',
+            )
+        );
+        $router->addRoute('gray_scale', $route);
+
         // マスタデータをごにょってjsにして返す
         $route = new Zend_Controller_Router_Route_Regex(
             'js/([^/]+)\.js',

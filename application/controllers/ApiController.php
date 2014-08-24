@@ -24,6 +24,25 @@ class ApiController extends Zend_Controller_Action
         exit();
     }
 
+    public function grayImageAction()
+    {
+        $request = $this->getRequest();
+
+        $sDir = $_SERVER['DOCUMENT_ROOT'] . $request->getParam('file_path') . '/';
+        $sExt = $request->getParam('ext');
+        $sSrc = $sDir . $request->getParam('file_name') . '.' . $sExt;
+        $sDest = $sDir . 'gray_' . $request->getParam('file_name') . '.' . $sExt;
+
+        $im = new Imagick($sSrc);
+        $im->setImageColorspace(Imagick::COLORSPACE_GRAY);
+        $im->writeImages($sDest, true);
+
+        header("Content-type: image/{$sExt}");
+        echo $im;
+        $im->destroy();
+        exit();
+    }
+
     public function buildJavascriptAction()
     {
         $request = $this->getRequest();
