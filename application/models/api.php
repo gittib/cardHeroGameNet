@@ -74,11 +74,11 @@ class model_Api {
             )
             ->joinLeft(
                 array('monaft' => 'm_monster'),
-                implode(' and ', array(
+                array(
                     'monaft.card_id = submon.card_id',
                     'monaft.monster_name = submon.monster_name',
                     'monaft.lv = submon.lv + 1'
-                )),
+                ),
                 array(
                     'next_lv_monster_id'   => new Zend_Db_Expr('min(monaft.monster_id)'),
                 )

@@ -91,6 +91,27 @@ class GameController extends Zend_Controller_Action
         $this->render('deck/list', null, true);
     }
 
+    public function startAction()
+    {
+        $request = $this->getRequest();
+        $deckId = $request->getParam('deck_id');
+        if (!isset($deckId) || $deckId == '') {
+            throw new Exception('デッキ情報の取得に失敗しました');
+        }
+        $this->_layout->noindex = true;
+
+        $this->_getModel();
+
+        $iGameFieldId = $this->_model->start(array(
+            'game_field_id' => $request->getParam('game_field_id'),
+            'deck_id'       => $request->getParam('deck_id'),
+        ));
+        $request->setParam('game_field_id', $iGameFieldId);
+        $request->setParam('ignore_open_flg', true);
+
+        $this->forward('field');
+    }
+
     public function fieldAction()
     {
         $this->_getModel();
@@ -133,11 +154,11 @@ class GameController extends Zend_Controller_Action
             'field_data'    => $aFieldData,
         ));
 
-        // $this->_redirect(
-        //     '/game/list/',
-        //     array('code' => 301)
-        // );
-        // exit();
+        $this->_redirect(
+            '/game/list/',
+            array('code' => 301)
+        );
+        exit();
     }
 
     public function listAction()

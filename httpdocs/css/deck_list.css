@@ -11,14 +11,20 @@ div.message {
 
 .deck_frame {
   border: solid 3px; }
-  .deck_frame div .card_list {
-    padding: 3px;
+  .deck_frame div.card_list {
+    width: 100%;
+    max-width: 350px;
     float: left;
-    border: solid 1px; }
+    border: none;
+    text-align: center; }
+    .deck_frame div.card_list div.card_image {
+      float: left;
+      padding: 3px; }
   .deck_frame div.deck_header > div {
     padding: 2px;
     float: left; }
   .deck_frame div.edit_link.mine {
+    width: 100%;
     margin-bottom: 20px; }
   .deck_frame img {
     border: solid 1px;

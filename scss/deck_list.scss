@@ -18,11 +18,16 @@ div.message {
 
 .deck_frame {
     border: solid 3px;
-    div {
-        .card_list {
-            padding: 3px;
+    div.card_list {
+        width: 100%;
+        max-width: 350px;
+        float: left;
+        border: none;
+        text-align: center;
+
+        div.card_image {
             float: left;
-            border: solid 1px;
+            padding: 3px;
         }
     }
 
@@ -34,6 +39,7 @@ div.message {
     }
 
     div.edit_link.mine {
+        width: 100%;
         margin-bottom: 20px;
     }
 

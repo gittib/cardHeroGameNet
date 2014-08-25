@@ -478,6 +478,7 @@ new function () {
         });
 
         var keys = [
+            'myMaster',
             'myFront1',
             'myFront2',
             'myBack1',

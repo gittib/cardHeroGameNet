@@ -41,7 +41,7 @@ if (empty($this->aCardInfoArray)) {
         $this->aCardInfoInField = $aCardInfo;
         $sLinkTitle = "フィールドID:{$aCardInfo['field_info']['game_field_id']}({$aCardInfo['field_info']['upd_date']})";
         $sHref = "/game/receive/{$aCardInfo['field_info']['game_field_id']}/";
-        if (true || isset($aCardInfo['field_info']['started_flg']) && $aCardInfo['field_info']['started_flg']) {
+        if (isset($aCardInfo['field_info']['started_flg']) && $aCardInfo['field_info']['started_flg']) {
             $sHref = "/game/field/{$aCardInfo['field_info']['game_field_id']}/";
         }
         echo <<<_eos_

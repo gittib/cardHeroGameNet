@@ -128,7 +128,10 @@ class model_Game {
             )
             ->joinLeft(
                 array('monster' => 't_game_monster'),
-                'monster.game_card_id = card.game_card_id',
+                array(
+                    'monster.game_card_id = card.game_card_id',
+                    'monster.game_field_id = card.game_field_id',
+                ),
                 array(
                     'monster_id',
                     'field_position'    => 'position',
@@ -147,7 +150,10 @@ class model_Game {
             )
             ->joinLeft(
                 array('status' => 't_game_monster_status'),
-                'status.game_card_id = monster.game_card_id',
+                array(
+                    'status.game_card_id = monster.game_card_id',
+                    'status.game_field_id = monster.game_field_id',
+                ),
                 array(
                     'status_id',
                     'status_turn_count' => 'turn_count',
@@ -270,7 +276,10 @@ class model_Game {
                     )
                     ->join(
                         array('tgc' => 't_game_cards'),
-                        'tgc.game_card_id = tgm.game_card_id',
+                        array(
+                            'tgc.game_card_id = tgm.game_card_id',
+                            'tgc.game_field_id = tgm.game_field_id',
+                        ),
                         array(
                             'owner',
                         )
@@ -348,6 +357,54 @@ class model_Game {
             $sPos = strtoupper($sPos);
         }
         return $sPos;
+    }
+
+    public function start ($aArgs)
+    {
+        return;
+
+        $aUserInfo = Common::checkLogin();
+        $userId = -1;
+        if (isset($aUserInfo) && $aUserInfo != '') {
+            $userId = $aUserInfo['user_id'];
+        }
+
+        $sel = $this->_db->select()
+            ->from(
+                array('vd' => 'v_deck')
+            )
+            ->where('vd.deck_id = ?', $aArgs['deck_id']);
+
+        try {
+            $this->_db->beginTransaction();
+
+            $iGameFieldId = $aArgs['game_field_id'];
+            $iSort = 1000;
+            foreach ($aCardInfo['deck_cards'] as $val) {
+                $val['game_field_id']       = $iGameFieldId;
+                $val['position_category']   = 'deck';
+                $val['sort_no']             = $iSort++;
+                $this->_insertGameCard($val);
+            }
+            foreach ($aCardInfo['hand_cards'] as $val) {
+                $val['game_field_id']       = $iGameFieldId;
+                $val['position_category']   = 'hand';
+                $this->_insertGameCard($val);
+            }
+            foreach ($aCardInfo['field_cards'] as $val) {
+                $val['game_field_id']       = $iGameFieldId;
+                $val['position_category']   = 'field';
+                $this->_insertGameCard($val);
+            }
+
+            $this->_db->commit();
+
+        } catch (Exception $e) {
+            $this->_db->rollBack();
+            throw $e;
+        }
+
+        return $iGameFieldId;
     }
 
     public function standby($deckId)
@@ -513,6 +570,7 @@ class model_Game {
         if ($row['position_category'] == 'field') {
             $set = array(
                 'game_card_id'  => $iGameCardId,
+                'game_field_id' => $row['game_field_id'],
                 'monster_id'    => $row['monster_id'],
                 'position'      => $row['position'],
                 'hp'            => $row['hp'],
@@ -539,7 +597,7 @@ class model_Game {
             $aFieldData['turn'] = 1;
         }
 
-        if ($aFieldData['turn'] == 1) {
+        if ($aFieldData['turn'] == 2) {
             $aFieldData['stone1'] = $aFieldData['my_stone'];
             $aFieldData['stone2'] = $aFieldData['enemy_stone'];
         } else {
@@ -580,8 +638,7 @@ class model_Game {
             );
             $this->_db->insert('t_game_field', $set);
             foreach ($aFieldData['cards'] as $val) {
-                $sql = "select nextval('t_game_cards_game_card_id_seq')";
-                $iGameCardId = $this->_db->fetchOne($sql);
+                $iGameCardId = $val['game_card_id'];
                 if ($val['owner'] == 'enemy') {
                     // aFieldData['turn']はswwap済なのでenemyはそのまま、myをswapする
                     $val['owner'] = $aFieldData['turn'];
@@ -601,8 +658,14 @@ class model_Game {
                 );
                 $this->_db->insert('t_game_cards', $set);
                 if ($val['pos_category'] == 'field') {
+                    if (isset($val['standby_flg']) && $val['standby_flg']) {
+                        $val['standby_flg'] = 1;
+                    } else {
+                        $val['standby_flg'] = 0;
+                    }
                     $set = array(
                         'game_card_id'  => $iGameCardId,
+                        'game_field_id' => $iGameFieldId,
                         'monster_id'    => $val['monster_id'],
                         'position'      => preg_replace('/^(ene)?my/', '', $val['pos_id']),
                         'hp'            => $val['hp'],
@@ -620,6 +683,7 @@ class model_Game {
                         $set = array(
                             'status_id'     => $st['status_id'],
                             'game_card_id'  => $iGameCardId,
+                            'game_field_id' => $iGameFieldId,
                             'turn_count'    => $st['turn_count'],
                             'param1'        => $st['param1'],
                             'param2'        => $st['param2'],
@@ -658,8 +722,8 @@ class model_Game {
                         // ターンエンド処理は入れない
                         continue;
                     }
-                    if (!isset($q['target_card_id'])) {
-                        $q['target_card_id'] = null;
+                    if (!isset($q['target_id'])) {
+                        $q['target_id'] = null;
                     }
                     if (!isset($q['cost_flg'])) {
                         $q['cost_flg'] = 0;
@@ -674,7 +738,7 @@ class model_Game {
                         'queue_id'          => $iQueueId,
                         'cost_flg'          => $q['cost_flg'],
                         'queue_type_id'     => $q['queue_type_id'],
-                        'target_card_id'    => $q['target_card_id'],
+                        'target_card_id'    => $q['target_id'],
                         'param1'            => $q['param1'],
                         'param2'            => $q['param2'],
                     );
