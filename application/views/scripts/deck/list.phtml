@@ -43,7 +43,7 @@ _eos_;
     <div class="edit_link clearfix">
         <form action="/game/start/" method="post">
             <input type="submit" value="このデッキを使ってゲームを受ける" />
-            <input type="hidden" name="game_field_id" value="{$this->aCardInfo['field_info']['game_field_id']}" />
+            <input type="hidden" name="game_field_id" value="{$this->nGameFieldId}" />
             <input type="hidden" name="deck_id" value="{$deckId}" />
         </form>
     </div>
@@ -94,8 +94,10 @@ _eos_;
             </div>
         </div>
     </div>
-    <div class="card_list clearfix">
+    <div class="card_list_frame clearfix">
+        <div class="card_list clearfix">
 {$sCardListHtml}
+        </div>
     </div>
 {$sDeckLink}
 </div>

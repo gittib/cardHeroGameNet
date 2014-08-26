@@ -86,6 +86,7 @@ class GameController extends Zend_Controller_Action
         $aDeckList = $modelDeck->getDeckList($iPage);
         $this->view->assign('aCardInfoInField', reset($aCardInfoArray));
         $this->view->assign('aDeckList', $aDeckList);
+        $this->view->assign('nGameFieldId', $nGameFieldId);
         $this->view->assign('bGameStart', true);
         $this->view->assign('sDispMessage', '使用するデッキを選んでください。');
         $this->render('deck/list', null, true);
