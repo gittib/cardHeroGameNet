@@ -1801,18 +1801,25 @@ new function () {
                                 monster_id      : q.param1,
                                 reset_hp        : q.param2,
                             });
-                            var sDom = '#' + g_field_data.cards[q.target_id].pos_id + ' img';
+                            var mon = g_field_data.cards[q.target_id];
+                            var sDom = '#' + mon.pos_id + ' div.pict';
                             g_field_data.animation_info.animations.push({
-                                target_dom              : sDom,
+                                target_dom : sDom,
+                                html_param : '<img src="/images/card/' + g_master_data.m_monster[mon.monster_id].image_file_name + '" />',
+                            });
+                            g_field_data.animation_info.animations.push({
+                                target_dom : sDom + ' img',
                                 css_param : {
-                                    margin : '25px',
-                                    height : 0,
-                                    width  : 0,
+                                    opacity : 0,
+                                    margin  : '25px',
+                                    height  : 0,
+                                    width   : 0,
                                 },
                                 animation_param : {
                                     margin  : 0,
                                     height  : '50px',
                                     width   : '50px',
+                                    opacity : 1,
                                 },
                             });
                             break;
