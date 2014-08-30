@@ -1,5 +1,5 @@
-arts_queue = {
-    getAcrtsQueue : function (aArgs) {
+arts_queue = function () {
+    var getAcrtsQueue = function (aArgs) {
         return null;
     };
-}
+};

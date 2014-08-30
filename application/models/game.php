@@ -183,11 +183,11 @@ class model_Game {
         $aTmpRow = null;
         foreach ($rslt as $val) {
             if ($iGameCardId != $val['game_card_id']) {
-                if (isset($aTmpRow)) {
+                if (isset($aTmpRow) && $aTmpRow) {
                     $aRet[$iGameFieldId][$sPosCategory][$iGameCardId] = $aTmpRow;
-                }
-                if ($val['owner'] != 1) {
-                    $aRet[$iGameFieldId]['field_info']['started_flg'] = true;
+                    if ($val['owner'] != 1) {
+                        $aRet[$iGameFieldId]['field_info']['started_flg'] = true;
+                    }
                 }
                 $aTmpRow = array(
                     'card_id'           => $val['card_id'],
@@ -218,8 +218,8 @@ class model_Game {
                     'param1'    => $val['status_param1'],
                     'param2'    => $val['status_param2'],
                     'explain'   => $this->_statusExplain(array(
-                        'turn'  => $aRet[$iGameFieldId]['turn'],
-                        'row'   => $val,
+                        'turn'      => $aRet[$iGameFieldId]['field_info']['turn'],
+                        'row'       => $val,
                     )),
                 );
             }
@@ -234,9 +234,8 @@ class model_Game {
     private function _statusExplain($aArgs)
     {
         $row = $aArgs['row'];
-        $sPos = $this->_getPosCode($row['position'], ($row['owner'] == $aArgs['turn']));
-        switch ($row['status_id'])
-        {
+        $sPos = $this->_getPosCode($row['field_position'], ($row['owner'] == $aArgs['turn']));
+        switch ($row['status_id']) {
             case 101:
             case 102:
             case 103:
@@ -416,6 +415,23 @@ class model_Game {
 
             $iGameFieldId = $aArgs['game_field_id'];
             $iSort = 1000;
+
+            $sel = $this->_db->select()
+                    ->from(
+                        't_game_cards',
+                        array(
+                            'cnt' => new Zend_Db_Expr("count(*)"),
+                        )
+                    )
+                    ->where('game_field_id = ?', $iGameFieldId)
+                    ->where('owner = 2')
+                    ;
+
+            $cnt = $this->_db->fetchOne($sel);
+            if ($cnt > 0) {
+                throw new Exception("対戦相手情報登録済み");
+            }
+
             foreach ($aCardInfo['deck_cards'] as $val) {
                 $val['game_field_id']       = $iGameFieldId;
                 $val['position_category']   = 'deck';

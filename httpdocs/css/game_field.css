@@ -2,7 +2,8 @@
 #game_field {
   width: 100%;
   border: 1px solid;
-  border-collapse: collapse; }
+  border-collapse: collapse;
+  margin-top: 20px; }
   #game_field td {
     width: 30%;
     height: 51px;

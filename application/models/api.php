@@ -151,6 +151,7 @@ class model_Api {
                     $iAttackStone = 0;
                 }
                 $aRet['m_monster'][$iMonsterId] = array(
+                    'monster_id'        => $iMonsterId,
                     'card_id'           => $val['card_id'],
                     'name'              => $val['monster_name'],
                     'lv'                => $val['lv'],

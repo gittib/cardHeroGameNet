@@ -37,7 +37,7 @@ class ApiController extends Zend_Controller_Action
         $im->setImageColorspace(Imagick::COLORSPACE_GRAY);
         $im->writeImages($sDest, true);
 
-        header("Content-type: image/{$sExt}");
+        $this->getResponse()->setHeader('Content-type', "image/{$sExt}");
         echo $im;
         $im->destroy();
         exit();
@@ -57,7 +57,7 @@ class ApiController extends Zend_Controller_Action
                 throw new Zend_Controller_Action_Exception('Unknown script', 404);
         }
 
-        header("Content-Type: text/javascript; charset=utf-8");
+        $this->getResponse()->setHeader('Content-Type', 'text/javascript');
         $this->view->assign('sScriptName', $sScriptName);
         $this->view->assign('json', $json);
     }
@@ -65,7 +65,7 @@ class ApiController extends Zend_Controller_Action
     public function sitemapAction()
     {
         $this->_helper->layout->disableLayout();
-        header("Content-Type: text/xml; charset=utf-8");
+        $this->getResponse()->setHeader('Content-Type', 'text/xml');
         $this->view->assign('aUrls', $this->_model->getUrl());
     }
 
