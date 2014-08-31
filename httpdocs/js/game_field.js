@@ -576,11 +576,11 @@ new function () {
         }
         try {
             if (0 < g_field_data.lvup_assist) {
-                throw new Error('lvup_standby');
+                throw 'lvup_standby';
             }
             $.each(g_field_data.cards, function (i, val) {
                 if (0 < val.lvup_standby) {
-                    throw new Error('lvup_standby');
+                    throw 'lvup_standby';
                 }
             });
         } catch (e) {
@@ -1305,7 +1305,7 @@ new function () {
                 $.each(mon.arts, function(i, val) {
                     var sPower = '';
                     var iStone = val.stone;
-                    if (val.damage_type_flg == 'P' || val.damage_type_flg == 'D') {
+                    if (val.damage_type_flg == 'P' || val.damage_type_flg == 'D' || val.damage_type_flg == 'HP') {
                         sPower = val.power + '' + val.damage_type_flg;
                     }
                     if (typeof aCard.status != 'undefined') {
@@ -1489,6 +1489,7 @@ new function () {
                                 priority    : exec_act.priority,
                                 target_id   : q.target_id,
                                 damage      : pow,
+                                attack_flg  : true,
                             });
                             break;
                         case 1002:
@@ -1540,9 +1541,9 @@ new function () {
                                 targetMon.hp -= pow;
                             }
                             damageReaction({
-                                actorId     : exec_act.actor_id,
+                                actor_id    : exec_act.actor_id,
                                 priority    : exec_act.priority,
-                                targetId    : q.target_id,
+                                target_id   : q.target_id,
                                 damage      : pow,
                             });
                             var sPosId = '#' + targetMon.pos_id;
@@ -1558,6 +1559,7 @@ new function () {
                             break;
                         case 1006:
                             var targetMon = g_field_data.cards[q.target_id];
+                            console.log(targetMon);
                             var dam = q.param1;
                             if (q.param2 == 'damage_noroi') {
                                 dam = targetMon.hp - 1;
@@ -1570,9 +1572,9 @@ new function () {
                                 targetMon.hp -= dam;
                             }
                             damageReaction({
-                                actorId     : exec_act.actor_id,
+                                actor_id    : exec_act.actor_id,
                                 priority    : exec_act.priority,
-                                targetId    : q.target_id,
+                                target_id   : q.target_id,
                                 damage      : dam,
                             });
                             var sPosId = '#' + targetMon.pos_id;
@@ -1720,7 +1722,11 @@ new function () {
                             });
                             break;
                         case 1017:
-                            g_field_data.cards[q.target_id].lvup_standby += q.param1;
+                            var mon = g_field_data.cards[q.target_id];
+                            var aMonsterData = g_master_data.m_monster[mon.monster_id];
+                            if (aMonsterData.next_monster_id || 0 < aMonsterData.supers.length) {
+                                g_field_data.cards[q.target_id].lvup_standby += parseInt(q.param1);
+                            }
                             break;
                         case 1018:
                             g_field_data.cards[q.target_id].lvup_standby = 0;
@@ -2082,10 +2088,11 @@ new function () {
             if (act && act.status) {
                 if (typeof act.status[100] != 'undefined') {
                     g_field_data.queues.push({
-                        actor_id        : targetId,
-                        log_message     : '気合溜め解除',
-                        resolved_flg    : 0,
-                        priority        : g_master_data.queue_priority['same_time'],
+                        actor_id            : targetId,
+                        log_message         : '気合溜め解除',
+                        resolved_flg        : 0,
+                        priority            : g_master_data.queue_priority['same_time'],
+                        actor_anime_disable : true,
                         queue_units : [
                             {
                                 queue_type_id   : 1027,
@@ -2098,10 +2105,11 @@ new function () {
                 if (act.status[101] != null) {
                     pow++;
                     g_field_data.queues.push({
-                        actor_id        : actorId,
-                        log_message     : 'パワーアップ効果発揮',
-                        resolved_flg    : 0,
-                        priority        : g_master_data.queue_priority['same_time'],
+                        actor_id            : actorId,
+                        log_message         : 'パワーアップ効果発揮',
+                        resolved_flg        : 0,
+                        priority            : g_master_data.queue_priority['same_time'],
+                        actor_anime_disable : true,
                         queue_units : [
                             {
                                 queue_type_id   : 1027,
@@ -2135,10 +2143,11 @@ new function () {
                 if (act.status[103] != null) {
                     pow = 2;
                     g_field_data.queues.push({
-                        actor_id        : actorId,
-                        log_message     : 'パワー２効果発揮',
-                        resolved_flg    : 0,
-                        priority        : g_master_data.queue_priority['same_time'],
+                        actor_id            : actorId,
+                        log_message         : 'パワー２効果発揮',
+                        resolved_flg        : 0,
+                        priority            : g_master_data.queue_priority['same_time'],
+                        actor_anime_disable : true,
                         queue_units : [
                             {
                                 queue_type_id   : 1027,
@@ -2153,10 +2162,11 @@ new function () {
                         pow--;
                     }
                     g_field_data.queues.push({
-                        actor_id        : actorId,
-                        log_message     : 'パワーダウン効果発揮',
-                        resolved_flg    : 0,
-                        priority        : g_master_data.queue_priority['same_time'],
+                        actor_id            : actorId,
+                        log_message         : 'パワーダウン効果発揮',
+                        resolved_flg        : 0,
+                        priority            : g_master_data.queue_priority['same_time'],
+                        actor_anime_disable : true,
                         queue_units : [
                             {
                                 queue_type_id   : 1027,
@@ -2184,10 +2194,11 @@ new function () {
             if (pow && target.status[107] != null) {
                 pow /= 2;
                 g_field_data.queues.push({
-                    actor_id        : targetId,
-                    log_message     : 'ガラスの盾 効果発揮',
-                    resolved_flg    : 0,
-                    priority        : g_master_data.queue_priority['same_time'],
+                    actor_id            : targetId,
+                    log_message         : 'ガラスの盾 効果発揮',
+                    resolved_flg        : 0,
+                    priority            : g_master_data.queue_priority['same_time'],
+                    actor_anime_disable : true,
                     queue_units : [
                         {
                             queue_type_id   : 1027,
@@ -2206,10 +2217,11 @@ new function () {
             if (pow && target.status[100] != null) {
                 pow--;
                 g_field_data.queues.push({
-                    actor_id        : targetId,
-                    log_message     : '気合溜め 防御効果発揮',
-                    resolved_flg    : 0,
-                    priority        : g_master_data.queue_priority['same_time'],
+                    actor_id            : targetId,
+                    log_message         : '気合溜め 防御効果発揮',
+                    resolved_flg        : 0,
+                    priority            : g_master_data.queue_priority['same_time'],
+                    actor_anime_disable : true,
                     queue_units : [
                         {
                             queue_type_id   : 1027,
@@ -2263,10 +2275,11 @@ new function () {
 
             if (dam && target.status[100] != null) {
                 g_field_data.queues.push({
-                    actor_id        : targetId,
-                    log_message     : '気合溜め解除',
-                    resolved_flg    : 0,
-                    priority        : g_master_data.queue_priority['same_time'],
+                    actor_id            : targetId,
+                    log_message         : '気合溜め解除',
+                    resolved_flg        : 0,
+                    priority            : g_master_data.queue_priority['same_time'],
+                    actor_anime_disable : true,
                     queue_units : [
                         {
                             queue_type_id   : 1027,
@@ -2296,10 +2309,11 @@ new function () {
      * damageReaction
      * ダメージを受けた時の反撃行動を処理する
      *
-     * @param   aArgs.actor_id  : 行動者のgame_card_id
-     * @param   aArgs.priority  : 行動のpriority。レベルアップの判定に使う
-     * @param   aArgs.target_id : 対象のgame_card_id
-     * @param   aArgs.damage    : ダメージ
+     * @param   aArgs.actor_id      : 行動者のgame_card_id
+     * @param   aArgs.priority      : 行動のpriority。レベルアップの判定に使う
+     * @param   aArgs.target_id     : 対象のgame_card_id
+     * @param   aArgs.damage        : ダメージ
+     * @param   aArgs.attack_flg    : 通常攻撃フラグ。ボムゾウの自爆とかの制御用
      */
     function damageReaction(aArgs)
     {
@@ -2541,6 +2555,7 @@ new function () {
                         ],
                     });
                 } else {
+                    var targetMonsterData = g_master_data.m_monster[target.monster_id];
                     g_field_data.queues.push({
                         actor_id            : act.game_card_id,
                         log_message         : '',
@@ -2551,7 +2566,7 @@ new function () {
                             {
                                 queue_type_id   : 1017,
                                 target_id       : act.game_card_id,
-                                param1          : target.lv,
+                                param1          : targetMonsterData.lv,
                             },
                         ],
                     });
@@ -2570,6 +2585,39 @@ new function () {
                 'background-color'  : g_base_color.background,
             },
         });
+
+        if (aArgs.attack_flg) {
+            // actorの性格処理
+            if (typeof act.monster_id != 'undefined' && !act.skill_disable_flg) {
+                var actorMon = g_master_data.m_monster[act.monster_id];
+                switch (actorMon.skill.id) {
+                    case 1:
+                    case 2:
+                    case 3:
+                        var dam = 2;
+                        if (actorMon.skill.id == 2) {
+                            dam = 3;
+                        } else if (actorMon.skill.id == 3) {
+                            dam = 6;
+                        }
+                        g_field_data.queues.push({
+                            actor_id            : null,
+                            log_message         : '自爆による反動ダメージ',
+                            resolved_flg        : 0,
+                            priority            : g_master_data.queue_priority['same_time'],
+                            actor_anime_disable : true,
+                            queue_units : [
+                                {
+                                    queue_type_id   : 1006,
+                                    target_id       : act.game_card_id,
+                                    param1          : dam,
+                                },
+                            ]
+                        });
+                        break;
+                }
+            }
+        }
 
         return true;
     }
