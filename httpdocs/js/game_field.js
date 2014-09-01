@@ -35,8 +35,10 @@ new function () {
 
         $(document).on('click', '#game_field td.monster_space', function () {
             var oDom = $(this);
-            switch (checkGameState()) {
+            var sGameState = checkGameState();
+            switch (sGameState) {
                 case 'normal':
+                case 'lvup_standby':
                     var sActorAutoChange = $('[name=actor_auto_change]:checked').val();
                     if (!sActorAutoChange) {
                         sActorAutoChange = 'hand';
@@ -56,7 +58,9 @@ new function () {
                         $('.actor').removeClass('actor');
                         oDom.addClass('actor');
 
-                        updateActorDom();
+                        updateActorDom({
+                            'game_state'    : sGameState,
+                        });
                     };
 
                     if (!g_field_data.actor.act_type) {
@@ -72,54 +76,54 @@ new function () {
                         }
                     }
                     break;
-                case 'lvup_standby':
-                    var iGameCardId = getGameCardId({
-                        pos_category    : 'field',
-                        pos_id          : oDom.attr('id'),
-                    });
-                    if (g_field_data.cards[iGameCardId].lvup_standby <= 0 && g_field_data.lvup_assist <= 0) {
-                        // そもそもレベルアップ権利持ってない時はスルー
-                        break;
-                    }
-                    var mon = g_master_data.m_monster[g_field_data.cards[iGameCardId].monster_id];
-                    if (mon.next_monster_id) {
-                        // 普通にレベルアップできるならそうする
-                        g_field_data.queues.push({
-                            actor_id        : iGameCardId,
-                            log_message     : '',
-                            resolved_flg    : 0,
-                            priority        : g_master_data.queue_priority['system'],
-                            queue_units : [
-                                {
-                                    queue_type_id   : 1019,
-                                    target_id       : iGameCardId,
-                                }
-                            ],
-                        });
-                    } else {
-                        // 普通にレベルアップ出来ない場合、スーパーに進化できるか判定してOKな手札にクラスを設置する
-                        var bChecked = false;
-                        $('.valid_super').removeClass('valid_super');
-                        $('#hand_card div.hand_card').each(function() {
-                            var oThis = $(this);
-                            var bSuper = isValidSuper({
-                                before_game_card_id : iGameCardId,
-                                after_game_card_id  : oThis.attr('game_card_id'),
-                            });
-                            if (bSuper) {
-                                oThis.addClass('valid_super');
-                                g_field_data.actor = {
-                                    game_card_id    : iGameCardId,
-                                };
-                                bChecked = true;
-                            }
-                        });
-                        if (!bChecked) {
-                            // 進化できるスーパーが手札に無かった場合、進化の権利を剥奪する
-                            g_field_data.cards[iGameCardId].lvup_standby = 0;
-                        }
-                    }
-                    break;
+              //case 'lvup_standby':
+              //    var iGameCardId = getGameCardId({
+              //        pos_category    : 'field',
+              //        pos_id          : oDom.attr('id'),
+              //    });
+              //    if (g_field_data.cards[iGameCardId].lvup_standby <= 0 && g_field_data.lvup_assist <= 0) {
+              //        // そもそもレベルアップ権利持ってない時はスルー
+              //        break;
+              //    }
+              //    var mon = g_master_data.m_monster[g_field_data.cards[iGameCardId].monster_id];
+              //    if (mon.next_monster_id) {
+              //        // 普通にレベルアップできるならそうする
+              //        g_field_data.queues.push({
+              //            actor_id        : iGameCardId,
+              //            log_message     : '',
+              //            resolved_flg    : 0,
+              //            priority        : g_master_data.queue_priority['system'],
+              //            queue_units : [
+              //                {
+              //                    queue_type_id   : 1019,
+              //                    target_id       : iGameCardId,
+              //                }
+              //            ],
+              //        });
+              //    } else {
+              //        // 普通にレベルアップ出来ない場合、スーパーに進化できるか判定してOKな手札にクラスを設置する
+              //        var bChecked = false;
+              //        $('.valid_super').removeClass('valid_super');
+              //        $('#hand_card div.hand_card').each(function() {
+              //            var oThis = $(this);
+              //            var bSuper = isValidSuper({
+              //                before_game_card_id : iGameCardId,
+              //                after_game_card_id  : oThis.attr('game_card_id'),
+              //            });
+              //            if (bSuper) {
+              //                oThis.addClass('valid_super');
+              //                g_field_data.actor = {
+              //                    game_card_id    : iGameCardId,
+              //                };
+              //                bChecked = true;
+              //            }
+              //        });
+              //        if (!bChecked) {
+              //            // 進化できるスーパーが手札に無かった場合、進化の権利を剥奪する
+              //            g_field_data.cards[iGameCardId].lvup_standby = 0;
+              //        }
+              //    }
+              //    break;
             }
         });
 
@@ -575,11 +579,22 @@ new function () {
             return 'tokugi_fuuji';
         }
         try {
-            if (0 < g_field_data.lvup_assist) {
-                throw 'lvup_standby';
-            }
             $.each(g_field_data.cards, function (i, val) {
+                if (typeof val.status != 'undefined') {
+                    if (val.status[111] != 'undefined') {
+                        return true;
+                    }
+                    if (val.status[127] != 'undefined') {
+                        return true;
+                    }
+                    if (val.status[128] != 'undefined') {
+                        return true;
+                    }
+                }
                 if (0 < val.lvup_standby) {
+                    throw 'lvup_standby';
+                }
+                if (0 < g_field_data.lvup_assist) {
                     throw 'lvup_standby';
                 }
             });
@@ -1075,7 +1090,9 @@ new function () {
                 'enemyBack1'    : '#enemyBack1',
                 'enemyBack2'    : '#enemyBack2',
             };
+
             var sMyHandHtml = '';
+            $('.lvup_ok').removeClass('lvup_ok');
             $.each(g_field_data.cards, function (i, val) {
                 switch (val.pos_category) {
                     case 'field':
@@ -1161,6 +1178,75 @@ new function () {
                         if (aEffectFlags.charge) {
                             sStatusEffect += '<span class="charge">！</span>';
                         }
+
+                        var bLvupOk = (function (mon) {
+                            if (mon.lvup_standby <= 0 && g_field_data.lvup_assist <= 0) {
+                                return false;
+                            }
+                            if (typeof mon.status != 'undefined') {
+                                if (typeof mon.status[111] != 'undefined') {
+                                    return false;
+                                }
+                                if (typeof mon.status[127] != 'undefined') {
+                                    return false;
+                                }
+                                if (typeof mon.status[128] != 'undefined') {
+                                    return false;
+                                }
+                            }
+
+                            var aMonsterData = g_master_data.m_monster[mon.monster_id];
+                            if (typeof aMonsterData.next_monster_id != 'undefined') {
+                                return true;
+                            }
+
+                            try {
+                                $.each(g_field_data.cards, function(i2, vval) {
+                                    if (vval.pos_category != 'hand' || vval.owner != 'my') {
+                                        return true;
+                                    }
+                                    var aHandInfo = g_master_data.m_card[vval.card_id];
+                                    if (aHandInfo.category != 'super_front' && aHandInfo.category != 'super_back') {
+                                        return true;
+                                    }
+
+                                    if (aMonsterData.skill.id == 15) {
+                                        throw 'super_ok';
+                                    }
+                                    $.each(aMonsterData.supers, function(j2,vsuper) {
+                                        if (vsuper.card_id == vval.card_id) {
+                                            throw 'super_ok';
+                                        }
+                                    });
+                                });
+                            } catch (e) {
+                                if (e == 'super_ok') {
+                                    return true;
+                                } else {
+                                    throw e;
+                                }
+                            }
+
+                            return false;
+                        })(val);
+                        if (bLvupOk) {
+                            $('#game_field td#' + val.pos_id).addClass('lvup_ok');
+                        } else if (0 < val.lvup_standby) {
+                            console.log('lvupできないのでカウントを初期化');
+                            g_field_data.queues.push({
+                                actor_id        : val.game_card_id,
+                                log_message     : '',
+                                resolved_flg    : 0,
+                                priority        : g_master_data.queue_priority['same_time'],
+                                queue_units : [
+                                    {
+                                        queue_type_id   : 1018,
+                                        target_id       : val.game_card_id,
+                                    }
+                                ],
+                            });
+                        }
+
                         $('#game_field td#' + val.pos_id).html(
                             '<div class="pict">' +
                                 '<img src="' + sImgSrc + '" alt="' + sImgAlt + '"/>' +
@@ -1202,8 +1288,11 @@ new function () {
         }
     }
 
-    function updateActorDom()
+    function updateActorDom(aArgs)
     {
+        if (typeof aArgs == 'undefined') {
+            aArgs = {};
+        }
         try {
             console.log('updateActorDom started.');
             var aCard = g_field_data.cards[g_field_data.actor.game_card_id];
@@ -1330,7 +1419,8 @@ new function () {
                 });
 
                 // 移動、逃げる
-                if (aCardData.category != 'master') {
+                if (aCardData.category == 'master') {
+                } else {
                     var sCost = '';
                     var iStone = 0;
                     if (typeof aCard.status != 'undefined') {
@@ -1462,6 +1552,7 @@ new function () {
                 var backupFieldWhileSingleQueueProcessing = {};
                 $.extend(true, backupFieldWhileSingleQueueProcessing, g_field_data);
                 try {
+                    console.log(q.queue_type_id + ' resolve start.');
                     switch (q.queue_type_id) {
                         case 1000:
                             var sHtml = '<input type="hidden" name="field_data" value=\'' + JSON.stringify(g_field_data) + '\' />';
@@ -1722,11 +1813,7 @@ new function () {
                             });
                             break;
                         case 1017:
-                            var mon = g_field_data.cards[q.target_id];
-                            var aMonsterData = g_master_data.m_monster[mon.monster_id];
-                            if (aMonsterData.next_monster_id || 0 < aMonsterData.supers.length) {
-                                g_field_data.cards[q.target_id].lvup_standby += parseInt(q.param1);
-                            }
+                            g_field_data.cards[q.target_id].lvup_standby += parseInt(q.param1);
                             break;
                         case 1018:
                             g_field_data.cards[q.target_id].lvup_standby = 0;
@@ -3087,21 +3174,18 @@ new function () {
     {
         var mon = g_master_data.m_monster[monster_id];
         var ret_monster_id = null;
-        var cnt = 0;
         $.each(g_master_data.m_monster, function(i, val) {
             if (val.monster_id == mon.monster_id) {
                 return true;
             } if (Number(val.card_id) != Number(mon.card_id)) {
                 return true;
             }
-            cnt++;
 
             if (Number(val.lv) == Number(mon.lv)) {
                 ret_monster_id = val.monster_id;
                 return false;
             }
         });
-        console.log('getModifyMonsterId ret : ' + ret_monster_id);
         return ret_monster_id;
     }
 

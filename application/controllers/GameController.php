@@ -120,6 +120,9 @@ class GameController extends Zend_Controller_Action
         $request = $this->getRequest();
         $nGameFieldId = $request->getParam('game_field_id');
         $this->_stylesheet[] = '/css/game_field.css';
+        if (APPLICATION_ENV == 'testing') {
+            $this->_javascript[] = '/js/js_debug.js';
+        }
         $this->_javascript[] = '/js/master_data.js';
         $this->_javascript[] = '/js/game_field.js';
         $this->_layout->title = 'ゲームフィールド';
