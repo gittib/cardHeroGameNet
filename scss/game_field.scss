@@ -60,6 +60,13 @@
     td.target {
         background-color: #ffeeee;
     }
+
+    td.lvup_checking {
+        background-color: #888;
+    }
+    td.lvup_checking.lvup_ok {
+        background-color: #fff;
+    }
 }
 
 .mini-font {

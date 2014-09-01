@@ -35,6 +35,10 @@
     background-color: #ffff00; }
   #game_field td.target {
     background-color: #ffeeee; }
+  #game_field td.lvup_checking {
+    background-color: #888; }
+  #game_field td.lvup_checking.lvup_ok {
+    background-color: #fff; }
 
 .mini-font {
   font-size: 8px; }
