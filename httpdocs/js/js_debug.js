@@ -23,11 +23,17 @@ $(function () {
     console.log_bk = console.log;
     console.log = function (dbg_msg) {
         console.log_bk(dbg_msg);
+        var disp = dbg_msg;
+        try {
+            disp = JSON.stringify(dbg_msg).replace(/[\r\n]+/g, '<br />').replace(/\\n/g, '<br />').replace(/,"/g, ', "');
+        } catch (e) {
+            disp = dbg_msg;
+        }
         $('#my_console_window').append(
             '<tr><td>' +
                 $('#my_console_window tr').size() +
             '</td><td>' +
-                JSON.stringify(dbg_msg).replace(/[\r\n]+/g, '<br />').replace(/\\n/g, '<br />').replace(/,"/g, ', "') +
+                disp +
             '</td></tr>'
         );
     };

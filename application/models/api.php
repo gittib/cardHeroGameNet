@@ -11,6 +11,7 @@ class model_Api {
         $aRet = array(
             'm_card'        => array(),
             'm_monster'     => array(),
+            'm_arts'        => array(),
             'm_magic'       => array(),
             'm_queue'       => array(),
         );
@@ -173,7 +174,7 @@ class model_Api {
             }
             if (isset($val['art_id']) && $val['art_id'] != '') {
                 $iArtId = $val['art_id'];
-                $aRet['m_monster'][$iMonsterId]['arts'][] = array(
+                $aArtInfo = array(
                     'id'                => $val['art_id'],
                     'name'              => $val['art_name'],
                     'range_type_id'     => $val['range_type_id'],
@@ -182,6 +183,8 @@ class model_Api {
                     'script_id'         => $val['script_id'],
                     'stone'             => $val['art_stone'],
                 );
+                $aRet['m_monster'][$iMonsterId]['arts'][$iArtId] = $aArtInfo;
+                $aRet['m_arts'][$iArtId] = $aArtInfo;
             }
         }
 
