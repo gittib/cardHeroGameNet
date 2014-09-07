@@ -178,6 +178,12 @@ div.close_button {
                     float: right;
                     font-size: $cmd_font_size;
 
+                    span.range_pic {
+                        img {
+                            height: 18px;
+                        }
+                    }
+
                     span.stone_cost {
                         font-size: 16px;
                     }

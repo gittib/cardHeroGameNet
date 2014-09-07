@@ -101,6 +101,8 @@ div.close_button {
       #card_info #card_info_frame div.act_commands div.command_row div.num_info {
         float: right;
         font-size: 18px; }
+        #card_info #card_info_frame div.act_commands div.command_row div.num_info span.range_pic img {
+          height: 18px; }
         #card_info #card_info_frame div.act_commands div.command_row div.num_info span.stone_cost {
           font-size: 16px; }
     #card_info #card_info_frame div.act_commands div.command_row.selected_act {

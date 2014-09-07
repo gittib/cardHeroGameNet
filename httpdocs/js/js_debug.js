@@ -25,7 +25,10 @@ $(function () {
         console.log_bk(dbg_msg);
         var disp = dbg_msg;
         try {
-            disp = JSON.stringify(dbg_msg).replace(/[\r\n]+/g, '<br />').replace(/\\n/g, '<br />').replace(/,"/g, ', "');
+            disp = JSON.stringify(dbg_msg, null, true).replace(/[\r\n]+/g, '<br />').replace(/\\n/g, '<br />');
+            if (disp == '{}') {
+                throw 'muripo';
+            }
         } catch (e) {
             disp = dbg_msg;
         }

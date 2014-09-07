@@ -14,6 +14,7 @@ class model_Api {
             'm_arts'        => array(),
             'm_magic'       => array(),
             'm_queue'       => array(),
+            'm_status'      => array(),
         );
 
         $subMon = $this->_db->select()
@@ -260,6 +261,20 @@ class model_Api {
         $rslt = $this->_db->fetchAll($sel);
         foreach ($rslt as $val) {
             $aRet['queue_priority'][$val['id']] = $val['pri'];
+        }
+
+        $sel = $this->_db->select()
+            ->from(
+                array('ms' => 'm_status'),
+                array(
+                    'status_id',
+                    'status_type',
+                    'status_name',
+                )
+            );
+        $rslt = $this->_db->fetchAll($sel);
+        foreach ($rslt as $val) {
+            $aRet['m_status'][$val['status_id']] = $val;
         }
 
         return $aRet;

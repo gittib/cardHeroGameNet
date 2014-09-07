@@ -1,12 +1,7 @@
 game_field_utility = (function () {
     var g_master_data = master_data.getInfo();
-    var g_field_data;
 
     return {
-        'init'  : function (g) {
-            g_field_data = g;
-        },
-
         /**
          * @param monster_id
          *
@@ -65,62 +60,48 @@ game_field_utility = (function () {
         'getMaxHP'          : getMaxHP,
 
         /**
-         * @param actor_id
-         * @param target_id
+         * @param Object actor
+         * @param Object target
          *
          * @return bool
          */
         'attackRangeCheck'  : attackRangeCheck,
 
         /**
-         * getGameCardId
-         * 場所情報を元にgame_card_idを返す
-         *
-         * @param   aArgs.pos_category          : (必須)場所カテゴリ
-         * @param   aArgs.pos_id                : (任意)フィールドのマスID。場所カテゴリに'field'を指定した場合は必須
-         * @param   aArgs.owner                 : (任意)カードの持ち主
-         * @param   aArgs.sort_type             : (任意)デッキなどで順番を指定する場合の指定タイプ文言
-         *                                          - 'first'   デッキトップなど最初のカードを取得
-         *                                          - 'last'    デッキボトムなど最後のカードを取得
-         *
-         * @return  対象のgame_card_id。対象がいない場合はnull
-         */
-        'getGameCardId'     : getGameCardId,
-
-        /**
          * isValidSuper
          * 適正に進化できるスーパーかどうか確認
          *
-         * @param   aArgs.before_game_card_id          : (必須)進化元モンスターのgame_card_id
-         * @param   aArgs.after_game_card_id           : (必須)進化後モンスターのgame_card_id
-         * @param   aArgs.check_lvup_standby           : (任意)trueならレベルアップ可能回数のチェックをする
+         * @param   aArgs.aBefore   : (必須)進化元モンスター
+         * @param   aArgs.aAfter    : (必須)進化後モンスター
          *
          * @return  bool
          */
         'isValidSuper'      : isValidSuper,
 
         /**
-         * isDuplicateFieldPos
-         * フィールド上で場所被りが無いか確認
-         *
-         * @return  true:場所被り有り　false:場所被り無し
-         */
-        'isDuplicateFieldPos'     : isDuplicateFieldPos,
-
-        /**
          * loadMonsterInfo
          * モンスター情報を読み込んでフィールドにセットする
          *
-         * @param   aArgs.game_card_id          : (必須)セット対象
+         * @param   aArgs.target_monster        : (必須)セット対象
          * @param   aArgs.monster_id            : (任意)セットするモンスター情報。無ければセット対象の値を流用
          * @param   aArgs.pos_id                : (任意)セット対象のマスのID。無ければセット対象の値を流用
          * @param   aArgs.check_blank           : (任意)セットするマスが空いてるかどうか判定する
          * @param   aArgs.standby_flg           : (任意)伏せるかどうか。デフォルトは伏せない
          * @param   aArgs.reset_hp              : (任意)trueの場合、HPを最大値まで回復する
          * @param   aArgs.reset_act_count       : (任意)trueの場合、行動済み回数を0にする
-         * @param   aArgs.before_game_card_id   : (任意)スーパーになる場合とかの進化元モンスター情報
+         * @param   aArgs.aBefore               : (任意)スーパーになる場合とかの進化元モンスター情報
+         *
+         * @return  セットしたモンスター情報のオブジェクト
          */
         'loadMonsterInfo'       : loadMonsterInfo,
+
+        /**
+         * getModifyMonsterId
+         * バルパフの転生など、性格によって変身する先のmonster_idを取得する
+         *
+         * @return 変身先のmonster_id (取得できなかった場合はnull)
+         */
+        'getModifyMonsterId'    : getModifyMonsterId,
     };
 
 
@@ -325,10 +306,8 @@ game_field_utility = (function () {
         return iMaxHP;
     }
 
-    function attackRangeCheck(actor_id, target_id)
+    function attackRangeCheck(act, target)
     {
-        var act     = g_field_data.cards[actor_id];
-        var target  = g_field_data.cards[target_id];
         if (target.pos_category != 'field' || !target.pos_id) {
             return false;
         }
@@ -352,78 +331,11 @@ game_field_utility = (function () {
         return false;
     }
 
-    function getGameCardId (aArgs)
-    {
-        var iRetGameCardId = null;
-        var aFirstInfo  = null;
-        var aLastInfo   = null;
-        $.each(g_field_data.cards, function(iGameCardId, val) {
-            if (val.pos_category != aArgs.pos_category) {
-                return true;
-            }
-            if (aArgs.owner) {
-                if (aArgs.owner != val.owner) {
-                    return true;
-                }
-            }
-            switch(aArgs.pos_category) {
-                case 'field':
-                    if (val.pos_id == aArgs.pos_id) {
-                        if (val.next_game_card_id) {
-                            iRetGameCardId = val.next_game_card_id;
-                        } else {
-                            iRetGameCardId = iGameCardId;
-                        }
-                        return false;
-                    }
-                    break;
-                case 'deck':
-                case 'hand':
-                case 'used':
-                    if (aFirstInfo == null || aLastInfo == null) {
-                        aFirstInfo = {
-                            sort_no         : val.sort_no,
-                            game_card_id    : iGameCardId,
-                        };
-                        aLastInfo = {
-                            sort_no         : val.sort_no,
-                            game_card_id    : iGameCardId,
-                        };
-                    } else {
-                        if (val.sort_no < aFirstInfo.sort_no) {
-                            aFirstInfo = {
-                                sort_no         : val.sort_no,
-                                game_card_id    : iGameCardId,
-                            };
-                        }
-                        if (val.sort_no > aLastInfo.sort_no) {
-                            aLastInfo = {
-                                sort_no         : val.sort_no,
-                                game_card_id    : iGameCardId,
-                            };
-                        }
-                    }
-                    break;
-                default:
-                    break;
-            }
-        });
-        if (aArgs.sort_type == 'first') {
-            iRetGameCardId = aFirstInfo.game_card_id;
-        } else if (aArgs.sort_type == 'last') {
-            iRetGameCardId = aLastInfo.game_card_id;
-        }
-        if (isNaN(iRetGameCardId)) {
-            return null;
-        }
-        return iRetGameCardId;
-    }
-
     function isValidSuper(aArgs)
     {
         try {
-            var aBefore = g_field_data.cards[aArgs.before_game_card_id];
-            var aAfter  = g_field_data.cards[aArgs.after_game_card_id];
+            var aBefore = aArgs.aBefore;
+            var aAfter  = aArgs.aAfter;
 
             if (!aBefore || !aAfter) {
                 throw new Error('no_target');
@@ -439,8 +351,8 @@ game_field_utility = (function () {
                 throw new Error('not_super');
             }
 
-            if (aArgs.check_lvup_standby) {
-                if (aBefore.lvup_standby <= 0 && g_field_data.lvup_assist <= 0) {
+            if (aArgs.check_lvup_standby && typeof aArgs.lvup_assist != 'undefined') {
+                if (aBefore.lvup_standby <= 0 && aArgs.lvup_assist <= 0) {
                     throw new Error('empty_lvup_cost');
                 }
             }
@@ -467,45 +379,19 @@ game_field_utility = (function () {
         return true;
     }
 
-    function isDuplicateFieldPos()
-    {
-        var aPosId = {};
-        try {
-            $.each(g_field_data.cards, function (i, val) {
-                if (val.pos_category != 'field') {
-                    return true;
-                }
-                if (val.next_game_card_id) {
-                    return true;
-                }
-                if (typeof aPosId[val.pos_id] != 'undefined') {
-                    throw new Error('duplicate_field_pos');
-                }
-                aPosId[val.pos_id] = val.pos_id;
-            });
-        } catch (e) {
-            if (e == 'duplicate_field_pos') {
-                return true;
-            } else {
-                throw e;
-            }
-        }
-        return false;
-    }
-
     function loadMonsterInfo (aArgs)
     {
-        console.log('loadMonsterInfo started.');
+        console.log('game_field_utility.loadMonsterInfo started.');
         console.log(aArgs);
         // 引数バリデーションチェック
         if (!aArgs) {
             throw new Error('argument_error');
         }
-        if (!aArgs.game_card_id) {
+        if (!aArgs.target_monster) {
             throw new Error('argument_error');
         }
 
-        var targetMon = g_field_data.cards[aArgs.game_card_id];
+        var targetMon = aArgs.target_monster;
 
         if (!targetMon) {
             throw new Error('argument_error');
@@ -524,13 +410,6 @@ game_field_utility = (function () {
             if (!aArgs.pos_id) {
                 throw new Error('argument_error');
             }
-        }
-        if (aArgs.check_blank) {
-            $.each(g_field_data.cards, function (i, val) {
-                if (val.pos_category == 'field' && val.pos_id == aArgs.pos_id) {
-                    throw new Error('argument_error');
-                }
-            });
         }
         if (!aArgs.standby_flg) {
             aArgs.standby_flg = false;
@@ -556,13 +435,14 @@ game_field_utility = (function () {
         }
 
         // 任意引数の云々
-        if (aArgs.before_game_card_id) {
-            var bfMon = g_field_data.cards[aArgs.before_game_card_id];
+        if (aArgs.aBefore) {
+            var bfMon = aArgs.aBefore;
             bfMon.next_game_card_id = targetMon.game_card_id;
-            targetMon.before_game_card_id   = Number(aArgs.before_game_card_id);
-            targetMon.status                = bfMon.status;
+            targetMon.before_game_card_id   = Number(bfMon.game_card_id);
+            targetMon.status                = {};
             targetMon.act_count             = bfMon.act_count;
             targetMon.lvup_standby          = bfMon.lvup_standby;
+            $.extend(true, targetMon.status, bfMon.status);
         }
         if (aArgs.reset_hp) {
             targetMon.hp = Number(mon.max_hp);
@@ -572,5 +452,26 @@ game_field_utility = (function () {
         }
         console.log('loadMonsterInfo finish.');
         console.log(targetMon);
+
+        return targetMon;
+    }
+
+    function getModifyMonsterId (monster_id)
+    {
+        var mon = g_master_data.m_monster[monster_id];
+        var ret_monster_id = null;
+        $.each(g_master_data.m_monster, function(i, val) {
+            if (val.monster_id == mon.monster_id) {
+                return true;
+            } if (Number(val.card_id) != Number(mon.card_id)) {
+                return true;
+            }
+
+            if (Number(val.lv) == Number(mon.lv)) {
+                ret_monster_id = val.monster_id;
+                return false;
+            }
+        });
+        return ret_monster_id;
     }
 })();

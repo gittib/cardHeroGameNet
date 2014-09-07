@@ -45,6 +45,7 @@ arts_queue = (function () {
             aQueue.queue_units.unshift({
                 queue_type_id   : 1002,
                 target_id       : aArgs.actor_id,
+                cost_flg        : true,
             });
         } catch (e) {
             console.log(e.stack);
@@ -129,7 +130,7 @@ arts_queue = (function () {
                 break;
             case 1004:
                 var aRet = [];
-                var p = game_field_utility.getXYFromPosId(g_field_data.cards[aArgs.targets[0].game_card_id].pos_id);
+                var p = game_field_utility.getXYFromPosId(aArgs.field_data.cards[aArgs.targets[0].game_card_id].pos_id);
                 for (var i = 0 ; i < 4 ; i++) {
                     var sPosId = game_field_utility.getPosIdFromXY({x:p.x, y:i});
                     var targetId = game_field_utility.getGameCardId({
@@ -157,6 +158,87 @@ arts_queue = (function () {
                     },
                 ];
                 break;
+            case 1006:
+                return [
+                    {
+                        queue_type_id   : 1017,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : 1,
+                        param2          : true,
+                    },
+                ];
+                break;
+            case 1007:
+                var aRet = [
+                    {
+                        queue_type_id   : 1002,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param2          : true,
+                    },
+                ];
+                if (Math.random() * 2 < 1) {
+                    aRet.push({
+                        queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                        target_id       : targetId,
+                        param1          : aArtInfo.power,
+                    });
+                }
+                return aRet;
+                break;
+            case 1008:
+                var aRet = [
+                    {
+                        queue_type_id   : 1017,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : 1,
+                        param2          : true,
+                    },
+                ];
+                var aMonsterInfo = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var aMonsterData = g_master_data.m_monster[aMonsterInfo.monster_id];
+                if (aMonsterData.next_monster_id) {
+                    return aRet;
+                }
+                var bSuper = false;
+                $.each(aArgs.field_data.cards, function (i, val) {
+                    bSuper = isValidSuper({
+                        aBefore : aMonsterInfo,
+                        aAfter  : val,
+                    });
+                    if (bSuper) {
+                        return false;
+                    }
+                });
+                if (bSuper) {
+                    return aRet;
+                } else {
+                    return [
+                        {
+                            queue_type_id   : 1008,
+                            target_id       : aArgs.targets[0].game_card_id,
+                        },
+                    ];
+                }
+                break;
+            case 1009:
+                return [
+                    {
+                        queue_type_id   : 1008,
+                        target_id       : aArgs.targets[0].game_card_id,
+                    },
+                ];
+                break;
+            case 1010:
+                var aRet = [];
+                $.each(g_master_data.m_status, function(i, val) {
+                    if (val.status_type == '!') {return true;}
+                    aRet.push({
+                        queue_type_id   : 1027,
+                        target_id       : aArgs.targets[0].game_card_id,
+                    });
+                });
+                return aRet;
+                break;
             case 1011:
                 return [
                     {
@@ -165,6 +247,83 @@ arts_queue = (function () {
                         param1          : aArtInfo.power,
                     },
                 ];
+                break;
+            case 1012:
+                var dam = parseInt(Math.random() * 3) + 2;
+                return [
+                    {
+                        queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : dam,
+                    },
+                    {
+                        queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                        target_id       : aArgs.actor_id,
+                        param1          : dam,
+                    },
+                ];
+                break;
+            case 1013:
+                var aMonsterInfo = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var iMaxHP = game_field_utility.getMaxHP(aMonsterInfo);
+                var dam = iMaxHP - aMonsterInfo.hp;
+                return [
+                    {
+                        queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : dam,
+                    },
+                    {
+                        queue_type_id   : 1008,
+                        target_id       : aArgs.actor_id,
+                    },
+                ];
+                break;
+            case 1014:
+                return [
+                    {
+                        queue_type_id   : 1002,
+                        target_id       : aArgs.actor_id,
+                    },
+                    {
+                        queue_type_id   : 1026,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : 117,
+                        param2          : aArgs.actor_id,
+                        cost_flg        : true,
+                    },
+                    {
+                        queue_type_id   : 1026,
+                        target_id       : aArgs.actor_id,
+                        param1          : 118,
+                        param2          : aArgs.targets[0].game_card_id,
+                        cost_flg        : true,
+                    },
+                ];
+                break;
+            case 1015:
+                var aMonsterInfo = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var iMaxHP = game_field_utility.getMaxHP(aMonsterInfo);
+                var aRet = [
+                    {
+                        queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : aArtInfo.power,
+                    }
+                ];
+                if (iMaxHP <= aMonsterInfo.hp) {
+                    aRet.push({
+                        queue_type_id   : 1008,
+                        target_id       : aArgs.actor_id,
+                    });
+                } else {
+                    aRet.push({
+                        queue_type_id   : 1007,
+                        target_id       : aArgs.actor_id,
+                        param1          : aArtInfo.power,
+                    });
+                }
+                return aRet;
                 break;
             default:
                 throw new Error('unknown script_id posted.');
