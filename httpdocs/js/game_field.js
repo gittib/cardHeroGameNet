@@ -1708,6 +1708,10 @@ new function () {
                             var actorMon = g_field_data.cards[exec_act.actor_id];
                             var aMonsterData = g_master_data.m_monster[actorMon.monster_id];
                             var pow = aMonsterData.attack.power;
+                            if (actorMon.mad_hole_cnt) {
+                                // マッドホールによるパワーアップ
+                                pow += actorMon.mad_hole_cnt;
+                            }
                             if (actorMon.status[100]) {
                                 pow++;
                             }
@@ -2210,6 +2214,17 @@ new function () {
                             break;
                         case 1026:
                             var mon = g_field_data.cards[q.target_id];
+
+                            // マッド・ダミーのパワーアップ効果は魔法効果を受けるものとして扱う
+                            if (q.param1 == 'madHole') {
+                                if (typeof mon.mad_hole_cnt == 'number') {
+                                    mon.mad_hole_cnt++;
+                                } else {
+                                    mon.mad_hole_cnt = 1;
+                                }
+                                break;
+                            }
+
                             var iTurnCount = 2;
                             switch (q.param1) {
                                 case 100:
@@ -3158,6 +3173,7 @@ new function () {
         delete mon.act_count;
         delete mon.lvup_standby;
         delete mon.status;
+        delete mon.mad_hole_cnt;
     }
 
     /**

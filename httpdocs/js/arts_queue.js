@@ -83,15 +83,23 @@ arts_queue = (function () {
                 for (i = 1 ; i <= 3 ; i++) {
                     var iDist   = Math.max(Math.abs(df.x), Math.abs(df.y));
                     var pow     = aArtInfo.power + 1 - iDist;
-                    var sPosId  = getRelativePosId(aActor.pos_id, df);
+                    var sPosId  = game_field_utility.getRelativePosId(aActor.pos_id, df);
                     if (sPosId != '') {
-                        aRet.push({
-                            queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
-                            target_id       : game_field_utility.getGameCardId({
-                                pos_category    : 'field',
-                                pos_id          : sPosId,
-                            }),
-                            param1          : aArtInfo.power,
+                        $.each(aArgs.field_data.cards, function(j, val) {
+                            if (val.pos_category != 'field') {
+                                return true;
+                            }
+                            if (typeof val.next_game_card_id != 'undefined' && val.next_game_card_id) {
+                                return true;
+                            }
+                            if (val.standby_flg) {
+                                return true;
+                            }
+                            aRet.push({
+                                queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                                target_id       : val.game_card_id,
+                                param1          : aArtInfo.power,
+                            });
                         });
                     }
 
@@ -131,20 +139,27 @@ arts_queue = (function () {
             case 1004:
                 var aRet = [];
                 var p = game_field_utility.getXYFromPosId(aArgs.field_data.cards[aArgs.targets[0].game_card_id].pos_id);
-                for (var i = 0 ; i < 4 ; i++) {
-                    var sPosId = game_field_utility.getPosIdFromXY({x:p.x, y:i});
-                    var targetId = game_field_utility.getGameCardId({
-                        pos_category    : 'field',
-                        pos_id          : sPosId,
-                    });
-                    if (targetId) {
-                        aRet.push({
-                            queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
-                            target_id       : targetId,
-                            param1          : aArtInfo.power,
-                        });
+                $.each(aArgs.field_data.cards, function(j, val) {
+                    if (val.pos_category != 'field') {
+                        return true;
                     }
-                }
+                    if (typeof val.next_game_card_id != 'undefined' && val.next_game_card_id) {
+                        return true;
+                    }
+                    if (val.standby_flg) {
+                        return true;
+                    }
+                    for (var i = 0 ; i < 4 ; i++) {
+                        var sPosId = game_field_utility.getPosIdFromXY({x:p.x, y:i});
+                        if (val.pos_id == sPosId) {
+                            aRet.push({
+                                queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                                target_id       : val.game_card_id,
+                                param1          : aArtInfo.power,
+                            });
+                        }
+                    }
+                });
                 if (aRet.length > 0) {
                     return aRet;
                 }
@@ -324,6 +339,116 @@ arts_queue = (function () {
                     });
                 }
                 return aRet;
+                break;
+            case 1016:
+                return [
+                    {
+                        queue_type_id   : 1026,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : 129,
+                    },
+                ];
+                break;
+            case 1017:
+                var aActor = aArgs.field_data.cards[aArgs.actor_id];
+                var aTarget = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var p1 = game_field_utility.getXYFromPosId(aActor.pos_id);
+                var p2 = game_field_utility.getXYFromPosId(aTarget.pos_id);
+                var sPosMoveTo = game_field_utility.getRelativePosId(aActor.pos_id, {x:0, y:-1});
+                var aRet = [{
+                    queue_type_id   : 1022,
+                    target_id       : aArgs.actor_id,
+                    param1          : sPosMoveTo,
+                    cost_flg        : true,
+                }];
+                $.each(aArgs.field_data.cards, function(i, val) {
+                    if (val.pos_category != 'field') {
+                        return true;
+                    }
+                    if (typeof val.next_game_card_id != 'undefined' && val.next_game_card_id) {
+                        return true;
+                    }
+                    if (val.pos_id == sPosMoveTo) {
+                        aRet.push({
+                            queue_type_id   : 1022,
+                            target_id       : val.game_card_id,
+                            param1          : aActor.pos_id,
+                        });
+                    } else {
+                        if (val.standby_flg) {
+                            return true;
+                        }
+                        for (var j = -1 ; j <= 1 j++) {
+                            var sPosId = game_field_utility.getPosIdFromXY({
+                                x : p1.x + j,
+                                y : p1.y - 2,
+                            });
+                            if (val.pos_id = sPosId) {
+                                aRet.push({
+                                    queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                                    target_id       : val.game_card_id,
+                                    param1          : aArtInfo.power,
+                                });
+                                break;
+                            }
+                        }
+                    }
+                });
+                return aRet;
+                break;
+            case 1018:
+                var aRet = [];
+                var sPosId = (function() {
+                    var a = [
+                        'enemyBack1',
+                        'enemyBack2',
+                        'enemyFront1',
+                        'enemyFront2',
+                        'enemyMaster',
+                    ];
+                    return a[parseInt(Math.random() * 5)];
+                })();
+                $.each(aArgs.field_data, function(i, val) {
+                    if (val.pos_category != 'field') {
+                        return true;
+                    }
+                    if (typeof val.next_game_card_id != 'undefined' && val.next_game_card_id) {
+                        return true;
+                    }
+                    if (val.standby_flg) {
+                        return true;
+                    }
+
+                    if (val.pos_id == sPosId) {
+                        aRet.push({
+                            queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                            target_id       : val.game_card_id,
+                            param1          : aArtInfo.power,
+                        });
+                    } else if (game_field_utility.getDistance(sPosId, val.pos_id) == 1) {
+                        aRet.push({
+                            queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                            target_id       : val.game_card_id,
+                            param1          : aArtInfo.power - 1,
+                        });
+                    }
+                });
+                if (aRet.length) {
+                    return aRet;
+                }
+                break;
+            case 1019:
+                return [
+                    {
+                        queue_type_id   : 1026,
+                        target_id       : aArgs.actor_id,
+                        param1          : 129,
+                    },
+                    {
+                        queue_type_id   : 1008,
+                        target_id       : aArgs.targets[0].game_card_id,
+                    },
+                ];
                 break;
             default:
                 throw new Error('unknown script_id posted.');
