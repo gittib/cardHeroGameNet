@@ -1087,7 +1087,7 @@ new function () {
                 game_card_id    : aArgs.oDom.attr('game_card_id'),
                 pos_id          : aArgs.oDom.attr('id'),
             };
-            if (!aTargetInfo.game_card_id) {
+            if (aTargetInfo.pos_id) {
                 aTargetInfo.game_card_id = getGameCardId({
                     pos_category    : 'field',
                     pos_id          : aArgs.oDom.attr('id'),
@@ -1487,6 +1487,7 @@ new function () {
                 }
 
                 // アタック
+                var iPow = parseInt(mon.attack.power);
                 var sCost = '';
                 var iStone = parseInt(mon.attack.stone);
                 if (typeof aCard.status != 'undefined') {
@@ -1505,7 +1506,7 @@ new function () {
                     '<div class="command_row" act_type="attack">' +
                         mon.attack.name +
                         '<div class="num_info">' +
-                            mon.attack.power + 'P' +
+                            iPow + 'P' +
                             sCost +
                         '</div>' +
                     '</div>';
@@ -1513,10 +1514,22 @@ new function () {
                 // 特技
                 $.each(mon.arts, function(i, val) {
                     var sPower = '';
+                    var iPow = Number(val.power);
                     var sRange = '<img src="/images/range/' + val.range_type_id + '.png" alt="" />';
                     var iStone = val.stone;
                     if (val.damage_type_flg == 'P' || val.damage_type_flg == 'D' || val.damage_type_flg == 'HP') {
-                        sPower = val.power + '' + val.damage_type_flg;
+                        switch (val.script_id) {
+                            case 1012:
+                            case 1013:
+                            case 1020:
+                                sPower = '?' + val.damage_type_flg;
+                                break;
+                            default:
+                                sPower = '' + iPow + '' + val.damage_type_flg;
+                                break;
+                        }
+                    } else if (val.script_id == 1041) {
+                        sPower = '2?';
                     }
                     if (typeof aCard.status != 'undefined') {
                         if (typeof aCard.status[120] != 'undefined' && aCard.status[120].param1 == i) {
@@ -1946,8 +1959,10 @@ new function () {
                             removeMonsterInfoOnField(q.target_id);
                             break;
                         case 1010:
+                            console.log(q);
                             var targetMon = g_field_data.cards[q.target_id];
-                            targetMon = targetMon = game_field_utility.loadMonsterInfo({
+                            console.log(targetMon);
+                            targetMon = game_field_utility.loadMonsterInfo({
                                 target_monster  : targetMon,
                                 standby_flg     : false,
                                 reset_hp        : true,
@@ -3191,6 +3206,8 @@ new function () {
      */
     function getGameCardId (aArgs)
     {
+        console.log('getGameCardId started.');
+        console.log(aArgs);
         var iRetGameCardId = null;
         var aFirstInfo  = null;
         var aLastInfo   = null;
