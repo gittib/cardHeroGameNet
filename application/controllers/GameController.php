@@ -126,6 +126,7 @@ class GameController extends Zend_Controller_Action
         $this->_javascript[] = '/js/master_data.js';
         $this->_javascript[] = '/js/game_field_utility.js';
         $this->_javascript[] = '/js/arts_queue.js';
+        $this->_javascript[] = '/js/game_field_reactions.js';
         $this->_javascript[] = '/js/game_field.js';
         $this->_layout->title = 'ゲームフィールド';
         //$this->_layout->description = 'スマホでカードヒーローが遊べます。';

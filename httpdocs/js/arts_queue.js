@@ -494,10 +494,119 @@ arts_queue = (function () {
                 }
                 return aRet;
                 break;
+            case 1023:
+                var aMonsterInfo = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var iStone = 2;
+                if (aMonsterInfo.owner == 'my') {
+                    iStone = Math.min(aArgs.field_data.my_stone, 2);
+                } else if (aMonsterInfo.owner == 'enemy') {
+                    iStone = Math.min(aArgs.field_data.enemy_stone, 2);
+                } else {
+                    throw new Error('invalid_target');
+                }
+                return [
+                    {
+                        queue_type_id   : 1004,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : -1 * iStone,
+                    },
+                    {
+                        queue_type_id   : 1004,
+                        target_id       : aArgs.actor_id,
+                        param1          : iStone,
+                    },
+                ];
+                break;
+            case 1024:
+                var iSt = 101;
+                if (2 <= g_master_data.m_monster[aArgs.field_data.cards[aArgs.actor_id]].lv) {
+                    iSt = 130;
+                }
+                return [
+                    {
+                        queue_type_id   : 1026,
+                        target_id       : aArgs.actor_id,
+                        param1          : iSt,
+                    },
+                ];
+                break;
+            case 1026:
+                var mon = aArgs.field_data.cards[aArgs.actor_id];
+                var aMonsterData = g_master_data.m_monster[mon.monster_id];
+                var p0 = game_field_utility.getXYFromPosId(mon.pos_id);
+                var lrCnt = 0;
+                var pow = 0;
+                var aRet = [];
+                $.each(aArgs.field_data.cards, function(i, val) {
+                    if (val.pos_category != 'field') {
+                        return true;
+                    }
+                    if (typeof val.next_game_card_id != 'undefined' && val.next_game_card_id) {
+                        return true;
+                    }
+                    if (val.standby_flg) {
+                        return true;
+                    }
+                    var p = game_field_utility.getXYFromPosId(val.pos_id);
+                    if (p.y == p0.y && p.x != 1) {
+                        if (p.x == 0 && val.card_id != 108) {
+                            throw new Error('レオンいないのでダメ');
+                        }
+                        if (p.x == 2 && val.card_id != 107) {
+                            throw new Error('ラオンいないのでダメ');
+                        }
+                        lrCnt++;
+                        if (val.game_card_id != mon.game_card_id) {
+                            aRet.push({
+                                queue_type_id   : 1024,
+                                target_id       : val.game_card_id,
+                                cost_flg        : true,
+                            });
+                        }
+                        pow += g_master_data.m_monster[val.monster_id].attack.power;
+                        // ドリルブレイクの時はP効果の云々を自前で処理する
+                        $.each(val.status, function(sid, stval) {
+                            switch (sid) {
+                                case 101:
+                                case 102:
+                                    pow++;
+                                    break;
+                                case 103:
+                                    pow -= g_master_data.m_monster[val.monster_id].attack.power;
+                                    pow += 2;
+                                    break;
+                                case 104:
+                                    pow--;
+                                    break;
+                                case 105:
+                                    pow += 2;
+                                    return true;
+                                default:
+                                    return true;
+                            }
+                            aRet.push({
+                                queue_type_id   : 1027,
+                                target_id       : val.game_card_id,
+                                param1          : sid,
+                            });
+                        });
+                    }
+                });
+                if (lrCnt < 2) {
+                    throw new Error('invalid_actor');
+                }
+                aRet.push({
+                    queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : pow,
+                });
+                return aRet;
+                break;
+            case 1027:
+                break;
             default:
                 throw new Error('unknown script_id posted.');
         }
         throw new Error('_getQueueUnitsFromScriptId Failure.');
     }
 })();
-console.log(arts_queue);
