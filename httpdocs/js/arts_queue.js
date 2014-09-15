@@ -23,20 +23,25 @@ arts_queue = (function () {
         var aQueue = null;
         try {
             delete aArgs.field_data.tokugi_fuuji_flg;
+            var mon = aArgs.field_data.cards[aArgs.actor_id];
+            var aArtInfo = g_master_data.m_arts[aArgs.art_id];
+
             var bSealed = (function(){
                 // 特技封じの判定
                 try {
+                    console.log('特技封じ判定');
                     if (mon.status[110].param1 == aArgs.art_id) {
+                       alert('特技を封じられています！');
                        return true;
                     }
-                } catch (e) {}
+                } catch (e) {
+                    console.log(e.stack);
+                }
                 return false;
             })();
             if (bSealed) {
                 return null;
             }
-            var mon = aArgs.field_data[aArgs.actor_id];
-            var aArtInfo = g_master_data.m_arts[aArgs.art_id];
             aQueue = {
                 actor_id        : aArgs.actor_id,
                 resolved_flg    : 0,
