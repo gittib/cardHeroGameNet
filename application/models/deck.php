@@ -7,10 +7,21 @@ class model_Deck {
         $this->_db = Zend_Registry::get('db');
     }
 
-    public function getDeckList($nPage = 1)
+    /**
+     * @param aArgs['page_no']
+     * @param aArgs['max_rare_max']
+     * @param aArgs['sum_rare_max']
+     *
+     * @return aDeck
+     */
+    public function getDeckList($aArgs)
     {
         // ログインしてない時用に、絶対にヒットしないダミーIDで初期化しておく
         $userId = -1;
+        $nPage = 1;
+        if (isset($aArgs['page_no']) && $aArgs['page_no'] != '') {
+            $nPage = $aArgs['page_no'];
+        }
         $aUserInfo = Common::checkLogin();
         if (isset($aUserInfo)) {
             $userId = $aUserInfo['user_id'];
@@ -27,6 +38,30 @@ class model_Deck {
                 'deck_id desc',
             ))
             ->limitPage($nPage, 10);
+        if (isset($aArgs['max_rare_max']) && $aArgs['max_rare_max'] != '') {
+            $sub2 = $this->_db->select()
+                ->distinct()
+                ->from(
+                    array('vd' => 'v_deck'),
+                    array(
+                        'deck_id',
+                    )
+                )
+                ->where('vd.max_rare <= ?', $aArgs['max_rare_max']);
+            $sub->where('td.deck_id in(?)', $sub2);
+        }
+        if (isset($aArgs['sum_rare_max']) && $aArgs['sum_rare_max'] != '') {
+            $sub3 = $this->_db->select()
+                ->distinct()
+                ->from(
+                    array('vd' => 'v_deck'),
+                    array(
+                        'deck_id',
+                    )
+                )
+                ->where('vd.sum_rare <= ?', $aArgs['sum_rare_max']);
+            $sub->where('td.deck_id in(?)', $sub3);
+        }
 
         $sel = $this->_db->select()
             ->from(

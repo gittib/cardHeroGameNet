@@ -39,10 +39,11 @@ if (empty($this->aCardInfoArray)) {
     echo $sPageLinkTag;
     foreach ($this->aCardInfoArray as $aCardInfo) {
         $this->aCardInfoInField = $aCardInfo;
-        $sLinkTitle = "フィールドID:{$aCardInfo['field_info']['game_field_id']}({$aCardInfo['field_info']['upd_date']})";
-        $sHref = "/game/receive/{$aCardInfo['field_info']['game_field_id']}/";
-        if (isset($aCardInfo['field_info']['started_flg']) && $aCardInfo['field_info']['started_flg']) {
-            $sHref = "/game/field/{$aCardInfo['field_info']['game_field_id']}/";
+        $aFieldInfo = $aCardInfo['field_info'];
+        $sLinkTitle = "[{$aFieldInfo['game_field_id']}]投稿者：{$aFieldInfo['nick_name']}({$aFieldInfo['upd_date']})";
+        $sHref = "/game/receive/{$aFieldInfo['game_field_id']}/";
+        if (isset($aFieldInfo['started_flg']) && $aFieldInfo['started_flg']) {
+            $sHref = "/game/field/{$aFieldInfo['game_field_id']}/";
         }
         echo <<<_eos_
 <div class="game_field_info">

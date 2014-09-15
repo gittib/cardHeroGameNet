@@ -244,7 +244,7 @@ game_field_reactions = (function () {
             $('#enemyPlayersInfo .stone span').text(g_field_data.enemy_stone);
             $('#enemyPlayersInfo .hand  span').text(nHand['enemy']);
 
-            updateActorDom();
+            updateActorDom(aArgs);
         } catch (e) {
             console.log('updateField Failure.');
             console.log(e.stack);
@@ -285,39 +285,7 @@ game_field_reactions = (function () {
             var sDtlLink    = '<a class="blank_link" target="_blank" href="/card/detail/' + aCardData.card_id + '/">詳細</a>';
             var sCommandsHtml = '';
 
-            if (aArgs.game_state == 'lvup_standby') {
-                var aMonsterData = g_master_data.m_monster[aCard.monster_id];
-                var sCommandName = null;
-                if (0 < aCard.lvup_standby || 0 < g_field_data.lvup_assist) {
-                    if (aMonsterData.next_monster_id) {
-                        sCommandName = 'レベルアップ';
-                    } else {
-                        try {
-                            $.each(g_field_data.cards, function(i, val) {
-                                var bSuper = game_field_utility.isValidSuper({
-                                    aBefore : aCard,
-                                    aAfter  : val,
-                                });
-                                if (bSuper) {
-                                    throw 'super_ok';
-                                }
-                            });
-                        } catch (e) {
-                            if (e == 'super_ok') {
-                                sCommandName = 'スーパーに進化';
-                            } else {
-                                throw e;
-                            }
-                        }
-                    }
-                }
-                if (sCommandName) {
-                    sCommandsHtml =
-                        '<div class="command_row" act_type="lvup">' +
-                            sCommandName +
-                        '</div>';
-                }
-            } else if (aCard.pos_category == 'hand') {
+            if (aCard.pos_category == 'hand') {
                 switch (aCardData.card_name) {
                     case 'ローテーション':
                         g_field_data.actor.act_type = 'magic';
@@ -371,119 +339,208 @@ game_field_reactions = (function () {
                         break;
                 }
             } else if (aCard.pos_category == 'field') {
-                var mon = g_master_data.m_monster[aCard.monster_id];
-
-                if (aCard.owner == 'enemy' && aCard.standby_flg) {
-                    throw new Error('standby monster');
-                }
-
-                // アタック
-                var iPow = parseInt(mon.attack.power);
-                var sCost = '';
-                var iStone = parseInt(mon.attack.stone);
-                if (typeof aCard.status != 'undefined') {
-                    if (typeof aCard.status[123] != 'undefined') {
-                        iStone += 2;
-                    }
-                }
-                if (iStone > 0) {
-                    sCost =
-                        ' ' +
-                        '<span class="stone_cost">' +
-                            iStone + 'コ' +
-                        '</span>';
-                }
-                sCommandsHtml =
-                    '<div class="command_row" act_type="attack">' +
-                        mon.attack.name +
-                        '<div class="num_info">' +
-                            iPow + 'P' +
-                            sCost +
-                        '</div>' +
-                    '</div>';
-
-                // 特技
-                $.each(mon.arts, function(i, val) {
-                    var sPower = '';
-                    var iPow = Number(val.power);
-                    var sRange = '<img src="/images/range/' + val.range_type_id + '.png" alt="" />';
-                    var iStone = val.stone;
-                    if (val.damage_type_flg == 'P' || val.damage_type_flg == 'D' || val.damage_type_flg == 'HP') {
-                        switch (val.script_id) {
-                            case 1012:
-                            case 1013:
-                            case 1020:
-                                sPower = '?' + val.damage_type_flg;
-                                break;
-                            default:
-                                sPower = '' + iPow + '' + val.damage_type_flg;
-                                break;
+                if (aArgs.game_state == 'lvup_standby') {
+                    var aMonsterData = g_master_data.m_monster[aCard.monster_id];
+                    var sCommandName = null;
+                    if (0 < aCard.lvup_standby || 0 < g_field_data.lvup_assist) {
+                        if (aMonsterData.next_monster_id) {
+                            sCommandName = 'レベルアップ';
+                        } else {
+                            try {
+                                $.each(g_field_data.cards, function(i, val) {
+                                    var bSuper = game_field_utility.isValidSuper({
+                                        aBefore : aCard,
+                                        aAfter  : val,
+                                    });
+                                    if (bSuper) {
+                                        throw 'super_ok';
+                                    }
+                                });
+                            } catch (e) {
+                                if (e == 'super_ok') {
+                                    sCommandName = 'スーパーに進化';
+                                } else {
+                                    throw e;
+                                }
+                            }
                         }
-                    } else if (val.script_id == 1041) {
-                        sPower = '2?';
                     }
+                    if (sCommandName) {
+                        sCommandsHtml =
+                            '<div class="command_row" act_type="lvup">' +
+                                sCommandName +
+                            '</div>';
+                    }
+                } else if (aArgs.game_state == 'tokugi_fuuji') {
+                    aCard = g_field_data.cards[g_field_data.actor.aTargets[0].game_card_id];
+                    var mon = g_master_data.m_monster[aCard.monster_id];
+                    sImg = '<img src="/images/card/' + mon.image_file_name + '" alt="' + sImageAlt + '" />';
+
+                    if (aCard.owner == 'enemy' && aCard.standby_flg) {
+                        throw new Error('standby monster');
+                    }
+
+                    // 特技
+                    $.each(mon.arts, function(i, val) {
+                        var sPower = '';
+                        var iPow = Number(val.power);
+                        var sRange = '<img src="/images/range/' + val.range_type_id + '.png" alt="" />';
+                        var iStone = val.stone;
+                        if (val.damage_type_flg == 'P' || val.damage_type_flg == 'D' || val.damage_type_flg == 'HP') {
+                            switch (val.script_id) {
+                                case 1012:
+                                case 1013:
+                                case 1020:
+                                case 1026:
+                                    sPower = '?' + val.damage_type_flg;
+                                    break;
+                                default:
+                                    sPower = '' + iPow + '' + val.damage_type_flg;
+                                    break;
+                            }
+                        } else if (val.script_id == 1041) {
+                            sPower = '2?';
+                        }
+                        if (typeof aCard.status != 'undefined') {
+                            if (typeof aCard.status[120] != 'undefined' && aCard.status[120].param1 == i) {
+                                iStone *= 2;
+                            }
+                            if (typeof aCard.status[123] != 'undefined') {
+                                iStone += 2;
+                            }
+                        }
+                        sCommandsHtml +=
+                            '<div class="command_row" art_id="' + val.id + '" act_type="arts">' +
+                                val.name +
+                                '<div class="num_info">' +
+                                    '<span class="range_pic">' +
+                                        sRange +
+                                    '</span>' +
+                                    ' ' +
+                                    sPower +
+                                    ' ' +
+                                    '<span class="stone_cost">' +
+                                        iStone + 'コ' +
+                                    '</span>' +
+                                '</div>' +
+                            '</div>';
+                    });
+                } else {
+                    var mon = g_master_data.m_monster[aCard.monster_id];
+
+                    if (aCard.owner == 'enemy' && aCard.standby_flg) {
+                        throw new Error('standby monster');
+                    }
+
+                    // アタック
+                    var iPow = parseInt(mon.attack.power);
+                    var sCost = '';
+                    var iStone = parseInt(mon.attack.stone);
                     if (typeof aCard.status != 'undefined') {
-                        if (typeof aCard.status[120] != 'undefined' && aCard.status[120].param1 == i) {
-                            iStone *= 2;
-                        }
                         if (typeof aCard.status[123] != 'undefined') {
                             iStone += 2;
                         }
                     }
-                    sCommandsHtml +=
-                        '<div class="command_row" art_id="' + val.id + '" act_type="arts">' +
-                            val.name +
-                            '<div class="num_info">' +
-                                '<span class="range_pic">' +
-                                    sRange +
-                                '</span>' +
-                                ' ' +
-                                sPower +
-                                ' ' +
-                                '<span class="stone_cost">' +
-                                    iStone + 'コ' +
-                                '</span>' +
-                            '</div>' +
-                        '</div>';
-                });
-
-                // 移動、逃げる or メイクカード
-                var sCost = '';
-                var iStone = 0;
-                if (aCard.status) {
-                    if (typeof aCard.status[123] != 'undefined') {
-                        iStone += 2;
+                    if (iStone > 0) {
+                        sCost =
+                            ' ' +
+                            '<span class="stone_cost">' +
+                                iStone + 'コ' +
+                            '</span>';
                     }
-                }
-                if (iStone > 0) {
-                    sCost =
-                        ' ' +
-                        '<span class="stone_cost">' +
-                            iStone + 'コ' +
-                        '</span>';
-                }
-                if (aCardData.category == 'master') {
-                    sCommandsHtml +=
-                        '<div class="command_row" act_type="make_card">' +
-                            'メイクカード' +
+                    sCommandsHtml =
+                        '<div class="command_row" act_type="attack">' +
+                            mon.attack.name +
                             '<div class="num_info">' +
+                                iPow + 'P' +
                                 sCost +
                             '</div>' +
                         '</div>';
-                } else {
-                    sCommandsHtml +=
-                        '<div class="command_row" act_type="move">' +
-                            '移動' +
-                            '<div class="num_info">' +
-                                sCost +
+
+                    // 特技
+                    $.each(mon.arts, function(i, val) {
+                        var sPower = '';
+                        var iPow = Number(val.power);
+                        var sRange = '<img src="/images/range/' + val.range_type_id + '.png" alt="" />';
+                        var iStone = val.stone;
+                        if (val.damage_type_flg == 'P' || val.damage_type_flg == 'D' || val.damage_type_flg == 'HP') {
+                            switch (val.script_id) {
+                                case 1012:
+                                case 1013:
+                                case 1020:
+                                case 1026:
+                                    sPower = '?' + val.damage_type_flg;
+                                    break;
+                                default:
+                                    sPower = '' + iPow + '' + val.damage_type_flg;
+                                    break;
+                            }
+                        } else if (val.script_id == 1041) {
+                            sPower = '2?';
+                        }
+                        if (typeof aCard.status != 'undefined') {
+                            if (typeof aCard.status[120] != 'undefined' && aCard.status[120].param1 == i) {
+                                iStone *= 2;
+                            }
+                            if (typeof aCard.status[123] != 'undefined') {
+                                iStone += 2;
+                            }
+                        }
+                        sCommandsHtml +=
+                            '<div class="command_row" art_id="' + val.id + '" act_type="arts">' +
+                                val.name +
+                                '<div class="num_info">' +
+                                    '<span class="range_pic">' +
+                                        sRange +
+                                    '</span>' +
+                                    ' ' +
+                                    sPower +
+                                    ' ' +
+                                    '<span class="stone_cost">' +
+                                        iStone + 'コ' +
+                                    '</span>' +
+                                '</div>' +
+                            '</div>';
+                    });
+
+                    // 移動、逃げる or メイクカード
+                    var sCost = '';
+                    var iStone = 0;
+                    if (aCard.status) {
+                        if (typeof aCard.status[123] != 'undefined') {
+                            iStone += 2;
+                        }
+                    }
+                    if (iStone > 0) {
+                        sCost =
+                            ' ' +
+                            '<span class="stone_cost">' +
+                                iStone + 'コ' +
+                            '</span>';
+                    }
+                    if (aCardData.category == 'master') {
+                        sCommandsHtml +=
+                            '<div class="command_row" act_type="make_card">' +
+                                'メイクカード' +
+                                '<div class="num_info">' +
+                                    sCost +
+                                '</div>' +
+                            '</div>';
+                    } else {
+                        sCommandsHtml +=
+                            '<div class="command_row" act_type="move">' +
+                                '移動' +
+                                '<div class="num_info">' +
+                                    sCost +
+                                '</div>' +
                             '</div>' +
-                        '</div>' +
-                        '<div class="command_row" act_type="escape">' +
-                            '逃げる' +
-                            '<div class="num_info">' +
-                                sCost +
-                            '</div>' +
-                        '</div>';
+                            '<div class="command_row" act_type="escape">' +
+                                '逃げる' +
+                                '<div class="num_info">' +
+                                    sCost +
+                                '</div>' +
+                            '</div>';
+                    }
                 }
             }
 
@@ -506,8 +563,6 @@ game_field_reactions = (function () {
                 '</div>'
             );
         } catch (e) {
-            console.log('updateActorDom Failure.');
-            console.log(e.stack);
             // 選択情報を正しく処理できなかった場合、選択されてないと見なす
             $('#card_info_frame').html(
                 '<div class="card_info_title">' +
@@ -764,7 +819,7 @@ game_field_reactions = (function () {
             if (aArgs.priority == g_master_data.queue_priority.command) {
                 if (act.owner == target.owner) {
                     g_field_data.queues.push({
-                        actor_id            : null,
+                        actor_id            : act.game_card_id,
                         log_message         : '',
                         resolved_flg        : 0,
                         actor_anime_disable : true,
@@ -773,6 +828,7 @@ game_field_reactions = (function () {
                             {
                                 queue_type_id   : 1023,
                                 target_id       : act.game_card_id,
+                                param1          : 1,
                             },
                         ],
                     });

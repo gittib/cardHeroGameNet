@@ -37,7 +37,9 @@ class GameController extends Zend_Controller_Action
         $this->_javascript[] = '/js/img_delay_load.js';
         $this->_layout->title = 'ゲーム開始';
         $iPage = $request->getParam('page_no');
-        $ret = $modelDeck->getDeckList($iPage);
+        $ret = $modelDeck->getDeckList(array(
+            'page_no'   => $iPage,
+        ));
 
         $this->view->assign('aDeckList', $ret);
         $this->view->assign('bGameStandby', true);
@@ -83,7 +85,9 @@ class GameController extends Zend_Controller_Action
             'game_field_id' => $nGameFieldId,
             'open_flg'      => 1,
         ));
-        $aDeckList = $modelDeck->getDeckList($iPage);
+        $ret = $modelDeck->getDeckList(array(
+            'page_no'   => $iPage,
+        ));
         $this->view->assign('aCardInfoInField', reset($aCardInfoArray));
         $this->view->assign('aDeckList', $aDeckList);
         $this->view->assign('nGameFieldId', $nGameFieldId);

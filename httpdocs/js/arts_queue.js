@@ -22,6 +22,20 @@ arts_queue = (function () {
     function getArtsQueue (aArgs) {
         var aQueue = null;
         try {
+            delete aArgs.field_data.tokugi_fuuji_flg;
+            var bSealed = (function(){
+                // 特技封じの判定
+                try {
+                    if (mon.status[110].param1 == aArgs.art_id) {
+                       return true;
+                    }
+                } catch (e) {}
+                return false;
+            })();
+            if (bSealed) {
+                return null;
+            }
+            var mon = aArgs.field_data[aArgs.actor_id];
             var aArtInfo = g_master_data.m_arts[aArgs.art_id];
             aQueue = {
                 actor_id        : aArgs.actor_id,
@@ -48,6 +62,9 @@ arts_queue = (function () {
                 cost_flg        : true,
             });
         } catch (e) {
+            if (e == 'tokugi_fuuji') {
+                aArgs.field_data.tokugi_fuuji_flg = true;
+            }
             console.log(e.stack);
             return null;
         }
@@ -440,6 +457,11 @@ arts_queue = (function () {
             case 1019:
                 return [
                     {
+                        queue_type_id   : 1007,
+                        target_id       : aArgs.actor_id,
+                        param1          : 1,
+                    },
+                    {
                         queue_type_id   : 1026,
                         target_id       : aArgs.actor_id,
                         param1          : 129,
@@ -447,6 +469,7 @@ arts_queue = (function () {
                     {
                         queue_type_id   : 1008,
                         target_id       : aArgs.targets[0].game_card_id,
+                        cost_flg        : true,
                     },
                 ];
                 break;
@@ -603,6 +626,65 @@ arts_queue = (function () {
                 return aRet;
                 break;
             case 1027:
+                return [
+                    {
+                        queue_type_id   : 1011,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : 'draw',
+                        param2          : 1,
+                    },
+                ];
+                break;
+            case 1028:
+                return [
+                    {
+                        queue_type_id   : 1004,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : -1,
+                        cost_flg        : true,
+                    },
+                    {
+                        queue_type_id   : 1017,
+                        target_id       : aArgs.actor_id,
+                        param1          : 1,
+                        param2          : true,
+                    },
+                    {
+                        queue_type_id   : 1019,
+                        target_id       : aArgs.actor_id,
+                    }
+                ];
+                break;
+            case 1029:
+                return [
+                    {
+                        queue_type_id   : 1008,
+                        target_id       : aArgs.actor_id,
+                    }
+                ];
+                break;
+            case 1030:
+                return [
+                    {
+                        queue_type_id   : 1026,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : 128,
+                    }
+                ];
+                break;
+            case 1031:
+                if (aArgs.param2) {
+                    return [
+                        {
+                            queue_type_id   : 1026,
+                            target_id       : aArgs.targets[0].game_card_id,
+                            param1          : 110,
+                            param2          : aArgs.param2,
+                        }
+                    ];
+                } else {
+                    throw 'tokugi_fuuji';
+                }
                 break;
             default:
                 throw new Error('unknown script_id posted.');

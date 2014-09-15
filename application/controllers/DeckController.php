@@ -34,7 +34,9 @@ class DeckController extends Zend_Controller_Action
         $this->_javascript[] = '/js/deck_list.js';
         $this->_javascript[] = '/js/img_delay_load.min.js';
         $nPage = $request->getParam('page_no');
-        $ret = $this->_model->getDeckList($nPage);
+        $ret = $this->_model->getDeckList(array(
+            'page_no'   => $nPage,
+        ));
 
         $this->view->assign('aDeckList', $ret);
         $this->view->assign('bDeckEdit', true);

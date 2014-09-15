@@ -163,43 +163,64 @@ new function () {
         $(document).on('click', '.command_row', function () {
             var oDom = $(this);
             var aCard = g_field_data.cards[g_field_data.actor.game_card_id];
-            if (aCard.owner == 'enemy' && oDom.attr('act_type') != 'lvup') {
-                return;
-            }
-            switch (aCard.pos_category) {
-                case 'field':
-                    if (aCard.standby_flg) {
+            switch (checkGameState()) {
+                case 'normal':
+                case 'lvup_standby':
+                    if (aCard.owner == 'enemy' && oDom.attr('act_type') != 'lvup') {
                         return;
                     }
-                    g_field_data.actor.act_type = oDom.attr('act_type');
-                    g_field_data.actor.art_id   = oDom.attr('art_id');
-                    var prm1 = oDom.attr('param1');
-                    if (typeof prm1 !== 'undefined') {
-                        g_field_data.actor.param1 = prm1;
+                    switch (aCard.pos_category) {
+                        case 'field':
+                            if (aCard.standby_flg) {
+                                return;
+                            }
+                            g_field_data.actor.act_type = oDom.attr('act_type');
+                            g_field_data.actor.art_id   = oDom.attr('art_id');
+                            var prm1 = oDom.attr('param1');
+                            if (typeof prm1 !== 'undefined') {
+                                g_field_data.actor.param1 = prm1;
+                            }
+                            if (g_field_data.actor.act_type == 'lvup') {
+                                var aCardData = g_master_data.m_monster[aCard.monster_id];
+                                if (aCardData.next_monster_id) {
+                                    addTarget({
+                                        oDom    : oDom,
+                                    });
+                                }
+                            }
+                            break;
+                        case 'hand':
+                            g_field_data.actor.act_type = oDom.attr('act_type');
+                            var prm1 = oDom.attr('param1');
+                            if (typeof prm1 !== 'undefined') {
+                                g_field_data.actor.param1 = prm1;
+                            }
+                            break;
                     }
-                    if (g_field_data.actor.act_type == 'lvup') {
-                        var aCardData = g_master_data.m_monster[aCard.monster_id];
-                        if (aCardData.next_monster_id) {
-                            addTarget({
-                                oDom    : oDom,
-                            });
-                        }
-                    }
+                    $('.command_row').removeClass('selected_act');
+                    oDom.addClass('selected_act');
                     break;
-                case 'hand':
-                    g_field_data.actor.act_type = oDom.attr('act_type');
-                    var prm1 = oDom.attr('param1');
-                    if (typeof prm1 !== 'undefined') {
-                        g_field_data.actor.param1 = prm1;
+                case 'tokugi_fuuji':
+                    var aQueue = arts_queue.getArtsQueue({
+                        field_data  : g_field_data,
+                        art_id      : g_field_data.actor.art_id,
+                        actor_id    : g_field_data.actor.game_card_id,
+                        targets     : g_field_data.actor.aTargets,
+                        param2      : oDom.attr('art_id'),
+                    });
+                    if (aQueue) {
+                        g_field_data.queues.push(aQueue);
+                        execQueue({ resolve_all : true });
                     }
                     break;
             }
-            $('.command_row').removeClass('selected_act');
-            oDom.addClass('selected_act');
         });
 
         $(document).on('click', '#buttons_frame div.cancel_button', function () {
             switch (checkGameState()) {
+                case 'tokugi_fuuji':
+                    delete g_field_data.tokugi_fuuji_flg;
+                    // break は書かない
                 case 'normal':
                     g_field_data.actor = {game_card_id : null};
                     $('.actor').removeClass('actor');
@@ -725,7 +746,7 @@ new function () {
                     }
                     break;
                 case 13:
-                    if (g_master_data.m_card[targetMon.card_id].category == 'Master') {
+                    if (g_master_data.m_card[targetMon.card_id].category == 'master') {
                         return false;
                     }
                     if (game_field_utility.getDistance(actorMon.pos_id, targetMon.pos_id) == 1) {
@@ -776,7 +797,7 @@ new function () {
                     var p2 = game_field_utility.getXYFromPosId(targetMon.pos_id);
                     if (aArgs.range_type_id == 19) {
                         var cd = g_master_data.m_card[targetMon.card_id];
-                        if (cd.category == 'Master') {
+                        if (cd.category == 'master') {
                             return false;
                         }
                     }
@@ -797,13 +818,13 @@ new function () {
                     // breakは書かない
                 case 21:
                     var cd = g_master_data.m_card[targetMon.card_id];
-                    if (cd.category == 'Master') {
+                    if (cd.category == 'master') {
                         return true;
                     }
                     break;
                 case 23:
                     var cd = g_master_data.m_card[targetMon.card_id];
-                    if (cd.category != 'Master') {
+                    if (cd.category != 'master') {
                         return true;
                     }
                     break;
@@ -940,6 +961,12 @@ new function () {
                     });
                     console.log('arts q set sita');
                     console.log(aQueue);
+                    if (g_field_data.tokugi_fuuji_flg) {
+                        game_field_reactions.updateActorDom({
+                            field_data  : g_field_data,
+                            game_state  : 'tokugi_fuuji',
+                        });
+                    }
                     break;
                 case 'move':
                     aQueue = {
@@ -978,6 +1005,49 @@ new function () {
                     }
                     break;
                 case 'escape':
+                    aQueue = {
+                        actor_id        : actor.game_card_id,
+                        log_message     : '逃走',
+                        resolved_flg    : 0,
+                        priority        : g_master_data.queue_priority['command'],
+                        queue_units : [
+                            {
+                                queue_type_id   : 1008,
+                                target_id       : actor.game_card_id,
+                            },
+                            {
+                                queue_type_id   : 1023,
+                                target_id       : actor.game_card_id,
+                                cost_flg        : true,
+                            },
+                            {
+                                queue_type_id   : 1024,
+                                target_id       : actor.game_card_id,
+                                cost_flg        : true,
+                            }
+                        ],
+                    };
+                    break;
+                case 'make_card':
+                    aQueue = {
+                        actor_id        : actor.game_card_id,
+                        log_message     : 'メイクカードを使用',
+                        resolved_flg    : 0,
+                        priority        : g_master_data.queue_priority['command'],
+                        queue_units : [
+                            {
+                                queue_type_id   : 1011,
+                                target_id       : actor.game_card_id,
+                                param1          : 'draw',
+                                param2          : 1,
+                            },
+                            {
+                                queue_type_id   : 1023,
+                                target_id       : actor.game_card_id,
+                                cost_flg        : true,
+                            }
+                        ],
+                    };
                     break;
                 case 'lvup':
                     aQueue = {
@@ -1074,6 +1144,12 @@ new function () {
                     actor.param1 = aTargetInfo.pos_id;
                     _addActionFromActorInfo();
                     break;
+                case 'escape':
+                case 'make_card':
+                    if (actor.game_card_id == aTargetInfo.game_card_id) {
+                        _addActionFromActorInfo();
+                    }
+                    break;
                 case 'lvup':
                     _addActionFromActorInfo();
                     break;
@@ -1092,6 +1168,10 @@ new function () {
      */
     function execQueue(aArgs)
     {
+        // 特技封じとかでごしょったからこのタイミングで綺麗にする
+        delete g_field_data.tokugi_fuuji_flg;
+        g_field_data.actor = {game_card_id : null};
+
         var bRecursive = aArgs.resolve_all;
         var act = g_field_data.queues;
         var all_resolved = true;
@@ -1107,6 +1187,13 @@ new function () {
             }
         }
         if (all_resolved) {
+            (function() {
+                $.each(g_field_data.cards, function(iGameCardId, val) {
+                    if (val.pos_category != 'field') {
+                        removeMonsterInfoOnField(iGameCardId);
+                    }
+                });
+            })();
             return;
         }
         exec_act.failure_flg  = false;
@@ -1215,6 +1302,22 @@ new function () {
                                                 {
                                                     queue_type_id   : 1008,
                                                     target_id       : actorMon.game_card_id,
+                                                },
+                                            ],
+                                        });
+                                        break;
+                                    case 12:
+                                        g_field_data.queues.push({
+                                            actor_id            : actorMon.game_card_id,
+                                            log_message         : '性格「後退」発動',
+                                            resolved_flg        : 0,
+                                            actor_anime_disable : true,
+                                            priority            : g_master_data.queue_priority['reaction'],
+                                            queue_units : [
+                                                {
+                                                    queue_type_id   : 1022,
+                                                    target_id       : actorMon.game_card_id,
+                                                    param1          : game_field_utility.getRelativePosId(actorMon.pos_id, {x:0, y:1}),
                                                 },
                                             ],
                                         });
@@ -1378,11 +1481,10 @@ new function () {
                                     margin  : '25px',
                                 },
                             });
-                            removeMonsterInfoOnField(q.target_id);
                             break;
                         case 1011:
                             var mon = g_field_data.cards[q.target_id];
-                            if (q.param1 == 'drow' && q.param2 && (mon.pos_id == 'myMaster' || mon.pos_id == 'enemyMaster')) {
+                            if (q.param1 == 'draw' && q.param2 && (mon.pos_id == 'myMaster' || mon.pos_id == 'enemyMaster')) {
                                 (function() {
                                     for (var i = 0 ; i < q.param2 ; i++) {
                                         var iGameCardId = game_field_reactions.getGameCardId({
@@ -1395,6 +1497,7 @@ new function () {
                                 })();
                                 break;
                             }
+                            // break は書かない
                         case 1009:
                         case 1015:
                             g_field_data.cards[q.target_id].pos_category = 'hand';
@@ -1430,7 +1533,6 @@ new function () {
                                     },
                                 });
                             })();
-                            removeMonsterInfoOnField(q.target_id);
                             break;
                         case 1010:
                             console.log(q);
@@ -1735,6 +1837,10 @@ new function () {
                                 turn_count  : iTurnCount,
                             };
                             switch (q.param1) {
+                                case 110:
+                                case 120:
+                                    mon.status[q.param1].param1 = q.param2;
+                                    break;
                                 case 127:
                                     mon.status[q.param1].param1 = mon.monster_id;
                                     mon.monster_id = q.param2;
@@ -1834,17 +1940,20 @@ new function () {
             } catch (e) {
                 iAnimationTime = 100;
             }
-            if (g_field_data.animation_info.animations.length > 0) {
-                var aArgs = g_field_data.animation_info.animations.shift();
-                if (typeof aArgs.html_param != 'undefined') {
-                    $(aArgs.target_dom).html(aArgs.html_param);
-                }
-                if (typeof aArgs.css_param != 'undefined') {
-                    $.each(aArgs.css_param, function (key, val) {
-                        $(aArgs.target_dom).css(key, val);
-                    });
-                }
-                if (typeof aArgs.animation_param != 'undefined') {
+            if (0 < g_field_data.animation_info.animations.length) {
+                try {
+                    var aArgs = g_field_data.animation_info.animations.shift();
+                    if ($(aArgs.target_dom).size() <= 0) {
+                        throw '';
+                    }
+                    if (typeof aArgs.html_param != 'undefined') {
+                        $(aArgs.target_dom).html(aArgs.html_param);
+                    }
+                    if (typeof aArgs.css_param != 'undefined') {
+                        $.each(aArgs.css_param, function (key, val) {
+                            $(aArgs.target_dom).css(key, val);
+                        });
+                    }
                     if (typeof aArgs.animation_time_rate != 'undefined') {
                         iAnimationTime *= aArgs.animation_time_rate;
                     }
@@ -1856,7 +1965,7 @@ new function () {
                             _execAnimationUnit(bRecursive);
                         }
                     );
-                } else {
+                } catch(e) {
                     setTimeout( function () {
                         _execAnimationUnit(bRecursive);
                     }, 1);

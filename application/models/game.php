@@ -54,6 +54,7 @@ class model_Game {
                 )
             )
             ->order(array(
+                'upd_date desc',
                 'game_field_id',
             ));
         if (isset($aOption['game_field_id']) && $aOption['game_field_id'] != '') {
@@ -86,6 +87,13 @@ class model_Game {
                     'start_date'        => new Zend_Db_Expr("to_char(first.upd_date,'yyyy/mm/dd HH24:MI:SS')"),
                 )
             )
+            ->joinLeft(
+                array('tu' => 't_user'),
+                'tu.user_id = field.user_id',
+                array(
+                    'nick_name',
+                )
+            )
             ->where('field.game_field_id in(?)', $selField)
             ->order(array(
                 'upd_date desc',
@@ -98,6 +106,9 @@ class model_Game {
         }
 
         foreach ($rslt as $val) {
+            if ($val['nick_name'] == '') {
+                $val['nick_name'] = 'Guest';
+            }
             $iGameFieldId = $val['game_field_id'];
             $aRet[$iGameFieldId] = array(
                 'field_info'    => $val,

@@ -308,27 +308,52 @@ game_field_utility = (function () {
 
     function attackRangeCheck(act, target)
     {
-        if (target.pos_category != 'field' || !target.pos_id) {
-            return false;
-        }
-        if (target.standby_flg) {
-            return false;
-        }
-        if (act.status[113]) {
-            // どこでも受けてたら範囲が変わる
-            if (target.pos_id == 'myMaster' || target.pos_id == 'enemyMaster') {
-                return false;
-            } else {
-                return true;
-            }
-        } else {
-            if (getDistance(act.pos_id, target.pos_id) == 1) {
-                return true;
-            } else {
+        try {
+            if (target.pos_category != 'field' || !target.pos_id) {
                 return false;
             }
+            if (target.standby_flg) {
+                return false;
+            }
+            if (act.status[113]) {
+                // どこでも受けてたら範囲が変わる
+                if (target.pos_id == 'myMaster' || target.pos_id == 'enemyMaster') {
+                    return false;
+                } else {
+                    return true;
+                }
+            } else {
+                var aData = g_master_data.m_monster[act.monster_id];
+                var p1 = getXYFromPosId(act.pos_id);
+                var p2 = getXYFromPosId(target.pos_id);
+                switch(aData.skill.id) {
+                    case 23:
+                        if (p2.y-p1.y == -1 && (p2.x-p1.x == 0 || p2.x-p1.x == -1)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                        break;
+                    case 24:
+                        if (p2.y-p1.y == -1 && (p2.x-p1.x == 0 || p2.x-p1.x == 1)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                        break;
+                    default:
+                        if (getDistance(act.pos_id, target.pos_id) == 1) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                        break;
+                }
+            }
+            return false;
+        } catch (e) {
+            return false;
         }
-        return false;
     }
 
     function isValidSuper(aArgs)
