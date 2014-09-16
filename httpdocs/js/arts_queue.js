@@ -691,6 +691,37 @@ arts_queue = (function () {
                     throw 'tokugi_fuuji';
                 }
                 break;
+            case 1032:
+                var aActor = aArgs.field_data.cards[aArgs.actor_id];
+                var aRet = [
+                    {
+                        queue_type_id   : 1008,
+                        target_id       : aArgs.actor_id,
+                    },
+                    {
+                        queue_type_id   : 1013,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : aActor.pos_id,
+                    },
+                    {
+                        queue_type_id   : 1010,
+                        target_id       : aArgs.targets[0].game_card_id,
+                    },
+                ];
+                if (g_master_data.m_monster[aActor.monster_id].lv == 2) {
+                    aRet.push({
+                        queue_type_id   : 1017,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : 1,
+                        param2          : true,
+                    });
+                    aRet.push({
+                        queue_type_id   : 1019,
+                        target_id       : aArgs.targets[0].game_card_id,
+                    });
+                }
+                return aRet;
+                break;
             default:
                 throw new Error('unknown script_id posted.');
         }

@@ -635,7 +635,7 @@ new function () {
             if (!aArgs.actor_id) {
                 aArgs.actor_id = g_field_data.actor.game_card_id;
             }
-            if (!aArgs.target_id) {
+            if (aArgs.target_pos_id) {
                 aArgs.target_id = game_field_reactions.getGameCardId({
                     pos_category    : 'field',
                     pos_id          : aArgs.target_pos_id,
@@ -648,6 +648,7 @@ new function () {
             // 先に伏せ状態のチェック
             switch (aArgs.range_type_id) {
                 case 12:
+                case 26:
                     // 伏せてても関係なし
                     break;
                 case 23:
@@ -698,18 +699,23 @@ new function () {
                 case 3:
                     var p1 = game_field_utility.getXYFromPosId(aArgs.actor_id);
                     var p2 = game_field_utility.getXYFromPosId(aArgs.target_id);
-                    var p3 = {
-                        x   : (p2.x - p1.x) / 2,
-                        y   : (p2.y - p1.y) / 2,
-                    };
                     var dist = Math.max(Math.abs(p1.x - p2.x), Math.abs(p1.y - p2.y));
-                    var betweenId = game_field_reactions.getGameCardId({
-                        pos_category    : 'field',
-                        pos_id          : game_field_utility.getRelativePosId(aArgs.actor_id, p3),
-                    });
-                    if (betweenId) {
-                        if (g_field_data.cards[betweenId].standby_flg) {
-                            return false;
+                    var p3 = {
+                        x   : (p2.x - p1.x) / dist,
+                        y   : (p2.y - p1.y) / dist,
+                    };
+                    for (var i = 1 ; i < dist ; i++) {
+                        var pTmp = {x:p3.x, y:p3.y};
+                        pTmp.x *= i;
+                        pTmp.y *= i;
+                        var betweenId = game_field_reactions.getGameCardId({
+                            pos_category    : 'field',
+                            pos_id          : game_field_utility.getRelativePosId(aArgs.actor_id, pTmp),
+                        });
+                        if (betweenId) {
+                            if (g_field_data.cards[betweenId].standby_flg) {
+                                return false;
+                            }
                         }
                     }
                     if (dist <= 2 || (dist <= 3 && aArgs.range_type_id == 4)){
@@ -1122,11 +1128,13 @@ new function () {
                 case 'magic':
                     var bRangeOk = checkTargetPosValid({
                         actor_id        : actor.game_card_id,
+                        target_id       : aTargetInfo.game_card_id,
                         target_pos_id   : aTargetInfo.pos_id,
                         range_type_id   : g_master_data.m_arts[actor.art_id].range_type_id,
                         target_order    : actor.aTargets.length,
                     });
                     if (!bRangeOk) {
+                        console.log('range check NG');
                         return false;
                     }
                     actor.aTargets.push(aTargetInfo);
