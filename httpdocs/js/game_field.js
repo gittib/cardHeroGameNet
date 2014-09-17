@@ -1747,6 +1747,11 @@ new function () {
                         case 1022:
                             var p = game_field_utility.getXYFromPosId(q.param1);
                             var aCard = g_field_data.cards[q.target_id];
+                            if (aCard.status) {
+                                if (aCard.status[114]) {
+                                    throw new Error('Move failed. Mover has kagenui.');
+                                }
+                            }
                             if ((aCard.owner == 'my' && 2 <= p.y) || (aCard.owner == 'enemy' && p.y <= 1)) {
                                 aCard.pos_id = q.param1;
                                 bMoveQueueResolved = true;

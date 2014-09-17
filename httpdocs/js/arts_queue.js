@@ -395,6 +395,7 @@ arts_queue = (function () {
                             queue_type_id   : 1022,
                             target_id       : val.game_card_id,
                             param1          : aActor.pos_id,
+                            cost_flg        : true,
                         });
                     } else {
                         if (val.standby_flg) {
@@ -720,6 +721,66 @@ arts_queue = (function () {
                         target_id       : aArgs.targets[0].game_card_id,
                     });
                 }
+                return aRet;
+                break;
+            case 1033:
+                var aTarget = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var aRet = [];
+                try {
+                    $.each(aArgs.field_data.cards, function(i, val) {
+                        if (val.pos_category != 'field') {
+                            return true;
+                        }
+                        if (val.next_game_card_id) {
+                            return true;
+                        }
+                        if (val.owner != aTarget.owner) {
+                            return true;
+                        }
+                        if (val.status) {
+                            if (val.status[114]) {
+                                // 影縫い持ちがいたらローテ効果は全て発動せず、攻撃効果のみ処理する
+                                throw 'kagenui';
+                            }
+                        }
+                        var sPosId = '';
+                        switch (val.pos_id) {
+                            case 'myFront1':
+                            case 'enemyBack2':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:2, y:0});
+                                break;
+                            case 'myFront2':
+                            case 'enemyBack1':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:0, y:1});
+                                break;
+                            case 'myBack1':
+                            case 'enemyFront2':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:0, y:-1});
+                                break;
+                            case 'myBack2':
+                            case 'enemyFront1':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:-2, y:0});
+                                break;
+                        }
+                        if (sPosId) {
+                            aRet.push({
+                                queue_type_id   : 1022,
+                                target_id       : val.game_card_id,
+                                param1          : sPosId,
+                            });
+                        }
+                    });
+                } catch (e) {
+                    if (e != 'kagenui') {
+                        throw e;
+                    }
+                    aRet = [];
+                }
+                aRet.push({
+                    queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                    target_id       : aTarget.game_card_id,
+                    param1          : aArtInfo.power,
+                });
                 return aRet;
                 break;
             default:
