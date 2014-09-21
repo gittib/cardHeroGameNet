@@ -64,7 +64,7 @@ game_field_reactions = (function () {
             $.each(g_field_data.cards, function (i, val) {
                 switch (val.pos_category) {
                     case 'field':
-                        if (typeof val.next_game_card_id != 'undefined') {
+                        if (val.next_game_card_id) {
                             // 進化元は進化先が上に重なってるので非表示
                             break;
                         }

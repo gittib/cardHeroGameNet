@@ -1,9 +1,18 @@
 @charset "utf-8";
+#game_infomation_frame {
+  border: none;
+  width: 100%;
+  margin-top: 20px; }
+  #game_infomation_frame div {
+    border: 1px solid;
+    border-bottom: none; }
+  #game_infomation_frame div.info {
+    min-height: 1em; }
+
 #game_field {
   width: 100%;
   border: 1px solid;
-  border-collapse: collapse;
-  margin-top: 20px; }
+  border-collapse: collapse; }
   #game_field td {
     width: 30%;
     height: 51px;
@@ -17,7 +26,7 @@
       #game_field td .pict img {
         border: 1px solid;
         height: 100%;
-        width: 100%; }
+        max-width: 100%; }
     #game_field td .param {
       float: left;
       padding-left: 3px;

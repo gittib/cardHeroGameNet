@@ -119,7 +119,7 @@ class model_Game {
         }
         $sel = $this->_db->select()
             ->from(
-                array('card' => 't_game_cards'),
+                array('card' => 't_game_card'),
                 array(
                     'game_field_id',
                     'game_card_id',
@@ -139,15 +139,13 @@ class model_Game {
             )
             ->joinLeft(
                 array('monster' => 't_game_monster'),
-                array(
-                    'monster.game_card_id = card.game_card_id',
-                    'monster.game_field_id = card.game_field_id',
-                ),
+                'monster.game_card_id = card.game_card_id and monster.game_field_id = card.game_field_id',
                 array(
                     'monster_id',
                     'field_position'    => 'position',
                     'hp',
                     'standby_flg',
+                    'next_game_card_id',
                 )
             )
             ->joinLeft(
@@ -216,6 +214,9 @@ class model_Game {
                     $aTmpRow['lv']              = $val['lv'];
                     $aTmpRow['hp']              = $val['hp'];
                     $aTmpRow['status']          = array();
+                    if (isset($val['next_game_card_id']) && $val['next_game_card_id'] != '') {
+                        $aTmpRow['next_game_card_id'] = $val['next_game_card_id'];
+                    }
                 }
             }
             $iGameFieldId = $val['game_field_id'];
@@ -256,6 +257,7 @@ class model_Game {
             case 107:
             case 108:
             case 109:
+            case 110:
             case 111:
             case 112:
             case 113:
@@ -285,7 +287,7 @@ class model_Game {
                         )
                     )
                     ->join(
-                        array('tgc' => 't_game_cards'),
+                        array('tgc' => 't_game_card'),
                         array(
                             'tgc.game_card_id = tgm.game_card_id',
                             'tgc.game_field_id = tgm.game_field_id',
@@ -363,7 +365,7 @@ class model_Game {
             default:
                 $sPos = '';
         }
-        if (!$bMyField) {
+        if ($bMyField) {
             $sPos = strtoupper($sPos);
         }
         return $sPos;
@@ -429,7 +431,7 @@ class model_Game {
 
             $sel = $this->_db->select()
                     ->from(
-                        't_game_cards',
+                        't_game_card',
                         array(
                             'cnt' => new Zend_Db_Expr("count(*)"),
                         )
@@ -568,7 +570,7 @@ class model_Game {
 
     private function _insertGameCard($row)
     {
-        $sql = "select nextval('t_game_cards_game_card_id_seq')";
+        $sql = "select nextval('t_game_card_game_card_id_seq')";
         $iGameCardId = $this->_db->fetchOne($sql);
         $set = array(
             'game_card_id'      => $iGameCardId,
@@ -583,7 +585,7 @@ class model_Game {
         if (isset($row['sort_no']) && $row['sort_no'] != '') {
             $set['sort_no'] = $row['sort_no'];
         }
-        $this->_db->insert('t_game_cards', $set);
+        $this->_db->insert('t_game_card', $set);
 
         if ($row['position_category'] == 'field') {
             $set = array(
@@ -595,6 +597,9 @@ class model_Game {
             );
             if (isset($row['standby_flg'])) {
                 $set['standby_flg'] = $row['standby_flg'];
+            }
+            if (isset($row['next_game_card_id'])) {
+                $set['next_game_card_id'] = $row['next_game_card_id'];
             }
             $this->_db->insert('t_game_monster', $set);
         }
@@ -674,7 +679,7 @@ class model_Game {
                     'owner'             => $val['owner'],
                     'position_category' => $val['pos_category'],
                 );
-                $this->_db->insert('t_game_cards', $set);
+                $this->_db->insert('t_game_card', $set);
                 if ($val['pos_category'] == 'field') {
                     if (isset($val['standby_flg']) && $val['standby_flg']) {
                         $val['standby_flg'] = 1;
@@ -690,8 +695,11 @@ class model_Game {
                         'standby_flg'   => $val['standby_flg'],
                         'act_count'     => $val['act_count'],
                     );
+                    if (isset($val['next_game_card_id']) && $val['next_game_card_id'] != '') {
+                        $set['next_game_card_id'] = $val['next_game_card_id'];
+                    }
                     $this->_db->insert('t_game_monster', $set);
-                    foreach ($val['status'] as $st) {
+                    foreach ($val['status'] as $iStatusId => $st) {
                         if (!isset($st['param1'])) {
                             $st['param1'] = '';
                         }
@@ -699,7 +707,7 @@ class model_Game {
                             $st['param2'] = '';
                         }
                         $set = array(
-                            'status_id'     => $st['status_id'],
+                            'status_id'     => $iStatusId,
                             'game_card_id'  => $iGameCardId,
                             'game_field_id' => $iGameFieldId,
                             'turn_count'    => $st['turn_count'],

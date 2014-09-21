@@ -3,7 +3,7 @@ $nPages = (int)(($this->nFields - 1) / 10) + 1;
 $nDispLinkRange = 3;
 
 $sPageLinkTag = "<div class='page_link'>\n";
-if ($this->nPage > $nDispLinkRange+1) {
+if ($nDispLinkRange+1 < $this->nPage) {
     $sPageLinkTag .= <<<_eos_
     <span><a href="/game/list/">1</a>...</span>
 

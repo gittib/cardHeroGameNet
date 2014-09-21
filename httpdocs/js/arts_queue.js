@@ -31,7 +31,9 @@ arts_queue = (function () {
                 try {
                     console.log('特技封じ判定');
                     if (mon.status[110].param1 == aArgs.art_id) {
-                       alert('特技を封じられています！');
+                       game_field_utility.myAlertInField({
+                           message  : '特技を封じられています！',
+                       });
                        return true;
                     }
                 } catch (e) {
@@ -111,7 +113,7 @@ arts_queue = (function () {
                             if (val.pos_category != 'field') {
                                 return true;
                             }
-                            if (typeof val.next_game_card_id != 'undefined' && val.next_game_card_id) {
+                            if (val.next_game_card_id) {
                                 return true;
                             }
                             if (val.standby_flg) {
@@ -165,7 +167,7 @@ arts_queue = (function () {
                     if (val.pos_category != 'field') {
                         return true;
                     }
-                    if (typeof val.next_game_card_id != 'undefined' && val.next_game_card_id) {
+                    if (val.next_game_card_id) {
                         return true;
                     }
                     if (val.standby_flg) {
@@ -387,7 +389,7 @@ arts_queue = (function () {
                     if (val.pos_category != 'field') {
                         return true;
                     }
-                    if (typeof val.next_game_card_id != 'undefined' && val.next_game_card_id) {
+                    if (val.next_game_card_id) {
                         return true;
                     }
                     if (val.pos_id == sPosMoveTo) {
@@ -435,7 +437,7 @@ arts_queue = (function () {
                     if (val.pos_category != 'field') {
                         return true;
                     }
-                    if (typeof val.next_game_card_id != 'undefined' && val.next_game_card_id) {
+                    if (val.next_game_card_id) {
                         return true;
                     }
                     if (val.standby_flg) {
@@ -570,7 +572,7 @@ arts_queue = (function () {
                     if (val.pos_category != 'field') {
                         return true;
                     }
-                    if (typeof val.next_game_card_id != 'undefined' && val.next_game_card_id) {
+                    if (val.next_game_card_id) {
                         return true;
                     }
                     if (val.standby_flg) {
@@ -780,6 +782,142 @@ arts_queue = (function () {
                     queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
                     target_id       : aTarget.game_card_id,
                     param1          : aArtInfo.power,
+                });
+                return aRet;
+                break;
+            case 1034:
+                return [
+                    {
+                        queue_type_id   : 1020,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : 1,
+                        cost_flg        : true,
+                    },
+                    {
+                        queue_type_id   : 1017,
+                        target_id       : aArgs.targets[1].game_card_id,
+                        param1          : 1,
+                    },
+                ];
+                break;
+            case 1035:
+                return [
+                    {
+                        queue_type_id   : 1004,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : aArtInfo.power,
+                    },
+                ];
+                break;
+            case 1036:
+                return [
+                    {
+                        queue_type_id   : 1026,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : 106,
+                    },
+                ];
+                break;
+            case 1037:
+                return [
+                    {
+                        queue_type_id   : 1026,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : 102,
+                    },
+                ];
+                break;
+            case 1038:
+                var aRet = [];
+                var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var p1 = game_field_utility.getXYFromPosId(mon.pos_id);
+                $.each(aArgs.field_data.cards, function(i, val) {
+                    if (val.pos_category != 'field') {
+                        return true;
+                    }
+                    if (val.next_game_card_id) {
+                        return true;
+                    }
+                    if (val.standby_flg) {
+                        return true;
+                    }
+                    var p2 = game_field_utility.getXYFromPosId(val.pos_id);
+                    if (p2.y == p1.y) {
+                        aRet.push({
+                            queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                            target_id       : val.game_card_id,
+                            param1          : aArtInfo.power,
+                        });
+                    }
+                });
+                return aRet;
+                break;
+            case 1039:
+                var aRet = [];
+                var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                $.each(aArgs.field_data.cards, function(i, val) {
+                    if (val.pos_category != 'field') {
+                        return true;
+                    }
+                    if (val.next_game_card_id) {
+                        return true;
+                    }
+                    if (val.standby_flg) {
+                        return true;
+                    }
+                    aRet.push({
+                        queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                        target_id       : val.game_card_id,
+                        param1          : aArtInfo.power,
+                    });
+                });
+                return aRet;
+                break;
+            case 1040:
+                var aRet = [];
+                var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var aMonsterData = g_master_data.m_monster[mon.game_card_id];
+                $.each(g_master_data.m_status, function(iStatusId, val) {
+                    aRet.push({
+                        queue_type_id   : 1027,
+                        targets         : aArgs.targets[0].game_card_id,
+                        param1          : iStatusId,
+                    });
+                });
+                for (var i = 1 ; i < aMonsterData.lv ; i++) {
+                    aRet.push({
+                        queue_type_id   : 1020,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : true,
+                    });
+                }
+                aRet.push({
+                    queue_type_id   : 1030,
+                    target_id       : aArgs.targets[0].game_card_id,
+                });
+                return aRet;
+                break;
+            case 1041:
+                var aRet = [];
+                var sOwner = 'my';
+                if (parseInt(Math.random() * 2)) {
+                    sOwner = 'enemy';
+                }
+                $.each(aArgs.field_data.cards, function(i, val) {
+                    if (val.pos_category != 'field') {
+                        return true;
+                    }
+                    if (val.standby_flg) {
+                        return true;
+                    }
+                    if (val.owner != sOwner) {
+                        return true;
+                    }
+                    aRet.push({
+                        queue_type_id   : (sOwner == 'my') ? 1007 : 1006,
+                        target_id       : val.game_card_id,
+                        param1          : aArtInfo.power,
+                    });
                 });
                 return aRet;
                 break;

@@ -83,7 +83,9 @@
                         $aEffectFlags['magic'] = true;
                         break;
                 }
-                $sExplain .= $aStatusVal['explain'] . "<br />\n";
+                if (isset($aStatusVal['explain']) && $aStatusVal['explain'] != '') {
+                    $sExplain .= $this->escape($aStatusVal['explain']) . "<br />\n";
+                }
             }
         }
         if (isset($aEffectFlags['charge'])) {

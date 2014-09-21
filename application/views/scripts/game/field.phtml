@@ -23,12 +23,14 @@
             'myBack2',
         ),
     );
+    $aCards = array();
     foreach ($aCardInfo['field'] as $iGameCardId => $val) {
         if ($aCardInfo['field_info']['turn'] == $val['owner']) {
-            $pos = 'my' . $val['position'];
+            $sOwner = 'my';
         } else {
-            $pos = 'enemy' . $val['position'];
+            $sOwner = 'enemy';
         }
+        $pos = $sOwner . $val['position'];
 
         $sStatusDetail = '';
         if ($val['standby_flg']) {
@@ -49,6 +51,7 @@
         $sEffect .= '<span class="magic"></span>';
         $sEffect .= '<span class="charge"></span>';
         $aEffectFlags = array();
+        $aSt = array();
         if (isset($val['status']) && $val['status'] != '') {
             foreach ($val['status'] as $aStatusVal) {
                 switch ($aStatusVal['type']) {
@@ -65,6 +68,12 @@
                         $aEffectFlags['magic'] = true;
                         break;
                 }
+                $aSt[$aStatusVal['id']]=array(
+                        'status_id'=>$aStatusVal['id'],
+                        'turn_count'=>$aStatusVal['turn'],
+                        'param1'=>$aStatusVal['param1'],
+                        'param2'=>$aStatusVal['param2'],
+                );
                 $sStatusDetail .= <<<_eos_
                     <div class="status_row"
                         status_id="{$aStatusVal['id']}"
@@ -102,6 +111,24 @@ _eos_;
         </td>
 
 _eos_;
+        $aCards[$iGameCardId] = array(
+            'game_card_id'      => $iGameCardId,
+            'card_id'           => $val['card_id'],
+            'monster_id'        => $val['monster_id'],
+            'owner'             => $sOwner,
+            'pos_category'      => 'field',
+            'sort_no'           => 0,
+            'pos_id'            => $pos,
+            'hp'                => $val['hp'],
+            'standby_flg'       => $val['standby_flg'],
+            'skill_disable_flg' => 0,
+            'act_count'         => 0,
+            'lvup_standby'      => 0,
+            'status'            => $aSt,
+        );
+        if (isset($val['next_game_card_id']) && $val['next_game_card_id'] != '') {
+            $aCards[$iGameCardId]['next_game_card_id'] = $val['next_game_card_id'];
+        }
     }
 
     $sMyHandHtml = '';
@@ -110,18 +137,18 @@ _eos_;
         'my'    => 0,
         'enemy' => 0,
     );
+    $iSortNo = 0;
     foreach ($this->aCardInfo['hand'] as $iGameCardId => $val) {
-        if ($aCardInfo['field_info']['turn'] == $val['owner']) {
-            $aHandCount['my']++;
+        $sOwner = ($aCardInfo['field_info']['turn'] == $val['owner']) ? 'my' : 'enemy';
+        if ($sOwner == 'my') {
             $sMyHandHtml .= <<<_eos_
     <div class="hand_card" game_card_id="{$iGameCardId}" card_id="{$val['card_id']}">
         <img src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
     </div>
 
 _eos_;
-        } else {
-            $aHandCount['enemy']++;
         }
+        $aHandCount[$sOwner]++;
         $sHandCards .= <<<_eos_
 <div class="hand_card"
     game_card_id="{$iGameCardId}"
@@ -129,6 +156,13 @@ _eos_;
     owner="{$val['owner']}" ></div>
 
 _eos_;
+        $aCards[$iGameCardId] = array(
+            'game_card_id'  => $iGameCardId,
+            'card_id'       => $val['card_id'],
+            'owner'         => $sOwner,
+            'pos_category'  => 'hand',
+            'sort_no'       => $iSortNo++,
+        );
     }
 
     if ($aCardInfo['field_info']['turn'] == 1) {
@@ -187,6 +221,14 @@ _eos_;
     owner="{$val['owner']}" ></div>
 
 _eos_;
+            $sOwner = ($aCardInfo['field_info']['turn'] == $val['owner']) ? 'my' : 'enemy';
+            $aCards[$iGameCardId] = array(
+                'game_card_id'  => $iGameCardId,
+                'card_id'       => $val['card_id'],
+                'owner'         => $sOwner,
+                'pos_category'  => 'deck',
+                'sort_no'       => $iSortNo++,
+            );
         }
     }
 
@@ -200,9 +242,24 @@ _eos_;
     owner="{$val['owner']}" ></div>
 
 _eos_;
+            $sOwner = ($aCardInfo['field_info']['turn'] == $val['owner']) ? 'my' : 'enemy';
+            $aCards[$iGameCardId] = array(
+                'game_card_id'  => $iGameCardId,
+                'card_id'       => $val['card_id'],
+                'owner'         => $sOwner,
+                'pos_category'  => 'used',
+                'sort_no'       => $iSortNo++,
+            );
         }
     }
 ?>
+<div id="game_infomation_frame">
+    <div class="label">
+        Game Infomation
+    </div>
+    <div class="info">
+    </div>
+</div>
 <table id="game_field">
 <?php
     foreach ($aPosId as $aLine) {
@@ -264,6 +321,11 @@ _eos_;
         <input type="RADIO" name="actor_auto_change" value="field"  />フィールドのみ
         <input type="RADIO" name="actor_auto_change" value="off"    />OFF
     </div>
+    <div class="setting_item animation_speed">
+        <span>アラートメッセージ</span><br/>
+        <input type="RADIO" name="alert_popup" value="1" />アラート表示
+        <input type="RADIO" name="alert_popup" value="0" />アラート非表示
+    </div>
     <input type="BUTTON" class="toggle_setting last" value="設定非表示" />
 </div>
 
@@ -275,6 +337,11 @@ _eos_;
     echo '<div turn_num="' . $aCardInfo['field_info']['turn'] . '"></div>';
 ?>
 </div>
+<script type="text/javascript">
+function getCardsJson() {
+    return JSON.parse('<?php echo json_encode($aCards); ?>');
+}
+</script>
 <form name="form_current_field" method="post" action="/game/turn-end/">
 <input type="hidden" name="game_field_id" value="<?php echo $this->nGameFieldId; ?>" />
 </form>

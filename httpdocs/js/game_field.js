@@ -279,6 +279,19 @@ new function () {
         g_field_data.my_stone       = Number($('#myPlayersInfo div.stone span').text());
         g_field_data.enemy_stone    = Number($('#enemyPlayersInfo div.stone span').text());
 
+        g_field_data.cards = getCardsJson();
+        $.each(g_field_data.cards, function(iGameCardId, val) {
+            if (val.next_game_card_id) {
+                g_field_data.cards[val.next_game_card_id].before_game_card_id = iGameCardId;
+            }
+            if (typeof val.status != 'undefined') {
+                if (val.status.length <= 0) {
+                    val.status = {};
+                }
+            }
+        });
+        return;
+
         $('#game_field td.monster_space').each(function () {
             var iGameCardId = Number($(this).attr('game_card_id'));
             if (isNaN(iGameCardId)) {
@@ -381,6 +394,7 @@ new function () {
         var aRadioSettings = [
             'animation_speed',
             'actor_auto_change',
+            'alert_popup',
         ];
 
         try {
@@ -968,6 +982,9 @@ new function () {
                     console.log('arts q set sita');
                     console.log(aQueue);
                     if (g_field_data.tokugi_fuuji_flg) {
+                        game_field_utility.myAlertInField({
+                            message : '封じる特技を選んで下さい',
+                        });
                         game_field_reactions.updateActorDom({
                             field_data  : g_field_data,
                             game_state  : 'tokugi_fuuji',
@@ -1137,6 +1154,7 @@ new function () {
                         console.log('range check NG');
                         return false;
                     }
+                    $('#' + aTargetInfo.pos_id).addClass('target');
                     actor.aTargets.push(aTargetInfo);
                     _addActionFromActorInfo();
                     break;
@@ -1202,6 +1220,15 @@ new function () {
                     }
                 });
             })();
+            var sMessage = '';
+            switch (checkGameState()) {
+                case 'lvup_standby':
+                    sMessage = 'レベルアップさせるモンスターを選んで下さい';
+                    break;
+            }
+            game_field_utility.myAlertInField({
+                message : sMessage,
+            });
             return;
         }
         exec_act.failure_flg  = false;
@@ -1641,7 +1668,7 @@ new function () {
                                 var aSuperInHand = g_field_data.cards[q.param1];
                                 var bSuper = game_field_utility.isValidSuper({
                                     aBefore : g_field_data.cards[q.target_id],
-                                    aAfter  : g_field_data.cards[q.param1],
+                                    aAfter  : aSuperInHand,
                                 });
                                 if (!bSuper) {
                                     throw new Error('invalid_target');
@@ -1702,19 +1729,21 @@ new function () {
                                 mon.pos_category  = 'used';
                                 mon.sort_no       = iSortNo;
                             }
-                            g_field_data.queues.push({
-                                actor_id        : q.target_id,
-                                log_message     : 'レベルダウンしたストーンを還元',
-                                resolved_flg    : 0,
-                                priority        : g_master_data.queue_priority['same_time'],
-                                queue_units : [
-                                    {
-                                        queue_type_id   : 1004,
-                                        target_id       : q.target_id,
-                                        param1          : 1,
-                                    }
-                                ],
-                            });
+                            if (!q.param1) {
+                                g_field_data.queues.push({
+                                    actor_id        : q.target_id,
+                                    log_message     : 'レベルダウンしたストーンを還元',
+                                    resolved_flg    : 0,
+                                    priority        : g_master_data.queue_priority['same_time'],
+                                    queue_units : [
+                                        {
+                                            queue_type_id   : 1004,
+                                            target_id       : q.target_id,
+                                            param1          : 1,
+                                        }
+                                    ],
+                                });
+                            }
                             break;
                         case 1021:
                             var mon = g_field_data.cards[q.target_id];
@@ -1833,6 +1862,35 @@ new function () {
                                 break;
                             }
 
+                            var aAlreadyStatus = {};
+                            $.each(mon.status, function(iStatusId, val) {
+                                var aSt = g_master_data.m_status[iStatusId];
+                                switch (aSt.status_type) {
+                                    case 'P':
+                                    case 'S':
+                                        aAlreadyStatus[aSt.status_type] = true;
+                                        aAlreadyStatus[iStatusId] = true;
+                                        break;
+                                    default:
+                                        aAlreadyStatus[iStatusId] = true;
+                                        break;
+                                }
+                            });
+                            var aSt = g_master_data.m_status[q.param1];
+                            switch (aSt.status_type) {
+                                case 'P':
+                                case 'S':
+                                    if (aAlreadyStatus[aSt.status_type]) {
+                                        throw new Error('duplicate_status_type');
+                                    }
+                                    break;
+                                default:
+                                    if (aAlreadyStatus[aSt.status_id]) {
+                                        throw new Error('duplicate_status_id');
+                                    }
+                                    break;
+                            }
+
                             var iTurnCount = 2;
                             switch (q.param1) {
                                 case 100:
@@ -1898,6 +1956,9 @@ new function () {
                             break;
                         case 1029:
                             g_field_data.cards[q.target_id].skill_disable_flg = 0;
+                            break;
+                        case 1030:
+                            g_field_data.cards[q.target_id].act_count = 0;
                             break;
                         default:
                             throw new Error('invalid_queue_type');
@@ -2000,6 +2061,7 @@ new function () {
         if (!g_field_data.animation_info.bAnimationProcessing) {
             g_field_data.animation_info.bAnimationProcessing = true;
             $('.actor').removeClass('actor');
+            $('.target').removeClass('target');
             _execAnimationUnit(bRecursive);
         } else {
             return;

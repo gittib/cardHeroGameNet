@@ -102,6 +102,14 @@ game_field_utility = (function () {
          * @return 変身先のmonster_id (取得できなかった場合はnull)
          */
         'getModifyMonsterId'    : getModifyMonsterId,
+
+        /**
+         * myAlertInField
+         * 通知情報をアラートで出すかDOM操作で出すか、出し分けできるようにしとく
+         *
+         * @param   aArgs.message   : 表示するメッセージ
+         */
+        'myAlertInField'        : myAlertInField,
     };
 
 
@@ -498,5 +506,23 @@ game_field_utility = (function () {
             }
         });
         return ret_monster_id;
+    }
+
+    var sGameInfomationMessage = '';
+    function myAlertInField (aArgs)
+    {
+        if (aArgs.message == sGameInfomationMessage) {
+            return;
+        }
+        sGameInfomationMessage = aArgs.message;
+        var param = JSON.parse(localStorage.game_settings);
+        var bAlertPopup = parseInt(param['alert_popup']);
+        if (typeof bAlertPopup == 'undefined') {
+            bAlertPopup = true;
+        }
+        $('#game_infomation_frame .info').text(sGameInfomationMessage);
+        if (bAlertPopup && 0 < sGameInfomationMessage.length) {
+            alert(sGameInfomationMessage);
+        }
     }
 })();
