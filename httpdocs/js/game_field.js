@@ -3,13 +3,15 @@ new function () {
     var g_master_data = master_data.getInfo();
 
     var g_field_data = {
-        turn        : null,
-        my_stone    : 0,
-        enemy_stone : 0,
-        lvup_assist : 0,
-        cards       : {},
-        queues      : [],
-        actor       : {
+        turn            : null,
+        my_stone        : 0,
+        enemy_stone     : 0,
+        lvup_assist     : 0,
+        cards           : {},
+        queues          : [],
+        old_queues      : [],
+        resolved_queues : [],
+        actor           : {
             game_card_id    : null,
         },
 
@@ -1197,11 +1199,13 @@ new function () {
         // 特技封じとかでごしょったからこのタイミングで綺麗にする
         delete g_field_data.tokugi_fuuji_flg;
         g_field_data.actor = {game_card_id : null};
+        game_field_reactions.updateActorDom();
 
         var bRecursive = aArgs.resolve_all;
         var act = g_field_data.queues;
         var all_resolved = true;
         var exec_act = null;
+        var bOldQueue = false;
 
         for (var i = 0 ; i < act.length ; i++) {
             if (act[i].resolved_flg) {
@@ -1241,6 +1245,17 @@ new function () {
             g_backup_field_data = {};
             $.extend(true, g_backup_field_data, g_field_data);
         }
+        var backupQueuesWhileOldQueueProcessing = null;
+        if (bOldQueue) {
+            backupQueuesWhileOldQueueProcessing = [];
+            $.extend(true, g_field_data.queues, backupQueuesWhileOldQueueProcessing);
+        } else {
+            // 処理するキューをresolved_queuesの末尾に追加する
+            // バックアップ取った後だから、処理前に突っ込んでもおｋ
+            var q = {};
+            $.extend(true, q, exec_act);
+            g_field_data.resolved_queues.push(q);
+        }
         try {
             if (!exec_act.actor_anime_disable) {
                 if (typeof g_field_data.cards[exec_act.actor_id] != 'undefined') {
@@ -1277,11 +1292,6 @@ new function () {
                     console.log(q.queue_type_id + ' resolve start.');
                     switch (q.queue_type_id) {
                         case 1000:
-                            $.each(g_field_data.queues, function (i, vQueue) {
-                                if (vQueue.before_turn_flg) {
-                                    delete vQueue;
-                                }
-                            });
                             var sHtml = '<input type="hidden" name="field_data" value=\'' + JSON.stringify(g_field_data) + '\' />';
                             $('form[name=form_current_field]').append(sHtml);
                             game_field_reactions.updateField({
@@ -1960,6 +1970,31 @@ new function () {
                         case 1030:
                             g_field_data.cards[q.target_id].act_count = 0;
                             break;
+                        case 9999:
+                            switch (q.param1) {
+                                case 'regenerate':
+                                    var mon = g_field_data.cards[q.target_id];
+                                    if (mon.before_game_card_id) {
+                                        mon.pos_category = 'used';
+                                        var tmp = mon.before_game_card_id;
+                                        delete mon.before_game_card_id;
+                                        mon = g_field_data.cards[tmp];
+                                        delete mon.next_game_card_id;
+                                    }
+                                    var a = g_master_data.m_card[mon.card_id].monster_id;
+                                    mon = game_field_utility.loadMonsterInfo({
+                                        target_monster  : mon,
+                                        monster_id      : a,
+                                        reset_hp        : true,
+                                        reset_status    : true,
+                                        reset_act_count : true,
+                                    });
+                                    break;
+                                default:
+                                    throw new Error('argument_error');
+                                    break;
+                            }
+                            break;
                         default:
                             throw new Error('invalid_queue_type');
                             break;
@@ -1988,9 +2023,6 @@ new function () {
                 }
             }
             delete exec_act.failure_flg;
-            setTimeout( function () {
-                execAnimation(bRecursive);
-            }, 1);
         } catch (e) {
             console.log(e);
             console.log(e.stack);

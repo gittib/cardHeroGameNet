@@ -89,6 +89,7 @@ game_field_utility = (function () {
          * @param   aArgs.standby_flg           : (任意)伏せるかどうか。デフォルトは伏せない
          * @param   aArgs.reset_hp              : (任意)trueの場合、HPを最大値まで回復する
          * @param   aArgs.reset_act_count       : (任意)trueの場合、行動済み回数を0にする
+         * @param   aArgs.reset_status          : (任意)trueの場合、statusを全て解除する
          * @param   aArgs.aBefore               : (任意)スーパーになる場合とかの進化元モンスター情報
          *
          * @return  セットしたモンスター情報のオブジェクト
@@ -463,7 +464,7 @@ game_field_utility = (function () {
         if (typeof targetMon.lvup_standby == 'undefined') {
             targetMon.lvup_standby      = 0;
         }
-        if (typeof targetMon.status == 'undefined') {
+        if (typeof targetMon.status == 'undefined' || aArgs.reset_status) {
             targetMon.status = {};
         }
 

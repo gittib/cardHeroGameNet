@@ -85,7 +85,7 @@ class GameController extends Zend_Controller_Action
             'game_field_id' => $nGameFieldId,
             'open_flg'      => 1,
         ));
-        $ret = $modelDeck->getDeckList(array(
+        $aDeckList = $modelDeck->getDeckList(array(
             'page_no'   => $iPage,
         ));
         $this->view->assign('aCardInfoInField', reset($aCardInfoArray));
@@ -128,12 +128,11 @@ class GameController extends Zend_Controller_Action
             $this->_javascript[] = '/js/js_debug.js';
         }
         $this->_javascript[] = '/js/master_data.js';
-        $this->_javascript[] = '/js/game_field.min.js?ver=20140921';
-      //$this->_javascript[] = '/js/game_field_utility.js';
-      //$this->_javascript[] = '/js/game_field_reactions.js';
-      //$this->_javascript[] = '/js/arts_queue.js';
-      //$this->_javascript[] = '/js/game_field.js';
-        $this->_layout->title = 'ゲームフィールド';
+      //$this->_javascript[] = '/js/game_field.min.js?ver=20140921';
+        $this->_javascript[] = '/js/game_field_utility.js';
+        $this->_javascript[] = '/js/game_field_reactions.js';
+        $this->_javascript[] = '/js/arts_queue.js';
+        $this->_javascript[] = '/js/game_field.js';
         //$this->_layout->description = 'スマホでカードヒーローが遊べます。';
 
         $aSelectCond = array(
@@ -145,6 +144,7 @@ class GameController extends Zend_Controller_Action
         }
         $aFields = $this->_model->getFieldDetail($aSelectCond);
         $aCardInfo = reset($aFields);
+        $this->_layout->title = "ゲーム {$aCardInfo['field_info']['title_str']}";
         $this->view->assign('aCardInfo', $aCardInfo);
         $this->view->assign('nGameFieldId', $nGameFieldId);
     }

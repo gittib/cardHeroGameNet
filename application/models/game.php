@@ -76,7 +76,7 @@ class model_Game {
                     'turn',
                     'stone1',
                     'stone2',
-                    'upd_date' => new Zend_Db_Expr("to_char(field.upd_date,'yyyy/mm/dd HH24:MI:SS')"),
+                    'upd_date' => new Zend_Db_Expr("to_char(field.upd_date,'yyyy/mm/dd HH24:MI')"),
                 )
             )
             ->joinLeft(
@@ -84,7 +84,7 @@ class model_Game {
                 "to_char(first.game_field_id, '999999') = regexp_replace(field.field_id_path, '-.*$', '')",
                 array(
                     'first_field_id'    => 'game_field_id',
-                    'start_date'        => new Zend_Db_Expr("to_char(first.upd_date,'yyyy/mm/dd HH24:MI:SS')"),
+                    'start_date'        => new Zend_Db_Expr("to_char(first.upd_date,'yyyy/mm/dd HH24:MI')"),
                 )
             )
             ->joinLeft(
@@ -109,6 +109,9 @@ class model_Game {
             if ($val['nick_name'] == '') {
                 $val['nick_name'] = 'Guest';
             }
+            $aBeforeFields = explode('-', $val['field_id_path']);
+            $val['turn_count'] = count($aBeforeFields);
+            $val['title_str'] = '';
             $iGameFieldId = $val['game_field_id'];
             $aRet[$iGameFieldId] = array(
                 'field_info'    => $val,
@@ -117,6 +120,25 @@ class model_Game {
                 'deck'          => array(),
             );
         }
+        $sub = $this->_db->select()
+            ->from(
+                array('sub_tgc' => 't_game_card'),
+                array(
+                    'game_field_id',
+                    'owner',
+                )
+            )
+            ->join(
+                array('sub_mc' => 'm_card'),
+                'sub_mc.card_id = sub_tgc.card_id',
+                array(
+                    'max_rare'  => new Zend_Db_Expr("max(rare)"),
+                )
+            )
+            ->group(array(
+                'sub_tgc.game_field_id',
+                'sub_tgc.owner',
+            ));
         $sel = $this->_db->select()
             ->from(
                 array('card' => 't_game_card'),
@@ -178,11 +200,20 @@ class model_Game {
                     'status_type',
                 )
             )
+            ->joinLeft(
+                array('rare_data' => $sub),
+                'rare_data.game_field_id = card.game_field_id and ' .
+                'rare_data.owner = card.owner',
+                array(
+                    'max_rare',
+                )
+            )
             ->where('card.game_field_id in(?)', $selField)
             ->order(array(
                 'game_field_id',
                 'position_category',
                 'sort_no',
+                'owner',
                 'game_card_id',
             ));
         $rslt = $this->_db->fetchAll($sel);
@@ -216,6 +247,26 @@ class model_Game {
                     $aTmpRow['status']          = array();
                     if (isset($val['next_game_card_id']) && $val['next_game_card_id'] != '') {
                         $aTmpRow['next_game_card_id'] = $val['next_game_card_id'];
+                    }
+                }
+
+                // マスターはタイトルに反映
+                if ($aTmpRow['category'] == 'master') {
+                    switch ($aTmpRow['card_id']) {
+                        case 1002:
+                            $sMaster = '黒';
+                            break;
+                        case 1003:
+                            $sMaster = '白';
+                            break;
+                    }
+                    $sMaster .= '★' . $val['max_rare'];
+                    if ($aRet[$iGameFieldId]['field_info']['title_str'] == '') {
+                        $aRet[$iGameFieldId]['field_info']['title_str'] = "【{$sMaster}】";
+                    } else {
+                        $aRet[$iGameFieldId]['field_info']['title_str'] .= "VS【{$sMaster}】";
+                        $aRet[$iGameFieldId]['field_info']['title_str'] .= "{$aRet[$iGameFieldId]['field_info']['turn_count']}ターン目";
+                        $aRet[$iGameFieldId]['field_info']['title_str'] .= "[{$aRet[$iGameFieldId]['field_info']['upd_date']}]";
                     }
                 }
             }

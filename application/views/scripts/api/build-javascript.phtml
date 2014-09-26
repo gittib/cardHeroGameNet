@@ -1,3 +1,9 @@
-<?php echo $this->sScriptName; ?> = {
-    getInfo : function() { return JSON.parse('<?php echo $this->json; ?>'); }
-};
+<?php echo $this->sScriptName; ?> = (function(){
+    var aInfo = JSON.parse('<?php echo $this->json; ?>');
+
+    return {
+        getInfo : function() {
+            return aInfo;
+        },
+    };
+})();

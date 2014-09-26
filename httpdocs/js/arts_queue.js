@@ -874,28 +874,13 @@ arts_queue = (function () {
                 return aRet;
                 break;
             case 1040:
-                var aRet = [];
-                var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
-                var aMonsterData = g_master_data.m_monster[mon.game_card_id];
-                $.each(g_master_data.m_status, function(iStatusId, val) {
-                    aRet.push({
-                        queue_type_id   : 1027,
-                        targets         : aArgs.targets[0].game_card_id,
-                        param1          : iStatusId,
-                    });
-                });
-                for (var i = 1 ; i < aMonsterData.lv ; i++) {
-                    aRet.push({
-                        queue_type_id   : 1020,
+                return [
+                    {
+                        queue_type_id   : 9999,
                         target_id       : aArgs.targets[0].game_card_id,
-                        param1          : true,
-                    });
-                }
-                aRet.push({
-                    queue_type_id   : 1030,
-                    target_id       : aArgs.targets[0].game_card_id,
-                });
-                return aRet;
+                        param1          : 'regenerate',
+                    },
+                ];
                 break;
             case 1041:
                 var aRet = [];
@@ -920,6 +905,25 @@ arts_queue = (function () {
                     });
                 });
                 return aRet;
+                break;
+            case 1042:
+                return [
+                    {
+                        queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : aArtInfo.power,
+                    },
+                    {
+                        queue_type_id   : 1026,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : 114,
+                    },
+                    {
+                        queue_type_id   : 1026,
+                        target_id       : aArgs.actor_id,
+                        param1          : 114,
+                    },
+                ];
                 break;
             default:
                 throw new Error('unknown script_id posted.');
