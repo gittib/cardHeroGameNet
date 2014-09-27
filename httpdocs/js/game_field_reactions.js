@@ -85,65 +85,26 @@ game_field_reactions = (function () {
                             sLvHp += '<span class="mini-font">HP</span><span class="hp">' + val.hp + '</span>';
                         }
                         var aEffectFlags = {
-                            power   : false,
-                            shield  : false,
-                            magic   : false,
-                            charge  : false,
+                            'P'  : false,
+                            'S'  : false,
+                            'M'  : false,
+                            '!'  : false,
                         };
                         $.each(val.status, function (sid, aStatus) {
-                            switch (Number(sid)) {
-                                case 101:
-                                case 102:
-                                case 103:
-                                case 104:
-                                case 105:
-                                case 130:
-                                    aEffectFlags.power = true;
-                                    break;
-                                case 106:
-                                case 107:
-                                case 108:
-                                case 109:
-                                    aEffectFlags.shield = true;
-                                    break;
-                                case 110:
-                                case 111:
-                                case 112:
-                                case 113:
-                                case 114:
-                                case 115:
-                                case 116:
-                                case 117:
-                                case 118:
-                                case 119:
-                                case 120:
-                                case 121:
-                                case 122:
-                                case 123:
-                                case 124:
-                                case 125:
-                                case 126:
-                                case 127:
-                                case 128:
-                                case 129:
-                                    aEffectFlags.magic = true;
-                                    break;
-                                case 100:
-                                    aEffectFlags.charge = true;
-                                    break;
-                            }
+                            var aSt = g_master_data.m_status[sid];
+                            aEffectFlags[aSt.status_type] = true;
                         });
                         var sStatusEffect = '';
-                        if (aEffectFlags.power) {
+                        if (aEffectFlags['P']) {
                             sStatusEffect += '<span class="power">P</span>';
                         }
-                        if (aEffectFlags.shield) {
+                        if (aEffectFlags['S']) {
                             sStatusEffect += '<span class="shield">S</span>';
                         }
-                        if (aEffectFlags.magic) {
+                        if (aEffectFlags['M']) {
                             sStatusEffect += '<span class="magic">M</span>';
                         }
-                        if (aEffectFlags.charge) {
+                        if (aEffectFlags['!']) {
                             sStatusEffect += '<span class="charge">！</span>';
                         }
 
@@ -202,7 +163,7 @@ game_field_reactions = (function () {
                                 actor_id        : val.game_card_id,
                                 log_message     : '',
                                 resolved_flg    : 0,
-                                priority        : g_master_data.queue_priority['same_time'],
+                                priority        : 'same_time',
                                 queue_units : [
                                     {
                                         queue_type_id   : 1018,
@@ -223,10 +184,15 @@ game_field_reactions = (function () {
                         delete aPosId[val.pos_id];
                         break;
                     case 'hand':
-                        var sImgSrc = '/images/card/' + g_master_data.m_card[val.card_id].image_file_name;
-                        var sImgAlt = g_master_data.m_card[val.card_id].card_name;
                         nHand[val.owner]++;
                         if (val.owner == 'my') {
+                            var aCardData = g_master_data.m_card[val.card_id];
+                            var sImgSrc = '/images/card/' + g_master_data.m_card[val.card_id].image_file_name;
+                            var sImgAlt = aCardData.card_name;
+                            var sMagicAttr = '';
+                            if (aCardData.category == 'magic') {
+                                g_master_data.m_magic
+                            }
                             sMyHandHtml +=
                             '<div class="hand_card" game_card_id="' + val.game_card_id + '">' +
                                 '<img src="' + sImgSrc + '" alt="' + sImgAlt + '"/>' +
@@ -261,6 +227,7 @@ game_field_reactions = (function () {
      */
     function updateActorDom(aArgs)
     {
+        $('.target').removeClass('target');
         if (typeof aArgs == 'undefined') {
             aArgs = {'field_data' : g_field_data};
         }
@@ -286,56 +253,107 @@ game_field_reactions = (function () {
             var sCommandsHtml = '';
 
             if (aCard.pos_category == 'hand') {
-                switch (aCardData.card_name) {
-                    case 'ローテーション':
-                        g_field_data.actor.act_type = 'magic';
+                switch (aCardData.category) {
+                    case 'monster_front':
+                    case 'monster_back':
+                        g_field_data.actor.act_type = 'into_field';
                         sCommandsHtml =
-                            '<div class="command_row" act_type="magic" param1="1">' +
-                                '時計回り' +
-                            '</div>' +
-                            '<div class="command_row" act_type="magic" param1="2">' +
-                                '反時計回り' +
+                            '<div class="command_row into_field selected_act" act_type="into_field">' +
+                                '場に出す' +
                             '</div>';
                         break;
-                    case 'カードサーチ':
+                    case 'magic':
                         g_field_data.actor.act_type = 'magic';
-                        sCommandsHtml =
-                            '<div class="command_row" act_type="magic" param1="front">' +
-                                '前衛モンスターをサーチ' +
-                            '</div>' +
-                            '<div class="command_row" act_type="magic" param1="back">' +
-                                '後衛モンスターをサーチ' +
-                            '</div>' +
-                            '<div class="command_row" act_type="magic" param1="magic">' +
-                                'マジックをサーチ' +
-                            '</div>' +
-                            '<div class="command_row" act_type="magic" param1="super">' +
-                                'スーパーをサーチ' +
-                            '</div>';
-                        break;
-                    default:
-                        var sSelectedClass = 'selected_act';
-                        switch (aCardData.category)
-                        {
-                            case 'monster_front':
-                            case 'monster_back':
-                                g_field_data.actor.act_type = 'into_field';
+                        var aMagicData = g_master_data.m_magic[aCardData.magic_id];
+                        var mid = aCardData.magic_id;
+                        var iStone = aMagicData.stone;
+                        var aMaster = getGameCardId({
+                            pos_category    : 'field',
+                            pos_id          : 'myMaster',
+                        });
+                        try {
+                            if (aMaster.status[123]) {
+                                iStone += 2;
+                            }
+                        } catch (e) {}
+                        switch (aCardData.card_name) {
+                            case 'ローテーション':
                                 sCommandsHtml =
-                                    '<div class="command_row into_field selected_act" act_type="into_field">' +
-                                        '場に出す' +
+                                    '<div class="command_row" act_type="magic" magic_id="' + mid + '" param1="1">' +
+                                        '時計回り' +
+                                        ' ' +
+                                        '<div class="num_info">' +
+                                            '<span class="stone_cost">' +
+                                                iStone + 'コ' +
+                                            '</span>' +
+                                        '</div>' +
+                                    '</div>' +
+                                    '<div class="command_row" act_type="magic" magic_id="' + mid + '" param1="2">' +
+                                        '反時計回り' +
+                                        ' ' +
+                                        '<div class="num_info">' +
+                                            '<span class="stone_cost">' +
+                                                iStone + 'コ' +
+                                            '</span>' +
+                                        '</div>' +
                                     '</div>';
                                 break;
-                            case 'magic':
-                                g_field_data.actor.act_type = 'magic';
+                            case 'カードサーチ':
                                 sCommandsHtml =
-                                    '<div class="command_row magic selected_act" act_type="magic">' +
+                                    '<div class="command_row" act_type="magic" magic_id="' + mid + '" param1="front">' +
+                                        '前衛モンスターをサーチ' +
+                                        ' ' +
+                                        '<div class="num_info">' +
+                                            '<span class="stone_cost">' +
+                                                iStone + 'コ' +
+                                            '</span>' +
+                                        '</div>' +
+                                    '</div>' +
+                                    '<div class="command_row" act_type="magic" magic_id="' + mid + '" param1="back">' +
+                                        '後衛モンスターをサーチ' +
+                                        ' ' +
+                                        '<div class="num_info">' +
+                                            '<span class="stone_cost">' +
+                                                iStone + 'コ' +
+                                            '</span>' +
+                                        '</div>' +
+                                    '</div>' +
+                                    '<div class="command_row" act_type="magic" magic_id="' + mid + '" param1="magic">' +
+                                        'マジックをサーチ' +
+                                        ' ' +
+                                        '<div class="num_info">' +
+                                            '<span class="stone_cost">' +
+                                                iStone + 'コ' +
+                                            '</span>' +
+                                        '</div>' +
+                                    '</div>' +
+                                    '<div class="command_row" act_type="magic" magic_id="' + mid + '" param1="super">' +
+                                        'スーパーをサーチ' +
+                                        ' ' +
+                                        '<div class="num_info">' +
+                                            '<span class="stone_cost">' +
+                                                iStone + 'コ' +
+                                            '</span>' +
+                                        '</div>' +
+                                    '</div>';
+                                break;
+                            default:
+                                g_field_data.actor.magic_id = mid;
+                                sCommandsHtml =
+                                    '<div class="command_row magic selected_act" magic_id="' + mid + '" act_type="magic">' +
                                         '発動' +
+                                        ' ' +
+                                        '<div class="num_info">' +
+                                            '<span class="stone_cost">' +
+                                                iStone + 'コ' +
+                                            '</span>' +
+                                        '</div>' +
                                     '</div>';
-                                break;
-                            case 'super_front':
-                            case 'super_back':
                                 break;
                         }
+                        break;
+                    case 'super_front':
+                    case 'super_back':
                         break;
                 }
             } else if (aCard.pos_category == 'field') {
@@ -605,7 +623,7 @@ game_field_reactions = (function () {
                 actor_id        : null,
                 log_message     : 'ダメージをストーンに還元',
                 resolved_flg    : 0,
-                priority        : g_master_data.queue_priority['same_time'],
+                priority        : 'same_time',
                 queue_units : [
                     {
                         queue_type_id   : 1004,
@@ -623,7 +641,7 @@ game_field_reactions = (function () {
                     actor_id        : null,
                     log_message     : '反撃(竜の盾)',
                     resolved_flg    : 0,
-                    priority        : g_master_data.queue_priority['follow_damage'],
+                    priority        : 'follow_damage',
                     queue_units : [
                         {
                             queue_type_id   : 1005,
@@ -648,7 +666,7 @@ game_field_reactions = (function () {
                             actor_id        : target.game_card_id,
                             log_message     : '仮死　発動',
                             resolved_flg    : 0,
-                            priority        : g_master_data.queue_priority['reaction'],
+                            priority        : 'reaction',
                             queue_units : [
                                 {
                                     queue_type_id   : 1021,
@@ -675,7 +693,7 @@ game_field_reactions = (function () {
                                 actor_id        : target.game_card_id,
                                 log_message     : '撤退　発動',
                                 resolved_flg    : 0,
-                                priority        : g_master_data.queue_priority['reaction'],
+                                priority        : 'reaction',
                                 queue_units : [
                                     {
                                         queue_type_id   : 1022,
@@ -698,7 +716,7 @@ game_field_reactions = (function () {
                                 actor_id        : target.game_card_id,
                                 log_message     : '献身　発動',
                                 resolved_flg    : 0,
-                                priority        : g_master_data.queue_priority['reaction'],
+                                priority        : 'reaction',
                                 queue_units : [
                                     {
                                         queue_type_id   : 1007,
@@ -720,7 +738,7 @@ game_field_reactions = (function () {
                                 actor_id        : target.game_card_id,
                                 log_message     : '反撃　発動',
                                 resolved_flg    : 0,
-                                priority        : g_master_data.queue_priority['react_damage'],
+                                priority        : 'react_damage',
                                 queue_units : [
                                     {
                                         queue_type_id   : 1001,
@@ -741,7 +759,7 @@ game_field_reactions = (function () {
                                 actor_id        : target.game_card_id,
                                 log_message     : 'やつあたり　発動',
                                 resolved_flg    : 0,
-                                priority        : g_master_data.queue_priority['react_damage'],
+                                priority        : 'react_damage',
                                 queue_units : [
                                     {
                                         queue_type_id   : 1005,
@@ -764,7 +782,7 @@ game_field_reactions = (function () {
                         actor_id        : target.game_card_id,
                         log_message     : '',
                         resolved_flg    : 0,
-                        priority        : g_master_data.queue_priority['same_time'],
+                        priority        : 'same_time',
                         queue_units : [
                             {
                                 queue_type_id   : 1028,
@@ -788,7 +806,7 @@ game_field_reactions = (function () {
                             log_message         : '',
                             resolved_flg        : 0,
                             actor_anime_disable : true,
-                            priority            : g_master_data.queue_priority['system'],
+                            priority            : 'reaction',
                             queue_units : [
                                 {
                                     queue_type_id   : 1021,
@@ -805,7 +823,7 @@ game_field_reactions = (function () {
                             log_message         : '',
                             resolved_flg        : 0,
                             actor_anime_disable : true,
-                            priority            : g_master_data.queue_priority['system'],
+                            priority            : 'system',
                             queue_units : [
                                 {
                                     queue_type_id   : 1008,
@@ -823,7 +841,7 @@ game_field_reactions = (function () {
                         log_message         : '',
                         resolved_flg        : 0,
                         actor_anime_disable : true,
-                        priority            : g_master_data.queue_priority['system'],
+                        priority            : 'system',
                         queue_units : [
                             {
                                 queue_type_id   : 1023,
@@ -839,7 +857,7 @@ game_field_reactions = (function () {
                         log_message         : '',
                         resolved_flg        : 0,
                         actor_anime_disable : true,
-                        priority            : g_master_data.queue_priority['system'],
+                        priority            : 'system',
                         queue_units : [
                             {
                                 queue_type_id   : 1017,
@@ -882,7 +900,7 @@ game_field_reactions = (function () {
                             actor_id            : null,
                             log_message         : '自爆による反動ダメージ',
                             resolved_flg        : 0,
-                            priority            : g_master_data.queue_priority['same_time'],
+                            priority            : 'same_time',
                             actor_anime_disable : true,
                             queue_units : [
                                 {
@@ -922,7 +940,7 @@ game_field_reactions = (function () {
                         actor_id        : aArgs.target_id,
                         log_message     : 'ヒールアップ　発動',
                         resolved_flg    : 0,
-                        priority        : g_master_data.queue_priority['reaction'],
+                        priority        : 'reaction',
                         queue_units : [
                             {
                                 queue_type_id   : 1026,
@@ -944,7 +962,7 @@ game_field_reactions = (function () {
                 actor_id        : aArgs.target_id,
                 log_message     : '',
                 resolved_flg    : 0,
-                priority        : g_master_data.queue_priority['same_time'],
+                priority        : 'same_time',
                 queue_units : [
                     {
                         queue_type_id   : 1028,
@@ -985,7 +1003,7 @@ game_field_reactions = (function () {
                         actor_id        : aArgs.target_id,
                         log_message     : sLogMessage,
                         resolved_flg    : 0,
-                        priority        : g_master_data.queue_priority['reaction'],
+                        priority        : 'reaction',
                         queue_units : [
                             {
                                 queue_type_id   : 1026,
@@ -1005,7 +1023,7 @@ game_field_reactions = (function () {
                         actor_id        : aArgs.target_id,
                         log_message     : 'ホロウによりストーン呪い',
                         resolved_flg    : 0,
-                        priority        : g_master_data.queue_priority['reaction'],
+                        priority        : 'reaction',
                         queue_units : [
                             {
                                 queue_type_id   : 1026,
@@ -1038,7 +1056,7 @@ game_field_reactions = (function () {
                             actor_id        : aArgs.target_id,
                             log_message     : 'ウェイク還元によりストーン２個を還元',
                             resolved_flg    : 0,
-                            priority        : g_master_data.queue_priority['reaction'],
+                            priority        : 'reaction',
                             queue_units : [
                                 {
                                     queue_type_id   : 1004,
@@ -1060,7 +1078,7 @@ game_field_reactions = (function () {
                     actor_id        : aArgs.target_id,
                     log_message     : '',
                     resolved_flg    : 0,
-                    priority        : g_master_data.queue_priority['same_time'],
+                    priority        : 'same_time',
                     queue_units : [
                         {
                             queue_type_id   : 1028,
@@ -1087,7 +1105,7 @@ game_field_reactions = (function () {
                 actor_id        : aArgs.target_id,
                 log_message     : '気合溜め解除',
                 resolved_flg    : 0,
-                priority        : g_master_data.queue_priority['same_time'],
+                priority        : 'same_time',
                 actor_anime_disable : true,
                 queue_units : [
                     {

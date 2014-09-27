@@ -137,7 +137,7 @@ new function () {
                         var aQueue = {
                             actor_id        : null,
                             resolved_flg    : 0,
-                            priority        : g_master_data.queue_priority['system'],
+                            priority        : 'system',
                             queue_units : [
                                 {
                                     queue_type_id   : 1019,
@@ -178,6 +178,7 @@ new function () {
                             }
                             g_field_data.actor.act_type = oDom.attr('act_type');
                             g_field_data.actor.art_id   = oDom.attr('art_id');
+                            g_field_data.actor.magic_id = oDom.attr('magic_id');
                             var prm1 = oDom.attr('param1');
                             if (typeof prm1 !== 'undefined') {
                                 g_field_data.actor.param1 = prm1;
@@ -240,7 +241,7 @@ new function () {
                                 actor_id        : null,
                                 log_message     : '',
                                 resolved_flg    : 0,
-                                priority        : g_master_data.queue_priority['same_time'],
+                                priority        : 'same_time',
                                 queue_units : [
                                     {
                                         queue_type_id   : 1018,
@@ -446,7 +447,7 @@ new function () {
             actor_id        : null,
             log_message     : 'ストーン3個を支給',
             resolved_flg    : 0,
-            priority        : g_master_data.queue_priority['system'],
+            priority        : 'system',
             queue_units : [
                 {
                     queue_type_id   : 1004,
@@ -465,7 +466,7 @@ new function () {
             actor_id        : null,
             log_message     : 'カードを1枚ドロー',
             resolved_flg    : 0,
-            priority        : g_master_data.queue_priority['system'],
+            priority        : 'system',
             queue_units : [
                 {
                     queue_type_id   : 1011,
@@ -495,7 +496,7 @@ new function () {
                     actor_id        : mon.game_card_id,
                     log_message     : game_field_utility.getPosCodeFromPosId(mon.pos_id) + aMonsterData.name + '登場',
                     resolved_flg    : 0,
-                    priority        : g_master_data.queue_priority['system'],
+                    priority        : 'system',
                     queue_units : [
                         {
                             queue_type_id   : 1010,
@@ -525,7 +526,7 @@ new function () {
                     actor_id        : mon.game_card_id,
                     log_message     : g_master_data.m_monster[mon.monster_id].name + 'が前進',
                     resolved_flg    : 0,
-                    priority        : g_master_data.queue_priority['system'],
+                    priority        : 'system',
                     queue_units : [
                         {
                             queue_type_id   : 1022,
@@ -760,8 +761,8 @@ new function () {
                     }
                     // berakは書かない
                 case 8:
-                    var p1 = game_field_utility.getXYFromPosId(aArgs.actor_id);
-                    var p2 = game_field_utility.getXYFromPosId(aArgs.target_id);
+                    var p1 = game_field_utility.getXYFromPosId(actorMon.pos_id);
+                    var p2 = game_field_utility.getXYFromPosId(targetMon.pos_id);
                     var df = {x : Math.abs(p1.x - p2.x), y : Math.abs(p1.y - p2.y)};
                     if (Math.min(df.x, df.y) == 1 && Math.max(df.x, df.y) == 2) {
                         return true;
@@ -929,7 +930,7 @@ new function () {
                         actor_id        : actor.game_card_id,
                         log_message     : 'モンスターをセット',
                         resolved_flg    : 0,
-                        priority        : g_master_data.queue_priority['command'],
+                        priority        : 'command',
                         queue_units : [
                             {
                                 queue_type_id   : 1004,
@@ -950,7 +951,7 @@ new function () {
                         actor_id        : actor.game_card_id,
                         log_message     : '通常攻撃',
                         resolved_flg    : 0,
-                        priority        : g_master_data.queue_priority['command'],
+                        priority        : 'command',
                         queue_units : [
                             {
                                 queue_type_id   : 1024,
@@ -993,12 +994,31 @@ new function () {
                         });
                     }
                     break;
+                case 'magic':
+                    aQueue = magic_queue.getMagicQueue({
+                        field_data  : g_field_data,
+                        magic_id    : actor.magic_id,
+                        actor_id    : actor.game_card_id,
+                        targets     : actor.aTargets,
+                    });
+                    console.log('magic q set sita');
+                    console.log(aQueue);
+                    if (g_field_data.tokugi_fuuji_flg) {
+                        game_field_utility.myAlertInField({
+                            message : '封じる特技を選んで下さい',
+                        });
+                        game_field_reactions.updateActorDom({
+                            field_data  : g_field_data,
+                            game_state  : 'tokugi_fuuji',
+                        });
+                    }
+                    break;
                 case 'move':
                     aQueue = {
                         actor_id        : actor.game_card_id,
                         log_message     : '移動',
                         resolved_flg    : 0,
-                        priority        : g_master_data.queue_priority['command'],
+                        priority        : 'command',
                         queue_units : [
                             {
                                 queue_type_id   : 1024,
@@ -1034,7 +1054,7 @@ new function () {
                         actor_id        : actor.game_card_id,
                         log_message     : '逃走',
                         resolved_flg    : 0,
-                        priority        : g_master_data.queue_priority['command'],
+                        priority        : 'command',
                         queue_units : [
                             {
                                 queue_type_id   : 1008,
@@ -1058,7 +1078,7 @@ new function () {
                         actor_id        : actor.game_card_id,
                         log_message     : 'メイクカードを使用',
                         resolved_flg    : 0,
-                        priority        : g_master_data.queue_priority['command'],
+                        priority        : 'command',
                         queue_units : [
                             {
                                 queue_type_id   : 1011,
@@ -1079,7 +1099,7 @@ new function () {
                         actor_id        : actor.game_card_id,
                         log_message     : 'レベルアップ',
                         resolved_flg    : 0,
-                        priority        : g_master_data.queue_priority['command'],
+                        priority        : 'command',
                         queue_units : [
                             {
                                 queue_type_id   : 1019,
@@ -1144,12 +1164,27 @@ new function () {
                     }
                     break;
                 case 'arts':
-                case 'magic':
                     var bRangeOk = checkTargetPosValid({
                         actor_id        : actor.game_card_id,
                         target_id       : aTargetInfo.game_card_id,
                         target_pos_id   : aTargetInfo.pos_id,
                         range_type_id   : g_master_data.m_arts[actor.art_id].range_type_id,
+                        target_order    : actor.aTargets.length,
+                    });
+                    if (!bRangeOk) {
+                        console.log('range check NG');
+                        return false;
+                    }
+                    $('#' + aTargetInfo.pos_id).addClass('target');
+                    actor.aTargets.push(aTargetInfo);
+                    _addActionFromActorInfo();
+                    break;
+                case 'magic':
+                    var bRangeOk = checkTargetPosValid({
+                        actor_id        : actor.game_card_id,
+                        target_id       : aTargetInfo.game_card_id,
+                        target_pos_id   : aTargetInfo.pos_id,
+                        range_type_id   : g_master_data.m_magic[actor.magic_id].range_type_id,
                         target_order    : actor.aTargets.length,
                     });
                     if (!bRangeOk) {
@@ -1212,7 +1247,7 @@ new function () {
                 continue;
             }
             all_resolved = false;
-            if (exec_act == null || exec_act.priority < act[i].priority) {
+            if (exec_act == null || g_master_data.queue_priority[exec_act.priority] < g_master_data.queue_priority[act[i].priority]) {
                 exec_act = act[i];
             }
         }
@@ -1241,7 +1276,7 @@ new function () {
         var bEffectQueueResolved = false;
         var backupFieldWhileSingleActionProcessing = {};
         $.extend(true, backupFieldWhileSingleActionProcessing, g_field_data);
-        if (exec_act.priority == g_master_data.queue_priority['command']) {
+        if (exec_act.priority == 'command') {
             g_backup_field_data = {};
             $.extend(true, g_backup_field_data, g_field_data);
         }
@@ -1342,7 +1377,7 @@ new function () {
                                             log_message         : '',
                                             resolved_flg        : 0,
                                             actor_anime_disable : true,
-                                            priority            : g_master_data.queue_priority['system'],
+                                            priority            : 'reaction',
                                             queue_units : [
                                                 {
                                                     queue_type_id   : 1008,
@@ -1357,7 +1392,7 @@ new function () {
                                             log_message         : '性格「後退」発動',
                                             resolved_flg        : 0,
                                             actor_anime_disable : true,
-                                            priority            : g_master_data.queue_priority['reaction'],
+                                            priority            : 'reaction',
                                             queue_units : [
                                                 {
                                                     queue_type_id   : 1022,
@@ -1509,7 +1544,7 @@ new function () {
                                 log_message         : 'LV分のストーンを還元',
                                 resolved_flg        : 0,
                                 actor_anime_disable : true,
-                                priority            : g_master_data.queue_priority['same_time'],
+                                priority            : 'same_time',
                                 queue_units : [
                                     {
                                         queue_type_id   : 1004,
@@ -1553,30 +1588,20 @@ new function () {
                                 } else {
                                     var posId = '#enemyPlayersInfo div.hand';
                                 }
-                                g_field_data.animation_info.animations.push({
-                                    target_dom  : posId,
-                                    animation_param : {
-                                        'opacity'   : 'hide',
-                                    },
-                                });
-                                g_field_data.animation_info.animations.push({
-                                    target_dom  : posId,
-                                    animation_param : {
-                                        'opacity'   : 'show',
-                                    },
-                                });
-                                g_field_data.animation_info.animations.push({
-                                    target_dom  : posId,
-                                    animation_param : {
-                                        'opacity'   : 'hide',
-                                    },
-                                });
-                                g_field_data.animation_info.animations.push({
-                                    target_dom  : posId,
-                                    animation_param : {
-                                        'opacity'   : 'show',
-                                    },
-                                });
+                                for (var i = 0 ; i < 2 ; i++) {
+                                    g_field_data.animation_info.animations.push({
+                                        target_dom  : posId,
+                                        animation_param : {
+                                            'opacity'   : 'hide',
+                                        },
+                                    });
+                                    g_field_data.animation_info.animations.push({
+                                        target_dom  : posId,
+                                        animation_param : {
+                                            'opacity'   : 'show',
+                                        },
+                                    });
+                                }
                             })();
                             break;
                         case 1010:
@@ -1593,7 +1618,7 @@ new function () {
                                 field_data      : g_field_data,
                                 actor_id        : exec_act.actor_id,
                                 target_id       : q.target_id,
-                                system_flg      : (exec_act.priority == g_master_data.queue_priority['system']),
+                                system_flg      : (exec_act.priority == 'system'),
                             });
                             break;
                         case 1012:
@@ -1622,6 +1647,10 @@ new function () {
                             });
                             break;
                         case 1014:
+                            var target = g_field_data.cards[q.target_id];
+                            if (target.pos_category != 'hand') {
+                                throw new Error('invalid_target');
+                            }
                             var iSortNo = 1;
                             $.each(g_field_data.cards, function(i, val) {
                                 if (val.pos_category == 'used') {
@@ -1630,7 +1659,6 @@ new function () {
                                     }
                                 }
                             });
-                            var target = g_field_data.cards[q.target_id];
                             target.pos_category = 'used';
                             target.sort_no = iSortNo;
                             break;
@@ -1739,21 +1767,19 @@ new function () {
                                 mon.pos_category  = 'used';
                                 mon.sort_no       = iSortNo;
                             }
-                            if (!q.param1) {
-                                g_field_data.queues.push({
-                                    actor_id        : q.target_id,
-                                    log_message     : 'レベルダウンしたストーンを還元',
-                                    resolved_flg    : 0,
-                                    priority        : g_master_data.queue_priority['same_time'],
-                                    queue_units : [
-                                        {
-                                            queue_type_id   : 1004,
-                                            target_id       : q.target_id,
-                                            param1          : 1,
-                                        }
-                                    ],
-                                });
-                            }
+                            g_field_data.queues.push({
+                                actor_id        : q.target_id,
+                                log_message     : 'レベルダウンしたストーンを還元',
+                                resolved_flg    : 0,
+                                priority        : 'same_time',
+                                queue_units : [
+                                    {
+                                        queue_type_id   : 1004,
+                                        target_id       : q.target_id,
+                                        param1          : 1,
+                                    }
+                                ],
+                            });
                             break;
                         case 1021:
                             var mon = g_field_data.cards[q.target_id];
@@ -1944,7 +1970,7 @@ new function () {
                                             actor_id        : mon.game_card_id,
                                             log_message     : 'ダークホールにより消滅',
                                             resolved_flg    : 0,
-                                            priority        : g_master_data.queue_priority['follow'],
+                                            priority        : 'follow',
                                             queue_units : [
                                                 {
                                                     queue_type_id   : 1008,
@@ -2130,7 +2156,7 @@ new function () {
                         actor_id            : targetId,
                         log_message         : '気合溜め解除',
                         resolved_flg        : 0,
-                        priority            : g_master_data.queue_priority['same_time'],
+                        priority            : 'same_time',
                         actor_anime_disable : true,
                         queue_units : [
                             {
@@ -2147,7 +2173,7 @@ new function () {
                         actor_id            : actorId,
                         log_message         : 'パワーアップ効果発揮',
                         resolved_flg        : 0,
-                        priority            : g_master_data.queue_priority['same_time'],
+                        priority            : 'same_time',
                         actor_anime_disable : true,
                         queue_units : [
                             {
@@ -2164,7 +2190,7 @@ new function () {
                         actor_id        : actorId,
                         log_message     : 'バーサクパワー効果発揮',
                         resolved_flg    : 0,
-                        priority        : g_master_data.queue_priority['same_time'],
+                        priority        : 'same_time',
                         queue_units : [
                             {
                                 queue_type_id   : 1006,
@@ -2185,7 +2211,7 @@ new function () {
                         actor_id            : actorId,
                         log_message         : 'パワー２効果発揮',
                         resolved_flg        : 0,
-                        priority            : g_master_data.queue_priority['same_time'],
+                        priority            : 'same_time',
                         actor_anime_disable : true,
                         queue_units : [
                             {
@@ -2204,7 +2230,7 @@ new function () {
                         actor_id            : actorId,
                         log_message         : 'パワーダウン効果発揮',
                         resolved_flg        : 0,
-                        priority            : g_master_data.queue_priority['same_time'],
+                        priority            : 'same_time',
                         actor_anime_disable : true,
                         queue_units : [
                             {
@@ -2236,7 +2262,7 @@ new function () {
                     actor_id            : targetId,
                     log_message         : 'ガラスの盾 効果発揮',
                     resolved_flg        : 0,
-                    priority            : g_master_data.queue_priority['same_time'],
+                    priority            : 'same_time',
                     actor_anime_disable : true,
                     queue_units : [
                         {
@@ -2259,7 +2285,7 @@ new function () {
                     actor_id            : targetId,
                     log_message         : '気合溜め 防御効果発揮',
                     resolved_flg        : 0,
-                    priority            : g_master_data.queue_priority['same_time'],
+                    priority            : 'same_time',
                     actor_anime_disable : true,
                     queue_units : [
                         {
@@ -2317,7 +2343,7 @@ new function () {
                     actor_id            : targetId,
                     log_message         : '気合溜め解除',
                     resolved_flg        : 0,
-                    priority            : g_master_data.queue_priority['same_time'],
+                    priority            : 'same_time',
                     actor_anime_disable : true,
                     queue_units : [
                         {
@@ -2372,7 +2398,7 @@ new function () {
                             actor_id        : val.game_card_id,
                             log_message     : '仮死から復活',
                             resolved_flg    : 0,
-                            priority        : g_master_data.queue_priority['system'],
+                            priority        : 'system',
                             queue_units : [
                                 {
                                     queue_type_id   : 1021,
@@ -2394,7 +2420,7 @@ new function () {
                                 actor_id        : val.game_card_id,
                                 log_message     : '',
                                 resolved_flg    : 0,
-                                priority        : g_master_data.queue_priority['system'],
+                                priority        : 'system',
                                 queue_units : [
                                     {
                                         queue_type_id   : 1027,
@@ -2413,7 +2439,7 @@ new function () {
                         actor_id        : null,
                         log_message     : '',
                         resolved_flg    : 0,
-                        priority        : g_master_data.queue_priority['system'],
+                        priority        : 'system',
                         queue_units : [
                             {
                                 queue_type_id   : 1025,
@@ -2431,7 +2457,7 @@ new function () {
             actor_id        : null,
             log_message     : 'ターンエンド',
             resolved_flg    : 0,
-            priority        : g_master_data.queue_priority['turn_end'],
+            priority        : 'turn_end',
             queue_units : [
                 {
                     queue_type_id : 1000,

@@ -769,19 +769,6 @@ class model_Game {
                     }
                 }
             }
-            $sel = $this->_db->select()
-                ->from(
-                    'm_queue_priority',
-                    array(
-                        'pri_str_id',
-                        'priority',
-                    )
-                );
-            $rslt = $this->_db->fetchAll($sel);
-            $aPri = array();
-            foreach ($rslt as $val) {
-                $aPri[$val['priority']] = $val['pri_str_id'];
-            }
             foreach ($aFieldData['queues'] as $val) {
                 $sql = "select nextval('t_queue_queue_id_seq')";
                 $iQueueId = $this->_db->fetchOne($sql);
@@ -789,7 +776,7 @@ class model_Game {
                     'queue_id'      => $iQueueId,
                     'game_field_id' => $iGameFieldId,
                     'act_card_id'   => $val['actor_id'],
-                    'pri_str_id'    => $aPri[$val['priority']],
+                    'pri_str_id'    => $val['priority'],
                     'resolved_flg'  => $val['resolved_flg'],
                     'log_message'   => $val['log_message'],
                 );

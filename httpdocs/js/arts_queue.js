@@ -47,10 +47,10 @@ arts_queue = (function () {
             aQueue = {
                 actor_id        : aArgs.actor_id,
                 resolved_flg    : 0,
-                priority        : g_master_data.queue_priority['command'],
+                priority        : 'command',
                 queue_units     : _getQueueUnitsFromScriptId(aArgs),
             };
-            if (Number(aArtInfo.stone) != 0) {
+            if (0 < Number(aArtInfo.stone)) {
                 aQueue.queue_units.unshift({
                     queue_type_id   : 1004,
                     target_id       : aArgs.actor_id,
@@ -189,32 +189,26 @@ arts_queue = (function () {
                 }
                 break;
             case 1005:
-                return [
-                    {
-                        queue_type_id   : 1020,
-                        target_id       : aArgs.targets[0].game_card_id,
-                        param1          : aArtInfo.power,
-                    },
-                ];
+                return [{
+                    queue_type_id   : 1020,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : aArtInfo.power,
+                }];
                 break;
             case 1006:
-                return [
-                    {
-                        queue_type_id   : 1017,
-                        target_id       : aArgs.targets[0].game_card_id,
-                        param1          : 1,
-                        param2          : true,
-                    },
-                ];
+                return [{
+                    queue_type_id   : 1017,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 1,
+                    param2          : true,
+                }];
                 break;
             case 1007:
-                var aRet = [
-                    {
-                        queue_type_id   : 1002,
-                        target_id       : aArgs.targets[0].game_card_id,
-                        param2          : true,
-                    },
-                ];
+                var aRet = [{
+                    queue_type_id   : 1002,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param2          : true,
+                }];
                 if (Math.random() * 2 < 1) {
                     aRet.push({
                         queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
@@ -225,14 +219,12 @@ arts_queue = (function () {
                 return aRet;
                 break;
             case 1008:
-                var aRet = [
-                    {
-                        queue_type_id   : 1017,
-                        target_id       : aArgs.targets[0].game_card_id,
-                        param1          : 1,
-                        param2          : true,
-                    },
-                ];
+                var aRet = [{
+                    queue_type_id   : 1017,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 1,
+                    param2          : true,
+                }];
                 var aMonsterInfo = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
                 var aMonsterData = g_master_data.m_monster[aMonsterInfo.monster_id];
                 if (aMonsterData.next_monster_id) {
@@ -251,21 +243,17 @@ arts_queue = (function () {
                 if (bSuper) {
                     return aRet;
                 } else {
-                    return [
-                        {
-                            queue_type_id   : 1008,
-                            target_id       : aArgs.targets[0].game_card_id,
-                        },
-                    ];
+                    return [{
+                        queue_type_id   : 1008,
+                        target_id       : aArgs.targets[0].game_card_id,
+                    }];
                 }
                 break;
             case 1009:
-                return [
-                    {
-                        queue_type_id   : 1008,
-                        target_id       : aArgs.targets[0].game_card_id,
-                    },
-                ];
+                return [{
+                    queue_type_id   : 1008,
+                    target_id       : aArgs.targets[0].game_card_id,
+                }];
                 break;
             case 1010:
                 var aRet = [];
@@ -279,13 +267,11 @@ arts_queue = (function () {
                 return aRet;
                 break;
             case 1011:
-                return [
-                    {
-                        queue_type_id   : 1007,
-                        target_id       : aArgs.targets[0].game_card_id,
-                        param1          : aArtInfo.power,
-                    },
-                ];
+                return [{
+                    queue_type_id   : 1007,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : aArtInfo.power,
+                }];
                 break;
             case 1012:
                 var dam = parseInt(Math.random() * 3) + 2;
@@ -343,13 +329,11 @@ arts_queue = (function () {
             case 1015:
                 var aMonsterInfo = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
                 var iMaxHP = game_field_utility.getMaxHP(aMonsterInfo);
-                var aRet = [
-                    {
-                        queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
-                        target_id       : aArgs.targets[0].game_card_id,
-                        param1          : aArtInfo.power,
-                    }
-                ];
+                var aRet = [{
+                    queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : aArtInfo.power,
+                }];
                 if (iMaxHP <= aMonsterInfo.hp) {
                     aRet.push({
                         queue_type_id   : 1008,
@@ -365,13 +349,11 @@ arts_queue = (function () {
                 return aRet;
                 break;
             case 1016:
-                return [
-                    {
-                        queue_type_id   : 1026,
-                        target_id       : aArgs.targets[0].game_card_id,
-                        param1          : 129,
-                    },
-                ];
+                return [{
+                    queue_type_id   : 1026,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 129,
+                }];
                 break;
             case 1017:
                 var aActor = aArgs.field_data.cards[aArgs.actor_id];
@@ -483,13 +465,11 @@ arts_queue = (function () {
                 break;
             case 1020:
                 var aMonsterInfo = g_master_data.m_monster[aArgs.field_data.cards[aArgs.targets[0].game_card_id].monster_id];
-                return [
-                    {
-                        queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
-                        target_id       : aArgs.targets[0].game_card_id,
-                        param1          : aMonsterInfo.lv,
-                    },
-                ];
+                return [{
+                    queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : aMonsterInfo.lv,
+                }];
                 break;
             case 1021:
                 var aRet = [];
@@ -510,12 +490,10 @@ arts_queue = (function () {
                 return aRet;
                 break;
             case 1022:
-                var aRet = [
-                    {
-                        queue_type_id   : 1010,
-                        target_id       : aArgs.targets[0].game_card_id,
-                    },
-                ];
+                var aRet = [{
+                    queue_type_id   : 1010,
+                    target_id       : aArgs.targets[0].game_card_id,
+                }];
                 if (aArtInfo.damage_type_flg != 'O') {
                     aRet.push({
                         queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),

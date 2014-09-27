@@ -232,8 +232,8 @@ class model_Api {
             ->from('m_magic');
         $rslt = $this->_db->fetchAll($sel);
         foreach ($rslt as $val) {
-            $iCardId = $val['card_id'];
-            $aRet['m_magic'][$iCardId] = $val;
+            $iMagicId = $val['magic_id'];
+            $aRet['m_magic'][$iMagicId] = $val;
         }
 
         $sel = $this->_db->select()

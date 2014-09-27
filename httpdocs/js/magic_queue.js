@@ -22,9 +22,10 @@ magic_queue = (function () {
         var aQueue = null;
         try {
             delete aArgs.field_data.tokugi_fuuji_flg;
+            var iMasterId = null;
             $.each(aArgs.field_data.cards, function(i, val) {
                 if (val.pos_id == 'myMaster') {
-                    aArgs.actor_id = val.game_card_id;
+                    iMasterId = val.game_card_id;
                     return false;
                 }
             });
@@ -53,10 +54,10 @@ magic_queue = (function () {
             aQueue = {
                 actor_id        : aArgs.actor_id,
                 resolved_flg    : 0,
-                priority        : g_master_data.queue_priority['command'],
+                priority        : 'command',
                 queue_units     : _getQueueUnitsFromMagicId(aArgs),
             };
-            if (Number(aMagicInfo.stone) != 0) {
+            if (0 < Number(aMagicInfo.stone)) {
                 aQueue.queue_units.unshift({
                     queue_type_id   : 1004,
                     target_id       : aArgs.actor_id,
@@ -65,14 +66,22 @@ magic_queue = (function () {
                 });
             }
             aQueue.queue_units.unshift({
+                queue_type_id   : 1014,
+                target_id       : aArgs.actor_id,
+                cost_flg        : true,
+            });
+            aQueue.queue_units.unshift({
                 queue_type_id   : 1003,
                 target_id       : aArgs.actor_id,
                 cost_flg        : true,
             });
+            aQueue.queue_units.unshift({
+                queue_type_id   : 1024,
+                target_id       : iMasterId,
+                cost_flg        : true,
+            });
         } catch (e) {
-            if (e == 'tokugi_fuuji') {
-                aArgs.field_data.tokugi_fuuji_flg = true;
-            }
+            console.log(e);
             console.log(e.stack);
             return null;
         }
@@ -80,8 +89,88 @@ magic_queue = (function () {
     }
 
     function _getQueueUnitsFromMagicId (aArgs) {
-        var aMagicInfo = g_master_data.m_arts[aArgs.art_id];
+        var aMagicInfo = g_master_data.m_magic[aArgs.magic_id];
+
+        // 魔法効果を付与するだけ系はたくさんあるので、先に処理してしまう
+        var aRet = (function () {
+            var a = {
+                250     : 106,
+                270     : 104,
+                550     : 107,
+                590     : 103,
+                600     : 111,
+                630     : 113,
+                860     : 114,
+                880     : 108,
+                890     : 109,
+                910     : 115,
+                940     : 102,
+                950     : 116,
+                960     : 101,
+                1250    : 124,
+                1290    : 100,
+            };
+            if (a[Number(aMagicInfo.magic_id)]) {
+                return [{
+                    queue_type_id   : 1026,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : a[Number(aMagicInfo.magic_id)],
+                }];
+            }
+            return null;
+        })();
+        if (aRet) {
+            return aRet;
+        }
         switch (Number(aMagicInfo.magic_id)) {
+            case 240:
+                return [{
+                    queue_type_id   : 1007,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 2,
+                }];
+                break;
+            case 260:
+                return [{
+                    queue_type_id   : 1005,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 1,
+                }];
+                break;
+            case 280:
+                aRet = [{
+                    queue_type_id   : 1003,
+                    target_id       : aArgs.actor_id,
+                }];
+                if (Math.random() * 2 < 1.0) {
+                    aRet.push({
+                        queue_type_id   : 1017,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : 1,
+                        param2          : true,
+                    });
+                } else {
+                    aRet.push({
+                        queue_type_id   : 1020,
+                        target_id       : aArgs.targets[0].game_card_id,
+                    });
+                }
+                return aRet;
+                break;
+            case 290:
+                return [{
+                    queue_type_id   : 1020,
+                    target_id       : aArgs.targets[0].game_card_id,
+                }];
+                break;
+            case 1490:
+                return [{
+                    queue_type_id   : 1017,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 1,
+                    param2          : true,
+                }];
+                break;
             default:
                 throw new Error('unknown magic_id posted.');
         }

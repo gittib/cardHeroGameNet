@@ -40,8 +40,10 @@
       #game_field td .param span.charge {
         color: #ffffff;
         background-color: #ff0000; }
-    #game_field td div.num_info img {
-      height: 13px; }
+    #game_field td div.num_info {
+      margin-left: 1px; }
+      #game_field td div.num_info img {
+        height: 13px; }
   #game_field td.actor {
     background-color: #ffff00; }
   #game_field td.target {
