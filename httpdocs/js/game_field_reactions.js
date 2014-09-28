@@ -233,6 +233,72 @@ game_field_reactions = (function () {
         }
         g_field_data = aArgs.field_data;
         try {
+            var _buildArtsRow = function (mon) {
+                $.each(mon.arts, function(i, val) {
+                    var sPower = '';
+                    var iPow = Number(val.power);
+                    var sRange = '<img src="/images/range/' + val.range_type_id + '.png" alt="" />';
+                    var iStone = val.stone;
+                    if (val.damage_type_flg == 'P' && typeof mon.status != 'undefined') {
+                        $.each(mon.status, function(sid, aSt) {
+                            switch (sid) {
+                                case 101:
+                                case 102:
+                                    iPow++;
+                                    break;
+                                case 103:
+                                    iPow = 2;
+                                    break;
+                                case 104:
+                                    iPow--;
+                                    break;
+                                case 105:
+                                    iPow += 2;
+                                    break;
+                            }
+                        });
+                    }
+                    if (val.damage_type_flg == 'P' || val.damage_type_flg == 'D' || val.damage_type_flg == 'HP') {
+                        switch (val.script_id) {
+                            case 1012:
+                            case 1013:
+                            case 1020:
+                            case 1026:
+                                sPower = '?' + val.damage_type_flg;
+                                break;
+                            default:
+                                sPower = '' + iPow + '' + val.damage_type_flg;
+                                break;
+                        }
+                    } else if (val.script_id == 1041) {
+                        sPower = '2?';
+                    }
+                    if (typeof mon.status != 'undefined') {
+                        if (typeof mon.status[120] != 'undefined' && mon.status[120].param1 == val.art_id) {
+                            iStone *= 2;
+                        }
+                        if (typeof mon.status[123] != 'undefined') {
+                            iStone += 2;
+                        }
+                    }
+                    sCommandsHtml +=
+                        '<div class="command_row" art_id="' + val.id + '" act_type="arts">' +
+                            val.name +
+                            '<div class="num_info">' +
+                                '<span class="range_pic">' +
+                                    sRange +
+                                '</span>' +
+                                ' ' +
+                                sPower +
+                                ' ' +
+                                '<span class="stone_cost">' +
+                                    iStone + 'コ' +
+                                '</span>' +
+                            '</div>' +
+                        '</div>';
+                });
+            };
+
             console.log('updateActorDom started.');
             var aCard = g_field_data.cards[g_field_data.actor.game_card_id];
             console.log(aCard);
@@ -399,50 +465,7 @@ game_field_reactions = (function () {
                     }
 
                     // 特技
-                    $.each(mon.arts, function(i, val) {
-                        var sPower = '';
-                        var iPow = Number(val.power);
-                        var sRange = '<img src="/images/range/' + val.range_type_id + '.png" alt="" />';
-                        var iStone = val.stone;
-                        if (val.damage_type_flg == 'P' || val.damage_type_flg == 'D' || val.damage_type_flg == 'HP') {
-                            switch (val.script_id) {
-                                case 1012:
-                                case 1013:
-                                case 1020:
-                                case 1026:
-                                    sPower = '?' + val.damage_type_flg;
-                                    break;
-                                default:
-                                    sPower = '' + iPow + '' + val.damage_type_flg;
-                                    break;
-                            }
-                        } else if (val.script_id == 1041) {
-                            sPower = '2?';
-                        }
-                        if (typeof aCard.status != 'undefined') {
-                            if (typeof aCard.status[120] != 'undefined' && aCard.status[120].param1 == i) {
-                                iStone *= 2;
-                            }
-                            if (typeof aCard.status[123] != 'undefined') {
-                                iStone += 2;
-                            }
-                        }
-                        sCommandsHtml +=
-                            '<div class="command_row" art_id="' + val.id + '" act_type="arts">' +
-                                val.name +
-                                '<div class="num_info">' +
-                                    '<span class="range_pic">' +
-                                        sRange +
-                                    '</span>' +
-                                    ' ' +
-                                    sPower +
-                                    ' ' +
-                                    '<span class="stone_cost">' +
-                                        iStone + 'コ' +
-                                    '</span>' +
-                                '</div>' +
-                            '</div>';
-                    });
+                    _buildArtsRow(mon);
                 } else {
                     var mon = g_master_data.m_monster[aCard.monster_id];
 
@@ -451,75 +474,34 @@ game_field_reactions = (function () {
                     }
 
                     // アタック
-                    var iPow = parseInt(mon.attack.power);
                     var sCost = '';
-                    var iStone = parseInt(mon.attack.stone);
+                    var aNumbers = {
+                        iPow    : parseInt(mon.attack.power),
+                        iStone  : parseInt(mon.attack.stone),
+                    };
                     if (typeof aCard.status != 'undefined') {
                         if (typeof aCard.status[123] != 'undefined') {
-                            iStone += 2;
+                            aNumbers.iStone += 2;
                         }
                     }
-                    if (iStone > 0) {
+                    if (aNumbers.iStone > 0) {
                         sCost =
                             ' ' +
                             '<span class="stone_cost">' +
-                                iStone + 'コ' +
+                                aNumbers.iStone + 'コ' +
                             '</span>';
                     }
                     sCommandsHtml =
                         '<div class="command_row" act_type="attack">' +
                             mon.attack.name +
                             '<div class="num_info">' +
-                                iPow + 'P' +
+                                aNumbers.iPow + 'P' +
                                 sCost +
                             '</div>' +
                         '</div>';
 
                     // 特技
-                    $.each(mon.arts, function(i, val) {
-                        var sPower = '';
-                        var iPow = Number(val.power);
-                        var sRange = '<img src="/images/range/' + val.range_type_id + '.png" alt="" />';
-                        var iStone = val.stone;
-                        if (val.damage_type_flg == 'P' || val.damage_type_flg == 'D' || val.damage_type_flg == 'HP') {
-                            switch (val.script_id) {
-                                case 1012:
-                                case 1013:
-                                case 1020:
-                                case 1026:
-                                    sPower = '?' + val.damage_type_flg;
-                                    break;
-                                default:
-                                    sPower = '' + iPow + '' + val.damage_type_flg;
-                                    break;
-                            }
-                        } else if (val.script_id == 1041) {
-                            sPower = '2?';
-                        }
-                        if (typeof aCard.status != 'undefined') {
-                            if (typeof aCard.status[120] != 'undefined' && aCard.status[120].param1 == i) {
-                                iStone *= 2;
-                            }
-                            if (typeof aCard.status[123] != 'undefined') {
-                                iStone += 2;
-                            }
-                        }
-                        sCommandsHtml +=
-                            '<div class="command_row" art_id="' + val.id + '" act_type="arts">' +
-                                val.name +
-                                '<div class="num_info">' +
-                                    '<span class="range_pic">' +
-                                        sRange +
-                                    '</span>' +
-                                    ' ' +
-                                    sPower +
-                                    ' ' +
-                                    '<span class="stone_cost">' +
-                                        iStone + 'コ' +
-                                    '</span>' +
-                                '</div>' +
-                            '</div>';
-                    });
+                    _buildArtsRow(mon);
 
                     // 移動、逃げる or メイクカード
                     var sCost = '';
@@ -545,6 +527,18 @@ game_field_reactions = (function () {
                                 '</div>' +
                             '</div>';
                     } else {
+                        switch (g_master_data.m_monster[aCardData.monster_id].skill.id) {
+                            case 4:
+                            case 5:
+                                sCommandsHtml +=
+                                    '<div class="command_row" act_type="charge">' +
+                                        '気合だめ' +
+                                        '<div class="num_info">' +
+                                            sCost +
+                                        '</div>' +
+                                    '</div>';
+                                break;
+                        }
                         sCommandsHtml +=
                             '<div class="command_row" act_type="move">' +
                                 '移動' +
@@ -823,7 +817,7 @@ game_field_reactions = (function () {
                             log_message         : '',
                             resolved_flg        : 0,
                             actor_anime_disable : true,
-                            priority            : 'system',
+                            priority            : 'react_system',
                             queue_units : [
                                 {
                                     queue_type_id   : 1008,
@@ -834,14 +828,14 @@ game_field_reactions = (function () {
                         break;
                 }
             }
-            if (aArgs.priority == g_master_data.queue_priority.command) {
+            if (aArgs.priority == 'command') {
                 if (act.owner == target.owner) {
                     g_field_data.queues.push({
                         actor_id            : act.game_card_id,
                         log_message         : '',
                         resolved_flg        : 0,
                         actor_anime_disable : true,
-                        priority            : 'system',
+                        priority            : 'react_system',
                         queue_units : [
                             {
                                 queue_type_id   : 1023,
@@ -857,7 +851,7 @@ game_field_reactions = (function () {
                         log_message         : '',
                         resolved_flg        : 0,
                         actor_anime_disable : true,
-                        priority            : 'system',
+                        priority            : 'react_system',
                         queue_units : [
                             {
                                 queue_type_id   : 1017,

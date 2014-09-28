@@ -110,7 +110,7 @@ class model_Game {
                 $val['nick_name'] = 'Guest';
             }
             $aBeforeFields = explode('-', $val['field_id_path']);
-            $val['turn_count'] = count($aBeforeFields);
+            $val['turn_count'] = count($aBeforeFields) + 1;
             $val['title_str'] = '';
             $iGameFieldId = $val['game_field_id'];
             $aRet[$iGameFieldId] = array(
