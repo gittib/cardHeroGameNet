@@ -36,9 +36,7 @@ arts_queue = (function () {
                        });
                        return true;
                     }
-                } catch (e) {
-                    console.log(e.stack);
-                }
+                } catch (e) {}
                 return false;
             })();
             if (bSealed) {
@@ -69,9 +67,6 @@ arts_queue = (function () {
                 cost_flg        : true,
             });
         } catch (e) {
-            if (e == 'tokugi_fuuji') {
-                aArgs.field_data.tokugi_fuuji_flg = true;
-            }
             console.log(e.stack);
             return null;
         }
@@ -669,7 +664,8 @@ arts_queue = (function () {
                         }
                     ];
                 } else {
-                    throw 'tokugi_fuuji';
+                    aArgs.field_data.tokugi_fuuji_flg = true;
+                    return null;
                 }
                 break;
             case 1032:

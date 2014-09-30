@@ -69,7 +69,7 @@ class model_Card {
     }
 
     public function getCardListInfo() {
-        $sub = $this->_db->select()
+        $submon = $this->_db->select()
             ->from(
                 array('m_monster'),
                 array(
@@ -80,22 +80,33 @@ class model_Card {
             ->group(array(
                 'card_id',
             ));
+        $submag = $this->_db->select()
+            ->from(
+                array('m_magic'),
+                array(
+                    'card_id',
+                    'max_stone'    => new Zend_Db_Expr('max(stone)'),
+                )
+            )
+            ->group(array(
+                'card_id',
+            ));
         $sql = $this->_db->select()
             ->from(
-                array('mon' => $sub),
+                array('mc' => 'm_card')
+            )
+            ->joinLeft(
+                array('mon' => $submon),
+                'mon.card_id = mc.card_id',
                 array(
                     'max_lv'    => new Zend_Db_Expr("'最大LV：' || mon.max_lv"),
                 )
             )
-            ->joinRight(
-                array('mc' => 'm_card'),
-                'mon.card_id = mc.card_id'
-            )
             ->joinLeft(
-                array('mag' => 'm_magic'),
+                array('mag' => $submag),
                 'mag.card_id = mc.card_id',
                 array(
-                    'magic_stone' => new Zend_Db_Expr("'消費ストーン：' || mag.stone || 'コ'"),
+                    'magic_stone' => new Zend_Db_Expr("'消費ストーン：' || mag.max_stone || 'コ'"),
                 )
             )
             ->order(array(

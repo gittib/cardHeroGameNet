@@ -1224,7 +1224,7 @@ game_field_reactions = (function () {
                                 game_card_id    : iGameCardId,
                             };
                         }
-                        if (val.sort_no > aLastInfo.sort_no) {
+                        if (aLastInfo.sort_no < val.sort_no) {
                             aLastInfo = {
                                 sort_no         : val.sort_no,
                                 game_card_id    : iGameCardId,

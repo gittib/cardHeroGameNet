@@ -8,6 +8,7 @@ magic_queue = (function () {
          * キューオブジェクトを生成する
          *
          * @param aArgs.field_data  結局必要だった
+         * @param aArgs.actor_id    魔法カードのgame_card_id
          * @param aArgs.magic_id    魔法ID
          * @param aArgs.targets     対象情報の配列
          *
@@ -274,6 +275,16 @@ magic_queue = (function () {
                         return true;
                     }
                     $.each(val.status, function(iSt, vSt) {
+                        // 気合溜めとかマッド・ダミーのパワーとかもステータス扱いとするので、
+                        // PSM効果しか消せないようにする
+                        switch (g_master_data.m_status[iSt].status_type) {
+                            case 'P':
+                            case 'S':
+                            case 'M':
+                                break;
+                            default:
+                                return true;
+                        }
                         aRet.push({
                             queue_type_id   : 1027,
                             target_id       : iGameCardId,
@@ -298,7 +309,11 @@ magic_queue = (function () {
                 }];
                 break;
             case 870:
+                var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
                 $.each(aArgs.field_data.cards, function(iGameCardId, val) {
+                    if (val.owner != mon.owner) {
+                        return true;
+                    }
                     if (val.pos_category != 'field') {
                         return true;
                     }
@@ -338,13 +353,14 @@ magic_queue = (function () {
                         iHandNum++;
                     }
                 });
-                var iMaxPic = Math.min(parseInt(Math.random()*3)+1, 6-iHandNum);
+                var iMaxPic = parseInt(Math.random() * 3) + 1;
                 for (var i = 0 ; i < iMaxPic ; i++) {
                     var j = parseInt(Math.random() * aUsedCards.length);
                     aRet.push({
                         queue_type_id   : 1015,
                         target_id       : aUsedCards[j],
                     });
+                    aUsedCards.splice(j, 1);
                 }
                 return aRet;
                 break;
@@ -363,7 +379,7 @@ magic_queue = (function () {
                         if (val.standby_flg) {
                             return true;
                         }
-                        if (next_game_card_id) {
+                        if (val.next_game_card_id) {
                             return true;
                         }
                         var p2 = game_field_utility.getXYFromPosId(val.pos_id);
@@ -377,6 +393,182 @@ magic_queue = (function () {
                     });
                 }
                 return aRet;
+                break;
+            case 930:
+                var aRet = [];
+                $.each(aArgs.field_data.cards, function(i, val) {
+                    if (val.pos_category != 'field') {
+                        return true;
+                    }
+                    if (val.next_game_card_id) {
+                        return true;
+                    }
+                    if (val.status) {
+                        if (val.status[114]) {
+                            // 影縫い持ちがいたら無効
+                            throw new Error('kagenui');
+                        }
+                    }
+                    var sPosId = '';
+                    if (Number(aArgs.param1) == 1) {
+                        switch (val.pos_id) {
+                            case 'myFront1':
+                            case 'enemyBack2':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:2, y:0});
+                                break;
+                            case 'myFront2':
+                            case 'enemyBack1':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:0, y:1});
+                                break;
+                            case 'myBack1':
+                            case 'enemyFront2':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:0, y:-1});
+                                break;
+                            case 'myBack2':
+                            case 'enemyFront1':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:-2, y:0});
+                                break;
+                        }
+                    } else {
+                        switch (val.pos_id) {
+                            case 'myFront1':
+                            case 'enemyBack2':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:0, y:1});
+                                break;
+                            case 'myFront2':
+                            case 'enemyBack1':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:-2, y:0});
+                                break;
+                            case 'myBack1':
+                            case 'enemyFront2':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:2, y:0});
+                                break;
+                            case 'myBack2':
+                            case 'enemyFront1':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:0, y:-1});
+                                break;
+                        }
+                    }
+                    if (sPosId) {
+                        aRet.push({
+                            queue_type_id   : 1022,
+                            target_id       : val.game_card_id,
+                            param1          : sPosId,
+                        });
+                    }
+                });
+                return aRet;
+                break;
+            case 970:
+                return [
+                    {
+                        queue_type_id   : 1026,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : 118,
+                        param2          : aArgs.targets[1].game_card_id,
+                    },
+                    {
+                        queue_type_id   : 1026,
+                        target_id       : aArgs.targets[1].game_card_id,
+                        param1          : 117,
+                        param2          : aArgs.targets[0].game_card_id,
+                    }
+                ];
+                break;
+            case 980:
+                return [
+                    {
+                        queue_type_id   : 1026,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : 119,
+                        param2          : aArgs.targets[1].game_card_id,
+                    },
+                    {
+                        queue_type_id   : 1026,
+                        target_id       : aArgs.targets[1].game_card_id,
+                        param1          : 119,
+                        param2          : aArgs.targets[0].game_card_id,
+                    }
+                ];
+                break;
+            case 1130:
+                return [{
+                    queue_type_id   : 1006,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 3,
+                }];
+                break;
+            case 1140:
+                var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var aRet = [];
+                var aCards = [];
+                var nHand = 0;
+                $.each(aArgs.field_data.cards, function(iGameCardId, val) {
+                    if (val.owner != mon.owner) {
+                        return true;
+                    }
+                    if (val.pos_category == 'hand') {
+                        aRet.push({
+                            queue_type_id   : 1031,
+                            target_id       : iGameCardId,
+                        });
+                        nHand++;
+                    }
+                    if (val.pos_category == 'hand' || val.pos_category == 'deck') {
+                        aCards.push(iGameCardId);
+                    }
+                });
+                for (var i = 0 ; i < nHand ; i++) {
+                    var j = parseInt(Math.random() * aCards.length);
+                    aRet.push({
+                        queue_type_id   : 1011,
+                        target_id       : aCards[j],
+                    });
+                    aCards.splice(j, 1);
+                }
+                var i = 1000;
+                while (0 < aCards.length) {
+                    var j = parseInt(Math.random() * aCards.length);
+                    aRet.push({
+                        queue_type_id   : 1012,
+                        target_id       : aCards[j],
+                        param1          : i++,
+                    });
+                    aCards.splice(j, 1);
+                }
+                return aRet;
+                break;
+            case 1150:
+                if (aArgs.targets[0].game_card_id) {
+                    aArgs.field_data.sort_card_flg = true;
+                    return null;
+                }
+                break;
+            case 1160:
+                var aRet = [];
+                var iDraw = 0;
+                for (var i = 0 ; i < aArgs.targets.length ; i++) {
+                    if (typeof aArgs.targets[i].pos_id != 'undefined' && aArgs.targets[i].pos_id == 'myMaster') {
+                        aRet.push({
+                            queue_type_id   : 1011,
+                            target_id       : aArgs.targets[i].game_card_id,
+                            param1          : 'draw',
+                            param2          : iDraw,
+                        });
+                        return aRet;
+                    }
+                    aRet.push({
+                        queue_type_id   : 1014,
+                        target_id       : aArgs.targets[i].game_card_id,
+                    });
+                    iDraw++;
+                }
+                break;
+            case 1170:
+                return [{
+                    queue_type_id   : 1010,
+                    target_id       : aArgs.targets[0].game_card_id,
+                }];
                 break;
             case 1490:
                 return [{

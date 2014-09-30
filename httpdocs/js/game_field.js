@@ -197,6 +197,12 @@ new function () {
                             break;
                         case 'hand':
                             g_field_data.actor.act_type = oDom.attr('act_type');
+                            if (g_field_data.actor.act_type == 'magic') {
+                                var mid = g_master_data.m_card[aCard.card_id];
+                                if (mid.magic_id) {
+                                    g_field_data.actor.magic_id = mid.magic_id;
+                                }
+                            }
                             var prm1 = oDom.attr('param1');
                             if (typeof prm1 !== 'undefined') {
                                 g_field_data.actor.param1 = prm1;
@@ -601,7 +607,7 @@ new function () {
 
     /**
      * checkTargetPosValid
-     * range_type_idの範囲内に対象がいるか確認する
+     * range_type_idの範囲内に対象がいるか確認する checkrangecheck
      *
      * @param   aArgs.range_type_id (必須)範囲タイプ
      * @param   aArgs.actor_id      (任意)行動者のgame_card_id
@@ -685,6 +691,7 @@ new function () {
                 case 12:
                 case 26:
                 case 34:
+                case 35:
                     // 伏せてても関係なし
                     break;
                 case 23:
@@ -928,6 +935,21 @@ new function () {
                         return false;
                     }
                     break;
+                case 35:
+                    // リフレッシュ専用
+                    if (targetMon.game_card_id == actorMon.game_card_id) {
+                        return false;
+                    }
+                    if (targetMon.owner != actorMon.owner) {
+                        return false;
+                    }
+                    if (targetMon.pos_category == 'hand') {
+                        return true;
+                    }
+                    if (typeof targetMon.pos_id != 'undefined' && targetMon.pos_id == 'myMaster') {
+                        return true;
+                    }
+                    break;
             }
         } catch (e) {
             console.log('unexpected in checkTargetPosValid');
@@ -1029,6 +1051,7 @@ new function () {
                         field_data  : g_field_data,
                         magic_id    : actor.magic_id,
                         actor_id    : actor.game_card_id,
+                        param1      : actor.param1,
                         targets     : actor.aTargets,
                     });
                     console.log('magic q set sita');
@@ -1219,7 +1242,8 @@ new function () {
                         console.log('range check NG');
                         return false;
                     }
-                    $('#' + aTargetInfo.pos_id).addClass('target');
+                    $('#game_field #' + aTargetInfo.pos_id).addClass('target');
+                    $('div.hand_card[game_card_id=' + aTargetInfo.game_card_id + ']').addClass('target');
                     actor.aTargets.push(aTargetInfo);
                     _addActionFromActorInfo();
                     return true;
@@ -1236,7 +1260,8 @@ new function () {
                         console.log('range check NG');
                         return false;
                     }
-                    $('#' + aTargetInfo.pos_id).addClass('target');
+                    $('#game_field #' + aTargetInfo.pos_id).addClass('target');
+                    $('div.hand_card[game_card_id=' + aTargetInfo.game_card_id + ']').addClass('target');
                     actor.aTargets.push(aTargetInfo);
                     _addActionFromActorInfo();
                     return true;
@@ -1365,6 +1390,27 @@ new function () {
                     }
                 }
             }
+            var _insertDrawAnimation = function (_q) {
+                if (g_field_data.cards[_q.target_id].owner == 'my') {
+                    var posId = '#myPlayersInfo div.hand';
+                } else {
+                    var posId = '#enemyPlayersInfo div.hand';
+                }
+                for (var i = 0 ; i < 2 ; i++) {
+                    g_field_data.animation_info.animations.push({
+                        target_dom  : posId,
+                        animation_param : {
+                            'opacity'   : 'hide',
+                        },
+                    });
+                    g_field_data.animation_info.animations.push({
+                        target_dom  : posId,
+                        animation_param : {
+                            'opacity'   : 'show',
+                        },
+                    });
+                }
+            };
             for (var iterator_of_queue_now_proc = 0 ; iterator_of_queue_now_proc < exec_act.queue_units.length ; iterator_of_queue_now_proc++) {
                 var q = exec_act.queue_units[iterator_of_queue_now_proc];
                 if (typeof q != 'object') {
@@ -1391,9 +1437,9 @@ new function () {
                             var actorMon = g_field_data.cards[exec_act.actor_id];
                             var aMonsterData = g_master_data.m_monster[actorMon.monster_id];
                             var pow = aMonsterData.attack.power;
-                            if (actorMon.mad_hole_cnt) {
+                            if (actorMon.status[131]) {
                                 // マッドホールによるパワーアップ
-                                pow += actorMon.mad_hole_cnt;
+                                pow += actorMon.status[131].param1;
                             }
                             if (actorMon.status[100]) {
                                 pow++;
@@ -1625,34 +1671,15 @@ new function () {
                                         g_field_data.cards[iGameCardId].pos_category = 'hand';
                                     }
                                 })();
-                                break;
+                            } else {
+                                g_field_data.cards[q.target_id].pos_category = 'hand';
                             }
-                            // break は書かない
+                            _insertDrawAnimation(q);
+                            break;
                         case 1009:
                         case 1015:
                             g_field_data.cards[q.target_id].pos_category = 'hand';
-                            (function () {
-                                // アニメーション設定箇所は邪魔なので無名関数化して畳めるようにしとく
-                                if (g_field_data.cards[q.target_id].owner == 'my') {
-                                    var posId = '#myPlayersInfo div.hand';
-                                } else {
-                                    var posId = '#enemyPlayersInfo div.hand';
-                                }
-                                for (var i = 0 ; i < 2 ; i++) {
-                                    g_field_data.animation_info.animations.push({
-                                        target_dom  : posId,
-                                        animation_param : {
-                                            'opacity'   : 'hide',
-                                        },
-                                    });
-                                    g_field_data.animation_info.animations.push({
-                                        target_dom  : posId,
-                                        animation_param : {
-                                            'opacity'   : 'show',
-                                        },
-                                    });
-                                }
-                            })();
+                            _insertDrawAnimation(q);
                             break;
                         case 1010:
                             console.log(q);
@@ -1869,23 +1896,29 @@ new function () {
                             }
                             if ((aCard.owner == 'my' && 2 <= p.y) || (aCard.owner == 'enemy' && p.y <= 1)) {
                                 aCard.pos_id = q.param1;
+                                if (aCard.before_game_card_id && typeof g_field_data.cards[aCard.before_game_card_id] != 'undefined') {
+                                    g_field_data.cards[aCard.before_game_card_id].pos_id = q.param1;
+                                }
                                 bMoveQueueResolved = true;
 
-                                var sDom = '#' + q.param1;
-                                for (var i = 0 ; i < 2 ; i++) {
-                                    g_field_data.animation_info.animations.push({
-                                        target_dom  : sDom,
-                                        animation_param : {
-                                            'background-color'  : '#ee0',
-                                        },
-                                    });
-                                    g_field_data.animation_info.animations.push({
-                                        target_dom  : sDom,
-                                        animation_param : {
-                                            'background-color'  : g_base_color.background,
-                                        },
-                                    });
-                                }
+                                (function(){
+                                    // アニメーション設定
+                                    var sDom = '#' + q.param1;
+                                    for (var i = 0 ; i < 2 ; i++) {
+                                        g_field_data.animation_info.animations.push({
+                                            target_dom  : sDom,
+                                            animation_param : {
+                                                'background-color'  : '#ee0',
+                                            },
+                                        });
+                                        g_field_data.animation_info.animations.push({
+                                            target_dom  : sDom,
+                                            animation_param : {
+                                                'background-color'  : g_base_color.background,
+                                            },
+                                        });
+                                    }
+                                })();
                             } else {
                                 throw new Error('move_to_opponent_field');
                             }
@@ -1938,16 +1971,17 @@ new function () {
                         case 1026:
                             var mon = g_field_data.cards[q.target_id];
 
-                            // マッド・ダミーのパワーアップ効果は魔法効果を受けるものとして扱う
-                            if (q.param1 == 'madHole') {
-                                if (typeof mon.mad_hole_cnt == 'number') {
-                                    mon.mad_hole_cnt++;
+                            if (q.param1 == 131) {
+                                if (typeof mon.status[131] == 'undefined') {
+                                    mon.status[131] = {
+                                        status_id   : 131,
+                                        turn_count  : 1000,
+                                        param1      : 1,
+                                    };
                                 } else {
-                                    mon.mad_hole_cnt = 1;
+                                    mon.status[131].param1++;
                                 }
-                                break;
                             }
-
                             var aAlreadyStatus = {};
                             $.each(mon.status, function(iStatusId, val) {
                                 var aSt = g_master_data.m_status[iStatusId];
@@ -1955,8 +1989,7 @@ new function () {
                                     case 'P':
                                     case 'S':
                                         aAlreadyStatus[aSt.status_type] = true;
-                                        aAlreadyStatus[iStatusId] = true;
-                                        break;
+                                        // breakは書かない
                                     default:
                                         aAlreadyStatus[iStatusId] = true;
                                         break;
@@ -1986,6 +2019,7 @@ new function () {
                                 case 123:
                                 case 124:
                                 case 128:
+                                case 131:
                                     iTurnCount = 1000;
                                     break;
                             }
@@ -1995,6 +2029,9 @@ new function () {
                             };
                             switch (q.param1) {
                                 case 110:
+                                case 117:
+                                case 118:
+                                case 119:
                                 case 120:
                                     mon.status[q.param1].param1 = q.param2;
                                     break;
@@ -2045,6 +2082,28 @@ new function () {
                             break;
                         case 1030:
                             g_field_data.cards[q.target_id].act_count = 0;
+                            break;
+                        case 1031:
+                            var mon = g_field_data.cards[q.target_id];
+                            if (mon.pos_category != 'hand') {
+                                throw new Error('invalid_target');
+                            }
+                            var st = 'last';
+                            if (q.param1 == 'first') {
+                                st = 'first';
+                            }
+                            var aCard = game_field_reactions.getGameCardId({
+                                pos_category    : 'deck',
+                                owner           : mon.owner,
+                                sort_type       : st,
+                            });
+                            mon.pos_category = 'deck';
+                            if (st == 'first') {
+                                mon.sort_no = aCard.sort_no - 1;
+                            } else {
+                                mon.sort_no = aCard.sort_no + 1;
+                            }
+                            _insertDrawAnimation(q);
                             break;
                         case 9999:
                             switch (q.param1) {
