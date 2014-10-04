@@ -15,7 +15,7 @@ $aDeckCardImages = array(
 if (isset($this->aDeckInfo['cards']) && is_array($this->aDeckInfo['cards'])) {
     foreach ($this->aDeckInfo['cards'] as $val) {
         $aDeckCardImages[$val['cate']] .= <<<_eos_
-<img src="/images/card/card.jpg" original-src="/images/card/{$val['image_file_name']}" cate="{$val['cate']}" cardid="{$val['card_id']}" />
+<img src="/images/card/card.jpg" original-src="/images/card/{$val['image_file_name']}" cate="{$val['cate']}" cardid="{$val['card_id']}" rare="{$val['rare']}" />
 
 _eos_;
     }
@@ -34,7 +34,7 @@ foreach ($this->card_list as $val) {
     if ($val['category'] == 'master') {
         $sMasterImages .= <<<_eos_
                 <div cardid="{$val['card_id']}">
-                    <img src="/images/card/card.jpg" original-src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}" cardid="{$val['card_id']}" />
+                    <img src="/images/card/card.jpg" original-src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}" cardid="{$val['card_id']}" rare="{$val['rare']}" />
                 </div>
 
 _eos_;
@@ -87,7 +87,11 @@ _eos_;
             <a class="blank_link" href="/card/detail/1002/" target="_blank">マスター詳細</a>
         </div>
         <div class="card_list_in_deck">
-            <div class="deck">デッキ枚数:<span id="deck_cards_num">0</span>枚</div>
+            <div class="deck">
+                デッキ枚数:<span id="deck_cards_num">0</span>枚&nbsp;
+                合計Rare:<span id="deck_sum_rare">★0</span>&nbsp;
+                最大Rare:<span id="deck_max_rare">★0</span>
+            </div>
             <div class="front">前衛モンスター枚数:<span id="front_cards_num">0</span>枚</div>
             <div class="front card_image_frame">
 <?php echo $aDeckCardImages['front']; ?>

@@ -703,7 +703,7 @@ game_field_reactions = (function () {
 
                         $('#game_field td#' + val.pos_id).html(
                             '<div class="pict">' +
-                                '<img src="' + sImgSrc + '" alt="' + sImgAlt + '"/>' +
+                                '<img class="card_image" src="' + sImgSrc + '" alt="' + sImgAlt + '"/>' +
                             '</div>' +
                             '<div class="param">' +
                                 sLvHp + '<br />' +
@@ -2694,6 +2694,7 @@ magic_queue = (function () {
          * キューオブジェクトを生成する
          *
          * @param aArgs.field_data  結局必要だった
+         * @param aArgs.actor_id    魔法カードのgame_card_id
          * @param aArgs.magic_id    魔法ID
          * @param aArgs.targets     対象情報の配列
          *
@@ -3088,30 +3089,51 @@ magic_queue = (function () {
                     if (val.next_game_card_id) {
                         return true;
                     }
-                    // if (val.status) {
-                    //     if (val.status[114]) {
-                    //         // 影縫い持ちがいたら無効
-                    //         throw new Error('kagenui');
-                    //     }
-                    // }
+                    if (val.status) {
+                        if (val.status[114]) {
+                            // 影縫い持ちがいたら無効
+                            throw new Error('kagenui');
+                        }
+                    }
                     var sPosId = '';
-                    switch (val.pos_id) {
-                        case 'myFront1':
-                        case 'enemyBack2':
-                            sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:2, y:0});
-                            break;
-                        case 'myFront2':
-                        case 'enemyBack1':
-                            sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:0, y:1});
-                            break;
-                        case 'myBack1':
-                        case 'enemyFront2':
-                            sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:0, y:-1});
-                            break;
-                        case 'myBack2':
-                        case 'enemyFront1':
-                            sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:-2, y:0});
-                            break;
+                    if (Number(aArgs.param1) == 1) {
+                        switch (val.pos_id) {
+                            case 'myFront1':
+                            case 'enemyBack2':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:2, y:0});
+                                break;
+                            case 'myFront2':
+                            case 'enemyBack1':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:0, y:1});
+                                break;
+                            case 'myBack1':
+                            case 'enemyFront2':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:0, y:-1});
+                                break;
+                            case 'myBack2':
+                            case 'enemyFront1':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:-2, y:0});
+                                break;
+                        }
+                    } else {
+                        switch (val.pos_id) {
+                            case 'myFront1':
+                            case 'enemyBack2':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:0, y:1});
+                                break;
+                            case 'myFront2':
+                            case 'enemyBack1':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:-2, y:0});
+                                break;
+                            case 'myBack1':
+                            case 'enemyFront2':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:2, y:0});
+                                break;
+                            case 'myBack2':
+                            case 'enemyFront1':
+                                sPosId = game_field_utility.getRelativePosId(val.pos_id, {x:0, y:-1});
+                                break;
+                        }
                     }
                     if (sPosId) {
                         aRet.push({
@@ -3209,21 +3231,29 @@ magic_queue = (function () {
                 }
                 break;
             case 1160:
-                var iMasterId = null;
-                $.each(aArgs.field_data.cards, function(iGameCardId, val) {
-                    if (!val.pos_id) {
-                        return true;
+                var aRet = [];
+                var iDraw = 0;
+                for (var i = 0 ; i < aArgs.targets.length ; i++) {
+                    if (typeof aArgs.targets[i].pos_id != 'undefined' && aArgs.targets[i].pos_id == 'myMaster') {
+                        aRet.push({
+                            queue_type_id   : 1011,
+                            target_id       : aArgs.targets[i].game_card_id,
+                            param1          : 'draw',
+                            param2          : iDraw,
+                        });
+                        return aRet;
                     }
-                    if (val.pos_id == 'myMaster') {
-                        iMasterId = iGameCardId;
-                        return false;
-                    }
-                });
-                var aRet = [{
-                    queue_type_id   : 1011,
-                    target_id       : iMasterId,
-                    param1          : 'draw',
-                    param2          : aArgs.targets.length,
+                    aRet.push({
+                        queue_type_id   : 1014,
+                        target_id       : aArgs.targets[i].game_card_id,
+                    });
+                    iDraw++;
+                }
+                break;
+            case 1170:
+                return [{
+                    queue_type_id   : 1010,
+                    target_id       : aArgs.targets[0].game_card_id,
                 }];
                 break;
             case 1490:
@@ -3439,6 +3469,12 @@ new function () {
                             break;
                         case 'hand':
                             g_field_data.actor.act_type = oDom.attr('act_type');
+                            if (g_field_data.actor.act_type == 'magic') {
+                                var mid = g_master_data.m_card[aCard.card_id];
+                                if (mid.magic_id) {
+                                    g_field_data.actor.magic_id = mid.magic_id;
+                                }
+                            }
                             var prm1 = oDom.attr('param1');
                             if (typeof prm1 !== 'undefined') {
                                 g_field_data.actor.param1 = prm1;
@@ -3843,7 +3879,7 @@ new function () {
 
     /**
      * checkTargetPosValid
-     * range_type_idの範囲内に対象がいるか確認する
+     * range_type_idの範囲内に対象がいるか確認する checkrangecheck
      *
      * @param   aArgs.range_type_id (必須)範囲タイプ
      * @param   aArgs.actor_id      (任意)行動者のgame_card_id
@@ -3927,6 +3963,7 @@ new function () {
                 case 12:
                 case 26:
                 case 34:
+                case 35:
                     // 伏せてても関係なし
                     break;
                 case 23:
@@ -4170,6 +4207,21 @@ new function () {
                         return false;
                     }
                     break;
+                case 35:
+                    // リフレッシュ専用
+                    if (targetMon.game_card_id == actorMon.game_card_id) {
+                        return false;
+                    }
+                    if (targetMon.owner != actorMon.owner) {
+                        return false;
+                    }
+                    if (targetMon.pos_category == 'hand') {
+                        return true;
+                    }
+                    if (typeof targetMon.pos_id != 'undefined' && targetMon.pos_id == 'myMaster') {
+                        return true;
+                    }
+                    break;
             }
         } catch (e) {
             console.log('unexpected in checkTargetPosValid');
@@ -4271,6 +4323,7 @@ new function () {
                         field_data  : g_field_data,
                         magic_id    : actor.magic_id,
                         actor_id    : actor.game_card_id,
+                        param1      : actor.param1,
                         targets     : actor.aTargets,
                     });
                     console.log('magic q set sita');
@@ -4461,7 +4514,8 @@ new function () {
                         console.log('range check NG');
                         return false;
                     }
-                    $('#' + aTargetInfo.pos_id).addClass('target');
+                    $('#game_field #' + aTargetInfo.pos_id).addClass('target');
+                    $('div.hand_card[game_card_id=' + aTargetInfo.game_card_id + ']').addClass('target');
                     actor.aTargets.push(aTargetInfo);
                     _addActionFromActorInfo();
                     return true;
@@ -4478,7 +4532,8 @@ new function () {
                         console.log('range check NG');
                         return false;
                     }
-                    $('#' + aTargetInfo.pos_id).addClass('target');
+                    $('#game_field #' + aTargetInfo.pos_id).addClass('target');
+                    $('div.hand_card[game_card_id=' + aTargetInfo.game_card_id + ']').addClass('target');
                     actor.aTargets.push(aTargetInfo);
                     _addActionFromActorInfo();
                     return true;
@@ -4654,9 +4709,9 @@ new function () {
                             var actorMon = g_field_data.cards[exec_act.actor_id];
                             var aMonsterData = g_master_data.m_monster[actorMon.monster_id];
                             var pow = aMonsterData.attack.power;
-                            if (actorMon.mad_hole_cnt) {
+                            if (actorMon.status[131]) {
                                 // マッドホールによるパワーアップ
-                                pow += actorMon.mad_hole_cnt;
+                                pow += actorMon.status[131].param1;
                             }
                             if (actorMon.status[100]) {
                                 pow++;
@@ -5188,16 +5243,17 @@ new function () {
                         case 1026:
                             var mon = g_field_data.cards[q.target_id];
 
-                            // マッド・ダミーのパワーアップ効果は魔法効果を受けるものとして扱う
-                            if (q.param1 == 'madHole') {
-                                if (typeof mon.mad_hole_cnt == 'number') {
-                                    mon.mad_hole_cnt++;
+                            if (q.param1 == 131) {
+                                if (typeof mon.status[131] == 'undefined') {
+                                    mon.status[131] = {
+                                        status_id   : 131,
+                                        turn_count  : 1000,
+                                        param1      : 1,
+                                    };
                                 } else {
-                                    mon.mad_hole_cnt = 1;
+                                    mon.status[131].param1++;
                                 }
-                                break;
                             }
-
                             var aAlreadyStatus = {};
                             $.each(mon.status, function(iStatusId, val) {
                                 var aSt = g_master_data.m_status[iStatusId];
@@ -5205,8 +5261,7 @@ new function () {
                                     case 'P':
                                     case 'S':
                                         aAlreadyStatus[aSt.status_type] = true;
-                                        aAlreadyStatus[iStatusId] = true;
-                                        break;
+                                        // breakは書かない
                                     default:
                                         aAlreadyStatus[iStatusId] = true;
                                         break;
@@ -5236,6 +5291,7 @@ new function () {
                                 case 123:
                                 case 124:
                                 case 128:
+                                case 131:
                                     iTurnCount = 1000;
                                     break;
                             }

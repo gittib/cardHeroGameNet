@@ -33,8 +33,12 @@
             float: left;
             height: 50px;
             width:  50px;
+            position: relative;
 
-            img {
+            img.card_image {
+                position: absolute;
+                left: 0;
+                top: 0;
                 border: 1px solid;
                 height: 100%;
                 max-width: 100%;
@@ -147,10 +151,10 @@ div.close_button {
 
             div {
                 float: left;
-            }
 
-            div.proposer {
-                float: right;
+                &.proposer {
+                    float: right;
+                }
             }
         }
 
@@ -160,28 +164,28 @@ div.close_button {
 
             div {
                 float: left;
-            }
 
-            div.card_image {
-                img {
-                    margin: 1px;
-                    border: solid 1px;
-                    width: $cmd_img_size;
-                    height: $cmd_img_size;
+                &.card_image {
+                    img {
+                        margin: 1px;
+                        border: solid 1px;
+                        width: $cmd_img_size;
+                        height: $cmd_img_size;
+                    }
                 }
-            }
 
-            div.card_name {
-                font-size: $cmd_font_size;
-            }
-
-            div.dtl_link {
-                float: right;
-                text-align: right;
-                padding-right: 1em;
-
-                a {
+                &.card_name {
                     font-size: $cmd_font_size;
+                }
+
+                &.dtl_link {
+                    float: right;
+                    text-align: right;
+                    padding-right: 1em;
+
+                    a {
+                        font-size: $cmd_font_size;
+                    }
                 }
             }
         }

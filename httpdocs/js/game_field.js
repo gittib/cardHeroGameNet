@@ -229,18 +229,26 @@ new function () {
         });
 
         $(document).on('click', '#buttons_frame div.cancel_button', function () {
+            var _delActorInfo = function() {
+                g_field_data.actor = {game_card_id : null};
+                $('.actor').removeClass('actor');
+                $('.target').removeClass('target');
+                game_field_reactions.updateActorDom({
+                    field_data  : g_field_data,
+                });
+            };
             switch (checkGameState()) {
+                case 'sort_card':
+                    delete g_field_data.sort_card_flg;
+                    _delActorInfo();
+                    break;
                 case 'tokugi_fuuji':
                     delete g_field_data.tokugi_fuuji_flg;
-                    // break は書かない
+                    _delActorInfo();
+                    break;
                 case 'select_action':
                 case 'select_target':
-                    g_field_data.actor = {game_card_id : null};
-                    $('.actor').removeClass('actor');
-                    $('.target').removeClass('target');
-                    game_field_reactions.updateActorDom({
-                        field_data  : g_field_data,
-                    });
+                    _delActorInfo();
                     break;
                 case 'lvup_standby':
                     if (g_field_data.actor.game_card_id) {
@@ -2035,6 +2043,7 @@ new function () {
                                 case 120:
                                     mon.status[q.param1].param1 = q.param2;
                                     break;
+                                case 121:
                                 case 127:
                                     mon.status[q.param1].param1 = mon.monster_id;
                                     mon.monster_id = q.param2;

@@ -637,21 +637,17 @@ arts_queue = (function () {
                 ];
                 break;
             case 1029:
-                return [
-                    {
-                        queue_type_id   : 1008,
-                        target_id       : aArgs.actor_id,
-                    }
-                ];
+                return [{
+                    queue_type_id   : 1008,
+                    target_id       : aArgs.actor_id,
+                }];
                 break;
             case 1030:
-                return [
-                    {
-                        queue_type_id   : 1026,
-                        target_id       : aArgs.targets[0].game_card_id,
-                        param1          : 128,
-                    }
-                ];
+                return [{
+                    queue_type_id   : 1026,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 128,
+                }];
                 break;
             case 1031:
                 if (aArgs.param2) {

@@ -1,6 +1,33 @@
 @charset "utf-8";
-
-li {
-    padding-top:10px;
-    padding-left:5px;
-}
+@font-face {
+  font-family: 'MotoyaCedar';
+  src: url("/font/NfMotoyaCedarStd-W1.otf") format("OpenType"); }
+#welcome {
+  margin: 15px;
+  font-family: 'メイリオ', 'ヒラギノ角ゴ ProN W3', 'Hiragino Kaku Gothic ProN', 'Lucida Grande', 'Meiryo', 'メイリオ', sans-serif; }
+  #welcome div {
+    float: left;
+    width: 120px;
+    height: 120px;
+    margin: 15px;
+    border: solid 3px;
+    position: relative; }
+    #welcome div.card_list {
+      background-color: #e0eeff; }
+    #welcome div.field_list {
+      background-color: #efe; }
+    #welcome div.deck_list {
+      background-color: #ffe; }
+    #welcome div.new_game {
+      background-color: #fee; }
+    #welcome div * {
+      position: absolute; }
+    #welcome div img {
+      top: 5px;
+      left: 15px;
+      width: 90px;
+      max-height: 90px; }
+    #welcome div span {
+      bottom: 0;
+      width: 100%;
+      text-align: center; }

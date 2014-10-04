@@ -5,7 +5,19 @@ function refreshDeckCardNum() {
     var nSuper = $("div.card_image_frame.super img").size();
     var nSum = nFront + nBack + nMagic + nSuper;
 
+    var nSumRare = Number($('.master_image div:visible img[rare]').attr('rare'));
+    var nMaxRare = nSumRare;
+    $('.card_list_in_deck img[rare]').each(function () {
+        var r = $(this).attr('rare');
+        nSumRare += Number(r);
+        if (nMaxRare < r) {
+            nMaxRare = r;
+        }
+    });
+
     $("#deck_cards_num").text(nSum);
+    $("#deck_sum_rare").text('★'+nSumRare);
+    $("#deck_max_rare").text('★'+nMaxRare);
     $("#front_cards_num").text(nFront);
     $("#back_cards_num").text(nBack);
     $("#magic_cards_num").text(nMagic);
@@ -37,14 +49,18 @@ $(function() {
         } else {
             category_name = 'super';
         }
+        var sSpace = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
         var content =
             '<div class="selected_card clearfix">' +
                 '<div class="card_image_frame">' +
-                    '<img src="' + $(this).attr('src') + '" cardid="' + num + '" cate="' + category_name + '" />' +
+                    '<img src="' + $(this).attr('src') + '" cardid="' + num + '" cate="' + category_name + '" rare="' + $(this).attr('rare') + '" />' +
                 '</div>' +
                 '<div class="insert_card">' +
                     $(this).attr('alt') + '　★' + $(this).attr('rare') + '<br />' +
-                    '<a href="javascript:void(0)">デッキに入れる</a><br />' +
+                    '<a num="0" href="javascript:void(0)">0枚</a>' + sSpace +
+                    '<a num="1" href="javascript:void(0)">1枚</a>' + sSpace +
+                    '<a num="2" href="javascript:void(0)">2枚</a>' + sSpace +
+                    '<a num="3" href="javascript:void(0)">3枚</a><br />' +
                     '<span class="ins_num" cardid="' + num + '">0</span>枚投入済み' +
                 '</div>' +
                 '<div class="card_detail">' +
@@ -65,21 +81,29 @@ $(function() {
     $(document).on('click', '.insert_card a', function() {
         var imgTag = $(this).parent().parent().children("div.card_image_frame").children('img');
         var card_id = imgTag.attr('cardid');
-        if ($('#deck_frame .card_list_in_deck img[cardid=' + card_id + ']').size() < 3) {
-            var cate = imgTag.attr('cate');
-            var imgHtml = imgTag.parent().html();
-            $('div.card_list_in_deck div.card_image_frame.' + cate + ' img').each(function() {
-                if (Number($(this).attr('cardid')) <= Number(imgTag.attr('cardid'))) {
-                    $(this).addClass('earlier');
-                }
-            });
-            if ($('.earlier').size() > 0) {
-                $('.earlier:last').after(imgHtml);
-                $('.earlier').removeClass('earlier');
-            } else {
-                $('div.card_list_in_deck div.card_image_frame.' + cate).prepend(imgHtml);
-            }
+        var nIns = Number($(this).attr('num'));
+        $('#deck_frame .card_list_in_deck img[cardid=' + card_id + ']').remove();
+        if (nIns <= 0) {
+            refreshDeckCardNum();
+            return;
         }
+
+        var cate = imgTag.attr('cate');
+        var imgHtml = imgTag.parent().html();
+        $('div.card_list_in_deck div.card_image_frame.' + cate + ' img').each(function() {
+            if (Number($(this).attr('cardid')) < Number(imgTag.attr('cardid'))) {
+                $(this).addClass('earlier');
+            }
+        });
+        if ($('.earlier').size() <= 0) {
+            $('div.card_list_in_deck div.card_image_frame.' + cate).prepend(imgHtml);
+            $('div.card_list_in_deck img[cardid=' + card_id + ']').addClass('earlier');
+            nIns--;
+        }
+        for (var i = 0 ; i < nIns ; i++){
+            $('.earlier:last').after(imgHtml);
+        }
+        $('.earlier').removeClass('earlier');
 
         refreshDeckCardNum();
     });

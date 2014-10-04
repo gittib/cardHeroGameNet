@@ -174,7 +174,7 @@ game_field_reactions = (function () {
 
                         $('#game_field td#' + val.pos_id).html(
                             '<div class="pict">' +
-                                '<img src="' + sImgSrc + '" alt="' + sImgAlt + '"/>' +
+                                '<img class="card_image" src="' + sImgSrc + '" alt="' + sImgAlt + '"/>' +
                             '</div>' +
                             '<div class="param">' +
                                 sLvHp + '<br />' +

@@ -1,0 +1,55 @@
+@charset "utf-8";
+
+@font-face {
+    font-family: 'MotoyaCedar';
+    src: url('/font/NfMotoyaCedarStd-W1.otf') format('OpenType');
+}
+
+#welcome {
+    $buttonMargine : 30px;
+    margin: $buttonMargine / 2;
+    font-family:'メイリオ', 'ヒラギノ角ゴ ProN W3', 'Hiragino Kaku Gothic ProN', 'Lucida Grande', 'Meiryo', 'メイリオ', sans-serif;
+
+    $divSize : 120px;
+    div {
+        float: left;
+        width: $divSize;
+        height: $divSize;
+        margin: $buttonMargine / 2;
+        border: solid 3px;
+        position: relative;
+
+        &.card_list {
+            background-color: #e0eeff;
+        }
+        &.field_list {
+            background-color: #efe;
+        }
+        &.deck_list {
+            background-color: #ffe;
+        }
+        &.new_game {
+            background-color: #fee;
+        }
+
+
+        * {
+            position: absolute;
+        }
+
+        img {
+            $imgMargin : 15px;
+            top: 5px;
+            left: $imgMargin;
+            width: $divSize - ($imgMargin * 2);
+            max-height: $divSize - ($imgMargin * 2);
+        }
+
+        span {
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+        }
+    }
+}
+

@@ -37,7 +37,9 @@ class ApiController extends Zend_Controller_Action
         $im->setImageColorspace(Imagick::COLORSPACE_GRAY);
         $im->writeImages($sDest, true);
 
-        $this->getResponse()->setHeader('Content-type', "image/{$sExt}");
+        $oRes = $this->getResponse();
+        $oRes->setHttpRespenseCode(201);
+        $oRes->setHeader('Content-type', "image/{$sExt}");
         echo $im;
         $im->destroy();
         exit();

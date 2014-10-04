@@ -243,6 +243,7 @@ class model_Deck {
             $aRet['deck_name']              = $val['deck_name'];
             $aRet['master_card_id']         = $val['master_card_id'];
             $aRet['master_image_file_name'] = $val['master_image_file_name'];
+            $aRet['rare']                   = $val['master_rare'];
             if (!isset($aRet['cards'])) {
                 $aRet['cards'] = array();
             }
@@ -251,6 +252,7 @@ class model_Deck {
                     'card_id'           => $val['card_id'],
                     'card_name'         => $val['card_name'],
                     'image_file_name'   => $val['image_file_name'],
+                    'rare'              => $val['rare'],
                 );
                 switch ($val['category']) {
                     case 'monster_front':

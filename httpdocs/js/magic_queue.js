@@ -110,6 +110,7 @@ magic_queue = (function () {
                 960     : 101,
                 1250    : 124,
                 1290    : 100,
+                1500    : 105,
             };
             if (a[Number(aMagicInfo.magic_id)]) {
                 return [{
@@ -226,11 +227,19 @@ magic_queue = (function () {
                 }];
                 break;
             case 580:
-                return [{
-                    queue_type_id   : 1026,
-                    target_id       : aArgs.targets[0].game_card_id,
-                    param1          : 110,
-                }];
+                if (aArgs.param2) {
+                    return [
+                        {
+                            queue_type_id   : 1026,
+                            target_id       : aArgs.targets[0].game_card_id,
+                            param1          : 110,
+                            param2          : aArgs.param2,
+                        }
+                    ];
+                } else {
+                    aArgs.field_data.tokugi_fuuji_flg = true;
+                    return null;
+                }
                 break;
             case 610:
                 if (!aArgs.targets[1].game_card_id) {
@@ -252,7 +261,7 @@ magic_queue = (function () {
                 return [{
                     queue_type_id   : 1026,
                     target_id       : aArgs.targets[0].game_card_id,
-                    param1          : 110,
+                    param1          : 112,
                 },{
                     queue_type_id   : 1024,
                     target_id       : aArgs.targets[0].game_card_id,
@@ -539,6 +548,7 @@ magic_queue = (function () {
                 return aRet;
                 break;
             case 1150:
+                // ソートカード
                 if (aArgs.targets[0].game_card_id) {
                     aArgs.field_data.sort_card_flg = true;
                     return null;
@@ -568,6 +578,215 @@ magic_queue = (function () {
                 return [{
                     queue_type_id   : 1010,
                     target_id       : aArgs.targets[0].game_card_id,
+                }];
+                break;
+            case 1180:
+                var aRet = [];
+                var p1 = game_field_utility.getXYFromPosId(aArgs.field_data.cards[aArgs.targets[0].game_card_id].pos_id);
+                $.each(aArgs.field_data.cards, function(iGameCardId, val) {
+                    if (val.pos_category != 'field') {
+                        return true;
+                    }
+                    if (val.next_game_card_id) {
+                        return true;
+                    }
+                    if (val.standby_flg) {
+                        return true;
+                    }
+                    var p2 = game_field_utility.getXYFromPosId(val.pos_id);
+                    if (p2.x == p1.x) {
+                        aRet.push({
+                            queue_type_id   : 1005,
+                            target_id       : iGameCardId,
+                            param1          : 1,
+                        });
+                    }
+                });
+                return aRet;
+                break;
+            case 1190:
+                if (aArgs.param2) {
+                    return [{
+                        queue_type_id   : 1026,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : 120,
+                        param2          : aArgs.param2,
+                    }];
+                } else {
+                    aArgs.field_data.tokugi_fuuji_flg = true;
+                    return null;
+                }
+                break;
+            case 1200:
+                var aRet = [];
+                var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var nHand = 0;
+                $.each(aArgs.field_data.cards, function(iGameCardId, val) {
+                    if (val.owner == mon.owner && val.pos_category == 'hand') {
+                        nHand++;
+                    }
+                });
+                if (nHand < 5) {
+                    return [{
+                        queue_type_id   : 1011,
+                        target_id       : mon.game_card_id,
+                        param1          : 'draw',
+                        param2          : 5-nHand,
+                    }];
+                }
+                break;
+            case 1210:
+                return [{
+                    queue_type_id   : 1004,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : parseInt(Math.random() * 3) + 1,
+                }];
+                break;
+            case 1220:
+                return [{
+                    queue_type_id   : 1008,
+                    target_id       : aArgs.targets[0].game_card_id,
+                }];
+                break;
+            case 1230:
+                var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var aValidTargets = [];
+                $.each(aArgs.field_data.cards, function(iGameCardId, val) {
+                    if (val.owner != mon.owner) {
+                        return true;
+                    }
+                    if (val.pos_category != 'deck') {
+                        return true;
+                    }
+                    var d = g_master_data.m_card[val.card_id];
+                    switch (Number(aArgs.param1)) {
+                        case 1:
+                            if (d.category != 'monster_front') {
+                                return true;
+                            }
+                            break;
+                        case 2:
+                            if (d.category != 'monster_back') {
+                                return true;
+                            }
+                            break;
+                        case 3:
+                            if (d.category != 'magic') {
+                                return true;
+                            }
+                            break;
+                        case 4:
+                            if (d.category != 'super_front' && d.category != 'super_back') {
+                                return true;
+                            }
+                            break;
+                        default:
+                            throw new Error('invalid_param');
+                            break;
+                    }
+                    aValidTargets.push(iGameCardId);
+                });
+                return [{
+                    queue_type_id   : 1011,
+                    target_id       : aValidTargets[parseInt(Math.random()*aValidTargets.length)],
+                }]
+                break;
+            case 1240:
+                // エクスチェンジ
+                var aRet = [];
+                for (var i = 0 ; i < 2 ; i++) {
+                    var mon = aArgs.field_data.cards[aArgs.targets[i].game_card_id];
+                    if (typeof mon.status == 'undefined') {
+                        continue;
+                    }
+                    $.each(mon.status, function(iSt, vSt) {
+                        aRet.push({
+                            queue_type_id   : 1027,
+                            target_id       : mon.game_card_id,
+                            param1          : iSt,
+                        });
+                    });
+                }
+                aRet.push({
+                    queue_type_id   : 1026,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 121,
+                    param2          : aArgs.targets[1].monster_id,
+                });
+                aRet.push({
+                    queue_type_id   : 1026,
+                    target_id       : aArgs.targets[1].game_card_id,
+                    param1          : 121,
+                    param2          : aArgs.targets[0].monster_id,
+                });
+                break;
+            case 1260:
+                var aRet = [];
+                $.each(aArgs.field_data.cards, function(i, val) {
+                    if (val.pos_category != 'field') {
+                        return true;
+                    }
+                    if (val.next_game_card_id) {
+                        return true;
+                    }
+                    if (val.standby_flg) {
+                        return true;
+                    }
+                    aRet.push({
+                        queue_type_id   : 1005,
+                        target_id       : val.game_card_id,
+                        param1          : 3,
+                    });
+                });
+                return aRet;
+                break;
+            case 1270:
+                return [{
+                    queue_type_id   : 1007,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 1,
+                }];
+                break;
+            case 1280:
+                var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var iMasterId = null;
+                $.each(aArgs.field_data.cards, function(iGameCardId, val) {
+                    if (val.owner != mon.owner) {
+                        return true;
+                    }
+                    if (g_master_data.m_card[val.card_id].category == 'master') {
+                        iMasterId = iGameCardId;
+                        return false;
+                    }
+                });
+                return [
+                    {
+                        queue_type_id   : 1026,
+                        target_id       : iMasterId,
+                        param1          : 125,
+                        param2          : aArgs.targets[0].game_card_id,
+                    },
+                    {
+                        queue_type_id   : 1026,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : 126,
+                        param2          : iMasterId,
+                    }
+                ];
+                break;
+            case 1300:
+                return [{
+                    queue_type_id   : 9999,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 'regenerate',
+                }];
+                break;
+            case 1480:
+                return [{
+                    queue_type_id   : 1026,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 127,
+                    param2          : aArgs.targets[1].monster_id,
                 }];
                 break;
             case 1490:
