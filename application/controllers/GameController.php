@@ -26,6 +26,37 @@ class GameController extends Zend_Controller_Action
 
     public function indexAction()
     {
+        $this->_getModel();
+
+        $request = $this->getRequest();
+        $this->_stylesheet[] = '/css/game_list.css';
+        $this->_javascript[] = '/js/game_list.js';
+        $this->_javascript[] = '/js/img_delay_load.js';
+        $this->_layout->title       = 'ゲームフィールド一覧';
+        $this->_layout->canonical   = '/game/list/';
+        $this->_layout->description = 'カードヒーローを実際に遊んで、1ターン分の結果を投稿できます。投稿されたフィールドに返信する形で遊ぶこともできます。';
+        $nPage = $request->getParam('page_no');
+        $aCardInfoArray = $this->_model->getFieldDetail(array(
+            'page_no'           => $nPage,
+            'open_flg'          => 1,
+            'allow_no_field'    => 1,
+        ));
+        $nFields = $this->_model->getFieldCount(array(
+            'page_no'           => $nPage,
+            'open_flg'          => 1,
+        ));
+        $this->view->assign('aCardInfoArray', $aCardInfoArray);
+        $this->view->assign('nFields', $nFields);
+        $this->view->assign('nPage', $nPage);
+
+        $bFieldSended = $request->getParam('field_sended');
+        if (isset($bFieldSended) && $bFieldSended) {
+            $this->view->assign('bFieldSended', true);
+        }
+    }
+
+    public function newAction()
+    {
         // ゲームを始めるため、初期デッキ選択
         $request = $this->getRequest();
 
@@ -44,7 +75,7 @@ class GameController extends Zend_Controller_Action
         $this->view->assign('aDeckList', $ret);
         $this->view->assign('bGameStandby', true);
         $this->view->assign('sDispMessage', '使用するデッキを選んでください。');
-        $this->render('deck/list', null, true);
+        $this->render('deck/index', null, true);
     }
 
     public function standbyAction()
@@ -93,7 +124,7 @@ class GameController extends Zend_Controller_Action
         $this->view->assign('nGameFieldId', $nGameFieldId);
         $this->view->assign('bGameStart', true);
         $this->view->assign('sDispMessage', '使用するデッキを選んでください。');
-        $this->render('deck/list', null, true);
+        $this->render('deck/index', null, true);
     }
 
     public function startAction()
@@ -168,41 +199,10 @@ class GameController extends Zend_Controller_Action
         ));
 
         $this->_redirect(
-            '/game/list/',
+            '/game/',
             array('code' => 301)
         );
         exit();
-    }
-
-    public function listAction()
-    {
-        $this->_getModel();
-
-        $request = $this->getRequest();
-        $this->_stylesheet[] = '/css/game_list.css';
-        $this->_javascript[] = '/js/game_list.js';
-        $this->_javascript[] = '/js/img_delay_load.js';
-        $this->_layout->title       = 'ゲームフィールド一覧';
-        $this->_layout->canonical   = '/game/list/';
-        $this->_layout->description = 'カードヒーローを実際に遊んで、1ターン分の結果を投稿できます。投稿されたフィールドに返信する形で遊ぶこともできます。';
-        $nPage = $request->getParam('page_no');
-        $aCardInfoArray = $this->_model->getFieldDetail(array(
-            'page_no'           => $nPage,
-            'open_flg'          => 1,
-            'allow_no_field'    => 1,
-        ));
-        $nFields = $this->_model->getFieldCount(array(
-            'page_no'           => $nPage,
-            'open_flg'          => 1,
-        ));
-        $this->view->assign('aCardInfoArray', $aCardInfoArray);
-        $this->view->assign('nFields', $nFields);
-        $this->view->assign('nPage', $nPage);
-
-        $bFieldSended = $request->getParam('field_sended');
-        if (isset($bFieldSended) && $bFieldSended) {
-            $this->view->assign('bFieldSended', true);
-        }
     }
 
     private function _getModel() {

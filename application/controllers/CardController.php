@@ -47,7 +47,7 @@ class CardController extends Zend_Controller_Action
         $this->render('detail');
     }
 
-    public function listAction()
+    public function indexAction()
     {
         $this->_getModel();
         $aCardInfo = $this->_model->getCardListInfo();

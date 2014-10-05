@@ -5,7 +5,7 @@ $nDispLinkRange = 3;
 $sPageLinkTag = "<div class='page_link'>\n";
 if ($nDispLinkRange+1 < $this->nPage) {
     $sPageLinkTag .= <<<_eos_
-    <span><a href="/game/list/">1</a>...</span>
+    <span><a href="/game/">1</a>...</span>
 
 _eos_;
 }
@@ -19,14 +19,14 @@ for ($i = $this->nPage - $nDispLinkRange ; $i <= $this->nPage + $nDispLinkRange 
     if ($i == $this->nPage) {
         $sPageLinkText = $i;
     } else {
-        $sPageLinkText = "<a href='/game/list/{$i}/'>{$i}</a>";
+        $sPageLinkText = "<a href='/game/{$i}/'>{$i}</a>";
     }
     $sPageLinkTag .= "<span>{$sPageLinkText}</span>\n";
 }
 
 if ($this->nPage < $nPages - ($nDispLinkRange+1)) {
     $sPageLinkTag .= <<<_eos_
-    <span>...<a href="/game/list/{$nPages}/">{$nPages}</a></span>
+    <span>...<a href="/game/{$nPages}/">{$nPages}</a></span>
 
 _eos_;
 }

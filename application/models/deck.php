@@ -283,6 +283,9 @@ class model_Deck {
 
             $deckId = '';
             try {
+                if (!isset($aDeckInfo['user_id']) || $aDeckInfo['user_id'] == '') {
+                    throw new Exception('new_regist');
+                }
                 if (!isset($aDeckInfo['deck_id']) || $aDeckInfo['deck_id'] == '') {
                     throw new Exception('new_regist');
                 }

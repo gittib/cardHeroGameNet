@@ -769,7 +769,7 @@ class model_Game {
                     }
                 }
             }
-            foreach ($aFieldData['queues'] as $val) {
+            foreach ($aFieldData['resolved_queues'] as $val) {
                 $sql = "select nextval('t_queue_queue_id_seq')";
                 $iQueueId = $this->_db->fetchOne($sql);
                 $set = array(

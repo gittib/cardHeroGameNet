@@ -9,12 +9,15 @@ class model_Card {
     }
 
     public function getCardDetailInfo($cardId) {
+        if (!isset($cardId) || $cardId == '') {
+            throw new Zend_Controller_Action_Exception('no card_id.', 404);
+        }
         $sel = $this->_db->select()
             ->from('m_card')
             ->where('card_id = ?', $cardId);
         $this->_aCardInfo['cardInfo'] = $this->_db->fetchRow($sel);
         if (!is_array($this->_aCardInfo['cardInfo']) || count($this->_aCardInfo['cardInfo']) <= 0) {
-            throw new exception('モンスターID不明');
+            throw new Zend_Controller_Action_Exception('unknown card_id.', 404);
         }
         $sel = $this->_db->select()
             ->from(

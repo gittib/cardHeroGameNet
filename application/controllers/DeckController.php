@@ -26,7 +26,7 @@ class DeckController extends Zend_Controller_Action
         $this->_layout->javascript = $this->_javascript;
     }
 
-    public function listAction()
+    public function indexAction()
     {
         $request = $this->getRequest();
         $this->_layout->title = 'デッキ一覧';
@@ -74,7 +74,7 @@ class DeckController extends Zend_Controller_Action
         $aDeckCards = $request->getParam('deck_cards');
         $this->_model->registDeck($aDeckInfo, $aDeckCards);
 
-        $this->_redirect('/deck/list/', array('code' => 301));
+        $this->_redirect('/deck/', array('code' => 301));
     }
 
     private function _getModel() {

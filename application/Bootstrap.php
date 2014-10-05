@@ -32,29 +32,13 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $front = Zend_Controller_Front::getInstance();
         $router = $front->getRouter();
 
-        // デッキ一覧
-        $route = new Zend_Controller_Router_Route_Regex(
-            'deck/list(/(\d+))?/?',
-            array(
-                'controller'    =>  'deck',
-                'action'        =>  'list',
-                1               =>  1,
-                2               =>  1,
-            ),
-            array(
-                2   => 'page_no',
-            )
-        );
-        $router->addRoute('deck_list', $route);
-
         // デッキ編集
         $route = new Zend_Controller_Router_Route_Regex(
             'deck/edit(/(\d+))?/?',
             array(
                 'controller'    =>  'deck',
                 'action'        =>  'edit',
-                1               =>  0,
-                2               =>  0,
+                2               =>  1,
             ),
             array(
                 2   => 'deck_id',
@@ -64,10 +48,10 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         // ゲームフィールド一覧
         $route = new Zend_Controller_Router_Route_Regex(
-            'game/list(/(\d+))?/?',
+            'game(/(\d+))?/?',
             array(
                 'controller'    =>  'game',
-                'action'        =>  'list',
+                'action'        =>  'index',
                 2               =>  1,
             ),
             array(
