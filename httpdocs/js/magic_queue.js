@@ -76,7 +76,7 @@ magic_queue = (function () {
                 target_id       : aArgs.actor_id,
                 cost_flg        : true,
             });
-            aQueue.queue_units.unshift({
+            aQueue.queue_units.push({
                 queue_type_id   : 1024,
                 target_id       : iMasterId,
                 cost_flg        : true,
@@ -626,12 +626,12 @@ magic_queue = (function () {
                         nHand++;
                     }
                 });
-                if (nHand < 5) {
+                if (nHand < 6) {
                     return [{
                         queue_type_id   : 1011,
                         target_id       : mon.game_card_id,
                         param1          : 'draw',
-                        param2          : 5-nHand,
+                        param2          : 6-nHand,
                     }];
                 }
                 break;
@@ -659,23 +659,23 @@ magic_queue = (function () {
                         return true;
                     }
                     var d = g_master_data.m_card[val.card_id];
-                    switch (Number(aArgs.param1)) {
-                        case 1:
+                    switch (aArgs.param1) {
+                        case 'front':
                             if (d.category != 'monster_front') {
                                 return true;
                             }
                             break;
-                        case 2:
+                        case 'back':
                             if (d.category != 'monster_back') {
                                 return true;
                             }
                             break;
-                        case 3:
+                        case 'magic':
                             if (d.category != 'magic') {
                                 return true;
                             }
                             break;
-                        case 4:
+                        case 'super':
                             if (d.category != 'super_front' && d.category != 'super_back') {
                                 return true;
                             }
@@ -686,10 +686,15 @@ magic_queue = (function () {
                     }
                     aValidTargets.push(iGameCardId);
                 });
+                if (aValidTargets.length <= 0) {
+                    return [{
+                        queue_type_id   : 1003,
+                    }];
+                }
                 return [{
                     queue_type_id   : 1011,
                     target_id       : aValidTargets[parseInt(Math.random()*aValidTargets.length)],
-                }]
+                }];
                 break;
             case 1240:
                 // エクスチェンジ
@@ -719,6 +724,7 @@ magic_queue = (function () {
                     param1          : 121,
                     param2          : aArgs.targets[0].monster_id,
                 });
+                return aRet;
                 break;
             case 1260:
                 var aRet = [];

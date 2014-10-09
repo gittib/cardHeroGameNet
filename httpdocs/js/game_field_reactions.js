@@ -234,14 +234,15 @@ game_field_reactions = (function () {
         g_field_data = aArgs.field_data;
         try {
             var _buildArtsRow = function (mon) {
-                $.each(mon.arts, function(i, val) {
+                var aMonsterData = g_master_data.m_monster[mon.monster_id];
+                $.each(aMonsterData.arts, function(i, val) {
                     var sPower = '';
                     var iPow = Number(val.power);
                     var sRange = '<img src="/images/range/' + val.range_type_id + '.png" alt="" />';
                     var iStone = val.stone;
                     if (val.damage_type_flg == 'P' && typeof mon.status != 'undefined') {
                         $.each(mon.status, function(sid, aSt) {
-                            switch (sid) {
+                            switch (Number(sid)) {
                                 case 101:
                                 case 102:
                                     iPow++;
@@ -329,7 +330,6 @@ game_field_reactions = (function () {
                             '</div>';
                         break;
                     case 'magic':
-                        g_field_data.actor.act_type = 'magic';
                         var aMagicData = g_master_data.m_magic[aCardData.magic_id];
                         var mid = aCardData.magic_id;
                         var iStone = aMagicData.stone;
@@ -405,6 +405,7 @@ game_field_reactions = (function () {
                                 break;
                             default:
                                 g_field_data.actor.magic_id = mid;
+                                g_field_data.actor.act_type = 'magic';
                                 sCommandsHtml =
                                     '<div class="command_row magic selected_act" magic_id="' + mid + '" act_type="magic">' +
                                         '発動' +
@@ -465,9 +466,9 @@ game_field_reactions = (function () {
                     }
 
                     // 特技
-                    _buildArtsRow(mon);
+                    _buildArtsRow(aCard);
                 } else {
-                    var mon = g_master_data.m_monster[aCard.monster_id];
+                    var aMonsterData = g_master_data.m_monster[aCard.monster_id];
 
                     if (aCard.owner == 'enemy' && aCard.standby_flg) {
                         throw new Error('standby monster');
@@ -476,12 +477,41 @@ game_field_reactions = (function () {
                     // アタック
                     var sCost = '';
                     var aNumbers = {
-                        iPow    : parseInt(mon.attack.power),
-                        iStone  : parseInt(mon.attack.stone),
+                        iPow    : parseInt(aMonsterData.attack.power),
+                        iStone  : parseInt(aMonsterData.attack.stone),
                     };
                     if (typeof aCard.status != 'undefined') {
                         if (typeof aCard.status[123] != 'undefined') {
                             aNumbers.iStone += 2;
+                        }
+                        $.each(aCard.status, function(iSt, aSt) {
+                            switch (Number(iSt)) {
+                                case 100:
+                                case 101:
+                                case 102:
+                                    aNumbers.iPow++;
+                                    break;
+                                case 103:
+                                    // パワー２は適当な値を入れておいて、
+                                    // 最後に何が何でもパワーを２にする
+                                    aNumbers.iPow = 22222;
+                                    break;
+                                case 104:
+                                    aNumbers.iPow--;
+                                    break;
+                                case 105:
+                                case 130:
+                                    aNumbers.iPow += 2;
+                                    break;
+                                case 131:
+                                    aNumbers.iPow += aSt.param1;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        });
+                        if (20000 < aNumbers.iPow) {
+                            aNumbers.iPow = 2;
                         }
                     }
                     if (aNumbers.iStone > 0) {
@@ -493,7 +523,7 @@ game_field_reactions = (function () {
                     }
                     sCommandsHtml =
                         '<div class="command_row" act_type="attack">' +
-                            mon.attack.name +
+                            aMonsterData.attack.name +
                             '<div class="num_info">' +
                                 aNumbers.iPow + 'P' +
                                 sCost +
@@ -501,7 +531,7 @@ game_field_reactions = (function () {
                         '</div>';
 
                     // 特技
-                    _buildArtsRow(mon);
+                    _buildArtsRow(aCard);
 
                     // 移動、逃げる or メイクカード
                     var sCost = '';
@@ -576,6 +606,8 @@ game_field_reactions = (function () {
             );
         } catch (e) {
             // 選択情報を正しく処理できなかった場合、選択されてないと見なす
+            console.log(e.stack);
+            $('.actor').removeClass('actor');
             $('#card_info_frame').html(
                 '<div class="card_info_title">' +
                     'Card Infomation' +
@@ -665,7 +697,7 @@ game_field_reactions = (function () {
                                 {
                                     queue_type_id   : 1021,
                                     target_id       : target.game_card_id,
-                                    param1          : 1,
+                                    param1          : game_field_utility.getModifyMonsterId(target.monster_id),
                                 },
                                 {
                                     queue_type_id   : 1029,
@@ -676,33 +708,34 @@ game_field_reactions = (function () {
                         bReactionPushed = true;
                         break;
                     case 17:
-                        var iBackCardId = null;
+                        var sBackPosId = null;
                         if (target.owner == 'my') {
-                            iBackCardId = game_field_utility.getRelativePosId(target.pos_id, {x:0, y:1});
+                            sBackPosId = game_field_utility.getRelativePosId(target.pos_id, {x:0, y:1});
                         } else {
-                            iBackCardId = game_field_utility.getRelativePosId(target.pos_id, {x:0, y:-1});
+                            sBackPosId = game_field_utility.getRelativePosId(target.pos_id, {x:0, y:-1});
                         }
-                        if (!iBackCardId) {
-                            g_field_data.queues.push({
-                                actor_id        : target.game_card_id,
-                                log_message     : '撤退　発動',
-                                resolved_flg    : 0,
-                                priority        : 'reaction',
-                                queue_units : [
-                                    {
-                                        queue_type_id   : 1022,
-                                        target_id       : target.game_card_id,
-                                        param1          : 1,
-                                        param2          : false,
-                                    },
-                                    {
-                                        queue_type_id   : 1029,
-                                        target_id       : target.game_card_id,
-                                    },
-                                ],
-                            });
-                            bReactionPushed = true;
-                        }
+                        g_field_data.queues.push({
+                            actor_id        : target.game_card_id,
+                            log_message     : '撤退　発動',
+                            resolved_flg    : 0,
+                            priority        : 'reaction',
+                            queue_units : [{
+                                queue_type_id   : 1022,
+                                target_id       : target.game_card_id,
+                                param1          : sBackPosId,
+                            }],
+                        });
+                        g_field_data.queues.push({
+                            actor_id        : target.game_card_id,
+                            log_message     : '',
+                            resolved_flg    : 0,
+                            priority        : 'reaction',
+                            queue_units : [{
+                                queue_type_id   : 1029,
+                                target_id       : target.game_card_id,
+                            }],
+                        });
+                        bReactionPushed = true;
                         break;
                     case 18:
                         if (iFrontCardId) {
@@ -725,6 +758,21 @@ game_field_reactions = (function () {
                             });
                             bReactionPushed = true;
                         }
+                        break;
+                    case 21:
+                        g_field_data.queues.push({
+                            actor_id            : target.game_card_id,
+                            log_message         : 'ダメージ呪い発動',
+                            resolved_flg        : 0,
+                            priority            : 'reaction',
+                            queue_units : [
+                                {
+                                    queue_type_id   : 1026,
+                                    target_id       : act.game_card_id,
+                                    param1          : 122,
+                                },
+                            ],
+                        });
                         break;
                     case 22:
                         if (game_field_utility.attackRangeCheck(act, target)) {
@@ -791,6 +839,23 @@ game_field_reactions = (function () {
             if (!target.skill_disable_flg) {
                 var targetMonsterData = g_master_data.m_monster[target.monster_id];
                 var bReactionPushed = false;
+                switch (targetMonsterData.skill.id) {
+                    case 20:
+                        g_field_data.queues.push({
+                            actor_id            : target.game_card_id,
+                            log_message         : 'ダメージ呪い発動',
+                            resolved_flg        : 0,
+                            priority            : 'reaction',
+                            queue_units : [
+                                {
+                                    queue_type_id   : 1026,
+                                    target_id       : act.game_card_id,
+                                    param1          : 122,
+                                },
+                            ],
+                        });
+                        break;
+                }
                 switch (targetMonsterData.skill.id) {
                     case 6:
                     case 14:

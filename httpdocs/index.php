@@ -5,9 +5,6 @@ defined('APPLICATION_PATH')
     || define('APPLICATION_PATH', realpath(dirname(__FILE__) . '/../application'));
 
 // Define application environment
-if (preg_match('/^test/', $_SERVER['SERVER_NAME'])) {
-    define('APPLICATION_ENV', 'testing');
-}
 defined('APPLICATION_ENV')
     || define('APPLICATION_ENV', (getenv('APPLICATION_ENV') ? getenv('APPLICATION_ENV') : 'production'));
 

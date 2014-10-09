@@ -262,11 +262,12 @@ class model_Game {
                     }
                     $sMaster .= '★' . $val['max_rare'];
                     if ($aRet[$iGameFieldId]['field_info']['title_str'] == '') {
-                        $aRet[$iGameFieldId]['field_info']['title_str'] = "【{$sMaster}】";
+                        $aRet[$iGameFieldId]['field_info']['title_str'] = "[{$iGameFieldId}]";
+                        $aRet[$iGameFieldId]['field_info']['title_str'] .= "【{$sMaster}】";
                     } else {
                         $aRet[$iGameFieldId]['field_info']['title_str'] .= "VS【{$sMaster}】";
                         $aRet[$iGameFieldId]['field_info']['title_str'] .= "{$aRet[$iGameFieldId]['field_info']['turn_count']}ターン目";
-                        $aRet[$iGameFieldId]['field_info']['title_str'] .= "[{$aRet[$iGameFieldId]['field_info']['upd_date']}]";
+                        //$aRet[$iGameFieldId]['field_info']['title_str'] .= "[{$aRet[$iGameFieldId]['field_info']['upd_date']}]";
                     }
                 }
             }

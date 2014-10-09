@@ -40,7 +40,7 @@ if (empty($this->aCardInfoArray)) {
     foreach ($this->aCardInfoArray as $aCardInfo) {
         $this->aCardInfoInField = $aCardInfo;
         $aFieldInfo = $aCardInfo['field_info'];
-        $sLinkTitle = "[{$aFieldInfo['game_field_id']}]{$aFieldInfo['title_str']}";
+        $sLinkTitle = "{$aFieldInfo['title_str']} [{$aFieldInfo['upd_date']}]";
         $sHref = "/game/receive/{$aFieldInfo['game_field_id']}/";
         if (isset($aFieldInfo['started_flg']) && $aFieldInfo['started_flg']) {
             $sHref = "/game/field/{$aFieldInfo['game_field_id']}/";

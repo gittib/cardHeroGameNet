@@ -570,9 +570,11 @@ new function () {
         console.log('checkGameState started.');
         // 特技封じの対象特技選択とか、特殊な状態の判定
         if (typeof g_field_data.sort_card_flg != 'undefined') {
+            console.log('sort_card');
             return 'sort_card';
         }
         if (typeof g_field_data.tokugi_fuuji_flg != 'undefined') {
+            console.log('tokugi_fuuji');
             return 'tokugi_fuuji';
         }
         try {
@@ -598,6 +600,7 @@ new function () {
         } catch (e) {
             console.log(e);
             if (e == 'lvup_standby') {
+                console.log('lvup_standby');
                 return 'lvup_standby';
             } else {
                 throw e;
@@ -606,8 +609,10 @@ new function () {
 
         // 特殊なのが無かったら通常の状態判定
         if (g_field_data.actor.act_type) {
+            console.log('select_target');
             return 'select_target';
         } else if (g_field_data.actor.game_card_id) {
+            console.log('select_action');
             return 'select_action';
         }
         return 'select_actor';
@@ -1355,12 +1360,34 @@ new function () {
                     g_backup_field_data = {};
                     $.extend(true, g_backup_field_data, g_field_data);
                 }
+
                 var backupQueuesWhileOldQueueProcessing = null;
                 if (bOldQueue) {
-                    // OldQueueを処理した時は誘発処理を発動されると困るので、バックアップを取る
+                    // OldQueueを処理した時は誘発処理を発動されると困るので、queuesのバックアップを取る
                     backupQueuesWhileOldQueueProcessing = [];
                     $.extend(true, g_field_data.queues, backupQueuesWhileOldQueueProcessing);
                 } else {
+                    (function(a) {
+                        // 女神の加護による回避判定
+                        $.each(a.queue_units, function(i,q) {
+                            switch (Number(q.queue_type_id)) {
+                                case 1001:
+                                case 1005:
+                                case 1006:
+                                    var mon = g_field_data.cards[q.target_id];
+                                    if (typeof mon.status != 'undefined') {
+                                        if (typeof mon.status[115] != 'undefined') {
+                                            if (Math.random() * 2 < 1) {
+                                                console.log('omamori set');
+                                                q.queue_type_id = 9999;
+                                                q.param1 = 'omamori';
+                                            }
+                                        }
+                                    }
+                            }
+                        });
+                    })(aExecAct);
+
                     // 処理するキューをresolved_queuesの末尾に追加する
                     // バックアップ取った後だから、処理前に突っ込んでもおｋ
                     var q = {};
@@ -1422,6 +1449,20 @@ new function () {
                         $.extend(true, backupFieldWhileSingleQueueProcessing, g_field_data);
                         try {
                             console.log(q.queue_type_id + ' resolve start.');
+                            if (aExecAct.priority.indexOf('system') == -1) {
+                                try {
+                                    var mon = g_field_data.cards[q.target_id];
+                                    var aMonsterData = g_master_data.m_monster[mon.monster_id];
+                                    if (aMonsterData.skill.id == 32) {
+                                        throw 'Asphyxia';
+                                    }
+                                } catch (e) {
+                                    if (e == 'Asphyxia') {
+                                        // 仮死状態のモンスターはSYSTEMキュー以外何も受け付けない
+                                        throw new Error('Asphyxia.');
+                                    }
+                                }
+                            }
                             switch (q.queue_type_id) {
                                 case 1000:
                                     var sHtml = '<input type="hidden" name="field_data" value=\'' + JSON.stringify(g_field_data) + '\' />';
@@ -1437,6 +1478,12 @@ new function () {
                                 case 1001:
                                     var actorMon = g_field_data.cards[aExecAct.actor_id];
                                     var aMonsterData = g_master_data.m_monster[actorMon.monster_id];
+                                    var targetMon = g_field_data.cards[q.target_id];
+                                    try {
+                                        // スケープゴートによる対象変更
+                                        var isg = targetMon.status[125].param1;
+                                        targetMon = g_field_data.cards[isg];
+                                    } catch (e) {}
                                     var pow = aMonsterData.attack.power;
                                     if (actorMon.status[131]) {
                                         // マッドホールによるパワーアップ
@@ -1445,16 +1492,15 @@ new function () {
                                     if (actorMon.status[100]) {
                                         pow++;
                                     }
-                                    pow = calcPow(aExecAct.actor_id, q.target_id, pow);
-                                    if (pow > 0) {
-                                        var targetMon = g_field_data.cards[q.target_id];
+                                    pow = calcPow(aExecAct.actor_id, targetMon.game_card_id, pow);
+                                    if (0 < pow) {
                                         targetMon.hp -= pow;
                                     }
                                     game_field_reactions.damageReaction({
                                         field_data  : g_field_data,
                                         actor_id    : aExecAct.actor_id,
                                         priority    : aExecAct.priority,
-                                        target_id   : q.target_id,
+                                        target_id   : targetMon.game_card_id,
                                         damage      : pow,
                                         attack_flg  : true,
                                     });
@@ -1544,7 +1590,12 @@ new function () {
                                     break;
                                 case 1005:
                                     var targetMon = g_field_data.cards[q.target_id];
-                                    var pow = calcPow(aExecAct.actor_id, q.target_id, q.param1);
+                                    // スケープゴートの保護対象だったら、標的へ対象切り替え
+                                    try {
+                                        var isg = targetMon.status[125].param1;
+                                        targetMon = g_field_data.cards[isg];
+                                    } catch (e) {}
+                                    var pow = calcPow(aExecAct.actor_id, targetMon.game_card_id, q.param1);
                                     if (0 < pow) {
                                         targetMon.hp -= pow;
                                     }
@@ -1552,7 +1603,7 @@ new function () {
                                         field_data  : g_field_data,
                                         actor_id    : aExecAct.actor_id,
                                         priority    : aExecAct.priority,
-                                        target_id   : q.target_id,
+                                        target_id   : targetMon.game_card_id,
                                         damage      : pow,
                                     });
                                     var sPosId = '#' + targetMon.pos_id;
@@ -1568,6 +1619,11 @@ new function () {
                                     break;
                                 case 1006:
                                     var targetMon = g_field_data.cards[q.target_id];
+                                    // スケープゴートの保護対象だったら、標的へ対象切り替え
+                                    try {
+                                        var isg = targetMon.status[125].param1;
+                                        targetMon = g_field_data.cards[isg];
+                                    } catch (e) {}
                                     console.log(targetMon);
                                     var dam = q.param1;
                                     if (q.param2 == 'damage_noroi') {
@@ -1576,7 +1632,7 @@ new function () {
                                             throw new Error('argument_error');
                                         }
                                     }
-                                    var dam = calcDam(aExecAct.actor_id, q.target_id, dam);
+                                    var dam = calcDam(aExecAct.actor_id, targetMon.game_card_id, dam);
                                     if (0 < dam) {
                                         targetMon.hp -= dam;
                                     }
@@ -1584,7 +1640,7 @@ new function () {
                                         field_data  : g_field_data,
                                         actor_id    : aExecAct.actor_id,
                                         priority    : aExecAct.priority,
-                                        target_id   : q.target_id,
+                                        target_id   : targetMon.game_card_id,
                                         damage      : dam,
                                     });
                                     var sPosId = '#' + targetMon.pos_id;
@@ -1971,8 +2027,34 @@ new function () {
                                     break;
                                 case 1026:
                                     var mon = g_field_data.cards[q.target_id];
+                                    q.param1 = Number(q.param1);
+                                    if (g_master_data.m_card[mon.card_id].category == 'master') {
+                                        // マスターは一部のステータスしか受け付けない
+                                        switch (q.param1) {
+                                            case 101:
+                                            case 103:
+                                            case 104:
+                                            case 110:
+                                            case 115:
+                                            case 117:
+                                            case 118:
+                                            case 120:
+                                            case 121:
+                                            case 122:
+                                            case 123:
+                                            case 125:
+                                            case 129:
+                                            case 130:
+                                                // こいつらはマスターでも通す
+                                                break;
+                                            default:
+                                                // 基本通さず、許可対象を指定する方針で
+                                                throw new Error('invalid_param');
+                                        }
+                                    }
 
                                     if (q.param1 == 131) {
+                                        // マッド・ホール
                                         if (typeof mon.status[131] == 'undefined') {
                                             mon.status[131] = {
                                                 status_id   : 131,
@@ -1982,6 +2064,7 @@ new function () {
                                         } else {
                                             mon.status[131].param1++;
                                         }
+                                        break;
                                     }
                                     var aAlreadyStatus = {};
                                     $.each(mon.status, function(iStatusId, val) {
@@ -2034,6 +2117,8 @@ new function () {
                                         case 118:
                                         case 119:
                                         case 120:
+                                        case 125:
+                                        case 126:
                                             mon.status[q.param1].param1 = q.param2;
                                             break;
                                         case 121:
@@ -2052,7 +2137,8 @@ new function () {
                                     if (!mon.status[q.param1]) {
                                         throw new Error('no_target');
                                     }
-                                    switch (q.param1) {
+                                    var iDelSt = null;
+                                    switch (Number(q.param1)) {
                                         case 116:
                                             if (q.param2) {
                                                 g_field_data.queues.push({
@@ -2073,6 +2159,36 @@ new function () {
                                         case 128:
                                             mon.monster_id = mon.status[q.param1].param1;
                                             break;
+                                        case 118:
+                                            iDelSt = 117;
+                                            break;
+                                        case 117:
+                                            iDelSt = 118;
+                                            break;
+                                        case 119:
+                                            iDelSt = 119;
+                                            break;
+                                        case 125:
+                                            iDelSt = 126;
+                                            break;
+                                        case 126:
+                                            iDelSt = 125;
+                                            break;
+                                    }
+                                    if (iDelSt) {
+                                        g_field_data.queues.push({
+                                            actor_id        : q.param1,
+                                            log_message     : '',
+                                            resolved_flg    : 0,
+                                            priority        : 'same_time',
+                                            queue_units : [
+                                                {
+                                                    queue_type_id   : 1027,
+                                                    target_id       : q.param1,
+                                                    param1          : iDelSt,
+                                                }
+                                            ],
+                                        });
                                     }
                                     delete mon.status[q.param1];
                                     break;
@@ -2126,6 +2242,10 @@ new function () {
                                                 reset_status    : true,
                                                 reset_act_count : true,
                                             });
+                                            break;
+                                        case 'omamori':
+                                            // 女神の加護で回避されたので何もしない
+                                            console.log('omamori kita');
                                             break;
                                         default:
                                             throw new Error('argument_error');
@@ -2408,10 +2528,10 @@ new function () {
                     ],
                 });
             }
-            if (pow && target.status[106] != null) {
+            if (pow && target.status[108] != null) {
                 pow = parseInt(pow / 2);
             }
-            if (pow && target.status[106] != null) {
+            if (pow && target.status[109] != null) {
                 pow--;
             }
             if (pow && target.status[100] != null) {
@@ -2508,6 +2628,46 @@ new function () {
     function removeMonsterInfoOnField(target_id)
     {
         var mon = g_field_data.cards[target_id];
+        if (typeof mon.status != 'undefined') {
+            // 2体を繋ぐ系のステータス解除時に相方のも解除する
+            $.each(mon.status, function(iSt, aSt) {
+                var sid = null;
+                switch (Number(iSt)) {
+                    case 117:
+                        sid = 118;
+                        break;
+                    case 118:
+                        sid = 117;
+                        break;
+                    case 119:
+                        sid = 119;
+                        break;
+                    case 121:
+                        sid = 121;
+                        break;
+                    case 125:
+                        sid = 126;
+                        break;
+                    case 126:
+                        sid = 125;
+                        break;
+                }
+                if (sid) {
+                    g_field_data.queues.push({
+                        actor_id        : null,
+                        resolved_flg    : 0,
+                        priority        : 'same_time',
+                        queue_units : [
+                            {
+                                queue_type_id   : 1027,
+                                target_id       : aSt.param1,
+                                param1          : sid,
+                            },
+                        ],
+                    });
+                }
+            });
+        }
         delete mon.monster_id;
         delete mon.pos_id;
         delete mon.hp;

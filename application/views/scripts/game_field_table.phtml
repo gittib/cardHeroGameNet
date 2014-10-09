@@ -50,7 +50,7 @@
         } else {
             $pos = 'enemy' . $val['position'];
         }
-        if ($val['standby_flg']) {
+        if ($val['standby_flg'] && $val['position'] != 'Master') {
             $sLv = '?';
             $sHp = '?';
             $val['image_file_name'] = 'card.jpg';

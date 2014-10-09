@@ -56,13 +56,13 @@ arts_queue = (function () {
                     cost_flg        : true,
                 });
             }
-            aQueue.queue_units.unshift({
-                queue_type_id   : 1024,
+            aQueue.queue_units.push({
+                queue_type_id   : 1002,
                 target_id       : aArgs.actor_id,
                 cost_flg        : true,
             });
-            aQueue.queue_units.unshift({
-                queue_type_id   : 1002,
+            aQueue.queue_units.push({
+                queue_type_id   : 1024,
                 target_id       : aArgs.actor_id,
                 cost_flg        : true,
             });
@@ -449,7 +449,7 @@ arts_queue = (function () {
                     {
                         queue_type_id   : 1026,
                         target_id       : aArgs.actor_id,
-                        param1          : 129,
+                        param1          : 131,
                     },
                     {
                         queue_type_id   : 1008,
