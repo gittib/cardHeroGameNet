@@ -176,7 +176,7 @@ class GameController extends Zend_Controller_Action
         }
         $aFields = $this->_model->getFieldDetail($aSelectCond);
         $aCardInfo = reset($aFields);
-        $this->_layout->title = "ゲーム {$aCardInfo['field_info']['title_str']}";
+        $this->_layout->title = "ゲーム{$aCardInfo['field_info']['title_str']}";
         $this->view->assign('aCardInfo', $aCardInfo);
         $this->view->assign('nGameFieldId', $nGameFieldId);
     }

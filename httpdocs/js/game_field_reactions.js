@@ -941,14 +941,14 @@ game_field_reactions = (function () {
             },
         });
 
-        if (aArgs.attack_flg) {
-            // actorの性格処理
-            if (typeof act.monster_id != 'undefined' && !act.skill_disable_flg) {
-                var actorMon = g_master_data.m_monster[act.monster_id];
-                switch (actorMon.skill.id) {
-                    case 1:
-                    case 2:
-                    case 3:
+        // actorの性格処理
+        if (typeof act.monster_id != 'undefined' && !act.skill_disable_flg) {
+            var actorMon = g_master_data.m_monster[act.monster_id];
+            switch (actorMon.skill.id) {
+                case 1:
+                case 2:
+                case 3:
+                    if (aArgs.attack_flg) {
                         var dam = 2;
                         if (actorMon.skill.id == 2) {
                             dam = 3;
@@ -969,8 +969,21 @@ game_field_reactions = (function () {
                                 },
                             ]
                         });
-                        break;
-                }
+                    }
+                    break;
+                case 8:
+                    g_field_data.queues.push({
+                        actor_id            : act.game_card_id,
+                        log_message         : 'HP吸収',
+                        resolved_flg        : 0,
+                        priority            : 'follow',
+                        queue_units : [{
+                            queue_type_id   : 1007,
+                            target_id       : act.game_card_id,
+                            param1          : aArgs.damage,
+                        }]
+                    });
+                    break;
             }
         }
 

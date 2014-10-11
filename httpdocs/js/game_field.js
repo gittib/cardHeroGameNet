@@ -634,10 +634,18 @@ new function () {
     {
         try {
             if (typeof aArgs.target_order != 'undefined') {
+                switch (aArgs.range_type_id) {
+                    default:
+                        // 今のところ[0]と[1]しか使ってないので、3個以上対象を取るのは全て不適正
+                        if (1 < aArgs.target_order) {
+                            return false;
+                        }
+                        break;
+                }
+
                 // target_orderがある場合は別のrange_type_idでの判定を行う
                 switch (aArgs.range_type_id) {
                     case 16:
-                    case 27:
                         if (aArgs.target_order == 0) {
                             if (g_field_data.cards[aArgs.target_id].owner != 'enemy') {
                                 return false;
@@ -649,6 +657,7 @@ new function () {
                         }
                         aArgs.range_type_id = 7;
                         break;
+                    case 27:
                     case 29:
                         aArgs.range_type_id = 6;
                         break;
@@ -738,24 +747,14 @@ new function () {
                         return true;
                     }
                     break;
+                case 3:
                 case 4:
                     var p1 = game_field_utility.getXYFromPosId(actorMon.pos_id);
                     var p2 = game_field_utility.getXYFromPosId(targetMon.pos_id);
-                    if (p1.x == p2.x) {
-                        for (i = Math.min(p1.y, p2,y)+1 ; i < Math.max(p1.y, p2.y) ; i++) {
-                            var betweenId = game_field_utility.getPosIdFromXY({x:p1.x, y:i});
-                            if (betweenId != '') {
-                                if (!g_field_data.cards[betweenId].standby_flg) {
-                                    return false;
-                                }
-                            }
-                        }
-                    }
-                    // breakは書かない
-                case 3:
-                    var p1 = game_field_utility.getXYFromPosId(actorMon.pos_id);
-                    var p2 = game_field_utility.getXYFromPosId(targetMon.pos_id);
                     var dist = Math.max(Math.abs(p1.x - p2.x), Math.abs(p1.y - p2.y));
+                    if (aArgs.range_type_id == 3 && 2 < dist) {
+                        return false;
+                    }
                     var p3 = {
                         x   : (p2.x - p1.x) / dist,
                         y   : (p2.y - p1.y) / dist,
@@ -766,10 +765,10 @@ new function () {
                         pTmp.y *= i;
                         var betweenId = game_field_reactions.getGameCardId({
                             pos_category    : 'field',
-                            pos_id          : game_field_utility.getRelativePosId(aArgs.actor_id, pTmp),
+                            pos_id          : game_field_utility.getRelativePosId(actorMon.pos_id, pTmp),
                         });
                         if (betweenId) {
-                            if (g_field_data.cards[betweenId].standby_flg) {
+                            if (!g_field_data.cards[betweenId].standby_flg) {
                                 return false;
                             }
                         }
@@ -1439,6 +1438,16 @@ new function () {
                             });
                         }
                     };
+                    var _checkScapeGoat = function(t) {
+                        try {
+                            // スケープゴートによる対象変更
+                            var a = g_field_data.cards[t.status[125].param1];
+                            if (a) {
+                                t = a;
+                            }
+                        } catch (e) {}
+                        return t;
+                    }
                     for (var iterator_of_queue_now_proc = 0 ; iterator_of_queue_now_proc < aExecAct.queue_units.length ; iterator_of_queue_now_proc++) {
                         var q = aExecAct.queue_units[iterator_of_queue_now_proc];
                         if (typeof q != 'object') {
@@ -1449,18 +1458,18 @@ new function () {
                         $.extend(true, backupFieldWhileSingleQueueProcessing, g_field_data);
                         try {
                             console.log(q.queue_type_id + ' resolve start.');
-                            if (aExecAct.priority.indexOf('system') == -1) {
-                                try {
+                            try {
+                                if (aExecAct.priority.indexOf('system') == -1) {
                                     var mon = g_field_data.cards[q.target_id];
                                     var aMonsterData = g_master_data.m_monster[mon.monster_id];
                                     if (aMonsterData.skill.id == 32) {
                                         throw 'Asphyxia';
                                     }
-                                } catch (e) {
-                                    if (e == 'Asphyxia') {
-                                        // 仮死状態のモンスターはSYSTEMキュー以外何も受け付けない
-                                        throw new Error('Asphyxia.');
-                                    }
+                                }
+                            } catch (e) {
+                                if (e == 'Asphyxia') {
+                                    // 仮死状態のモンスターはSYSTEMキュー以外何も受け付けない
+                                    throw new Error('Asphyxia.');
                                 }
                             }
                             switch (q.queue_type_id) {
@@ -1479,11 +1488,7 @@ new function () {
                                     var actorMon = g_field_data.cards[aExecAct.actor_id];
                                     var aMonsterData = g_master_data.m_monster[actorMon.monster_id];
                                     var targetMon = g_field_data.cards[q.target_id];
-                                    try {
-                                        // スケープゴートによる対象変更
-                                        var isg = targetMon.status[125].param1;
-                                        targetMon = g_field_data.cards[isg];
-                                    } catch (e) {}
+                                    targetMon = _checkScapeGoat(targetMon);
                                     var pow = aMonsterData.attack.power;
                                     if (actorMon.status[131]) {
                                         // マッドホールによるパワーアップ
@@ -1590,11 +1595,7 @@ new function () {
                                     break;
                                 case 1005:
                                     var targetMon = g_field_data.cards[q.target_id];
-                                    // スケープゴートの保護対象だったら、標的へ対象切り替え
-                                    try {
-                                        var isg = targetMon.status[125].param1;
-                                        targetMon = g_field_data.cards[isg];
-                                    } catch (e) {}
+                                    targetMon = _checkScapeGoat(targetMon);
                                     var pow = calcPow(aExecAct.actor_id, targetMon.game_card_id, q.param1);
                                     if (0 < pow) {
                                         targetMon.hp -= pow;
@@ -1619,11 +1620,7 @@ new function () {
                                     break;
                                 case 1006:
                                     var targetMon = g_field_data.cards[q.target_id];
-                                    // スケープゴートの保護対象だったら、標的へ対象切り替え
-                                    try {
-                                        var isg = targetMon.status[125].param1;
-                                        targetMon = g_field_data.cards[isg];
-                                    } catch (e) {}
+                                    targetMon = _checkScapeGoat(targetMon);
                                     console.log(targetMon);
                                     var dam = q.param1;
                                     if (q.param2 == 'damage_noroi') {
@@ -1697,7 +1694,7 @@ new function () {
                                         log_message         : 'LV分のストーンを還元',
                                         resolved_flg        : 0,
                                         actor_anime_disable : true,
-                                        priority            : 'same_time',
+                                        priority            : 'system',
                                         queue_units : [
                                             {
                                                 queue_type_id   : 1004,
@@ -1864,6 +1861,30 @@ new function () {
                                     } else {
                                         throw new Error('argument_error');
                                     }
+                                    g_field_data.animation_info.animations.push({
+                                        target_dom : '#' + mon.pos_id,
+                                        animation_param : {
+                                            backgroundColor : '#f00',
+                                        },
+                                    });
+                                    g_field_data.animation_info.animations.push({
+                                        target_dom : '#' + mon.pos_id,
+                                        animation_param : {
+                                            backgroundColor : '#0f0',
+                                        },
+                                    });
+                                    g_field_data.animation_info.animations.push({
+                                        target_dom : '#' + mon.pos_id,
+                                        animation_param : {
+                                            backgroundColor : '#00f',
+                                        },
+                                    });
+                                    g_field_data.animation_info.animations.push({
+                                        target_dom : '#' + mon.pos_id,
+                                        animation_param : {
+                                            backgroundColor : '#fff',
+                                        },
+                                    });
                                     break;
                                 case 1020:
                                     var mon = g_field_data.cards[q.target_id];
@@ -2125,6 +2146,7 @@ new function () {
                                         case 127:
                                             mon.status[q.param1].param1 = mon.monster_id;
                                             mon.monster_id = q.param2;
+                                            mon.card_id = g_master_data.m_monster[mon.monster_id].card_id;
                                             break;
                                         case 128:
                                             mon.status[q.param1].param1 = mon.monster_id;
@@ -2158,6 +2180,7 @@ new function () {
                                         case 127:
                                         case 128:
                                             mon.monster_id = mon.status[q.param1].param1;
+                                            mon.card_id = g_master_data.m_monster[mon.monster_id].card_id;
                                             break;
                                         case 118:
                                             iDelSt = 117;
@@ -2181,13 +2204,11 @@ new function () {
                                             log_message     : '',
                                             resolved_flg    : 0,
                                             priority        : 'same_time',
-                                            queue_units : [
-                                                {
-                                                    queue_type_id   : 1027,
-                                                    target_id       : q.param1,
-                                                    param1          : iDelSt,
-                                                }
-                                            ],
+                                            queue_units : [{
+                                                queue_type_id   : 1027,
+                                                target_id       : q.param1,
+                                                param1          : iDelSt,
+                                            }],
                                         });
                                     }
                                     delete mon.status[q.param1];

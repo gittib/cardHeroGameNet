@@ -209,7 +209,7 @@ magic_queue = (function () {
                     if (val.standby_flg) {
                         return true;
                     }
-                    if (next_game_card_id) {
+                    if (val.next_game_card_id) {
                         return true;
                     }
                     aRet.push({
@@ -277,7 +277,7 @@ magic_queue = (function () {
                     if (val.standby_flg) {
                         return true;
                     }
-                    if (next_game_card_id) {
+                    if (val.next_game_card_id) {
                         return true;
                     }
                     if (!val.status) {
@@ -329,7 +329,7 @@ magic_queue = (function () {
                     if (val.standby_flg) {
                         return true;
                     }
-                    if (next_game_card_id) {
+                    if (val.next_game_card_id) {
                         return true;
                     }
                     if (!val.status) {
@@ -788,20 +788,31 @@ magic_queue = (function () {
                 }];
                 break;
             case 1480:
+                if (aArgs.field_data.cards[aArgs.targets[0].game_card_id].owner == aArgs.field_data.cards[aArgs.targets[1].game_card_id].owner) {
+                    throw new Error('invalid_target');
+                }
                 return [{
                     queue_type_id   : 1026,
                     target_id       : aArgs.targets[0].game_card_id,
                     param1          : 127,
-                    param2          : aArgs.targets[1].monster_id,
+                    param2          : aArgs.field_data.cards[aArgs.targets[1].game_card_id].monster_id,
                 }];
                 break;
             case 1490:
-                return [{
+                var aRet = [{
                     queue_type_id   : 1017,
                     target_id       : aArgs.targets[0].game_card_id,
                     param1          : 1,
                     param2          : true,
                 }];
+                var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                if (g_master_data.m_monster[mon.monster_id].next_monster_id) {
+                    aRet.push({
+                        queue_type_id   : 1019,
+                        target_id       : aArgs.targets[0].game_card_id,
+                    });
+                }
+                return aRet;
                 break;
             default:
                 throw new Error('unknown magic_id posted.');

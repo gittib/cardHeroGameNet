@@ -20,3 +20,15 @@
   #header div.user_info {
     float: right;
     text-align: right; }
+
+#footer {
+  margin-top: 35px;
+  width: 100%;
+  min-height: 100%;
+  background-color: #eeffee; }
+  #footer .footer_tweet {
+    margin: 0 20px;
+    padding: 5px; }
+    #footer .footer_tweet span {
+      display: inherit;
+      text-align: center; }

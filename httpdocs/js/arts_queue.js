@@ -90,42 +90,36 @@ arts_queue = (function () {
                 var aTarget = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
                 var p1 = game_field_utility.getXYFromPosId(aActor.pos_id);
                 var p2 = game_field_utility.getXYFromPosId(aTarget.pos_id);
-                var df = {x : p2.x - p1.x, y : p2.y - p1.y};
-                for (var i = 2 ; i <= 4 ; i++) {
-                    if (df.x % i == 0 && df.y % i == 0) {
+                var df = {x: p2.x - p1.x, y: p2.y - p1.y};
+                for (var i = 1 ; i < 4 ; i++) {
+                    if (Math.abs(df.x) % i == 0 && Math.abs(df.y) % i == 0) {
                         df.x /= i;
                         df.y /= i;
                     }
                 }
                 var aRet = [];
-                var df0 = {x:df.x, y:df.y};
-                for (i = 1 ; i <= 3 ; i++) {
-                    var iDist   = Math.max(Math.abs(df.x), Math.abs(df.y));
-                    var pow     = aArtInfo.power + 1 - iDist;
-                    var sPosId  = game_field_utility.getRelativePosId(aActor.pos_id, df);
-                    if (sPosId != '') {
-                        $.each(aArgs.field_data.cards, function(j, val) {
-                            if (val.pos_category != 'field') {
-                                return true;
-                            }
-                            if (val.next_game_card_id) {
-                                return true;
-                            }
-                            if (val.standby_flg) {
-                                return true;
-                            }
+                $.each(aArgs.field_data.cards, function(j, val) {
+                    if (val.pos_category != 'field') {
+                        return true;
+                    }
+                    if (val.next_game_card_id) {
+                        return true;
+                    }
+                    if (val.standby_flg) {
+                        return true;
+                    }
+                    for (var i = 1 ; i <= 3 ; i++) {
+                        var p = {x:df.x*i,y:df.y*i};
+                        if (game_field_utility.getRelativePosId(aActor.pos_id, p) == val.pos_id) {
                             aRet.push({
                                 queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
                                 target_id       : val.game_card_id,
-                                param1          : aArtInfo.power,
+                                param1          : aArtInfo.power + 1 - game_field_utility.getDistance(val.pos_id, aActor.pos_id),
                             });
-                        });
+                        }
                     }
-
-                    df.x += df0.x;
-                    df.y += df0.y;
-                }
-                if (aRet.length > 0) {
+                });
+                if (aRet.length) {
                     return aRet;
                 }
                 break;
@@ -219,6 +213,9 @@ arts_queue = (function () {
                     target_id       : aArgs.targets[0].game_card_id,
                     param1          : 1,
                     param2          : true,
+                }, {
+                    queue_type_id   : 1019,
+                    target_id       : aArgs.targets[0].game_card_id,
                 }];
                 var aMonsterInfo = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
                 var aMonsterData = g_master_data.m_monster[aMonsterInfo.monster_id];
@@ -227,7 +224,7 @@ arts_queue = (function () {
                 }
                 var bSuper = false;
                 $.each(aArgs.field_data.cards, function (i, val) {
-                    bSuper = isValidSuper({
+                    bSuper = game_field_utility.isValidSuper({
                         aBefore : aMonsterInfo,
                         aAfter  : val,
                     });
@@ -523,13 +520,13 @@ arts_queue = (function () {
                 break;
             case 1024:
                 var iSt = 101;
-                if (2 <= g_master_data.m_monster[aArgs.field_data.cards[aArgs.actor_id]].lv) {
+                if (2 <= g_master_data.m_monster[aArgs.field_data.cards[aArgs.actor_id].monster_id].lv) {
                     iSt = 130;
                 }
                 return [
                     {
                         queue_type_id   : 1026,
-                        target_id       : aArgs.actor_id,
+                        target_id       : aArgs.targets[0].game_card_id,
                         param1          : iSt,
                     },
                 ];
