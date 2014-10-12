@@ -275,7 +275,7 @@ game_field_reactions = (function () {
                         sPower = '2?';
                     }
                     if (typeof mon.status != 'undefined') {
-                        if (typeof mon.status[120] != 'undefined' && mon.status[120].param1 == val.art_id) {
+                        if (typeof mon.status[120] != 'undefined' && mon.status[120].param1 == val.id) {
                             iStone *= 2;
                         }
                         if (typeof mon.status[123] != 'undefined') {
@@ -320,108 +320,121 @@ game_field_reactions = (function () {
             var sCommandsHtml = '';
 
             if (aCard.pos_category == 'hand') {
-                switch (aCardData.category) {
-                    case 'monster_front':
-                    case 'monster_back':
-                        g_field_data.actor.act_type = 'into_field';
-                        sCommandsHtml =
-                            '<div class="command_row into_field selected_act" act_type="into_field">' +
-                                '場に出す' +
-                            '</div>';
-                        break;
-                    case 'magic':
-                        var aMagicData = g_master_data.m_magic[aCardData.magic_id];
-                        var mid = aCardData.magic_id;
-                        var iStone = aMagicData.stone;
-                        var aMaster = getGameCardId({
-                            pos_category    : 'field',
-                            pos_id          : 'myMaster',
-                        });
-                        try {
-                            if (aMaster.status[123]) {
-                                iStone += 2;
+                if (aArgs.game_state == 'tokugi_fuuji') {
+                    aCard = g_field_data.cards[g_field_data.actor.aTargets[0].game_card_id];
+                    var mon = g_master_data.m_monster[aCard.monster_id];
+                    sImg = '<img src="/images/card/' + mon.image_file_name + '" alt="' + sImageAlt + '" />';
+
+                    if (aCard.owner == 'enemy' && aCard.standby_flg) {
+                        throw new Error('standby monster');
+                    }
+
+                    // 特技
+                    _buildArtsRow(aCard);
+                } else {
+                    switch (aCardData.category) {
+                        case 'monster_front':
+                        case 'monster_back':
+                            g_field_data.actor.act_type = 'into_field';
+                            sCommandsHtml =
+                                '<div class="command_row into_field selected_act" act_type="into_field">' +
+                                    '場に出す' +
+                                '</div>';
+                            break;
+                        case 'magic':
+                            var aMagicData = g_master_data.m_magic[aCardData.magic_id];
+                            var mid = aCardData.magic_id;
+                            var iStone = aMagicData.stone;
+                            var aMaster = getGameCardId({
+                                pos_category    : 'field',
+                                pos_id          : 'myMaster',
+                            });
+                            try {
+                                if (aMaster.status[123]) {
+                                    iStone += 2;
+                                }
+                            } catch (e) {}
+                            switch (aCardData.card_name) {
+                                case 'ローテーション':
+                                    sCommandsHtml =
+                                        '<div class="command_row" act_type="magic" magic_id="' + mid + '" param1="1">' +
+                                            '時計回り' +
+                                            ' ' +
+                                            '<div class="num_info">' +
+                                                '<span class="stone_cost">' +
+                                                    iStone + 'コ' +
+                                                '</span>' +
+                                            '</div>' +
+                                        '</div>' +
+                                        '<div class="command_row" act_type="magic" magic_id="' + mid + '" param1="2">' +
+                                            '反時計回り' +
+                                            ' ' +
+                                            '<div class="num_info">' +
+                                                '<span class="stone_cost">' +
+                                                    iStone + 'コ' +
+                                                '</span>' +
+                                            '</div>' +
+                                        '</div>';
+                                    break;
+                                case 'カードサーチ':
+                                    sCommandsHtml =
+                                        '<div class="command_row" act_type="magic" magic_id="' + mid + '" param1="front">' +
+                                            '前衛モンスターをサーチ' +
+                                            ' ' +
+                                            '<div class="num_info">' +
+                                                '<span class="stone_cost">' +
+                                                    iStone + 'コ' +
+                                                '</span>' +
+                                            '</div>' +
+                                        '</div>' +
+                                        '<div class="command_row" act_type="magic" magic_id="' + mid + '" param1="back">' +
+                                            '後衛モンスターをサーチ' +
+                                            ' ' +
+                                            '<div class="num_info">' +
+                                                '<span class="stone_cost">' +
+                                                    iStone + 'コ' +
+                                                '</span>' +
+                                            '</div>' +
+                                        '</div>' +
+                                        '<div class="command_row" act_type="magic" magic_id="' + mid + '" param1="magic">' +
+                                            'マジックをサーチ' +
+                                            ' ' +
+                                            '<div class="num_info">' +
+                                                '<span class="stone_cost">' +
+                                                    iStone + 'コ' +
+                                                '</span>' +
+                                            '</div>' +
+                                        '</div>' +
+                                        '<div class="command_row" act_type="magic" magic_id="' + mid + '" param1="super">' +
+                                            'スーパーをサーチ' +
+                                            ' ' +
+                                            '<div class="num_info">' +
+                                                '<span class="stone_cost">' +
+                                                    iStone + 'コ' +
+                                                '</span>' +
+                                            '</div>' +
+                                        '</div>';
+                                    break;
+                                default:
+                                    g_field_data.actor.magic_id = mid;
+                                    g_field_data.actor.act_type = 'magic';
+                                    sCommandsHtml =
+                                        '<div class="command_row magic selected_act" magic_id="' + mid + '" act_type="magic">' +
+                                            '発動' +
+                                            ' ' +
+                                            '<div class="num_info">' +
+                                                '<span class="stone_cost">' +
+                                                    iStone + 'コ' +
+                                                '</span>' +
+                                            '</div>' +
+                                        '</div>';
+                                    break;
                             }
-                        } catch (e) {}
-                        switch (aCardData.card_name) {
-                            case 'ローテーション':
-                                sCommandsHtml =
-                                    '<div class="command_row" act_type="magic" magic_id="' + mid + '" param1="1">' +
-                                        '時計回り' +
-                                        ' ' +
-                                        '<div class="num_info">' +
-                                            '<span class="stone_cost">' +
-                                                iStone + 'コ' +
-                                            '</span>' +
-                                        '</div>' +
-                                    '</div>' +
-                                    '<div class="command_row" act_type="magic" magic_id="' + mid + '" param1="2">' +
-                                        '反時計回り' +
-                                        ' ' +
-                                        '<div class="num_info">' +
-                                            '<span class="stone_cost">' +
-                                                iStone + 'コ' +
-                                            '</span>' +
-                                        '</div>' +
-                                    '</div>';
-                                break;
-                            case 'カードサーチ':
-                                sCommandsHtml =
-                                    '<div class="command_row" act_type="magic" magic_id="' + mid + '" param1="front">' +
-                                        '前衛モンスターをサーチ' +
-                                        ' ' +
-                                        '<div class="num_info">' +
-                                            '<span class="stone_cost">' +
-                                                iStone + 'コ' +
-                                            '</span>' +
-                                        '</div>' +
-                                    '</div>' +
-                                    '<div class="command_row" act_type="magic" magic_id="' + mid + '" param1="back">' +
-                                        '後衛モンスターをサーチ' +
-                                        ' ' +
-                                        '<div class="num_info">' +
-                                            '<span class="stone_cost">' +
-                                                iStone + 'コ' +
-                                            '</span>' +
-                                        '</div>' +
-                                    '</div>' +
-                                    '<div class="command_row" act_type="magic" magic_id="' + mid + '" param1="magic">' +
-                                        'マジックをサーチ' +
-                                        ' ' +
-                                        '<div class="num_info">' +
-                                            '<span class="stone_cost">' +
-                                                iStone + 'コ' +
-                                            '</span>' +
-                                        '</div>' +
-                                    '</div>' +
-                                    '<div class="command_row" act_type="magic" magic_id="' + mid + '" param1="super">' +
-                                        'スーパーをサーチ' +
-                                        ' ' +
-                                        '<div class="num_info">' +
-                                            '<span class="stone_cost">' +
-                                                iStone + 'コ' +
-                                            '</span>' +
-                                        '</div>' +
-                                    '</div>';
-                                break;
-                            default:
-                                g_field_data.actor.magic_id = mid;
-                                g_field_data.actor.act_type = 'magic';
-                                sCommandsHtml =
-                                    '<div class="command_row magic selected_act" magic_id="' + mid + '" act_type="magic">' +
-                                        '発動' +
-                                        ' ' +
-                                        '<div class="num_info">' +
-                                            '<span class="stone_cost">' +
-                                                iStone + 'コ' +
-                                            '</span>' +
-                                        '</div>' +
-                                    '</div>';
-                                break;
-                        }
-                        break;
-                    case 'super_front':
-                    case 'super_back':
-                        break;
+                            break;
+                        case 'super_front':
+                        case 'super_back':
+                            break;
+                    }
                 }
             } else if (aCard.pos_category == 'field') {
                 if (aArgs.game_state == 'lvup_standby') {
@@ -846,13 +859,24 @@ game_field_reactions = (function () {
                             log_message         : 'ダメージ呪い発動',
                             resolved_flg        : 0,
                             priority            : 'reaction',
-                            queue_units : [
-                                {
-                                    queue_type_id   : 1026,
-                                    target_id       : act.game_card_id,
-                                    param1          : 122,
-                                },
-                            ],
+                            queue_units : [{
+                                queue_type_id   : 1026,
+                                target_id       : act.game_card_id,
+                                param1          : 122,
+                            }],
+                        });
+                        break;
+                    case 21:
+                        g_field_data.queues.push({
+                            actor_id            : target.game_card_id,
+                            log_message         : 'ストーン呪い発動',
+                            resolved_flg        : 0,
+                            priority            : 'reaction',
+                            queue_units : [{
+                                queue_type_id   : 1026,
+                                target_id       : act.game_card_id,
+                                param1          : 123,
+                            }],
                         });
                         break;
                 }

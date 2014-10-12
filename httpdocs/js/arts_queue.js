@@ -49,10 +49,17 @@ arts_queue = (function () {
                 queue_units     : _getQueueUnitsFromScriptId(aArgs),
             };
             if (0 < Number(aArtInfo.stone)) {
+                var rate = -1;
+                // バイストーンの判定
+                try {
+                    if (mon.status[120].param1 == aArgs.art_id) {
+                        rate = -2;
+                    }
+                } catch (e) {}
                 aQueue.queue_units.unshift({
                     queue_type_id   : 1004,
                     target_id       : aArgs.actor_id,
-                    param1          : -1 * Number(aArtInfo.stone),
+                    param1          : rate * Number(aArtInfo.stone),
                     cost_flg        : true,
                 });
             }
@@ -185,12 +192,23 @@ arts_queue = (function () {
                 }];
                 break;
             case 1006:
-                return [{
+                var aRet = [{
                     queue_type_id   : 1017,
                     target_id       : aArgs.targets[0].game_card_id,
                     param1          : 1,
                     param2          : true,
+                    cost_flg        : true,
                 }];
+                var aMonsterData = g_master_data.m_monster[aArgs.field_data.cards[aArgs.targets[0].game_card_id].monster_id];
+                if (aMonsterData.next_monster_id) {
+                    aRet.push({
+                        queue_type_id   : 1019,
+                        target_id       : aArgs.targets[0].game_card_id,
+                    });
+                } else if (typeof aMonsterData.supers == 'undefined' || !aMonsterData.supers.length) {
+                    break;
+                }
+                return aRet;
                 break;
             case 1007:
                 var aRet = [{
@@ -213,6 +231,7 @@ arts_queue = (function () {
                     target_id       : aArgs.targets[0].game_card_id,
                     param1          : 1,
                     param2          : true,
+                    cost_flg        : true,
                 }, {
                     queue_type_id   : 1019,
                     target_id       : aArgs.targets[0].game_card_id,
@@ -249,12 +268,19 @@ arts_queue = (function () {
                 break;
             case 1010:
                 var aRet = [];
+                var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
                 $.each(g_master_data.m_status, function(i, val) {
-                    if (val.status_type == '!') {return true;}
-                    aRet.push({
-                        queue_type_id   : 1027,
-                        target_id       : aArgs.targets[0].game_card_id,
-                    });
+                    i = Number(i);
+                    if (val.status_type != 'P' && val.status_type != 'S' && val.status_type != 'M') {return true;}
+                    if (mon.status) {
+                        if (mon.status[i]) {
+                            aRet.push({
+                                queue_type_id   : 1027,
+                                target_id       : aArgs.targets[0].game_card_id,
+                                param1          : i,
+                            });
+                        }
+                    }
                 });
                 return aRet;
                 break;

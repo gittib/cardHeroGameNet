@@ -213,13 +213,25 @@ new function () {
                     oDom.addClass('selected_act');
                     break;
                 case 'tokugi_fuuji':
-                    var aQueue = arts_queue.getArtsQueue({
-                        field_data  : g_field_data,
-                        art_id      : g_field_data.actor.art_id,
-                        actor_id    : g_field_data.actor.game_card_id,
-                        targets     : g_field_data.actor.aTargets,
-                        param2      : oDom.attr('art_id'),
-                    });
+                    var aQueue = {};
+                    if (g_field_data.actor.art_id) {
+                        aQueue = arts_queue.getArtsQueue({
+                            field_data  : g_field_data,
+                            art_id      : g_field_data.actor.art_id,
+                            actor_id    : g_field_data.actor.game_card_id,
+                            targets     : g_field_data.actor.aTargets,
+                            param2      : oDom.attr('art_id'),
+                        });
+                    } else {
+                        aQueue = magic_queue.getMagicQueue({
+                            field_data  : g_field_data,
+                            magic_id    : g_field_data.actor.magic_id,
+                            actor_id    : g_field_data.actor.game_card_id,
+                            param1      : g_field_data.actor.param1,
+                            param2      : oDom.attr('art_id'),
+                            targets     : g_field_data.actor.aTargets,
+                        });
+                    }
                     if (aQueue) {
                         g_field_data.queues.push(aQueue);
                         execQueue({ resolve_all : true });
@@ -647,11 +659,11 @@ new function () {
                 switch (aArgs.range_type_id) {
                     case 16:
                         if (aArgs.target_order == 0) {
-                            if (g_field_data.cards[aArgs.target_id].owner != 'enemy') {
+                            if (g_field_data.cards[aArgs.target_id].owner != 'my') {
                                 return false;
                             }
                         } else if (aArgs.target_order == 1) {
-                            if (g_field_data.cards[aArgs.target_id].owner != 'my') {
+                            if (g_field_data.cards[aArgs.target_id].owner != 'enemy') {
                                 return false;
                             }
                         }
@@ -1030,6 +1042,7 @@ new function () {
                     };
                     var mon = g_field_data.cards[actor.game_card_id];
                     var aCardData = g_master_data.m_card[mon.card_id];
+                    var aMonsterData = g_master_data.m_monster[mon.monster_id];
                     if (aCardData.category == 'master') {
                         aQueue.queue_units.unshift({
                             queue_type_id   : 1004,
@@ -1037,6 +1050,27 @@ new function () {
                             param1          : -3,
                             cost_flg        : true,
                         });
+                    } else if (aMonsterData.skill) {
+                        if (aMonsterData.skill.id == 13) {
+                            (function () {
+                                var target = g_field_data.cards[actor.aTargets[0].game_card_id];
+                                if (target.status) {
+                                    $.each(target.status, function(iSt, aSt) {
+                                        switch (g_master_data.m_status[iSt].status_type) {
+                                            case 'P':
+                                            case 'S':
+                                            case 'M':
+                                                aQueue.queue_units.unshift({
+                                                    queue_type_id   : 1027,
+                                                    target_id       : target.game_card_id,
+                                                    param1          : iSt,
+                                                });
+                                            break;
+                                        }
+                                    });
+                                }
+                            })();
+                        }
                     }
                     break;
                 case 'arts':
@@ -1801,7 +1835,20 @@ new function () {
                                     });
                                     break;
                                 case 1017:
-                                    g_field_data.cards[q.target_id].lvup_standby += parseInt(q.param1);
+                                    var mon = g_field_data.cards[q.target_id];
+                                    // レベル固定の判定
+                                    if (mon.status) {
+                                        if (mon.status[111]) {
+                                            throw new Error('invalid_target');
+                                        }
+                                    }
+                                    mon.lvup_standby += parseInt(q.param1);
+                                    if (g_master_data.m_monster[mon.monster_id].skill) {
+                                        if (g_master_data.m_monster[mon.monster_id].skill.id == 11) {
+                                            g_field_data.lvup_assist = mon.lvup_standby;
+                                            mon.lvup_standby = 0;
+                                        }
+                                    }
                                     if (q.param2) {
                                         console.log('lvup_magic_flg set.');
                                         g_field_data.lvup_magic_flg = true;
@@ -1821,6 +1868,13 @@ new function () {
                                 case 1019:
                                     var mon = g_field_data.cards[q.target_id];
                                     var aMonsterData = g_master_data.m_monster[mon.monster_id];
+
+                                    // レベル固定の判定
+                                    if (mon.status) {
+                                        if (mon.status[111]) {
+                                            throw new Error('invalid_target');
+                                        }
+                                    }
 
                                     // レベルアップ権利のデクリメントはレベルアップ処理の中で行う。
                                     // よって、カード効果によるレベルアップ時にはレベルアップ権利のインクリメントが必要となる。
@@ -1864,7 +1918,7 @@ new function () {
                                     g_field_data.animation_info.animations.push({
                                         target_dom : '#' + mon.pos_id,
                                         animation_param : {
-                                            backgroundColor : '#f00',
+                                            backgroundColor : '#00f',
                                         },
                                     });
                                     g_field_data.animation_info.animations.push({
@@ -1876,7 +1930,13 @@ new function () {
                                     g_field_data.animation_info.animations.push({
                                         target_dom : '#' + mon.pos_id,
                                         animation_param : {
-                                            backgroundColor : '#00f',
+                                            backgroundColor : '#f00',
+                                        },
+                                    });
+                                    g_field_data.animation_info.animations.push({
+                                        target_dom : '#' + mon.pos_id,
+                                        animation_param : {
+                                            backgroundColor : '#ff0',
                                         },
                                     });
                                     g_field_data.animation_info.animations.push({
@@ -1891,6 +1951,13 @@ new function () {
                                     if (mon.lv <= 1) {
                                         throw new Error('invalid_target');
                                     }
+                                    // レベル固定の判定
+                                    if (mon.status) {
+                                        if (mon.status[111]) {
+                                            throw new Error('invalid_target');
+                                        }
+                                    }
+
                                     var bResolved = false;
                                     $.each(g_master_data.m_monster, function(i, val) {
                                         if (val.next_monster_id == mon.monster_id) {
@@ -2415,16 +2482,6 @@ new function () {
                 throw new Error('no_target');
             }
 
-            // 回避効果の適用
-            if (target.status) {
-                // 女神の加護
-                if (typeof target.status[115] != 'undefined') {
-                    if (Math.random() <= 0.5) {
-                        return 0;
-                    }
-                }
-            }
-
             // パワーアップ系効果の適用
             if (act && act.status) {
                 if (typeof act.status[100] != 'undefined') {
@@ -2533,7 +2590,7 @@ new function () {
                 pow--;
             }
             if (pow && target.status[107] != null) {
-                pow /= 2;
+                pow = parseInt(pow / 2);
                 g_field_data.queues.push({
                     actor_id            : targetId,
                     log_message         : 'ガラスの盾 効果発揮',
@@ -2602,16 +2659,6 @@ new function () {
             var target = g_field_data.cards[targetId];
             if (target == null) {
                 throw new Error('no_target');
-            }
-
-            // 回避効果の適用
-            if (target.status) {
-                // 女神の加護
-                if (typeof target.status[115] != 'undefined') {
-                    if (Math.random() <= 0.5) {
-                        return 0;
-                    }
-                }
             }
 
             if (dam && target.status[100] != null) {
