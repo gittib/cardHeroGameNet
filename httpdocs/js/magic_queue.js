@@ -31,6 +31,12 @@ magic_queue = (function () {
                 }
             });
 
+            if (game_field_reactions.isProvoked({
+                game_card_id    : iMasterId
+            })) {
+                throw new Error('Master is provoked.');
+            }
+
             var mon = aArgs.field_data.cards[aArgs.actor_id];
             var aMagicInfo = g_master_data.m_magic[aArgs.magic_id];
 
@@ -100,6 +106,7 @@ magic_queue = (function () {
                 550     : 107,
                 590     : 103,
                 600     : 111,
+                620     : 112,
                 630     : 113,
                 860     : 114,
                 880     : 108,
@@ -256,17 +263,6 @@ magic_queue = (function () {
                     });
                 }
                 return aRet;
-                break;
-            case 620:
-                return [{
-                    queue_type_id   : 1026,
-                    target_id       : aArgs.targets[0].game_card_id,
-                    param1          : 112,
-                },{
-                    queue_type_id   : 1024,
-                    target_id       : aArgs.targets[0].game_card_id,
-                    cost_flg        : true,
-                }];
                 break;
             case 640:
                 var aRet = [];

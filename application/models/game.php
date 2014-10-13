@@ -94,6 +94,7 @@ class model_Game {
                     'nick_name',
                 )
             )
+            ->where('field.del_flg = 0')
             ->where('field.game_field_id in(?)', $selField)
             ->order(array(
                 'upd_date desc',

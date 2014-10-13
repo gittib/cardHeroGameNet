@@ -631,359 +631,6 @@ new function () {
     }
 
     /**
-     * checkTargetPosValid
-     * range_type_idの範囲内に対象がいるか確認する checkrangecheck
-     *
-     * @param   aArgs.range_type_id (必須)範囲タイプ
-     * @param   aArgs.actor_id      (任意)行動者のgame_card_id
-     * @param   aArgs.target_id     (任意)対象のgame_card_id
-     * @param   aArgs.target_pos_id (任意)対象のpos_id。target_idをセット出来ない時に使う(移動とかワープとか)
-     * @param   aArgs.target_order  (任意)何番目の対象かを示す(幻影の鏡とかとか)
-     *
-     * @return  true : 適正対象  false : 不適正な対象
-     */
-    function checkTargetPosValid (aArgs)
-    {
-        try {
-            if (typeof aArgs.target_order != 'undefined') {
-                switch (aArgs.range_type_id) {
-                    default:
-                        // 今のところ[0]と[1]しか使ってないので、3個以上対象を取るのは全て不適正
-                        if (1 < aArgs.target_order) {
-                            return false;
-                        }
-                        break;
-                }
-
-                // target_orderがある場合は別のrange_type_idでの判定を行う
-                switch (aArgs.range_type_id) {
-                    case 16:
-                        if (aArgs.target_order == 0) {
-                            if (g_field_data.cards[aArgs.target_id].owner != 'my') {
-                                return false;
-                            }
-                        } else if (aArgs.target_order == 1) {
-                            if (g_field_data.cards[aArgs.target_id].owner != 'enemy') {
-                                return false;
-                            }
-                        }
-                        aArgs.range_type_id = 7;
-                        break;
-                    case 27:
-                    case 29:
-                        aArgs.range_type_id = 6;
-                        break;
-                    case 34:
-                        if (aArgs.target_order == 0) {
-                            aArgs.range_type_id = 15;
-                        }
-                        break;
-                }
-            }
-
-            // target_id が無いパターンは例外処理が面倒なので先に専用処理で捌く
-            if (aArgs.range_type_id == 12) {
-                var p1 = game_field_utility.getXYFromPosId(aArgs.target_pos_id);
-                if (!p1) {
-                    var mon = g_field_data.cards[aArgs.target_id];
-                    p1 = game_field_utility.getXYFromPosId(mon.pos_id);
-                }
-                if (p1.x != 1) {
-                    return true;
-                }
-            } else if (aArgs.range_type_id == 30) {
-                var tmp = game_field_utility.getXYFromPosId(aArgs.target_pos_id);
-                if (!tmp || tmp.y <= 1) {
-                    return false;
-                }
-                var mon = game_field_reactions.getGameCardId({
-                    pos_category    : 'field',
-                    pos_id          : aArgs.target_pos_id,
-                });
-                if (mon) {
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-
-            if (!aArgs.actor_id) {
-                aArgs.actor_id = g_field_data.actor.game_card_id;
-            }
-            if (aArgs.target_pos_id) {
-                aArgs.target_id = game_field_reactions.getGameCardId({
-                    pos_category    : 'field',
-                    pos_id          : aArgs.target_pos_id,
-                });
-            }
-            var actorMon = g_field_data.cards[aArgs.actor_id];
-            var targetMon = g_field_data.cards[aArgs.target_id];
-            console.log(aArgs);
-
-            // 先に伏せ状態のチェック
-            switch (aArgs.range_type_id) {
-                case 12:
-                case 26:
-                case 34:
-                case 35:
-                    // 伏せてても関係なし
-                    break;
-                case 23:
-                    // 伏せてなかったらアウト
-                    if (!targetMon.standby_flg) {
-                        return false;
-                    }
-                    break;
-                default:
-                    // 伏せてたらアウト
-                    if (targetMon.standby_flg != false) {
-                        return false;
-                    }
-                    break;
-            }
-
-            // 伏せ状態のチェックが終わったら各々のチェックに移る
-            switch (aArgs.range_type_id) {
-                case 0:
-                    if (game_field_utility.getDistance(actorMon.pos_id, targetMon.pos_id) == 1) {
-                        return true;
-                    }
-                    break;
-                case 1:
-                    if (game_field_utility.getDistance(actorMon.pos_id, targetMon.pos_id) == 2) {
-                        return true;
-                    }
-                    break;
-                case 2:
-                    if (game_field_utility.getDistance(actorMon.pos_id, targetMon.pos_id) == 3) {
-                        return true;
-                    }
-                    break;
-                case 3:
-                case 4:
-                    var p1 = game_field_utility.getXYFromPosId(actorMon.pos_id);
-                    var p2 = game_field_utility.getXYFromPosId(targetMon.pos_id);
-                    var dist = Math.max(Math.abs(p1.x - p2.x), Math.abs(p1.y - p2.y));
-                    if (aArgs.range_type_id == 3 && 2 < dist) {
-                        return false;
-                    }
-                    var p3 = {
-                        x   : (p2.x - p1.x) / dist,
-                        y   : (p2.y - p1.y) / dist,
-                    };
-                    for (var i = 1 ; i < dist ; i++) {
-                        var pTmp = {x:p3.x, y:p3.y};
-                        pTmp.x *= i;
-                        pTmp.y *= i;
-                        var betweenId = game_field_reactions.getGameCardId({
-                            pos_category    : 'field',
-                            pos_id          : game_field_utility.getRelativePosId(actorMon.pos_id, pTmp),
-                        });
-                        if (betweenId) {
-                            if (!g_field_data.cards[betweenId].standby_flg) {
-                                return false;
-                            }
-                        }
-                    }
-                    if (dist <= 2 || (dist <= 3 && aArgs.range_type_id == 4)){
-                        return true;
-                    }
-                    break;
-                case 5:
-                case 6:
-                case 10:
-                case 29:
-                    return true;
-                    break;
-                case 12:
-                case 7:
-                case 11:
-                case 16:
-                case 27:
-                    if (g_master_data.m_card[targetMon.card_id].category == 'master') {
-                        return false;
-                    }
-                    return true;
-                    break;
-                case 9:
-                    if (game_field_utility.getDistance(actorMon.pos_id, targetMon.pos_id) == 3) {
-                        return true;
-                    }
-                    // berakは書かない
-                case 8:
-                    var p1 = game_field_utility.getXYFromPosId(actorMon.pos_id);
-                    var p2 = game_field_utility.getXYFromPosId(targetMon.pos_id);
-                    var df = {x : Math.abs(p1.x - p2.x), y : Math.abs(p1.y - p2.y)};
-                    if (Math.min(df.x, df.y) == 1 && Math.max(df.x, df.y) == 2) {
-                        return true;
-                    }
-                    break;
-                case 13:
-                    if (g_master_data.m_card[targetMon.card_id].category == 'master') {
-                        return false;
-                    }
-                    if (game_field_utility.getDistance(actorMon.pos_id, targetMon.pos_id) == 1) {
-                        return true;
-                    }
-                    break;
-                case 14:
-                    var dist = game_field_utility.getDistance(actorMon.pos_id, targetMon.pos_id);
-                    if (dist == 2 || dist == 3) {
-                        return true;
-                    }
-                    break;
-                case 15:
-                    if (targetMon.owner == 'my' && targetMon.pos_id != 'myMaster') {
-                        return true;
-                    }
-                    break;
-                case 17:
-                    if (targetMon.owner != 'my' || targetMon.pos_id == 'myMaster') {
-                        return false;
-                    }
-                    var nMaxAct = 1;
-                    var aMonsterData = g_master_data.m_monster[targetMon.monster_id];
-                    if (aMonsterData.skill.id == 4) {
-                        nMaxAct = 2;
-                    } else if (aMonsterData.skill.id == 5) {
-                        nMaxAct = 3;
-                    }
-                    if (targetMon.act_count < nMaxAct) {
-                        return true;
-                    }
-                    break;
-                case 18:
-                    var p1 = game_field_utility.getXYFromPosId(actorMon.pos_id);
-                    var p2 = game_field_utility.getXYFromPosId(targetMon.pos_id);
-                    if (p1.y != 3) {
-                        return false;
-                    }
-                    if (p2.y != 1) {
-                        return false;
-                    }
-                    if (Math.abs(p2.x - p1.x) <= 1) {
-                        return true;
-                    }
-                    break;
-                case 19:
-                case 31:
-                    var p2 = game_field_utility.getXYFromPosId(targetMon.pos_id);
-                    if (aArgs.range_type_id == 19) {
-                        var cd = g_master_data.m_card[targetMon.card_id];
-                        if (cd.category == 'master') {
-                            return false;
-                        }
-                    }
-                    if (p2.y == 1 || p2.y == 2) {
-                        return true;
-                    }
-                    break;
-                case 20:
-                    var p2 = game_field_utility.getXYFromPosId(targetMon.pos_id);
-                    if (p2.y == 0 || p2.y == 3) {
-                        return true;
-                    }
-                    break;
-                case 22:
-                    if (game_field_utility.getDistance(actorMon.pos_id, targetMon.pos_id) != 1) {
-                        return false;
-                    }
-                    // breakは書かない
-                case 21:
-                    var cd = g_master_data.m_card[targetMon.card_id];
-                    if (cd.category == 'master') {
-                        return true;
-                    }
-                    break;
-                case 23:
-                    var cd = g_master_data.m_card[targetMon.card_id];
-                    if (cd.category != 'master') {
-                        return true;
-                    }
-                    break;
-                case 24:
-                    var mon = g_master_data.m_monster[actorMon.monster_id];
-                    var p1 = game_field_utility.getXYFromPosId(actorMon.pos_id);
-                    var p2 = game_field_utility.getXYFromPosId(targetMon.pos_id);
-                    if (p2.y - p1.y == -1) {
-                        if (p2.x - p1.x == -1 && mon.skill.id == 23) {
-                            return true;
-                        } else if (p2.x - p1.x == 1 && mon.skill.id == 24) {
-                            return true;
-                        }
-                    }
-                    break;
-                case 25:
-                    if (targetMon.pos_id == 'myMaster') {
-                        return true;
-                    }
-                    break;
-                case 26:
-                    if (targetMon.pos_category == 'hand' && targetMon.owner == 'my') {
-                        return true;
-                    }
-                    break;
-                case 28:
-                    if (targetMon.card_id == 1) {
-                        return true;
-                    }
-                    break;
-                case 32:
-                    var p1 = game_field_utility.getXYFromPosId(actorMon.pos_id);
-                    var p2 = game_field_utility.getXYFromPosId(targetMon.pos_id);
-                    var df = {x:p2.x-p1.x, y:p2.y-p1.y};
-                    if (df.y == -1) {
-                        if (df.x == 0 || df.x == 1) {
-                            return true;
-                        }
-                    }
-                    break;
-                case 33:
-                    var p1 = game_field_utility.getXYFromPosId(actorMon.pos_id);
-                    var p2 = game_field_utility.getXYFromPosId(targetMon.pos_id);
-                    var df = {x:p2.x-p1.x, y:p2.y-p1.y};
-                    if (df.y == -1) {
-                        if (df.x == 0 || df.x == -1) {
-                            return true;
-                        }
-                    }
-                    break;
-                case 34:
-                    if (targetMon.pos_category != 'hand') {
-                        return false;
-                    }
-                    var aCardData = g_master_data.m_card[targetMon.card_id];
-                    if (aCardData.category == 'monster_front' || aCardData.category == 'monster_back') {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                    break;
-                case 35:
-                    // リフレッシュ専用
-                    if (targetMon.game_card_id == actorMon.game_card_id) {
-                        return false;
-                    }
-                    if (targetMon.owner != actorMon.owner) {
-                        return false;
-                    }
-                    if (targetMon.pos_category == 'hand') {
-                        return true;
-                    }
-                    if (typeof targetMon.pos_id != 'undefined' && targetMon.pos_id == 'myMaster') {
-                        return true;
-                    }
-                    break;
-            }
-        } catch (e) {
-            console.log('unexpected in checkTargetPosValid');
-            console.log(e.stack);
-            console.log(e);
-        }
-        return false;
-    }
-
-    /**
      * addTarget
      * 適切に対象に取れるかどうか確認して、対象情報を追加する
      * 追加した時点で対象情報が充足した場合、キュー入れまで行う
@@ -1256,13 +903,24 @@ new function () {
             }
             switch (actor.act_type) {
                 case 'into_field':
-                    var bRangeOk = checkTargetPosValid({
+                    var bRangeOk = game_field_reactions.checkTargetPosValid({
                         actor_id        : actor.game_card_id,
                         target_id       : aTargetInfo.game_card_id,
                         target_pos_id   : aTargetInfo.pos_id,
                         range_type_id   : 30,
                     });
                     if (!bRangeOk) {
+                        return false;
+                    }
+                    if (game_field_reactions.isProvoked({
+                        game_card_id    : game_field_reactions.getGameCardId({
+                            pos_category    : 'field',
+                            pos_id          : 'myMaster'
+                        })
+                    })) {
+                        game_field_utility.myAlertInField({
+                            message : 'マスターが挑発されています！',
+                        });
                         return false;
                     }
                     actor.param1 = aTargetInfo.pos_id;
@@ -1277,7 +935,7 @@ new function () {
                     }
                     break;
                 case 'arts':
-                    var bRangeOk = checkTargetPosValid({
+                    var bRangeOk = game_field_reactions.checkTargetPosValid({
                         actor_id        : actor.game_card_id,
                         target_id       : aTargetInfo.game_card_id,
                         target_pos_id   : aTargetInfo.pos_id,
@@ -1295,7 +953,7 @@ new function () {
                     return true;
                     break;
                 case 'magic':
-                    var bRangeOk = checkTargetPosValid({
+                    var bRangeOk = game_field_reactions.checkTargetPosValid({
                         actor_id        : actor.game_card_id,
                         target_id       : aTargetInfo.game_card_id,
                         target_pos_id   : aTargetInfo.pos_id,
@@ -1306,6 +964,17 @@ new function () {
                         console.log('range check NG');
                         return false;
                     }
+                    if (game_field_reactions.isProvoked({
+                        game_card_id    : game_field_reactions.getGameCardId({
+                            pos_category    : 'field',
+                            pos_id          : 'myMaster'
+                        })
+                    })) {
+                        game_field_utility.myAlertInField({
+                            message : 'マスターが挑発されています！',
+                        });
+                        return false;
+                    }
                     $('#game_field #' + aTargetInfo.pos_id).addClass('target');
                     $('div.hand_card[game_card_id=' + aTargetInfo.game_card_id + ']').addClass('target');
                     actor.aTargets.push(aTargetInfo);
@@ -1313,7 +982,7 @@ new function () {
                     return true;
                     break;
                 case 'move':
-                    var bRangeOk = checkTargetPosValid({
+                    var bRangeOk = game_field_reactions.checkTargetPosValid({
                         actor_id        : actor.game_card_id,
                         target_pos_id   : aTargetInfo.pos_id,
                         range_type_id   : 12,
@@ -1386,6 +1055,15 @@ new function () {
                 var bMoveQueueResolved = false;
                 var bEffectQueueResolved = false;
 
+                // 挑発の判定はいろいろ使うので、ここのスコープで毎回チェックする
+                var bProvoked = game_field_reactions.isProvoked({
+                    game_card_id    : aExecAct.actor_id
+                });
+                var bIgnoreProvoke = false; // 挑発の制限がかかってても、これがtrueなら行動できる
+                if (aExecAct.priority != 'command') {
+                    bIgnoreProvoke = true;
+                }
+
                 // 処理失敗時にリストアするために、ここでバックアップを取る
                 var backupFieldWhileSingleActionProcessing = {};
                 $.extend(true, backupFieldWhileSingleActionProcessing, g_field_data);
@@ -1401,12 +1079,31 @@ new function () {
                     $.extend(true, g_field_data.queues, backupQueuesWhileOldQueueProcessing);
                 } else {
                     (function(a) {
-                        // 女神の加護による回避判定
                         $.each(a.queue_units, function(i,q) {
                             switch (Number(q.queue_type_id)) {
                                 case 1001:
                                 case 1005:
                                 case 1006:
+
+                                    // 挑発対象に攻撃してるかチェック
+                                    if (bProvoked) {
+                                        if (q.target_id == g_field_data.cards[aExecAct.actor_id].status[117].param1) {
+                                            bIgnoreProvoke = true;
+                                            g_field_data.queues.push({
+                                                actor_id        : aExecAct.actor_id,
+                                                log_message     : '挑発解除',
+                                                resolved_flg    : 0,
+                                                priority        : 'follow',
+                                                queue_units : [{
+                                                    queue_type_id   : 1027,
+                                                    target_id       : aExecAct.actor_id,
+                                                    param1          : 117
+                                                }]
+                                            });
+                                        }
+                                    }
+
+                                    // 女神の加護による回避判定
                                     var mon = g_field_data.cards[q.target_id];
                                     if (typeof mon.status != 'undefined') {
                                         if (typeof mon.status[115] != 'undefined') {
@@ -1417,6 +1114,8 @@ new function () {
                                             }
                                         }
                                     }
+
+                                    break;
                             }
                         });
                     })(aExecAct);
@@ -2046,6 +1745,25 @@ new function () {
                                         }
                                         bMoveQueueResolved = true;
 
+                                        // ダークホールの効果を消す
+                                        if (aCard.status) {
+                                            if (aCard.status[116]) {
+                                                g_field_data.queues.push({
+                                                    actor_id        : aCard.game_card_id,
+                                                    log_message     : '移動したのでダークホール効果消滅',
+                                                    resolved_flg    : 0,
+                                                    priority        : 'follow',
+                                                    queue_units : [
+                                                        {
+                                                            queue_type_id   : 1027,
+                                                            target_id       : aCard.game_card_id,
+                                                            param1          : 116,
+                                                        }
+                                                    ],
+                                                });
+                                            }
+                                        }
+
                                         (function(){
                                             // アニメーション設定
                                             var sDom = '#' + q.param1;
@@ -2228,22 +1946,6 @@ new function () {
                                     }
                                     var iDelSt = null;
                                     switch (Number(q.param1)) {
-                                        case 116:
-                                            if (q.param2) {
-                                                g_field_data.queues.push({
-                                                    actor_id        : mon.game_card_id,
-                                                    log_message     : 'ダークホールにより消滅',
-                                                    resolved_flg    : 0,
-                                                    priority        : 'follow',
-                                                    queue_units : [
-                                                        {
-                                                            queue_type_id   : 1008,
-                                                            target_id       : mon.game_card_id,
-                                                        }
-                                                    ],
-                                                });
-                                            }
-                                            break;
                                         case 127:
                                         case 128:
                                             mon.monster_id = mon.status[q.param1].param1;
@@ -2267,13 +1969,13 @@ new function () {
                                     }
                                     if (iDelSt) {
                                         g_field_data.queues.push({
-                                            actor_id        : q.param1,
+                                            actor_id        : mon.status[q.param1].param1,
                                             log_message     : '',
                                             resolved_flg    : 0,
                                             priority        : 'same_time',
                                             queue_units : [{
                                                 queue_type_id   : 1027,
-                                                target_id       : q.param1,
+                                                target_id       : mon.status[q.param1].param1,
                                                 param1          : iDelSt,
                                             }],
                                         });
@@ -2366,6 +2068,9 @@ new function () {
                         })) {
                             throw new Error('duplicate_field_pos');
                         }
+                    }
+                    if (bProvoked && !bIgnoreProvoke) {
+                        throw new Error('action_prevented_for_provoke');
                     }
                     delete aExecAct.failure_flg;
                 } catch (e) {
@@ -2480,6 +2185,13 @@ new function () {
             var target = g_field_data.cards[targetId];
             if (target == null) {
                 throw new Error('no_target');
+            }
+
+            // 水晶の壁張ってたらダメージ無効
+            if (target.status) {
+                if (target.status[112]) {
+                    return 0;
+                }
             }
 
             // パワーアップ系効果の適用
@@ -2661,6 +2373,13 @@ new function () {
                 throw new Error('no_target');
             }
 
+            // 水晶の壁張ってたらダメージ無効
+            if (target.status) {
+                if (target.status[112]) {
+                    return 0;
+                }
+            }
+
             if (dam && target.status[100] != null) {
                 g_field_data.queues.push({
                     actor_id            : targetId,
@@ -2792,6 +2511,20 @@ new function () {
                                     }
                                 ],
                             });
+                            if (status_id == 116) {
+                                g_field_data.queues.push({
+                                    actor_id        : val.game_card_id,
+                                    log_message     : 'ダークホールにより消滅',
+                                    resolved_flg    : 0,
+                                    priority        : 'follow',
+                                    queue_units : [
+                                        {
+                                            queue_type_id   : 1008,
+                                            target_id       : val.game_card_id,
+                                        }
+                                    ],
+                                });
+                            }
                         }
                     });
                 }

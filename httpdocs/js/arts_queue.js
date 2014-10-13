@@ -292,7 +292,7 @@ arts_queue = (function () {
                 }];
                 break;
             case 1012:
-                var dam = parseInt(Math.random() * 3) + 2;
+                var dam = parseInt(Math.random() * 4) + 2;
                 return [
                     {
                         queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
