@@ -240,6 +240,27 @@ new function () {
             }
         });
 
+        $(document).on('click', '.check_magic_effect[game_card_id]', function () {
+            try {
+                // 何の魔法効果を受けているのか、確認アラートメッセージを表示
+                var aCard = g_field_data.cards[Number($(this).attr('game_card_id'))];
+                if (aCard.status) {
+                    var sMessage = g_master_data.m_card[aCard.card_id].card_name + "は以下の効果を受けています\n";
+                    $.each(aCard.status, function(iSt, aSt) {
+                        switch (g_master_data.m_status[iSt].status_type) {
+                            case 'P':
+                            case 'S':
+                            case 'M':
+                                sMessage += "\n《" + g_master_data.m_status[iSt].status_name + '》';
+                                sMessage += "\n　" + g_master_data.m_status[iSt].status_caption;
+                                break;
+                        }
+                    });
+                    alert(sMessage);
+                }
+            } catch (e) {}
+        });
+
         $(document).on('click', '#buttons_frame div.cancel_button', function () {
             var _delActorInfo = function() {
                 g_field_data.actor = {game_card_id : null};
@@ -318,7 +339,7 @@ new function () {
             if (val.next_game_card_id) {
                 g_field_data.cards[val.next_game_card_id].before_game_card_id = iGameCardId;
             }
-            if (typeof val.status != 'undefined') {
+            if (val.status) {
                 if (val.status.length <= 0) {
                     val.status = {};
                 }
@@ -469,6 +490,7 @@ new function () {
         // カードドロー
         // 準備中の味方モンスターを登場させる
         // ルールによる前進処理
+        // その他ターン開始時に処理する効果
 
         var myMasterId = game_field_reactions.getGameCardId({
             pos_category    : 'field',
@@ -478,7 +500,7 @@ new function () {
             actor_id        : null,
             log_message     : 'ストーン3個を支給',
             resolved_flg    : 0,
-            priority        : 'system',
+            priority        : 'standby_system',
             queue_units : [
                 {
                     queue_type_id   : 1004,
@@ -497,7 +519,7 @@ new function () {
             actor_id        : null,
             log_message     : 'カードを1枚ドロー',
             resolved_flg    : 0,
-            priority        : 'system',
+            priority        : 'standby_system',
             queue_units : [
                 {
                     queue_type_id   : 1011,
@@ -527,7 +549,7 @@ new function () {
                     actor_id        : mon.game_card_id,
                     log_message     : game_field_utility.getPosCodeFromPosId(mon.pos_id) + aMonsterData.name + '登場',
                     resolved_flg    : 0,
-                    priority        : 'system',
+                    priority        : 'standby_system',
                     queue_units : [
                         {
                             queue_type_id   : 1010,
@@ -537,37 +559,55 @@ new function () {
                 });
             }
         }
-        keys = [
-            'myBack1',
-            'myBack2',
-        ];
-        for (var i = 0 ; i < keys.length ; i++) {
-            var iGameCardId = game_field_reactions.getGameCardId({
-                pos_category    : 'field',
-                pos_id          : keys[i],
-            });
-            var frontPos = game_field_utility.getRelativePosId(keys[i], {x:0, y:-1});
-            var iFrontGameCardId = game_field_reactions.getGameCardId({
-                pos_category    : 'field',
-                pos_id          : frontPos,
-            });
-            if (iGameCardId && !iFrontGameCardId) {
-                var mon = g_field_data.cards[iGameCardId];
-                g_field_data.queues.push({
-                    actor_id        : mon.game_card_id,
-                    log_message     : g_master_data.m_monster[mon.monster_id].name + 'が前進',
-                    resolved_flg    : 0,
-                    priority        : 'system',
-                    queue_units : [
-                        {
-                            queue_type_id   : 1022,
-                            target_id       : iGameCardId,
-                            param1          : frontPos,
-                        }
-                    ],
-                });
+        $.each(g_field_data.cards, function(iGameCardId, val) {
+            if (val.pos_category == 'field') {
+
+                // 前衛が空いてたら前進する
+                if (val.pos_id == 'myBack1' || val.pos_id == 'myBack2') {
+                    var frontPos = game_field_utility.getRelativePosId(val.pos_id, {x:0, y:-1});
+                    var iFrontGameCardId = game_field_reactions.getGameCardId({
+                        pos_category    : 'field',
+                        pos_id          : frontPos,
+                    });
+                    if (iGameCardId && !iFrontGameCardId) {
+                        g_field_data.queues.push({
+                            actor_id        : val.game_card_id,
+                            log_message     : g_master_data.m_monster[val.monster_id].name + 'が前進',
+                            resolved_flg    : 0,
+                            priority        : 'standby_system',
+                            queue_units : [
+                                {
+                                    queue_type_id   : 1022,
+                                    target_id       : iGameCardId,
+                                    param1          : frontPos,
+                                }
+                            ],
+                        });
+                    }
+                }
+
+                // ターン開始時に誘発する性格の処理
+                var aMonsterData = g_master_data.m_monster[val.monster_id];
+                switch (aMonsterData.skill.id) {
+                    case 26:
+                        g_field_data.queues.push({
+                            actor_id        : val.game_card_id,
+                            log_message     : 'きまぐれ発動',
+                            resolved_flg    : 0,
+                            priority        : 'reaction',
+                            queue_units : [
+                                {
+                                    queue_type_id   : 1026,
+                                    target_id       : iGameCardId,
+                                    param1          : (Math.random() < 0.5) ? 101 : 104,
+                                }
+                            ],
+                        });
+                        break;
+                }
+
             }
-        }
+        });
 
         execQueue({ resolve_all : true });
     }
@@ -581,24 +621,24 @@ new function () {
     {
         console.log('checkGameState started.');
         // 特技封じの対象特技選択とか、特殊な状態の判定
-        if (typeof g_field_data.sort_card_flg != 'undefined') {
+        if (g_field_data.sort_card_flg) {
             console.log('sort_card');
             return 'sort_card';
         }
-        if (typeof g_field_data.tokugi_fuuji_flg != 'undefined') {
+        if (g_field_data.tokugi_fuuji_flg) {
             console.log('tokugi_fuuji');
             return 'tokugi_fuuji';
         }
         try {
             $.each(g_field_data.cards, function (i, val) {
-                if (typeof val.status != 'undefined') {
-                    if (typeof val.status[111] != 'undefined') {
+                if (val.status) {
+                    if (val.status[111]) {
                         return true;
                     }
-                    if (typeof val.status[127] != 'undefined') {
+                    if (val.status[127]) {
                         return true;
                     }
-                    if (typeof val.status[128] != 'undefined') {
+                    if (val.status[128]) {
                         return true;
                     }
                 }
@@ -941,6 +981,7 @@ new function () {
                         target_pos_id   : aTargetInfo.pos_id,
                         range_type_id   : g_master_data.m_arts[actor.art_id].range_type_id,
                         target_order    : actor.aTargets.length,
+                        art_flg         : true,
                     });
                     if (!bRangeOk) {
                         console.log('range check NG');
@@ -1568,11 +1609,18 @@ new function () {
                                     var mon = g_field_data.cards[q.target_id];
                                     var aMonsterData = g_master_data.m_monster[mon.monster_id];
 
-                                    // レベル固定の判定
+                                    // レベル固定とか変身系の判定
                                     if (mon.status) {
-                                        if (mon.status[111]) {
-                                            throw new Error('invalid_target');
-                                        }
+                                        $.each([
+                                            111,
+                                            121,
+                                            127,
+                                            128
+                                        ], function(i,v) {
+                                            if (mon.status[v]) {
+                                                throw new Error('invalid_target');
+                                            }
+                                        });
                                     }
 
                                     // レベルアップ権利のデクリメントはレベルアップ処理の中で行う。
@@ -1585,7 +1633,7 @@ new function () {
                                         throw new Error('invalid_target');
                                     }
 
-                                    if (typeof q.param1 != 'undefined') {
+                                    if (q.param1) {
                                         // q.param1にgame_card_idが入ってたらスーパーに進化
                                         var aSuperInHand = g_field_data.cards[q.param1];
                                         var bSuper = game_field_utility.isValidSuper({
@@ -1603,7 +1651,7 @@ new function () {
                                             reset_hp        : true,
                                             aBefore         : g_field_data.cards[q.target_id],
                                         });
-                                    } else if (typeof aMonsterData.next_monster_id != 'undefined') {
+                                    } else if (aMonsterData.next_monster_id) {
                                         // next_monster_idに値が入ってる場合は1枚のカードで完結するレベルアップ
                                         console.log('asyuroro lvup siro-');
                                         mon = game_field_utility.loadMonsterInfo({
@@ -1614,47 +1662,59 @@ new function () {
                                     } else {
                                         throw new Error('argument_error');
                                     }
-                                    g_field_data.animation_info.animations.push({
-                                        target_dom : '#' + mon.pos_id,
-                                        animation_param : {
-                                            backgroundColor : '#00f',
-                                        },
+
+                                    (function _addLvUpAnimation() {
+                                        g_field_data.animation_info.animations.push({
+                                            target_dom : '#' + mon.pos_id,
+                                            animation_param : {
+                                                backgroundColor : '#00f',
+                                            },
+                                        });
+                                        g_field_data.animation_info.animations.push({
+                                            target_dom : '#' + mon.pos_id,
+                                            animation_param : {
+                                                backgroundColor : '#0f0',
+                                            },
+                                        });
+                                        g_field_data.animation_info.animations.push({
+                                            target_dom : '#' + mon.pos_id,
+                                            animation_param : {
+                                                backgroundColor : '#f00',
+                                            },
+                                        });
+                                        g_field_data.animation_info.animations.push({
+                                            target_dom : '#' + mon.pos_id,
+                                            animation_param : {
+                                                backgroundColor : '#ff0',
+                                            },
+                                        });
+                                        g_field_data.animation_info.animations.push({
+                                            target_dom : '#' + mon.pos_id,
+                                            animation_param : {
+                                                backgroundColor : '#fff',
+                                            },
+                                        });
                                     });
-                                    g_field_data.animation_info.animations.push({
-                                        target_dom : '#' + mon.pos_id,
-                                        animation_param : {
-                                            backgroundColor : '#0f0',
-                                        },
-                                    });
-                                    g_field_data.animation_info.animations.push({
-                                        target_dom : '#' + mon.pos_id,
-                                        animation_param : {
-                                            backgroundColor : '#f00',
-                                        },
-                                    });
-                                    g_field_data.animation_info.animations.push({
-                                        target_dom : '#' + mon.pos_id,
-                                        animation_param : {
-                                            backgroundColor : '#ff0',
-                                        },
-                                    });
-                                    g_field_data.animation_info.animations.push({
-                                        target_dom : '#' + mon.pos_id,
-                                        animation_param : {
-                                            backgroundColor : '#fff',
-                                        },
-                                    });
+
                                     break;
                                 case 1020:
                                     var mon = g_field_data.cards[q.target_id];
                                     if (mon.lv <= 1) {
                                         throw new Error('invalid_target');
                                     }
-                                    // レベル固定の判定
+
+                                    // レベル固定とか変身系の判定
                                     if (mon.status) {
-                                        if (mon.status[111]) {
-                                            throw new Error('invalid_target');
-                                        }
+                                        $.each([
+                                            111,
+                                            121,
+                                            127,
+                                            128
+                                        ], function(i,v) {
+                                            if (mon.status[v]) {
+                                                throw new Error('invalid_target');
+                                            }
+                                        });
                                     }
 
                                     var bResolved = false;
@@ -1701,6 +1761,34 @@ new function () {
                                             }
                                         ],
                                     });
+
+                                    (function _addLvDownAnimation() {
+                                        g_field_data.animation_info.animations.push({
+                                            target_dom : '#' + mon.pos_id,
+                                            animation_param : {
+                                                backgroundColor : '#000',
+                                            },
+                                        });
+                                        g_field_data.animation_info.animations.push({
+                                            target_dom : '#' + mon.pos_id,
+                                            animation_param : {
+                                                backgroundColor : '#fff',
+                                            },
+                                        });
+                                        g_field_data.animation_info.animations.push({
+                                            target_dom : '#' + mon.pos_id,
+                                            animation_param : {
+                                                backgroundColor : '#000',
+                                            },
+                                        });
+                                        g_field_data.animation_info.animations.push({
+                                            target_dom : '#' + mon.pos_id,
+                                            animation_param : {
+                                                backgroundColor : '#fff',
+                                            },
+                                        });
+                                    })();
+
                                     break;
                                 case 1021:
                                     var mon = g_field_data.cards[q.target_id];
@@ -1813,6 +1901,11 @@ new function () {
                                     }
                                     if (nMaxAct <= mon.act_count) {
                                         throw new Error('already_acted');
+                                    }
+                                    if (mon.status) {
+                                        if (mon.status[129]) {
+                                            throw new Error('invalid_actor');
+                                        }
                                     }
                                     mon.act_count++;
                                     game_field_reactions.actedReaction({

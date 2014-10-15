@@ -433,7 +433,7 @@ arts_queue = (function () {
                     ];
                     return a[parseInt(Math.random() * 5)];
                 })();
-                $.each(aArgs.field_data, function(i, val) {
+                $.each(aArgs.field_data.cards, function(i, val) {
                     if (val.pos_category != 'field') {
                         return true;
                     }

@@ -151,17 +151,28 @@ magic_queue = (function () {
                     queue_type_id   : 1003,
                     target_id       : aArgs.actor_id,
                 }];
+                var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var aMonsterData = g_master_data.m_monster[mon.monster_id];
+                if (aMonsterData.lv == 1 && !aMonsterData.next_monster_id) {
+                    break;
+                }
                 if (Math.random() < 0.5) {
                     aRet.push({
                         queue_type_id   : 1017,
-                        target_id       : aArgs.targets[0].game_card_id,
+                        target_id       : mon.game_card_id,
                         param1          : 1,
                         param2          : true,
                     });
+                    if (aMonsterData.next_monster_id) {
+                        aRet.push({
+                            queue_type_id   : 1019,
+                            target_id       : mon.game_card_id,
+                        });
+                    }
                 } else {
                     aRet.push({
                         queue_type_id   : 1020,
-                        target_id       : aArgs.targets[0].game_card_id,
+                        target_id       : mon.game_card_id,
                     });
                 }
                 return aRet;
@@ -315,6 +326,7 @@ magic_queue = (function () {
                 break;
             case 870:
                 var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var aRet = [];
                 $.each(aArgs.field_data.cards, function(iGameCardId, val) {
                     if (val.owner != mon.owner) {
                         return true;
@@ -342,6 +354,7 @@ magic_queue = (function () {
                         });
                     });
                 });
+                return aRet;
                 break;
             case 900:
                 var aRet = [];
@@ -590,7 +603,7 @@ magic_queue = (function () {
                         return true;
                     }
                     var p2 = game_field_utility.getXYFromPosId(val.pos_id);
-                    if (p2.x == p1.x) {
+                    if (p2.y == p1.y) {
                         aRet.push({
                             queue_type_id   : 1005,
                             target_id       : iGameCardId,
@@ -693,11 +706,19 @@ magic_queue = (function () {
                 }];
                 break;
             case 1240:
-                // エクスチェンジ
                 var aRet = [];
+                var aMst = [];
+                aMst.push(game_field_reactions.getGameCardId({
+                    pos_category    : 'field',
+                    pos_id          : 'myMaster',
+                }));
+                aMst.push(game_field_reactions.getGameCardId({
+                    pos_category    : 'field',
+                    pos_id          : 'enemyMaster',
+                }));
                 for (var i = 0 ; i < 2 ; i++) {
-                    var mon = aArgs.field_data.cards[aArgs.targets[i].game_card_id];
-                    if (typeof mon.status == 'undefined') {
+                    var mon = aArgs.field_data.cards[aMst[i]];
+                    if (!mon.status) {
                         continue;
                     }
                     $.each(mon.status, function(iSt, vSt) {
@@ -710,15 +731,15 @@ magic_queue = (function () {
                 }
                 aRet.push({
                     queue_type_id   : 1026,
-                    target_id       : aArgs.targets[0].game_card_id,
+                    target_id       : aMst[0],
                     param1          : 121,
-                    param2          : aArgs.targets[1].monster_id,
+                    param2          : aArgs.field_data.cards[aMst[1]].monster_id,
                 });
                 aRet.push({
                     queue_type_id   : 1026,
-                    target_id       : aArgs.targets[1].game_card_id,
+                    target_id       : aMst[1],
                     param1          : 121,
-                    param2          : aArgs.targets[0].monster_id,
+                    param2          : aArgs.field_data.cards[aMst[0]].monster_id,
                 });
                 return aRet;
                 break;

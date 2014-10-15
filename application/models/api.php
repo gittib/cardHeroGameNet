@@ -270,6 +270,7 @@ class model_Api {
                     'status_id',
                     'status_type',
                     'status_name',
+                    'status_caption',
                 )
             );
         $rslt = $this->_db->fetchAll($sel);
