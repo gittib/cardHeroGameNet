@@ -345,101 +345,8 @@ new function () {
                 }
             }
         });
-        return;
-
-        $('#game_field td.monster_space').each(function () {
-            var iGameCardId = Number($(this).attr('game_card_id'));
-            if (isNaN(iGameCardId)) {
-                return true;
-            }
-
-            var posId = $(this).attr('id');
-            console.log(game_field_utility);
-            var p = game_field_utility.getXYFromPosId(posId);
-            var sOwner = 'my';
-            if (p.y <= 1) {
-                sOwner = 'enemy';
-            }
-            var standbyFlg = 0;
-            if ($(this).find('div[standby_flg]').size() > 0) {
-                standbyFlg = 1;
-            }
-            var aMonsterData = {
-                game_card_id        : iGameCardId,
-                card_id             : Number($(this).attr('card_id')),
-                monster_id          : Number($(this).attr('monster_id')),
-                owner               : sOwner,
-                pos_category        : 'field',
-                sort_no             : 0,
-                pos_id              : posId,
-                hp                  : Number($(this).find('span.hp').text()),
-                standby_flg         : standbyFlg,
-                skill_disable_flg   : 0,
-                act_count           : 0,
-                lvup_standby        : 0,
-                status              : {}
-            };
-            $(this).find('div.status_hidden_param').find('div.status_row').each(function() {
-                var sid = Number($(this).attr('status_id'));
-                aMonsterData.status[sid] = {
-                    status_id   : Number($(this).attr('status_id')),
-                    turn_count  : Number($(this).attr('turn_count')),
-                    param1      : $(this).attr('param1'),
-                    param2      : $(this).attr('param2'),
-                };
-            });
-            g_field_data.cards[aMonsterData.game_card_id] = aMonsterData;
-        });
-
-        var iSortNo = 1;
-        $('.hidden_cards_info div.hand_card').each(function() {
-            var iGameCardId = $(this).attr('game_card_id');
-            var sOwner = 'my';
-            if (g_field_data.turn != $(this).attr('owner')) {
-                sOwner = 'enemy';
-            }
-            g_field_data.cards[$(this).attr('game_card_id')] = {
-                game_card_id    : Number($(this).attr('game_card_id')),
-                card_id         : Number($(this).attr('card_id')),
-                owner           : sOwner,
-                pos_category    : 'hand',
-                sort_no         : iSortNo,
-            };
-            iSortNo++;
-        });
-
-        var iSortNo = 1;
-        $('.hidden_cards_info div.deck_card').each(function() {
-            var iGameCardId = $(this).attr('game_card_id');
-            var sOwner = 'my';
-            if (g_field_data.turn != $(this).attr('owner')) {
-                sOwner = 'enemy';
-            }
-            g_field_data.cards[$(this).attr('game_card_id')] = {
-                game_card_id    : Number($(this).attr('game_card_id')),
-                card_id         : Number($(this).attr('card_id')),
-                owner           : sOwner,
-                pos_category    : 'deck',
-                sort_no         : iSortNo,
-            };
-            iSortNo++;
-        });
-
-        var iSortNo = 1;
-        $('.hidden_cards_info div.used_card').each(function() {
-            var iGameCardId = $(this).attr('game_card_id');
-            var sOwner = 'my';
-            if (g_field_data.turn != $(this).attr('owner')) {
-                sOwner = 'enemy';
-            }
-            g_field_data.cards[$(this).attr('game_card_id')] = {
-                game_card_id    : Number($(this).attr('game_card_id')),
-                card_id         : Number($(this).attr('card_id')),
-                owner           : sOwner,
-                pos_category    : 'used',
-                sort_no         : iSortNo,
-            };
-            iSortNo++;
+        game_field_reactions.updateField({
+            field_data  : g_field_data,
         });
     }
 
@@ -706,6 +613,14 @@ new function () {
                                 target_id       : actor.game_card_id,
                                 param1          : actor.param1,
                             },
+                            {
+                                queue_type_id   : 1024,
+                                target_id       : game_field_reactions.getGameCardId({
+                                    pos_category    : 'field',
+                                    pos_id          : 'myMaster',
+                                }),
+                                cost_flg        : true,
+                            },
                         ],
                     };
                     break;
@@ -871,6 +786,11 @@ new function () {
                             target_id       : actor.game_card_id,
                         }],
                     };
+                    if (g_field_data.cards[actor.game_card_id].status) {
+                        if (g_field_data.cards[actor.game_card_id].status[114]) {
+                            aQueue = null;
+                        }
+                    }
                     break;
                 case 'make_card':
                     aQueue = {
@@ -878,19 +798,20 @@ new function () {
                         log_message     : 'メイクカードを使用',
                         resolved_flg    : 0,
                         priority        : 'command',
-                        queue_units : [
-                            {
-                                queue_type_id   : 1011,
-                                target_id       : actor.game_card_id,
-                                param1          : 'draw',
-                                param2          : 1,
-                            },
-                            {
-                                queue_type_id   : 1023,
-                                target_id       : actor.game_card_id,
-                                cost_flg        : true,
-                            }
-                        ],
+                        queue_units : [{
+                            queue_type_id   : 1011,
+                            target_id       : actor.game_card_id,
+                            param1          : 'draw',
+                            param2          : 1,
+                        },{
+                            queue_type_id   : 1023,
+                            target_id       : actor.game_card_id,
+                            cost_flg        : true,
+                        },{
+                            queue_type_id   : 1024,
+                            target_id       : actor.game_card_id,
+                            cost_flg        : true,
+                        }],
                     };
                     break;
                 case 'lvup':
@@ -1062,6 +983,11 @@ new function () {
      */
     function execQueue(aArgs)
     {
+        // 決着がついてたら一切処理しない
+        if (g_field_data.finish_flg) {
+            return;
+        }
+
         // 特技封じとかでごしょったからこのタイミングで綺麗にする
         delete g_field_data.tokugi_fuuji_flg;
         g_field_data.actor = {game_card_id : null};
@@ -1694,7 +1620,7 @@ new function () {
                                                 backgroundColor : '#fff',
                                             },
                                         });
-                                    });
+                                    })();
 
                                     break;
                                 case 1020:
@@ -2033,12 +1959,13 @@ new function () {
                                     }
                                     break;
                                 case 1027:
+                                    q.param1 = Number(q.param1);
                                     var mon = g_field_data.cards[q.target_id];
                                     if (!mon.status[q.param1]) {
                                         throw new Error('no_target');
                                     }
                                     var iDelSt = null;
-                                    switch (Number(q.param1)) {
+                                    switch (q.param1) {
                                         case 127:
                                         case 128:
                                             mon.monster_id = mon.status[q.param1].param1;
@@ -2128,7 +2055,9 @@ new function () {
                                             break;
                                         case 'omamori':
                                             // 女神の加護で回避されたので何もしない
-                                            console.log('omamori kita');
+                                            break;
+                                        case 'suka':
+                                            // がむしゃらでミスったので何もしない
                                             break;
                                         default:
                                             throw new Error('argument_error');

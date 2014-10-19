@@ -55,6 +55,9 @@ class ApiController extends Zend_Controller_Action
                 $aMasterData = $this->_model->getCardMasterData();
                 $json = json_encode($aMasterData);
                 break;
+            case 'image_data':
+                $json = $this->_model->getImgs();
+                break;
             default:
                 throw new Zend_Controller_Action_Exception('Unknown script', 404);
         }
@@ -62,6 +65,18 @@ class ApiController extends Zend_Controller_Action
         $this->getResponse()->setHeader('Content-Type', 'text/javascript');
         $this->view->assign('sScriptName', $sScriptName);
         $this->view->assign('json', $json);
+    }
+
+    public function imageJsonLoadAction()
+    {
+        $this->_helper->layout->disableLayout();
+        $request = $this->getRequest();
+
+        $json = $this->_model->getImgs();
+        $this->getResponse()->setHeader('Content-Type', 'application/json; charset=utf-8');
+
+        echo $json;
+        exit;
     }
 
     public function sitemapAction()

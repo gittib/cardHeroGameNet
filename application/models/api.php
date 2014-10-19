@@ -281,6 +281,43 @@ class model_Api {
         return $aRet;
     }
 
+    public function getImgs() {
+        $s1 = $this->_db->select()
+            ->from(
+                array('m_card'),
+                array(
+                    'image_file_name',
+                )
+            );
+        $s2 = $this->_db->select()
+            ->from(
+                array('m_monster'),
+                array(
+                    'image_file_name',
+                )
+            );
+        $s3 = $this->_db->select()->union(array($s1, $s2));
+        $sel = $this->_db->select()
+            ->distinct()
+            ->from(
+                $s3,
+                array(
+                    'image_file_name',
+                )
+            );
+        $rslt = $this->_db->fetchCol($sel);
+
+        $ret = array();
+        foreach ($rslt as $val) {
+            $key = '/images/card/' . $val;
+            $fname = $_SERVER['DOCUMENT_ROOT'] . $key;
+            $ret[$key] = base64_encode(fread(fopen($fname, 'r'), filesize($fname)));
+        }
+        $ret = str_replace('\/', '/', json_encode($ret));
+
+        return $ret;
+    }
+
     public function getUrl() {
         $aUrls = array(
             '/',

@@ -99,7 +99,7 @@ _eos_;
         $aMonsterData[$pos] = <<<_eos_
         <td id="{$pos}" class="monster_space" monster_id="{$val['monster_id']}" card_id="{$val['card_id']}" game_card_id="{$iGameCardId}">
             <div class="pict">
-                <img class="card_image" src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
+                <img class="card_image" src="/images/card/card.jpg" src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
             </div>
             <div class="param">
                 {$sLvHp}<br />
@@ -143,7 +143,7 @@ _eos_;
         if ($sOwner == 'my') {
             $sMyHandHtml .= <<<_eos_
     <div class="hand_card" game_card_id="{$iGameCardId}" card_id="{$val['card_id']}">
-        <img src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
+        <img src="/images/card/card.jpg" original-src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
     </div>
 
 _eos_;

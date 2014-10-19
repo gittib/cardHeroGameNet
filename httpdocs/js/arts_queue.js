@@ -211,16 +211,18 @@ arts_queue = (function () {
                 return aRet;
                 break;
             case 1007:
-                var aRet = [{
-                    queue_type_id   : 1002,
-                    target_id       : aArgs.targets[0].game_card_id,
-                    param2          : true,
-                }];
+                var aRet = [];
                 if (Math.random() * 2 < 1) {
                     aRet.push({
                         queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
                         target_id       : targetId,
                         param1          : aArtInfo.power,
+                    });
+                } else {
+                    aRet.push({
+                        queue_type_id   : 9999,
+                        target_id       : aArgs.actor_id,
+                        param1          : 'suka',
                     });
                 }
                 return aRet;
@@ -422,7 +424,6 @@ arts_queue = (function () {
                 return aRet;
                 break;
             case 1018:
-                var aRet = [];
                 var sPosId = (function() {
                     var a = [
                         'enemyBack1',
@@ -433,6 +434,14 @@ arts_queue = (function () {
                     ];
                     return a[parseInt(Math.random() * 5)];
                 })();
+                var aRet = [{
+                    queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                    target_id       : game_field_reactions.getGameCardId({
+                        pos_category    : 'field',
+                        pos_id          : sPosId,
+                    }),
+                    param1          : aArtInfo.power,
+                }];
                 $.each(aArgs.field_data.cards, function(i, val) {
                     if (val.pos_category != 'field') {
                         return true;
@@ -444,13 +453,7 @@ arts_queue = (function () {
                         return true;
                     }
 
-                    if (val.pos_id == sPosId) {
-                        aRet.push({
-                            queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
-                            target_id       : val.game_card_id,
-                            param1          : aArtInfo.power,
-                        });
-                    } else if (game_field_utility.getDistance(sPosId, val.pos_id) == 1) {
+                    if (game_field_utility.getDistance(sPosId, val.pos_id) == 1) {
                         aRet.push({
                             queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
                             target_id       : val.game_card_id,

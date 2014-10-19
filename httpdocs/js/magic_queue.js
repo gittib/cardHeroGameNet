@@ -154,7 +154,10 @@ magic_queue = (function () {
                 var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
                 var aMonsterData = g_master_data.m_monster[mon.monster_id];
                 if (aMonsterData.lv == 1 && !aMonsterData.next_monster_id) {
-                    break;
+                    return [{
+                        queue_type_id   : 9999,
+                        param1          : 'invalid_target',
+                    }];
                 }
                 if (Math.random() < 0.5) {
                     aRet.push({

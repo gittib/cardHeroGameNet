@@ -3,6 +3,7 @@ game_field_reactions = (function () {
     var g_master_data;
     var g_field_data;
     var g_base_color;
+    var g_image_data = image_data.getInfo();
 
     return {
         'initMasterData'            : initMasterData,
@@ -116,16 +117,17 @@ game_field_reactions = (function () {
                         }
                         var sImgSrc = '/images/card/card.jpg';
                         var sImgAlt = 'カードヒーロー';
+                        var sImgClass = 'card_image';
                         var sLv = '?';
                         var sLvHp  = '<span class="mini-font">LV</span><span class="lv">?</span>';
                         sLvHp += '<span class="mini-font">HP</span><span class="hp">?</span>';
                         if (!val.standby_flg) {
                             sImgSrc = '/images/card/';
                             if (game_field_utility.getMaxActCount(val.monster_id) <= val.act_count) {
-                                sImgSrc += 'gray_';
+                                sImgClass += ' gray';
                             }
                             sImgSrc += g_master_data.m_monster[val.monster_id].image_file_name;
-                            sImgAlt = g_master_data.m_monster[val.monster_id].monster_name;
+                            sImgAlt = g_master_data.m_monster[val.monster_id].name;
                             sLv = g_master_data.m_monster[val.monster_id].lv;
                             sLvHp  = '<span class="mini-font">LV</span><span class="lv">' + sLv + '</span>';
                             sLvHp += '<span class="mini-font">HP</span><span class="hp">' + val.hp + '</span>';
@@ -173,9 +175,13 @@ game_field_reactions = (function () {
                             });
                         }
 
+                        if (g_image_data[sImgSrc]) {
+                            sImgSrc = 'data:image/jpg;base64,' + g_image_data[sImgSrc];
+                        }
+
                         $('#game_field td#' + val.pos_id).html(
                             '<div class="pict">' +
-                                '<img class="card_image" src="' + sImgSrc + '" alt="' + sImgAlt + '"/>' +
+                                '<img class="' + sImgClass + '" src="' + sImgSrc + '" alt="' + sImgAlt + '"/>' +
                             '</div>' +
                             '<div class="param">' +
                                 sLvHp + '<br />' +
@@ -194,6 +200,11 @@ game_field_reactions = (function () {
                             if (aCardData.category == 'magic') {
                                 g_master_data.m_magic
                             }
+
+                            if (g_image_data[sImgSrc]) {
+                                sImgSrc = 'data:image/jpg;base64,' + g_image_data[sImgSrc];
+                            }
+
                             sMyHandHtml +=
                             '<div class="hand_card" game_card_id="' + val.game_card_id + '">' +
                                 '<img src="' + sImgSrc + '" alt="' + sImgAlt + '"/>' +

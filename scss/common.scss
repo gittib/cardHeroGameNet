@@ -30,3 +30,8 @@ a.blank_link {
     padding-right: 15px;
 }
 
+img.gray {
+    -webkit-filter: grayscale(1); /* Webkit */
+    filter: gray; /* IE6-9 */
+    filter: grayscale(1); /* W3C */
+}
