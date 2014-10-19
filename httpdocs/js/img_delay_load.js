@@ -1,24 +1,48 @@
-
 $(function() {
-    var img_delay_load_func = function(triggerNode){
-        // 引き金となる要素を設定
-        var triggerNode = $("img[original-src]");
+    var dt = new Date();
+    var aImg;
 
-        triggerNode.each(function() {
-            // 引き金となる要素の位置を取得
-            var triggerNodePosition = $(this).offset().top - $(window).height();    
-            // 現在のスクロール位置が引き金要素の位置より下にあれば‥
-            if ($(window).scrollTop() > triggerNodePosition) {
-                $(this).attr("src", $(this).attr("original-src"));
+    (function _img_delay_load_main() {
+        try {
+            if (localStorage.img_data) {
+                aImg = JSON.parse(localStorage.img_data);
+                if (dt.getTime() < Number(aImg.upd_date) + 3600*24*7) {
+                    // localStorageの画像データが使えるのでajaxとか面倒な事は必要ない
+                    _swapOriginalImages();
+                } else {
+                    throw '';
+                }
+            } else if (typeof localStorage != 'undefined') {
+                throw '';
             }
-        })
-    };
+        } catch (e) {
+            _getImagesFromServer();
+        }
+    })();
 
-    // まず1回叩く
-    img_delay_load_func();
+    function _getImagesFromServer() {
+        $.getJSON('/api/image-json-load/', null, function(r) {
+            r.upd_date = dt.getTime();
+            try {
+                localStorage.img_data = JSON.stringify(r);
+            } catch (e) {}
+            aImg = r;
+            _swapOriginalImages();
+        });
+    }
 
-    // 画面スクロール毎に判定を行う
-    $(window).scroll(function() {
-        img_delay_load_func();
-    });
-})
+    function _swapOriginalImages() {
+        var sImg64 = 'data:image/jpg;base64,';
+        $('img[original-src]').each(function() {
+            var t = $(this);
+            var k = t.attr('original-src');
+            if (aImg[k]) {
+                t.attr('src', sImg64 + aImg[k]);
+            } else {
+                t.attr('src', k);
+            }
+            t.removeAttr('original-src');
+        });
+    }
+
+});

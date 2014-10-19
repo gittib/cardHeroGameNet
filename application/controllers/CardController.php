@@ -54,7 +54,7 @@ class CardController extends Zend_Controller_Action
         $this->view->assign('aCardInfo', $aCardInfo);
         $this->_layout->title = 'カードリスト';
         $this->_stylesheet[] = '/css/card_list.css';
-        $this->_javascript[] = '/js/img_delay_load.js';
+        $this->_javascript[] = '/js/img_delay_load.min.js';
     }
 
     private function _getModel() {

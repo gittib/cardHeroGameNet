@@ -23,7 +23,9 @@ class model_Game {
                 array(
                     'game_fields'   => new Zend_Db_Expr("count(game_field_id)"),
                 )
-            );
+            )
+            ->where('t_game_field.del_flg = ?', 0)
+            ;
         if (isset($aOption['game_field_id']) && $aOption['game_field_id'] != '') {
             $selFieldCnt->where('t_game_field.game_field_id in(?)', $aOption['game_field_id']);
         }
@@ -53,6 +55,7 @@ class model_Game {
                     'game_field_id',
                 )
             )
+            ->where('t_game_field.del_flg = ?', 0)
             ->order(array(
                 'upd_date desc',
                 'game_field_id',

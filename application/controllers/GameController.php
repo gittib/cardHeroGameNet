@@ -31,7 +31,7 @@ class GameController extends Zend_Controller_Action
         $request = $this->getRequest();
         $this->_stylesheet[] = '/css/game_list.css';
         $this->_javascript[] = '/js/game_list.js';
-        $this->_javascript[] = '/js/img_delay_load.js';
+        $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_layout->title       = 'ゲームフィールド一覧';
         $this->_layout->canonical   = '/game/list/';
         $this->_layout->description = 'カードヒーローを実際に遊んで、1ターン分の結果を投稿できます。投稿されたフィールドに返信する形で遊ぶこともできます。';
@@ -65,7 +65,7 @@ class GameController extends Zend_Controller_Action
         $this->_stylesheet[] = '/css/game_list.css';
         $this->_stylesheet[] = '/css/deck_list.css';
         $this->_javascript[] = '/js/game_list.js';
-        $this->_javascript[] = '/js/img_delay_load.js';
+        $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_layout->title = 'ゲーム開始';
         $iPage = $request->getParam('page_no');
         $ret = $modelDeck->getDeckList(array(
@@ -108,7 +108,7 @@ class GameController extends Zend_Controller_Action
         $this->_stylesheet[] = '/css/game_list.css';
         $this->_stylesheet[] = '/css/deck_list.css';
         $this->_stylesheet[] = '/css/game_receive.css';
-        $this->_javascript[] = '/js/img_delay_load.js';
+        $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_layout->title = 'ゲーム開始';
         $this->_layout->noindex = true;
 
