@@ -4,7 +4,11 @@
   xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
 <?php
     foreach ($this->aUrls as $val) {
-        echo "<url><loc>{$val}</loc></url>\n";
+        echo "<url>\n";
+        foreach ($val as $attr => $data) {
+            echo "<{$attr}>{$data}</{$attr}>\n";
+        }
+        echo "</url>\n";
     }
 ?>
 </urlset>

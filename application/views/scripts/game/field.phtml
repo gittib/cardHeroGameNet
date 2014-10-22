@@ -292,6 +292,16 @@ _eos_;
     </div>
 </div>
 <div id="buttons_frame">
+<?php
+if ($aCardInfo['field_info']['turn_count'] <= 2) {
+    echo <<<_eos_
+    <div class="marigan_button">
+        マリガン
+    </div>
+
+_eos_;
+}
+?>
     <div class="cancel_button">
         キャンセル
     </div>

@@ -1,4 +1,4 @@
-$(function() {
+(function() {
     var dt = new Date();
     var aImg;
 
@@ -32,17 +32,19 @@ $(function() {
     }
 
     function _swapOriginalImages() {
-        var sImg64 = 'data:image/jpg;base64,';
-        $('img[original-src]').each(function() {
-            var t = $(this);
-            var k = t.attr('original-src');
-            if (aImg[k]) {
-                t.attr('src', sImg64 + aImg[k]);
-            } else {
-                t.attr('src', k);
-            }
-            t.removeAttr('original-src');
+        $(function() {
+            var sImg64 = 'data:image/jpg;base64,';
+            $('img[original-src]').each(function() {
+                var t = $(this);
+                var k = t.attr('original-src');
+                if (aImg[k]) {
+                    t.attr('src', sImg64 + aImg[k]);
+                } else {
+                    t.attr('src', k);
+                }
+                t.removeAttr('original-src');
+            });
         });
     }
 
-});
+})();

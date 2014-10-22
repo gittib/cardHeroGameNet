@@ -532,7 +532,7 @@ game_field_reactions = (function () {
     var g_master_data;
     var g_field_data;
     var g_base_color;
-    var g_image_data = image_data.getInfo();
+    var g_image_data;
 
     return {
         'initMasterData'            : initMasterData,
@@ -560,6 +560,18 @@ game_field_reactions = (function () {
         g_master_data = aArgs.master_data;
         g_field_data  = aArgs.field_data;
         g_base_color  = aArgs.base_color;
+        try {
+            g_image_data = JSON.parse(localStorage.img_data);
+        } catch (e) {
+            $.getJSON('/api/image-json-load/', null, function(r) {
+                var dt = new Date();
+                r.upd_date = dt.getTime();
+                g_image_data = r;
+                try {
+                    localStorage.img_data = r;
+                } catch (e) {}
+            });
+        }
     }
 
     /**
@@ -3972,10 +3984,11 @@ magic_queue = (function () {
                 break;
             case 1150:
                 // ソートカード
-                if (aArgs.targets[0].game_card_id) {
-                    aArgs.field_data.sort_card_flg = true;
-                    return null;
-                }
+                return [{
+                    queue_type_id   : 9999,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 'sort_card',
+                }];
                 break;
             case 1160:
                 var aRet = [];
@@ -4524,10 +4537,6 @@ new function () {
                 });
             };
             switch (checkGameState()) {
-                case 'sort_card':
-                    delete g_field_data.sort_card_flg;
-                    _delActorInfo();
-                    break;
                 case 'tokugi_fuuji':
                     delete g_field_data.tokugi_fuuji_flg;
                     _delActorInfo();
@@ -5370,6 +5379,7 @@ new function () {
                             }
                         }
                     }
+
                     var _insertDrawAnimation = function (_q) {
                         if (g_field_data.cards[_q.target_id].owner == 'my') {
                             var posId = '#myPlayersInfo div.hand';
@@ -5400,7 +5410,8 @@ new function () {
                             }
                         } catch (e) {}
                         return t;
-                    }
+                    };
+
                     for (var iterator_of_queue_now_proc = 0 ; iterator_of_queue_now_proc < aExecAct.queue_units.length ; iterator_of_queue_now_proc++) {
                         var q = aExecAct.queue_units[iterator_of_queue_now_proc];
                         if (typeof q != 'object') {
@@ -6311,6 +6322,9 @@ new function () {
                                             break;
                                         case 'suka':
                                             // がむしゃらでミスったので何もしない
+                                            break;
+                                        case 'sort_card':
+                                            g_field_data.sort_card_flg = true;
                                             break;
                                         default:
                                             throw new Error('argument_error');

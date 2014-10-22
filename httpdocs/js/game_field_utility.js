@@ -109,6 +109,7 @@ game_field_utility = (function () {
          * 通知情報をアラートで出すかDOM操作で出すか、出し分けできるようにしとく
          *
          * @param   aArgs.message   : 表示するメッセージ
+         * @param   aArgs.no_alert  : trueの場合はalertを出さない
          */
         'myAlertInField'        : myAlertInField,
     };
@@ -522,7 +523,7 @@ game_field_utility = (function () {
             bAlertPopup = true;
         }
         $('#game_infomation_frame .info').text(sGameInfomationMessage);
-        if (bAlertPopup && 0 < sGameInfomationMessage.length) {
+        if (bAlertPopup && 0 < sGameInfomationMessage.length && !aArgs.no_alert) {
             alert(sGameInfomationMessage);
         }
     }

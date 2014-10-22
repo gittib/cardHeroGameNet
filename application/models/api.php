@@ -320,11 +320,22 @@ class model_Api {
 
     public function getUrl() {
         $aUrls = array(
-            '/',
-            '/card/list/',
-            '/deck/list/',
-            '/game/',
-            '/game/list/',
+            array(
+                'loc'       => 'http://' . $_SERVER['SERVER_NAME'] . '/',
+                'priority'  => 1,
+            ),
+            array(
+                'loc'   => 'http://' . $_SERVER['SERVER_NAME'] . '/card/',
+                'priority'  => 0.9,
+            ),
+            array(
+                'loc'   => 'http://' . $_SERVER['SERVER_NAME'] . '/deck/',
+                'priority'  => 0.9,
+            ),
+            array(
+                'loc'   => 'http://' . $_SERVER['SERVER_NAME'] . '/game/',
+                'priority'  => 0.9,
+            ),
         );
 
         $sel = $this->_db->select()
@@ -332,12 +343,17 @@ class model_Api {
                 't_game_field',
                 array(
                     'game_field_id',
+                    'upd_date'  => new Zend_Db_Expr("to_char(upd_date, 'yyyy-mm-dd')"),
                 )
             )
+            ->where('del_flg != 1')
             ->where('open_flg = 1');
-        $rslt = $this->_db->fetchCol($sel);
+        $rslt = $this->_db->fetchAll($sel);
         foreach ($rslt as $val) {
-            $aUrls[] = '/game/field/' . $val . '/';
+            $aUrls[] = array(
+                'loc'       => 'http://' . $_SERVER['SERVER_NAME'] . '/game/field/' . $val['game_field_id'] . '/',
+                'lastmod'   => $val['upd_date'],
+            );
         }
 
         $sel = $this->_db->select()
@@ -345,19 +361,15 @@ class model_Api {
                 'm_card',
                 array(
                     'card_id',
+                    'upd_date'  => new Zend_Db_Expr("to_char(upd_date, 'yyyy-mm-dd')"),
                 )
             );
-        $rslt = $this->_db->fetchCol($sel);
+        $rslt = $this->_db->fetchAll($sel);
         foreach ($rslt as $val) {
-            $aUrls[] = '/card/detail/' . $val . '/';
-        }
-
-        foreach ($aUrls as $key => $val) {
-            $sHttp = 'http://';
-            if (isset($_SERVER['HTTPS']) && $_SERVER['https']) {
-                $sHttp = 'https://';
-            }
-            $aUrls[$key] = $sHttp . $_SERVER['SERVER_NAME'] . $val;
+            $aUrls[] = array(
+                'loc'       => 'http://' . $_SERVER['SERVER_NAME'] . '/card/detail/' . $val['card_id'] . '/',
+                'lastmod'   => $val['upd_date'],
+            );
         }
 
         return $aUrls;

@@ -561,10 +561,11 @@ magic_queue = (function () {
                 break;
             case 1150:
                 // ソートカード
-                if (aArgs.targets[0].game_card_id) {
-                    aArgs.field_data.sort_card_flg = true;
-                    return null;
-                }
+                return [{
+                    queue_type_id   : 9999,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 'sort_card',
+                }];
                 break;
             case 1160:
                 var aRet = [];

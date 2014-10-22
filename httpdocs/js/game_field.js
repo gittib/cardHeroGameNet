@@ -3,15 +3,19 @@ new function () {
     var g_master_data = master_data.getInfo();
 
     var g_field_data = {
-        turn            : null,
-        my_stone        : 0,
-        enemy_stone     : 0,
-        lvup_assist     : 0,
-        cards           : {},
-        queues          : [],
-        old_queues      : [],
-        resolved_queues : [],
-        actor           : {
+        turn                : null,
+        my_stone            : 0,
+        enemy_stone         : 0,
+        lvup_assist         : 0,
+        tokugi_fuuji_flg    : false,
+        sort_card_flg       : false,
+        aSortingCards       : [],
+
+        cards               : {},
+        queues              : [],
+        old_queues          : [],
+        resolved_queues     : [],
+        actor : {
             game_card_id    : null,
         },
 
@@ -53,7 +57,7 @@ new function () {
             };
 
             var oDom = $(this);
-            var sGameState = checkGameState();
+            var sGameState = game_field_reactions.checkGameState();
             var sActorAutoChange = $('[name=actor_auto_change]:checked').val();
             if (!sActorAutoChange) {
                 sActorAutoChange = 'hand';
@@ -94,7 +98,7 @@ new function () {
             };
 
             var oDom = $(this);
-            switch (checkGameState()) {
+            switch (game_field_reactions.checkGameState()) {
                 case 'select_actor':
                 case 'select_action':
                 case 'select_target':
@@ -167,7 +171,7 @@ new function () {
         $(document).on('click', '.command_row', function () {
             var oDom = $(this);
             var aCard = g_field_data.cards[g_field_data.actor.game_card_id];
-            switch (checkGameState()) {
+            switch (game_field_reactions.checkGameState()) {
                 case 'lvup_standby':
                 case 'select_action':
                 case 'select_target':
@@ -238,6 +242,7 @@ new function () {
                     }
                     break;
             }
+            game_field_reactions.updateGameInfoMessage();
         });
 
         $(document).on('click', '.check_magic_effect[game_card_id]', function () {
@@ -270,11 +275,7 @@ new function () {
                     field_data  : g_field_data,
                 });
             };
-            switch (checkGameState()) {
-                case 'sort_card':
-                    delete g_field_data.sort_card_flg;
-                    _delActorInfo();
-                    break;
+            switch (game_field_reactions.checkGameState()) {
                 case 'tokugi_fuuji':
                     delete g_field_data.tokugi_fuuji_flg;
                     _delActorInfo();
@@ -520,64 +521,6 @@ new function () {
     }
 
     /**
-     * checkGameState
-     * レベルアップなど、処理途中でユーザの操作を受け付けるものがあるので、
-     * それらの操作受付中かどうかを判定する
-     */
-    function checkGameState()
-    {
-        console.log('checkGameState started.');
-        // 特技封じの対象特技選択とか、特殊な状態の判定
-        if (g_field_data.sort_card_flg) {
-            console.log('sort_card');
-            return 'sort_card';
-        }
-        if (g_field_data.tokugi_fuuji_flg) {
-            console.log('tokugi_fuuji');
-            return 'tokugi_fuuji';
-        }
-        try {
-            $.each(g_field_data.cards, function (i, val) {
-                if (val.status) {
-                    if (val.status[111]) {
-                        return true;
-                    }
-                    if (val.status[127]) {
-                        return true;
-                    }
-                    if (val.status[128]) {
-                        return true;
-                    }
-                }
-                if (0 < val.lvup_standby) {
-                    throw 'lvup_standby';
-                }
-                if (0 < g_field_data.lvup_assist) {
-                    throw 'lvup_standby';
-                }
-            });
-        } catch (e) {
-            console.log(e);
-            if (e == 'lvup_standby') {
-                console.log('lvup_standby');
-                return 'lvup_standby';
-            } else {
-                throw e;
-            }
-        }
-
-        // 特殊なのが無かったら通常の状態判定
-        if (g_field_data.actor.act_type) {
-            console.log('select_target');
-            return 'select_target';
-        } else if (g_field_data.actor.game_card_id) {
-            console.log('select_action');
-            return 'select_action';
-        }
-        return 'select_actor';
-    }
-
-    /**
      * addTarget
      * 適切に対象に取れるかどうか確認して、対象情報を追加する
      * 追加した時点で対象情報が充足した場合、キュー入れまで行う
@@ -685,9 +628,6 @@ new function () {
                     console.log('arts q set sita');
                     console.log(aQueue);
                     if (g_field_data.tokugi_fuuji_flg) {
-                        game_field_utility.myAlertInField({
-                            message : '封じる特技を選んで下さい',
-                        });
                         game_field_reactions.updateActorDom({
                             field_data  : g_field_data,
                             game_state  : 'tokugi_fuuji',
@@ -705,9 +645,6 @@ new function () {
                     console.log('magic q set sita');
                     console.log(aQueue);
                     if (g_field_data.tokugi_fuuji_flg) {
-                        game_field_utility.myAlertInField({
-                            message : '封じる特技を選んで下さい',
-                        });
                         game_field_reactions.updateActorDom({
                             field_data  : g_field_data,
                             game_state  : 'tokugi_fuuji',
@@ -1117,6 +1054,7 @@ new function () {
                             }
                         }
                     }
+
                     var _insertDrawAnimation = function (_q) {
                         if (g_field_data.cards[_q.target_id].owner == 'my') {
                             var posId = '#myPlayersInfo div.hand';
@@ -1147,7 +1085,8 @@ new function () {
                             }
                         } catch (e) {}
                         return t;
-                    }
+                    };
+
                     for (var iterator_of_queue_now_proc = 0 ; iterator_of_queue_now_proc < aExecAct.queue_units.length ; iterator_of_queue_now_proc++) {
                         var q = aExecAct.queue_units[iterator_of_queue_now_proc];
                         if (typeof q != 'object') {
@@ -2036,6 +1975,7 @@ new function () {
                                 case 9999:
                                     switch (q.param1) {
                                         case 'regenerate':
+                                            // 再生
                                             var mon = g_field_data.cards[q.target_id];
                                             if (mon.before_game_card_id) {
                                                 mon.pos_category = 'used';
@@ -2059,8 +1999,31 @@ new function () {
                                         case 'suka':
                                             // がむしゃらでミスったので何もしない
                                             break;
+                                        case 'sort_card':
+                                            // ソートカード発動時の処理
+                                            g_field_data.sort_card_flg = true;
+
+                                            // 対象カードをピックアップする
+                                            var mon = g_field_data.cards[q.target_id];
+                                            var aPicks = [];
+                                            $.each(g_field_data.cards, function(iGameCardId, val) {
+                                                if (val.owner == mon.owner && val.pos_category == 'deck') {
+                                                    aPicks.push({
+                                                        game_card_id    : iGameCardId,
+                                                        sort_no         : val.sort_no ? parseInt(val.sort_no) : 0,
+                                                    });
+                                                }
+                                            });
+                                            aPicks.sort(function(v1, v2) {
+                                                return v1.sort_no - v2.sort_no;
+                                            });
+                                            g_field_data.aSortingCards = [];
+                                            for (var i = 0 ; i < 5 ; i++) {
+                                                g_field_data.aSortingCards.push(aPicks.shift());
+                                            }
+                                            break;
                                         default:
-                                            throw new Error('argument_error');
+                                            throw new Error('9999 argument_error[' + q.param1 + ']');
                                             break;
                                     }
                                     break;
@@ -2119,15 +2082,6 @@ new function () {
                     }
                 });
             })();
-            var sMessage = '';
-            switch (checkGameState()) {
-                case 'lvup_standby':
-                    sMessage = 'レベルアップさせるモンスターを選んで下さい';
-                    break;
-            }
-            game_field_utility.myAlertInField({
-                message : sMessage,
-            });
         }
     }
 

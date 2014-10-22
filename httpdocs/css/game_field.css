@@ -76,6 +76,20 @@
   #hand_card div.target img {
     border-color: #ff0000; }
 
+.sort_card_frame {
+  width: 100%;
+  border-top: solid 1px;
+  border-bottom: solid 1px;
+  padding: 0 5px; }
+  .sort_card_frame .sort_card_target {
+    border: solid 1px;
+    font-size: 18px; }
+    .sort_card_frame .sort_card_target div {
+      float: left; }
+    .sort_card_frame .sort_card_target .pict {
+      width: 50px;
+      height: 50px; }
+
 div.card_name {
   float: left; }
 
@@ -133,6 +147,12 @@ div.close_button {
     border: solid 2px;
     font-size: 18px;
     text-align: center; }
+  #buttons_frame div.marigan_button {
+    background-color: #ffffee;
+    border-top-color: #ffffdd;
+    border-left-color: #ffffdd;
+    border-right-color: #888800;
+    border-bottom-color: #888800; }
   #buttons_frame div.cancel_button {
     background-color: #ffeeee;
     border-top-color: #ffdddd;
