@@ -6,10 +6,10 @@ table.monster_data td {
   border: solid 1px; }
 table.monster_data div {
   padding: 1px; }
-table.monster_data div.special_attack {
-  border-top: dotted 1px; }
-table.monster_data div.skill {
-  border-top: dotted 1px; }
+  table.monster_data div.special_attack {
+    border-top: dotted 1px; }
+  table.monster_data div.skill {
+    border-top: dotted 1px; }
 
 div.art_icon {
   float: left; }
@@ -54,3 +54,16 @@ div.magic_stone {
   float: right;
   width: 10%;
   font-size: 16px; }
+
+.card_description_frame {
+  width: 100%;
+  padding-top: 25px; }
+  .card_description_frame .label {
+    width: 100%;
+    background-color: #06f;
+    color: #fff;
+    font-size: 12px; }
+  .card_description_frame .card_description {
+    border: solid 1px;
+    border-top: 0;
+    padding: 3px; }

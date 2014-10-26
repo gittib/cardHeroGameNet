@@ -10,6 +10,12 @@ if (APPLICATION_ENV != 'production') {
     $sTitle = '【DEV】' . $sTitle;
 }
 
+// description
+$sDescription = '';
+if (isset($this->layout()->description)) {
+    $sDescription = $this->layout()->description;
+}
+
 // canonical
 $sDefaultCanonical = preg_replace('/\?.*$/', '', $_SERVER['REQUEST_URI']);
 $sCanonical = "<link rel='canonical' href='{$sDefaultCanonical}' />\n";
@@ -77,6 +83,7 @@ _eos_;
 <head>
 <title><?php echo $sTitle; ?>カードヒーロー＠スマホ</title>
 <meta name="keywords" content="カードヒーロー,スマホ" />
+<meta name="description" content="<?php echo $sDescription; ?>" />
 <meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1,minimum-scale=1" />
 <link rel="shortcut icon" href="/images/favicon.ico" />
 <?php echo $sNoIndex; ?>

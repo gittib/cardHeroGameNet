@@ -44,6 +44,7 @@ class CardController extends Zend_Controller_Action
         $this->view->assign('template', $_template);
         $this->_stylesheet[] = '/css/card_detail.css';
         $this->_layout->title = $aRet['cardInfo']['card_name'];
+        $this->_layout->description = preg_replace('/%descend%.*$/', '', $aRet['cardInfo']['description']);
         $this->render('detail');
     }
 

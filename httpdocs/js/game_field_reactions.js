@@ -56,6 +56,16 @@ game_field_reactions = (function () {
         'isDuplicateFieldPos'       : isDuplicateFieldPos,
 
         /**
+         * レベルアップできるか判定する
+         *
+         * @param   mon                     : チェック対象のモンスター情報
+         * @param   aOption.bCheckLvupCnt   : trueならレベルアップ権利状態も判定する
+         *
+         * @return  true : レベルアップ可能　false : レベルアップ不可能
+         */
+        'isLvupOk'                  : isLvupOk,
+
+        /**
          * 挑発の効果が効いてるか判定する
          *
          * @param   aArgs.game_card_id  : (必須)チェック対象のgame_card_id
@@ -77,6 +87,7 @@ game_field_reactions = (function () {
          * フィールド情報を元にHTMLを構成し直す
          *
          * @param   aArgs.field_data    : フィールド情報管理オブジェクト
+         *                                常に保持しているが、コピーが発生した場合に備えて毎回リフレッシュする
          */
         'updateField'               : updateField,
 
@@ -172,79 +183,52 @@ game_field_reactions = (function () {
                 'enemyBack2'    : '#enemyBack2',
             };
 
-            var sMyHandHtml = '';
+            var aMyHandHtml = [];
             $('.lvup_ok').removeClass('lvup_ok');
             $('.lvup_checking').removeClass('lvup_checking');
 
-            var _isLvupOk = function (mon) {
-                if (mon.lvup_standby <= 0 && g_field_data.lvup_assist <= 0) {
-                    return false;
-                }
-                if (mon.status) {
-                    if (mon.status[111]) {
-                        return false;
-                    }
-                    if (mon.status[127]) {
-                        return false;
-                    }
-                    if (mon.status[128]) {
-                        return false;
-                    }
-                }
-
-                var aMonsterData = g_master_data.m_monster[mon.monster_id];
-                if (aMonsterData.next_monster_id) {
-                    return true;
-                }
-
-                try {
-                    $.each(g_field_data.cards, function(i2, vval) {
-                        var bSuper = game_field_utility.isValidSuper({
-                            aBefore : mon,
-                            aAfter  : vval,
-                        });
-                        if (bSuper) {
-                            console.log('super_ok ktkr');
-                            throw 'super_ok';
-                        }
-                    });
-                } catch (e) {
-                    if (e == 'super_ok') {
-                        return true;
-                    } else {
-                        throw e;
-                    }
-                }
-
-                return false;
-            };
-
-            var _getSortCardHtml = function() {
-                if (!g_field_data.aSortingCards || g_field_data.aSortingCards.length <= 0) {
-                    return '';
+            (function _getSortCardHtml() {
+                if (checkGameState() != 'sort_card' || !g_field_data.aSortingCards || g_field_data.aSortingCards.length <= 0) {
+                    $('.sort_card_frame').remove();
+                    return;
+                } else if ($('.sort_card_frame').size() <= 0) {
+                    $('#hand_card').after('<div class="sort_card_frame"></div>');
                 }
 
                 g_field_data.aSortingCards.sort(function(v1,v2) {
                     return v1.sort_no - v2.sort_no;
                 });
-                var sHtml = '<div class="sort_card_frame">';
+                var sHtml = '<div class="sort_card_title">Sort Card</div>';
+                var sNext = ' <span class="next_draw">NEXT DRAW</span>';
                 $.each(g_field_data.aSortingCards, function(i,val) {
                     var aCardData = g_master_data.m_card[g_field_data.cards[val.game_card_id].card_id];
                     var sImgSrc = '/images/card/';
+                    var sClass = 'sort_card_target clearfix';
+                    if (val.bSelected) {
+                        sClass += ' selected';
+                    }
                     sImgSrc += aCardData.image_file_name;
                     if (g_image_data && g_image_data[sImgSrc]) {
                         sImgSrc = 'data:image/jpg;base64,' + g_image_data[sImgSrc];
                     }
-                    sHtml += '<div class="sort_card_target clearfix">' +
-                        '<div class="img_frame"><img class="pict" src="' + sImgSrc + '" alt="' + aCardData.card_name + '" /></div>' +
-                        '<div class="card_name">' + aCardData.card_name + '</div>' +
-                    '</div>';
+                    sHtml +=    '<div class="' + sClass + '" iref="' + i + '">' +
+                                    '<div class="img_frame"><img class="pict" src="' + sImgSrc + '" alt="' + aCardData.card_name + '" /></div>' +
+                                    '<div class="main_frame">' +
+                                        aCardData.card_name +
+                                        sNext +
+                                    '</div>' +
+                                    '<div class="dtl_link"><a class="blank_link" href="/card/detail/' + aCardData.card_id + '/" target="_blank">詳細</a></div>' +
+                                '</div>';
+                    sNext = '';
                 });
-                sHtml += '</div>';
-                return sHtml;
-            };
-            $('.sort_card_frame').remove();
-            $('#hand_card').after(_getSortCardHtml());
+                sHtml +=    '<div class="sort_end_button_frame">' +
+                                '<div class="sort_end_button">' +
+                                    'これでOK' +
+                                '</div>' +
+                            '</div>';
+
+                $('.sort_card_frame').html(sHtml);
+            })();
 
             $.each(g_field_data.cards, function (i, val) {
                 switch (val.pos_category) {
@@ -294,7 +278,11 @@ game_field_reactions = (function () {
                             sStatusEffect += '<span class="charge">！</span>';
                         }
 
-                        var bLvupOk = _isLvupOk(val);
+                        var bLvupOk = isLvupOk(
+                            val, {
+                                bCheckLvupCnt   : true,
+                            }
+                        );
                         if (bLvupOk) {
                             $('#game_field td').addClass('lvup_checking');
                             $('#game_field td#' + val.pos_id).addClass('lvup_ok');
@@ -343,18 +331,37 @@ game_field_reactions = (function () {
                                 sImgSrc = 'data:image/jpg;base64,' + g_image_data[sImgSrc];
                             }
 
-                            sMyHandHtml +=
-                            '<div class="hand_card" game_card_id="' + val.game_card_id + '">' +
-                                '<img src="' + sImgSrc + '" alt="' + sImgAlt + '"/>' +
-                            '</div>';
+                            aMyHandHtml.push({
+                                sort_no : Number(val.sort_no),
+                                content : '<div class="hand_card" game_card_id="' + val.game_card_id + '">' +
+                                              '<img src="' + sImgSrc + '" alt="' + sImgAlt + '"/>' +
+                                          '</div>',
+                            });
                         }
                         break;
+                }
+            });
+            aMyHandHtml.sort(function(v1,v2) {
+                try {
+                    if (!v1 || !v1.sort_no) {
+                        return -1;
+                    } else if (!v2 || !v2.sort_no) {
+                        return 1;
+                    }else {
+                        return v1.sort_no - v2.sort_no;
+                    }
+                } catch (e) {
+                    return 0;
                 }
             });
             $.each(aPosId, function(i, sPosId) {
                 $(sPosId).html('<div class="pict"></div>');
             });
-            $('#hand_card').html(sMyHandHtml);
+            var sHtml = '';
+            $.each(aMyHandHtml, function(i,val) {
+                sHtml += val.content;
+            });
+            $('#hand_card').html(sHtml);
             $('#myPlayersInfo    .stone span').text(g_field_data.my_stone);
             $('#myPlayersInfo    .hand  span').text(nHand['my']);
             $('#enemyPlayersInfo .stone span').text(g_field_data.enemy_stone);
@@ -790,6 +797,53 @@ game_field_reactions = (function () {
         }
 
         updateGameInfoMessage();
+    }
+
+    function isLvupOk(mon, aOption)
+    {
+        // 引数チェック
+        var aOption = aOption || {};
+
+        if (aOption.bCheckLvupCnt && mon.lvup_standby <= 0 && g_field_data.lvup_assist <= 0) {
+            return false;
+        }
+        if (mon.status) {
+            if (mon.status[111]) {
+                return false;
+            }
+            if (mon.status[127]) {
+                return false;
+            }
+            if (mon.status[128]) {
+                return false;
+            }
+        }
+
+        var aMonsterData = g_master_data.m_monster[mon.monster_id];
+        if (aMonsterData.next_monster_id) {
+            return true;
+        }
+
+        try {
+            $.each(g_field_data.cards, function(i2, vval) {
+                var bSuper = game_field_utility.isValidSuper({
+                    aBefore : mon,
+                    aAfter  : vval,
+                });
+                if (bSuper) {
+                    console.log('super_ok ktkr');
+                    throw 'super_ok';
+                }
+            });
+        } catch (e) {
+            if (e == 'super_ok') {
+                return true;
+            } else {
+                throw e;
+            }
+        }
+
+        return false;
     }
 
     function damageReaction(aArgs)
@@ -2070,6 +2124,9 @@ game_field_reactions = (function () {
         }
         g_sBeforeGameState = s;
         switch (s) {
+            case 'select_actor':
+                s = 'カードを選択してください';
+                break;
             case 'select_action':
                 s = 'コマンドを選択してください';
                 break;

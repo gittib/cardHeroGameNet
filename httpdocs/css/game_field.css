@@ -80,15 +80,40 @@
   width: 100%;
   border-top: solid 1px;
   border-bottom: solid 1px;
-  padding: 0 5px; }
+  padding-top: 12px; }
+  .sort_card_frame .sort_card_title {
+    border: solid 2px;
+    border-bottom: solid 1px; }
   .sort_card_frame .sort_card_target {
     border: solid 1px;
+    border-left: solid 2px;
+    border-right: solid 2px;
     font-size: 18px; }
+    .sort_card_frame .sort_card_target.selected {
+      background-color: #ff0; }
     .sort_card_frame .sort_card_target div {
-      float: left; }
+      float: left;
+      font-size: 18px; }
+      .sort_card_frame .sort_card_target div.dtl_link {
+        float: right;
+        margin-right: 3px; }
+      .sort_card_frame .sort_card_target div span.next_draw {
+        font-size: 12px; }
     .sort_card_frame .sort_card_target .pict {
       width: 50px;
       height: 50px; }
+  .sort_card_frame .sort_end_button_frame {
+    border: solid 2px;
+    border-top: solid 1px;
+    border-bottom: solid 1px; }
+    .sort_card_frame .sort_end_button_frame .sort_end_button {
+      margin: 12px;
+      border: solid #ddddff;
+      border-right: solid blue;
+      border-bottom: solid blue;
+      background-color: #88f;
+      font-size: 18px;
+      text-align: center; }
 
 div.card_name {
   float: left; }

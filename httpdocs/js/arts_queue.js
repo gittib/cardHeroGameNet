@@ -309,7 +309,7 @@ arts_queue = (function () {
                 ];
                 break;
             case 1013:
-                var aMonsterInfo = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var aMonsterInfo = aArgs.field_data.cards[aArgs.actor_id];
                 var iMaxHP = game_field_utility.getMaxHP(aMonsterInfo);
                 var dam = iMaxHP - aMonsterInfo.hp;
                 return [
@@ -638,7 +638,7 @@ arts_queue = (function () {
                         queue_type_id   : 1011,
                         target_id       : aArgs.targets[0].game_card_id,
                         param1          : 'draw',
-                        param2          : 1,
+                        param2          : parseInt(aArtInfo.power),
                     },
                 ];
                 break;
@@ -920,6 +920,21 @@ arts_queue = (function () {
                         param1          : 114,
                     },
                 ];
+                break;
+            case 1043:
+                var aRet = [{
+                    queue_type_id   : 1026,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 111,
+                }];
+                if (aArtInfo.damage_type_flg == 'P' || aArtInfo.damage_type_flg == 'D') {
+                    aRet.push({
+                        queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : aArtInfo.power,
+                    });
+                }
+                return aRet;
                 break;
             default:
                 throw new Error('unknown script_id posted.');

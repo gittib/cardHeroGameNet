@@ -25,4 +25,18 @@ _eos_;
 </div>
 <?php
 echo $this->render($this->template);
+$sDescription = str_replace('%descend%', '', $this->aCardInfo['description']);
+if (trim($sDescription) != '') {
+    echo <<<_eos_
+    <div class="card_description_frame">
+        <div class="label">
+            ＜カード紹介＞
+        </div>
+        <div class="card_description">
+            {$sDescription}
+        </div>
+    </div>
+
+_eos_;
+}
 ?>

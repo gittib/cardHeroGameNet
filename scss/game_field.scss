@@ -128,22 +128,64 @@
 }
 
 .sort_card_frame {
+    $font_size : 18px;
+
     width: 100%;
     border-top: solid 1px;
     border-bottom: solid 1px;
-    padding: 0 5px;
+    padding-top: 12px;
+
+    .sort_card_title {
+        border: solid 2px;
+        border-bottom: solid 1px;
+    }
 
     .sort_card_target {
         border:solid 1px;
-        font-size:18px;
+        border-left:solid 2px;
+        border-right:solid 2px;
+        font-size:$font_size;
+
+        &.selected {
+            background-color: #ff0;
+        }
 
         div {
             float: left;
+            font-size:$font_size;
+
+            &.dtl_link {
+                float: right;
+                margin-right: 3px;
+            }
+
+            span.next_draw {
+                font-size: 12px;
+            }
         }
 
         .pict {
             width: 50px;
             height: 50px;
+        }
+    }
+
+    .sort_end_button_frame {
+        border: solid 2px;
+        border-top: solid 1px;
+        border-bottom: solid 1px;
+
+        .sort_end_button {
+            $border_rb: solid #00f;
+
+            margin: 12px;
+            border: solid #ddddff;
+            border-right: $border_rb;
+            border-bottom: $border_rb;
+            background-color: #88f;
+
+            font-size:$font_size;
+            text-align: center;
         }
     }
 }
