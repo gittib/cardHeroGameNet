@@ -33,7 +33,7 @@ class GameController extends Zend_Controller_Action
         $this->_javascript[] = '/js/game_list.js';
         $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_layout->title       = 'ゲームフィールド一覧';
-        $this->_layout->canonical   = '/game/list/';
+        $this->_layout->canonical   = '/game/';
         $this->_layout->description = 'カードヒーローを実際に遊んで、1ターン分の結果を投稿できます。投稿されたフィールドに返信する形で遊ぶこともできます。';
         $nPage = $request->getParam('page_no');
         $aCardInfoArray = $this->_model->getFieldDetail(array(

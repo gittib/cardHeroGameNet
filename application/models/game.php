@@ -58,7 +58,7 @@ class model_Game {
             ->where('t_game_field.del_flg = ?', 0)
             ->order(array(
                 'upd_date desc',
-                'game_field_id',
+                'game_field_id desc',
             ));
         if (isset($aOption['game_field_id']) && $aOption['game_field_id'] != '') {
             $selField->where('t_game_field.game_field_id in(?)', $aOption['game_field_id']);
@@ -84,10 +84,22 @@ class model_Game {
             )
             ->joinLeft(
                 array('first' => 't_game_field'),
-                "to_char(first.game_field_id, '999999') = regexp_replace(field.field_id_path, '-.*$', '')",
+                "first.game_field_id = regexp_replace(field.field_id_path, '-.*$', '')::int",
                 array(
                     'first_field_id'    => 'game_field_id',
                     'start_date'        => new Zend_Db_Expr("to_char(first.upd_date,'yyyy/mm/dd HH24:MI')"),
+                )
+            )
+            ->joinLeft(
+                array('bf' => 't_game_field'),
+                "bf.game_field_id = regexp_replace(field.field_id_path, '^.*-', '')::int",
+                array()
+            )
+            ->joinLeft(
+                array('opp' => 't_user'),
+                'opp.user_id = bf.user_id',
+                array(
+                    'opponent_name' => 'nick_name',
                 )
             )
             ->joinLeft(
@@ -100,8 +112,8 @@ class model_Game {
             ->where('field.del_flg = 0')
             ->where('field.game_field_id in(?)', $selField)
             ->order(array(
-                'upd_date desc',
-                'game_field_id',
+                'field.upd_date desc',
+                'game_field_id desc',
             ))
             ;
         $rslt = $this->_db->fetchAll($sel);
@@ -112,6 +124,9 @@ class model_Game {
         foreach ($rslt as $val) {
             if ($val['nick_name'] == '') {
                 $val['nick_name'] = 'Guest';
+            }
+            if ($val['opponent_name'] == '') {
+                $val['opponent_name'] = 'Guest';
             }
             $aBeforeFields = explode('-', $val['field_id_path']);
             $val['turn_count'] = count($aBeforeFields) + 1;
@@ -326,6 +341,7 @@ class model_Game {
             case 123:
             case 124:
             case 129:
+            case 130:
                 return "{$sPos}{$row['monster_name']}に{$row['status_name']}";
             case 119:
                 if ($row['game_card_id'] < $row['status_param1']) {

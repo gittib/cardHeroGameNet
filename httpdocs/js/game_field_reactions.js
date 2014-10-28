@@ -450,9 +450,7 @@ game_field_reactions = (function () {
                 });
             };
 
-            console.log('updateActorDom started.');
             var aCard = g_field_data.cards[g_field_data.actor.game_card_id];
-            console.log(aCard);
             var aCardData = g_master_data.m_card[aCard.card_id];
             var sImageFileName = aCardData.image_file_name;
             var sImageAlt = aCardData.card_name;
@@ -780,6 +778,7 @@ game_field_reactions = (function () {
             );
         } catch (e) {
             // 選択情報を正しく処理できなかった場合、選択されてないと見なす
+            console.log('updateActorDom Failure.');
             console.log(e.stack);
             $('.actor').removeClass('actor');
             $('#card_info_frame').html(

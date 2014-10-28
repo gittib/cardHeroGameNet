@@ -1,6 +1,8 @@
 <?php
     $aCardInfo = $this->aCardInfoInField;
 
+    $sPlayers  = '投稿者：'   . $this->escape($aCardInfo['field_info']['nick_name']) . "<br />\n";
+    $sPlayers .= '対戦相手：' . $this->escape($aCardInfo['field_info']['opponent_name']);
     $sExplain ='';
 
     $aPosId = array(
@@ -196,7 +198,7 @@ foreach ($aPosId as $i => $aLine) {
         echo $aMonsterData[$posId];
     }
     if ($i == 0) {
-        echo "            <td colspan=3 rowspan=4 class=\"explain\">{$sExplain}</td>\n";
+        echo "            <td colspan=3 rowspan=4 class=\"explain\">{$sPlayers}<br />&nbsp;<br />{$sExplain}</td>\n";
     }
     echo "        </tr>\n";
 }

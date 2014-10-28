@@ -15,6 +15,7 @@ class IndexController extends Zend_Controller_Action
         $layout->stylesheet = array(
                 '/css/top.css',
                 );
+        $layout->description = 'スマホで遊べるカードヒーロー！';
     }
 
 }
