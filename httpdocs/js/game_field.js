@@ -594,11 +594,29 @@ new function () {
         var _addActionFromActorInfo = function () {
             var actor = g_field_data.actor;
             var aQueue = null;
+
+            var _addStoneNoroiCost = function (mon) {
+                try {
+                    if (mon.status && mon.status[123]) {
+                        aQueue.queue_units.unshift({
+                            queue_type_id   : 1004,
+                            target_id       : mon.game_card_id,
+                            param1          : -2,
+                            cost_flg        : true,
+                        });
+                    }
+                } catch (e) {}
+            };
+
             switch (actor.act_type) {
                 case 'into_field':
                     if (!actor.game_card_id || !actor.param1) {
                         throw new Error('actor_info_invalid');
                     }
+                    var iMasterId = game_field_reactions.getGameCardId({
+                        pos_category    : 'field',
+                        pos_id          : 'myMaster',
+                    });
                     aQueue = {
                         actor_id        : actor.game_card_id,
                         log_message     : 'モンスターをセット',
@@ -618,14 +636,12 @@ new function () {
                             },
                             {
                                 queue_type_id   : 1024,
-                                target_id       : game_field_reactions.getGameCardId({
-                                    pos_category    : 'field',
-                                    pos_id          : 'myMaster',
-                                }),
+                                target_id       : iMasterId,
                                 cost_flg        : true,
                             },
                         ],
                     };
+                    _addStoneNoroiCost(g_field_data.cards[iMasterId]);
                     break;
                 case 'attack':
                     aQueue = {
@@ -677,6 +693,7 @@ new function () {
                             })();
                         }
                     }
+                    _addStoneNoroiCost(mon);
                     break;
                 case 'arts':
                     aQueue = arts_queue.getArtsQueue({
@@ -693,6 +710,7 @@ new function () {
                             game_state  : 'tokugi_fuuji',
                         });
                     }
+                    _addStoneNoroiCost(g_field_data.cards[aQueue.actor_id]);
                     break;
                 case 'magic':
                     aQueue = magic_queue.getMagicQueue({
@@ -710,6 +728,11 @@ new function () {
                             game_state  : 'tokugi_fuuji',
                         });
                     }
+                    var iMasterId = game_field_reactions.getGameCardId({
+                        pos_category    : 'field',
+                        pos_id          : 'myMaster',
+                    });
+                    _addStoneNoroiCost(g_field_data.cards[iMasterId]);
                     break;
                 case 'move':
                     aQueue = {
@@ -730,6 +753,7 @@ new function () {
                             },
                         ],
                     };
+                    _addStoneNoroiCost(g_field_data.cards[aQueue.actor_id]);
                     var iPurpose = game_field_reactions.getGameCardId({
                         pos_category    : 'field',
                         pos_id          : actor.param1,
@@ -745,6 +769,7 @@ new function () {
                             target_id       : iPurpose,
                             param1          : g_field_data.cards[actor.game_card_id].pos_id,
                         });
+                        _addStoneNoroiCost(g_field_data.cards[iPurpose]);
                     }
                     break;
                 case 'charge':
@@ -763,6 +788,7 @@ new function () {
                             param1          : 100,
                         }],
                     };
+                    _addStoneNoroiCost(g_field_data.cards[aQueue.actor_id]);
                     break;
                 case 'escape':
                     aQueue = {
@@ -783,6 +809,7 @@ new function () {
                             target_id       : actor.game_card_id,
                         }],
                     };
+                    _addStoneNoroiCost(g_field_data.cards[aQueue.actor_id]);
                     if (g_field_data.cards[actor.game_card_id].status) {
                         if (g_field_data.cards[actor.game_card_id].status[114]) {
                             aQueue = null;
@@ -810,6 +837,7 @@ new function () {
                             cost_flg        : true,
                         }],
                     };
+                    _addStoneNoroiCost(g_field_data.cards[aQueue.actor_id]);
                     break;
                 case 'lvup':
                     aQueue = {

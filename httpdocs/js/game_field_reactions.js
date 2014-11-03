@@ -879,7 +879,7 @@ game_field_reactions = (function () {
             if (game_field_utility.getDistance(act.pos_id, target.pos_id) == 1 && !act.status[109]) {
                 g_field_data.queues.push({
                     actor_id        : aArgs.target_id,
-                    log_message     : '反撃(竜の盾)',
+                    log_message     : '竜の盾による反撃',
                     resolved_flg    : 0,
                     priority        : 'follow_damage',
                     queue_units : [
@@ -1118,6 +1118,19 @@ game_field_reactions = (function () {
                 var targetMonsterData = g_master_data.m_monster[target.monster_id];
                 var bReactionPushed = false;
                 switch (targetMonsterData.skill.id) {
+                    case 19:
+                        g_field_data.queues.push({
+                            actor_id            : target.game_card_id,
+                            log_message         : 'ストーン呪い発動',
+                            resolved_flg        : 0,
+                            priority            : 'reaction',
+                            queue_units : [{
+                                queue_type_id   : 1026,
+                                target_id       : act.game_card_id,
+                                param1          : 123,
+                            }],
+                        });
+                        break;
                     case 20:
                         g_field_data.queues.push({
                             actor_id            : target.game_card_id,
@@ -1128,19 +1141,6 @@ game_field_reactions = (function () {
                                 queue_type_id   : 1026,
                                 target_id       : act.game_card_id,
                                 param1          : 122,
-                            }],
-                        });
-                        break;
-                    case 21:
-                        g_field_data.queues.push({
-                            actor_id            : target.game_card_id,
-                            log_message         : 'ストーン呪い発動',
-                            resolved_flg        : 0,
-                            priority            : 'reaction',
-                            queue_units : [{
-                                queue_type_id   : 1026,
-                                target_id       : act.game_card_id,
-                                param1          : 123,
                             }],
                         });
                         break;

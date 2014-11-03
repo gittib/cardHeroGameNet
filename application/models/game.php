@@ -39,6 +39,7 @@ class model_Game {
      *  @param aOption:
      *      game_field_id   : 抽出対象フィールドのID
      *      page_no         : ページング用ページ番号を指定
+     *      select_queue    : キュー情報も抽出する
      *      open_flg        : t_game_fieldのopen_flgを指定
      *      allow_no_field  : フィールドが抽出できなくても例外を投げない
      *
@@ -137,6 +138,7 @@ class model_Game {
                 'field'         => array(),
                 'hand'          => array(),
                 'deck'          => array(),
+                'queue'         => array(),
             );
         }
         $sub = $this->_db->select()
@@ -311,6 +313,13 @@ class model_Game {
             $aRet[$iGameFieldId][$sPosCategory][$iGameCardId] = $aTmpRow;
         }
 
+        if (isset($aOption['select_queue']) && $aOption['select_queue']) {
+            $aQ = $this->_getQueueInfo($selField);
+            foreach ($aQ as $iGameFieldId => $val) {
+                $aRet[$iGameFieldId]['queue'] = $val;
+            }
+        }
+
         return $aRet;
     }
 
@@ -441,6 +450,47 @@ class model_Game {
             $sPos = strtoupper($sPos);
         }
         return $sPos;
+    }
+
+    private function _getQueueInfo ($selField)
+    {
+        $sel = $this->_db->select()
+            ->from(
+                array('tq' => 't_queue'),
+                array(
+                    'queue_id',
+                    'game_field_id',
+                    'act_card_id',
+                    'log_message',
+                )
+            )
+            ->join(
+                array('tqu' => 't_queue_unit'),
+                'tqu.queue_id = tq.queue_id'
+            )
+            ->where('tq.resolved_flg = ?', 1)
+            ->where('tq.game_field_id in(?)', $selField)
+            ->order(array(
+                'tq.game_field_id',
+                'tq.queue_id',
+                'tqu.queue_unit_id',
+            ));
+        $rslt = $this->_db->fetchAll($sel);
+        $aRet = array();
+        foreach ($rslt as $val) {
+            if (!isset($aRet[$val['game_field_id']])) {
+                $aRet[$val['game_field_id']] = array();
+            }
+            if (!isset($aRet[$val['game_field_id']][$val['queue_id']])) {
+                $aRet[$val['game_field_id']][$val['queue_id']] = array(
+                    'queue_id'      => $val['queue_id'],
+                    'game_field_id' => $val['game_field_id'],
+                    'actor_id'      => $val['act_card_id'],
+                    'log_message'   => $val['log_message'],
+                    'queue_units'   => array(),
+                );
+            }
+        }
     }
 
     public function start ($aArgs)

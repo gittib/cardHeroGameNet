@@ -15,7 +15,7 @@ class IndexController extends Zend_Controller_Action
         $layout->stylesheet = array(
                 '/css/top.css',
                 );
-        $layout->description = 'スマホで遊べるカードヒーロー！';
+        $layout->description = 'スマホでカードヒーローを遊べるWebサイトです。１ターンの行動を投稿することで、掲示板形式で対戦ができます。面白そうな投稿があれば、横から投稿するのもOKです。';
     }
 
 }
