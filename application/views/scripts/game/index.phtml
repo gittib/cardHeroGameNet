@@ -32,10 +32,25 @@ _eos_;
 }
 $sPageLinkTag .= "</div>\n";
 
+$sSelectOldFieldDispray = <<<_eos_
+<div class="old_field_disp_select_frame">
+    返信済みフィールド：
+    <select class="old_field_disp_select">
+        <option value="normal" selected="selected">普通に表示</option>
+        <option value="small">控えめに表示</option>
+        <option value="hide">圧縮して表示</option>
+    </select>
+</div>
 
+_eos_;
+?>
+
+<div id="game_field_list_frame">
+<?php
 if (empty($this->aCardInfoArray)) {
     echo '<div class="no-fields">まだフィールドが投稿されていません。</div>' . "\n";
 } else {
+    echo $sSelectOldFieldDispray;
     echo $sPageLinkTag;
     foreach ($this->aCardInfoArray as $aCardInfo) {
         $this->aCardInfoInField = $aCardInfo;
@@ -56,4 +71,7 @@ if (empty($this->aCardInfoArray)) {
 _eos_;
     }
     echo $sPageLinkTag;
+    echo $sSelectOldFieldDispray;
 }
+?>
+</div>

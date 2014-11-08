@@ -6,7 +6,7 @@
         try {
             if (localStorage.img_data) {
                 aImg = JSON.parse(localStorage.img_data);
-                if (dt.getTime() < Number(aImg.upd_date) + 3600*24*7) {
+                if (dt.getTime() < Number(aImg.upd_date) + 1000*3600*24*7) {
                     // localStorageの画像データが使えるのでajaxとか面倒な事は必要ない
                     _swapOriginalImages();
                 } else {

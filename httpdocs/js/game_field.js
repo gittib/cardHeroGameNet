@@ -673,7 +673,7 @@ new function () {
                         });
                     } else if (aMonsterData.skill) {
                         if (aMonsterData.skill.id == 13) {
-                            (function () {
+                            (function addHolyhandEffect () {
                                 var target = g_field_data.cards[actor.aTargets[0].game_card_id];
                                 if (target.status) {
                                     $.each(target.status, function(iSt, aSt) {
@@ -1008,11 +1008,6 @@ new function () {
      */
     function execQueue(aArgs)
     {
-        // 決着がついてたら一切処理しない
-        if (g_field_data.finish_flg) {
-            return;
-        }
-
         // 特技封じとかでごしょったからこのタイミングで綺麗にする
         delete g_field_data.tokugi_fuuji_flg;
         g_field_data.actor = {game_card_id : null};
@@ -1443,6 +1438,11 @@ new function () {
                                     break;
                                 case 1008:
                                     var targetMon = g_field_data.cards[q.target_id];
+                                    if (g_master_data.m_monster[targetMon.monster_id].category == 'master') {
+                                        // マスターが倒れる場合、墓地に送るとかの処理はしない
+                                        break;
+                                    }
+
                                     $.each(g_field_data.cards, function(ii, vv) {
                                         if (vv.pos_category != 'field') {
                                             return true;
@@ -1530,21 +1530,13 @@ new function () {
                                     g_field_data.cards[q.target_id].sort_no = q.param1;
                                     break;
                                 case 1013:
-                                    var iGameCardId = game_field_reactions.getGameCardId({
+                                    if (game_field_reactions.getGameCardId({
                                         pos_category    : 'field',
                                         pos_id          : q.param1,
-                                    });
-                                    if (iGameCardId) {
+                                    })) {
                                         throw new Error('no_target');
                                     }
                                     var targetMon = g_field_data.cards[q.target_id];
-                                    var dest = game_field_reactions.getGameCardId({
-                                        pos_category    : 'field',
-                                        pos_id          : q.param1,
-                                    });
-                                    if (dest) {
-                                        throw new Error('argument_error');
-                                    }
                                     targetMon = game_field_utility.loadMonsterInfo({
                                         target_monster  : targetMon,
                                         pos_id          : q.param1,
@@ -1652,7 +1644,6 @@ new function () {
                                         });
                                     } else if (aMonsterData.next_monster_id) {
                                         // next_monster_idに値が入ってる場合は1枚のカードで完結するレベルアップ
-                                        console.log('asyuroro lvup siro-');
                                         mon = game_field_utility.loadMonsterInfo({
                                             target_monster  : mon,
                                             monster_id      : aMonsterData.next_monster_id,

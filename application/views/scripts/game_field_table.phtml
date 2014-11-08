@@ -152,7 +152,7 @@ _eos_;
         );
     }
     $aMonsterData['enemyPlayersInfo'] = <<<_eos_
-        <td>
+        <td class="players_info">
             <div class="num_info stone">
                 <img src="/images/stone.png" alt="stone" />：
                 <span>{$aStoneCount['enemy']}</span>
@@ -169,7 +169,7 @@ _eos_;
 
 _eos_;
     $aMonsterData['myPlayersInfo'] = <<<_eos_
-        <td>
+        <td class="players_info">
             <div class="num_info stone">
                 <img src="/images/stone.png" alt="stone" />：
                 <span>{$aStoneCount['my']}</span>
@@ -186,8 +186,13 @@ _eos_;
 
 _eos_;
 
+$sClass = 'game_row';
+if (isset($aCardInfo['field_info']['responced']) && $aCardInfo['field_info']['responced']) {
+    $sClass .= ' res';
+}
+
 echo <<<_eos_
-<div class="game_row">
+<div class="{$sClass}">
     <table class="game_field">
 
 _eos_;

@@ -980,9 +980,7 @@ game_field_reactions = (function () {
                 });
             };
 
-            console.log('updateActorDom started.');
             var aCard = g_field_data.cards[g_field_data.actor.game_card_id];
-            console.log(aCard);
             var aCardData = g_master_data.m_card[aCard.card_id];
             var sImageFileName = aCardData.image_file_name;
             var sImageAlt = aCardData.card_name;
@@ -1310,6 +1308,7 @@ game_field_reactions = (function () {
             );
         } catch (e) {
             // 選択情報を正しく処理できなかった場合、選択されてないと見なす
+            console.log('updateActorDom Failure.');
             console.log(e.stack);
             $('.actor').removeClass('actor');
             $('#card_info_frame').html(
@@ -1410,7 +1409,7 @@ game_field_reactions = (function () {
             if (game_field_utility.getDistance(act.pos_id, target.pos_id) == 1 && !act.status[109]) {
                 g_field_data.queues.push({
                     actor_id        : aArgs.target_id,
-                    log_message     : '反撃(竜の盾)',
+                    log_message     : '竜の盾による反撃',
                     resolved_flg    : 0,
                     priority        : 'follow_damage',
                     queue_units : [
@@ -1649,6 +1648,19 @@ game_field_reactions = (function () {
                 var targetMonsterData = g_master_data.m_monster[target.monster_id];
                 var bReactionPushed = false;
                 switch (targetMonsterData.skill.id) {
+                    case 19:
+                        g_field_data.queues.push({
+                            actor_id            : target.game_card_id,
+                            log_message         : 'ストーン呪い発動',
+                            resolved_flg        : 0,
+                            priority            : 'reaction',
+                            queue_units : [{
+                                queue_type_id   : 1026,
+                                target_id       : act.game_card_id,
+                                param1          : 123,
+                            }],
+                        });
+                        break;
                     case 20:
                         g_field_data.queues.push({
                             actor_id            : target.game_card_id,
@@ -1659,19 +1671,6 @@ game_field_reactions = (function () {
                                 queue_type_id   : 1026,
                                 target_id       : act.game_card_id,
                                 param1          : 122,
-                            }],
-                        });
-                        break;
-                    case 21:
-                        g_field_data.queues.push({
-                            actor_id            : target.game_card_id,
-                            log_message         : 'ストーン呪い発動',
-                            resolved_flg        : 0,
-                            priority            : 'reaction',
-                            queue_units : [{
-                                queue_type_id   : 1026,
-                                target_id       : act.game_card_id,
-                                param1          : 123,
                             }],
                         });
                         break;
@@ -5062,11 +5061,29 @@ new function () {
         var _addActionFromActorInfo = function () {
             var actor = g_field_data.actor;
             var aQueue = null;
+
+            var _addStoneNoroiCost = function (mon) {
+                try {
+                    if (mon.status && mon.status[123]) {
+                        aQueue.queue_units.unshift({
+                            queue_type_id   : 1004,
+                            target_id       : mon.game_card_id,
+                            param1          : -2,
+                            cost_flg        : true,
+                        });
+                    }
+                } catch (e) {}
+            };
+
             switch (actor.act_type) {
                 case 'into_field':
                     if (!actor.game_card_id || !actor.param1) {
                         throw new Error('actor_info_invalid');
                     }
+                    var iMasterId = game_field_reactions.getGameCardId({
+                        pos_category    : 'field',
+                        pos_id          : 'myMaster',
+                    });
                     aQueue = {
                         actor_id        : actor.game_card_id,
                         log_message     : 'モンスターをセット',
@@ -5086,14 +5103,12 @@ new function () {
                             },
                             {
                                 queue_type_id   : 1024,
-                                target_id       : game_field_reactions.getGameCardId({
-                                    pos_category    : 'field',
-                                    pos_id          : 'myMaster',
-                                }),
+                                target_id       : iMasterId,
                                 cost_flg        : true,
                             },
                         ],
                     };
+                    _addStoneNoroiCost(g_field_data.cards[iMasterId]);
                     break;
                 case 'attack':
                     aQueue = {
@@ -5125,7 +5140,7 @@ new function () {
                         });
                     } else if (aMonsterData.skill) {
                         if (aMonsterData.skill.id == 13) {
-                            (function () {
+                            (function addHolyhandEffect () {
                                 var target = g_field_data.cards[actor.aTargets[0].game_card_id];
                                 if (target.status) {
                                     $.each(target.status, function(iSt, aSt) {
@@ -5145,6 +5160,7 @@ new function () {
                             })();
                         }
                     }
+                    _addStoneNoroiCost(mon);
                     break;
                 case 'arts':
                     aQueue = arts_queue.getArtsQueue({
@@ -5161,6 +5177,7 @@ new function () {
                             game_state  : 'tokugi_fuuji',
                         });
                     }
+                    _addStoneNoroiCost(g_field_data.cards[aQueue.actor_id]);
                     break;
                 case 'magic':
                     aQueue = magic_queue.getMagicQueue({
@@ -5178,6 +5195,11 @@ new function () {
                             game_state  : 'tokugi_fuuji',
                         });
                     }
+                    var iMasterId = game_field_reactions.getGameCardId({
+                        pos_category    : 'field',
+                        pos_id          : 'myMaster',
+                    });
+                    _addStoneNoroiCost(g_field_data.cards[iMasterId]);
                     break;
                 case 'move':
                     aQueue = {
@@ -5198,6 +5220,7 @@ new function () {
                             },
                         ],
                     };
+                    _addStoneNoroiCost(g_field_data.cards[aQueue.actor_id]);
                     var iPurpose = game_field_reactions.getGameCardId({
                         pos_category    : 'field',
                         pos_id          : actor.param1,
@@ -5213,6 +5236,7 @@ new function () {
                             target_id       : iPurpose,
                             param1          : g_field_data.cards[actor.game_card_id].pos_id,
                         });
+                        _addStoneNoroiCost(g_field_data.cards[iPurpose]);
                     }
                     break;
                 case 'charge':
@@ -5231,6 +5255,7 @@ new function () {
                             param1          : 100,
                         }],
                     };
+                    _addStoneNoroiCost(g_field_data.cards[aQueue.actor_id]);
                     break;
                 case 'escape':
                     aQueue = {
@@ -5251,6 +5276,7 @@ new function () {
                             target_id       : actor.game_card_id,
                         }],
                     };
+                    _addStoneNoroiCost(g_field_data.cards[aQueue.actor_id]);
                     if (g_field_data.cards[actor.game_card_id].status) {
                         if (g_field_data.cards[actor.game_card_id].status[114]) {
                             aQueue = null;
@@ -5278,6 +5304,7 @@ new function () {
                             cost_flg        : true,
                         }],
                     };
+                    _addStoneNoroiCost(g_field_data.cards[aQueue.actor_id]);
                     break;
                 case 'lvup':
                     aQueue = {
@@ -5448,11 +5475,6 @@ new function () {
      */
     function execQueue(aArgs)
     {
-        // 決着がついてたら一切処理しない
-        if (g_field_data.finish_flg) {
-            return;
-        }
-
         // 特技封じとかでごしょったからこのタイミングで綺麗にする
         delete g_field_data.tokugi_fuuji_flg;
         g_field_data.actor = {game_card_id : null};
@@ -5883,6 +5905,11 @@ new function () {
                                     break;
                                 case 1008:
                                     var targetMon = g_field_data.cards[q.target_id];
+                                    if (g_master_data.m_monster[targetMon.monster_id].category == 'master') {
+                                        // マスターが倒れる場合、墓地に送るとかの処理はしない
+                                        break;
+                                    }
+
                                     $.each(g_field_data.cards, function(ii, vv) {
                                         if (vv.pos_category != 'field') {
                                             return true;
@@ -5970,21 +5997,13 @@ new function () {
                                     g_field_data.cards[q.target_id].sort_no = q.param1;
                                     break;
                                 case 1013:
-                                    var iGameCardId = game_field_reactions.getGameCardId({
+                                    if (game_field_reactions.getGameCardId({
                                         pos_category    : 'field',
                                         pos_id          : q.param1,
-                                    });
-                                    if (iGameCardId) {
+                                    })) {
                                         throw new Error('no_target');
                                     }
                                     var targetMon = g_field_data.cards[q.target_id];
-                                    var dest = game_field_reactions.getGameCardId({
-                                        pos_category    : 'field',
-                                        pos_id          : q.param1,
-                                    });
-                                    if (dest) {
-                                        throw new Error('argument_error');
-                                    }
                                     targetMon = game_field_utility.loadMonsterInfo({
                                         target_monster  : targetMon,
                                         pos_id          : q.param1,
@@ -6092,7 +6111,6 @@ new function () {
                                         });
                                     } else if (aMonsterData.next_monster_id) {
                                         // next_monster_idに値が入ってる場合は1枚のカードで完結するレベルアップ
-                                        console.log('asyuroro lvup siro-');
                                         mon = game_field_utility.loadMonsterInfo({
                                             target_monster  : mon,
                                             monster_id      : aMonsterData.next_monster_id,

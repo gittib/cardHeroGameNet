@@ -71,6 +71,20 @@ class model_Game {
             $selField->where('t_game_field.open_flg = ?', $aOption['open_flg']);
         }
 
+        $selResponced = $this->_db->select()
+            ->distinct()
+            ->from(
+                array('res' => 't_game_field'),
+                array(
+                    'game_field_id',
+                )
+            )
+            ->join(
+                array('path' => 't_game_field'),
+                "path.field_id_path like '%' || res.game_field_id || '%'",
+                array()
+            );
+
         $sel = $this->_db->select()
             ->from(
                 array('field' => 't_game_field'),
@@ -108,6 +122,13 @@ class model_Game {
                 'tu.user_id = field.user_id',
                 array(
                     'nick_name',
+                )
+            )
+            ->joinLeft(
+                array('sub_res' => $selResponced),
+                'sub_res.game_field_id = field.game_field_id',
+                array(
+                    'responced' => 'game_field_id',
                 )
             )
             ->where('field.del_flg = 0')
@@ -460,13 +481,21 @@ class model_Game {
                 array(
                     'queue_id',
                     'game_field_id',
-                    'act_card_id',
+                    'actor_id'      => 'act_card_id',
                     'log_message',
                 )
             )
             ->join(
                 array('tqu' => 't_queue_unit'),
-                'tqu.queue_id = tq.queue_id'
+                'tqu.queue_id = tq.queue_id',
+                array(
+                    'queue_unit_id',
+                    'cost_flg',
+                    'queue_type_id',
+                    'target_id'         => 'target_card_id',
+                    'param1',
+                    'param2',
+                )
             )
             ->where('tq.resolved_flg = ?', 1)
             ->where('tq.game_field_id in(?)', $selField)
@@ -485,11 +514,14 @@ class model_Game {
                 $aRet[$val['game_field_id']][$val['queue_id']] = array(
                     'queue_id'      => $val['queue_id'],
                     'game_field_id' => $val['game_field_id'],
-                    'actor_id'      => $val['act_card_id'],
+                    'actor_id'      => $val['actor_id'],
                     'log_message'   => $val['log_message'],
                     'queue_units'   => array(),
                 );
             }
+            $aRet[$val['game_field_id']][$val['queue_id']]['queue_units'][] = array(
+                'queue_type_id',
+            );
         }
     }
 
