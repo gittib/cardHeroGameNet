@@ -36,8 +36,17 @@ $(function() {
         _changeDispMode($('.old_field_disp_select:first'));
     })();
 
-    $(".game_row").on("click", function() {
+    $(".game_field_info").on("click", function() {
+        if ($(this).find(".game_row").hasClass('mine')) {
+            if (!confirm('あなたが投稿したフィールド図です。\n対戦相手の手札などネタバレになりますが、よろしいですか？')) {
+                return;
+            }
+        }
         document.location = $(this).closest('div.game_field_info').find('div.field_title').find('a').attr('href');
+    });
+
+    $(".game_field_info .field_title a").on('click', function(e) {
+        e.preventDefault();
     });
 
     $(".old_field_disp_select").on("change", function() {

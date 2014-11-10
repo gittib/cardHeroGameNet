@@ -92,6 +92,7 @@ class model_Game {
                     'game_field_id',
                     'field_id_path',
                     'turn',
+                    'user_id',
                     'stone1',
                     'stone2',
                     'upd_date' => new Zend_Db_Expr("to_char(field.upd_date,'yyyy/mm/dd HH24:MI')"),
