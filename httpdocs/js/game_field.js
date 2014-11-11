@@ -1292,6 +1292,17 @@ new function () {
                                     }
                                     break;
                                 case 1003:
+                                    var sPosId = '#myMaster .pict';
+                                    var mon = g_field_data.cards[aExecAct.actor_id];
+                                    var sImgSrc = game_field_utility.getImg('/images/card/' + g_master_data.m_card[mon.card_id].image_file_name);
+                                    if (mon.owner != 'my') {
+                                        sPosId = '#enemyMaster .pict';
+                                    }
+                                    g_field_data.animation_info.animations.push({
+                                        target_dom      : sPosId,
+                                        html_param      : '<img class="card_image" src="' + sImgSrc + '" />',
+                                        animation_param : {}
+                                    });
                                     break;
                                 case 1004:
                                     var sOwner = g_field_data.cards[q.target_id].owner;

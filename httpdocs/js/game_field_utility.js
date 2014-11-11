@@ -1,7 +1,16 @@
 game_field_utility = (function () {
     var g_master_data = master_data.getInfo();
+    var g_image_data;
+    _initImage();
 
     return {
+        /**
+         * @param img_path
+         *
+         * @return 変換可能ならBase64エンコード文字列、無理なら引数をそのまま返す
+         */
+        'getImg'            : getImg,
+
         /**
          * @param monster_id
          *
@@ -118,6 +127,32 @@ game_field_utility = (function () {
 
 
 
+
+    function _initImage ()
+    {
+        try {
+            g_image_data = JSON.parse(localStorage.img_data);
+        } catch (e) {
+            $.getJSON('/api/image-json-load/', null, function(r) {
+                var dt = new Date();
+                r.upd_date = dt.getTime();
+                g_image_data = r;
+                try {
+                    localStorage.img_data = r;
+                } catch (e) {}
+            });
+        }
+    }
+
+    function getImg (img_path)
+    {
+        try {
+            if (g_image_data && g_image_data[img_path]) {
+                return 'data:image/jpg;base64,' + g_image_data[img_path];
+            }
+        } catch (e) {}
+        return img_path;
+    }
 
     function getMaxActCount (monster_id)
     {
