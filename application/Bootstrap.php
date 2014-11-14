@@ -109,7 +109,8 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $route = new Zend_Controller_Router_Route_Regex(
             '.*/?([^/]+)\.(png|jpg|gif)',
             array(
-                'controller'    =>  'api',
+                'module'        =>  'api',
+                'controller'    => 'index',
                 'action'        =>  'no-image',
                 1               =>  'dot',
                 2               =>  'png',
@@ -126,7 +127,8 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $route = new Zend_Controller_Router_Route_Regex(
             '(.*)/gray_([^/]+)\.(png|jpg|gif)',
             array(
-                'controller'    =>  'api',
+                'module'        =>  'api',
+                'controller'    => 'index',
                 'action'        =>  'gray-image',
                 1               =>  '/images',
                 2               =>  'dot',
@@ -144,7 +146,8 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $route = new Zend_Controller_Router_Route_Regex(
             'js/([^/]+)\.js',
             array(
-                'controller'    =>  'api',
+                'module'        =>  'api',
+                'controller'    => 'index',
                 'action'        =>  'build-javascript',
                 1               =>  1,
             ),
@@ -158,7 +161,8 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $route = new Zend_Controller_Router_Route_Regex(
             'sitemap.xml',
             array(
-                'controller'    =>  'api',
+                'module'        =>  'api',
+                'controller'    => 'index',
                 'action'        =>  'sitemap',
             ),
             array()

@@ -1,6 +1,6 @@
 <?php
 
-class ApiController extends Zend_Controller_Action
+class Api_IndexController extends Zend_Controller_Action
 {
     private $_model;
 
@@ -88,8 +88,8 @@ class ApiController extends Zend_Controller_Action
 
     private function _getModel()
     {
-        require_once APPLICATION_PATH . '/models/api.php';
-        $this->_model = new model_Api();
+        require_once APPLICATION_PATH . '/modules/api/models/index.php';
+        $this->_model = new model_Api_Index();
     }
 
 }

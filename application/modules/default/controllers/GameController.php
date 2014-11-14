@@ -159,12 +159,12 @@ class GameController extends Zend_Controller_Action
             $this->_javascript[] = '/js/js_debug.js';
         }
         $this->_javascript[] = '/js/master_data.js';
-        $this->_javascript[] = '/js/game_field.min.js';
-      //$this->_javascript[] = '/js/game_field_utility.js';
-      //$this->_javascript[] = '/js/game_field_reactions.js';
-      //$this->_javascript[] = '/js/arts_queue.js';
-      //$this->_javascript[] = '/js/magic_queue.js';
-      //$this->_javascript[] = '/js/game_field.js';
+      //$this->_javascript[] = '/js/game_field.min.js';
+        $this->_javascript[] = '/js/game_field_utility.js';
+        $this->_javascript[] = '/js/game_field_reactions.js';
+        $this->_javascript[] = '/js/arts_queue.js';
+        $this->_javascript[] = '/js/magic_queue.js';
+        $this->_javascript[] = '/js/game_field.js';
         //$this->_layout->description = 'スマホでカードヒーローが遊べます。';
 
         $aSelectCond = array(
@@ -206,7 +206,7 @@ class GameController extends Zend_Controller_Action
     }
 
     private function _getModel() {
-        require_once APPLICATION_PATH . '/models/game.php';
+        require_once APPLICATION_PATH . '/modules/default/models/game.php';
         $this->_model = new model_Game();
     }
 }

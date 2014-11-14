@@ -198,7 +198,7 @@ class UserController extends Zend_Controller_Action
     }
 
     private function _getModel() {
-        require_once APPLICATION_PATH . '/models/user.php';
+        require_once APPLICATION_PATH . '/modules/default/models/user.php';
         $this->_model = new model_User();
     }
 }

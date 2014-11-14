@@ -59,7 +59,7 @@ class CardController extends Zend_Controller_Action
     }
 
     private function _getModel() {
-        require_once APPLICATION_PATH . '/models/card.php';
+        require_once APPLICATION_PATH . '/modules/default/models/card.php';
         $this->_model = new model_Card();
     }
 }

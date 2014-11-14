@@ -1581,7 +1581,7 @@ new function () {
                                 case 1017:
                                     var mon = g_field_data.cards[q.target_id];
                                     // レベルアップできず、アシストも持ってないモンスターにはレベルアップ権利を与えない
-                                    if (!game_field_reactions.isLvupOk(mon) && g_master_data.m_monster[mon.monster_id].skill != 11) {
+                                    if (!game_field_reactions.isLvupOk(mon) && g_master_data.m_monster[mon.monster_id].skill.id != 11) {
                                         throw new Error('invalid_target');
                                     }
                                     mon.lvup_standby += parseInt(q.param1);

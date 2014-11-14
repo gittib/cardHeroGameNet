@@ -78,7 +78,7 @@ class DeckController extends Zend_Controller_Action
     }
 
     private function _getModel() {
-        require_once APPLICATION_PATH . '/models/deck.php';
+        require_once APPLICATION_PATH . '/modules/default/models/deck.php';
         $this->_model = new model_Deck();
     }
 }

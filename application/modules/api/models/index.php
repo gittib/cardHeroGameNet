@@ -1,6 +1,6 @@
 <?php
 
-class model_Api {
+class model_Api_Index {
     private $_db;
 
     public function __construct() {
