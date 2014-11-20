@@ -120,19 +120,19 @@ table.sql_debug td {
 
 _eos_;
         $ret = "<table cellspacing=0 cellpadding=0 border=0 class='sql_debug'>\n";
-        $ret .= "    <tr><th>#</th><th>Query</th><th>time[sec]</th></tr>\n";
+        $ret .= "    <tr><th>#</th><th>Query</th><th>time[msec]</th></tr>\n";
         $num = 1;
         foreach ($qp as $query) {
             $sql = $query->getQuery();
-            $sec = $query->getElapsedSecs();
+            $msec = $query->getElapsedSecs() * 1000;
             foreach ($query->getQueryParams() as $prm) {
                 $sql = preg_replace('/^([^?]*)\?/s', "$1'{$prm}'", $sql);
             }
-            $ret .= "    <tr><td>{$num}</td><td>{$sql}</td><td>{$sec}</td></tr>\n";
+            $ret .= "    <tr><td>{$num}</td><td>{$sql}</td><td>{$msec}</td></tr>\n";
             $num++;
         }
-        $sec = $db->getProfiler()->getTotalElapsedSecs();
-        $ret .= "    <tr><td>#</td><td>Total Time</td><td>{$sec}</td></tr>\n";
+        $msec = $db->getProfiler()->getTotalElapsedSecs() * 1000;
+        $ret .= "    <tr><td>#</td><td>Total Time</td><td>{$msec}</td></tr>\n";
         $ret .= "</table>\n";
         return $sCss . $ret;
     }

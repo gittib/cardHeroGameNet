@@ -63,7 +63,7 @@ arts_queue = (function () {
                     cost_flg        : true,
                 });
             }
-            aQueue.queue_units.push({
+            aQueue.queue_units.unshift({
                 queue_type_id   : 1002,
                 target_id       : aArgs.actor_id,
                 cost_flg        : true,

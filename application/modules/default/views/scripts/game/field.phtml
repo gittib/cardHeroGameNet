@@ -23,6 +23,16 @@
             'myBack2',
         ),
     );
+
+    // 1ターン前のフィールドを抽出した場合はturnの値を更新する
+    if ($this->bBefore) {
+        if ($aCardInfo['field_info']['turn'] == 1) {
+            $aCardInfo['field_info']['turn'] = 2;
+        } else {
+            $aCardInfo['field_info']['turn'] = 1;
+        }
+    }
+
     $aCards = array();
     foreach ($aCardInfo['field'] as $iGameCardId => $val) {
         if ($aCardInfo['field_info']['turn'] == $val['owner']) {
@@ -293,14 +303,14 @@ _eos_;
 </div>
 <div id="buttons_frame">
 <?php
-if ($aCardInfo['field_info']['turn_count'] <= 2) {
-    echo <<<_eos_
-    <div class="marigan_button">
-        マリガン
-    </div>
-
-_eos_;
-}
+//if ($aCardInfo['field_info']['turn_count'] <= 2) {
+//    echo <<<_eos_
+//    <div class="marigan_button">
+//        マリガン
+//    </div>
+//
+//_eos_;
+//}
 ?>
     <div class="cancel_button">
         キャンセル
@@ -323,6 +333,11 @@ _eos_;
         <input type="RADIO" name="animation_speed" value="300" />普通
         <input type="RADIO" name="animation_speed" value="500" />遅い
     </div>
+    <div class="setting_item old_animation_speed">
+        <span>前ターンのアニメーションスピード</span><br/>
+        <input type="RADIO" name="old_animation_speed" value="1"   />普通に流す
+        <input type="RADIO" name="old_animation_speed" value="200" />じっくり流す
+    </div>
     <div class="setting_item actor_auto_change">
         <span>カード選択切り替え</span><br/>
         <span class="mini-font">不適切な対象を選択した時、Card Infomationを選択したカードに切り替える</span><br/>
@@ -341,9 +356,6 @@ _eos_;
 
 <div class="hidden_cards_info">
 <?php
-    //echo $sHandCards;
-    //echo $sDeckCards;
-    //echo $sUsedCards;
     echo '<div turn_num="' . $aCardInfo['field_info']['turn'] . '"></div>';
 ?>
 </div>
@@ -351,8 +363,10 @@ _eos_;
 function getCardsJson() {
     return JSON.parse('<?php echo json_encode($aCards); ?>');
 }
+function getQueueJson() {
+    return JSON.parse('<?php echo json_encode($this->aQueue); ?>');
+}
 </script>
 <form name="form_current_field" method="post" action="/game/turn-end/">
-<input type="hidden" name="game_field_id" value="<?php echo $this->nGameFieldId; ?>" />
+<input type="hidden" name="game_field_id" value="<?php echo $this->iGameFieldId; ?>" />
 </form>
-

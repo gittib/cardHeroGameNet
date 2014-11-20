@@ -339,7 +339,8 @@ new function () {
         g_field_data.my_stone       = Number($('#myPlayersInfo div.stone span').text());
         g_field_data.enemy_stone    = Number($('#enemyPlayersInfo div.stone span').text());
 
-        g_field_data.cards = getCardsJson();
+        g_field_data.cards      = getCardsJson();
+        g_field_data.old_queues = getQueueJson();
         $.each(g_field_data.cards, function(iGameCardId, val) {
             if (val.next_game_card_id) {
                 g_field_data.cards[val.next_game_card_id].before_game_card_id = iGameCardId;
@@ -360,6 +361,7 @@ new function () {
     {
         var aRadioSettings = [
             'animation_speed',
+            'old_animation_speed',
             'actor_auto_change',
             'alert_popup',
         ];
@@ -475,13 +477,10 @@ new function () {
             if (val.pos_category == 'field') {
 
                 // 前衛が空いてたら前進する
+                // キュー自体は毎回入れてしまって、前衛が埋まってたらキューをコカす
                 if (val.pos_id == 'myBack1' || val.pos_id == 'myBack2') {
                     var frontPos = game_field_utility.getRelativePosId(val.pos_id, {x:0, y:-1});
-                    var iFrontGameCardId = game_field_reactions.getGameCardId({
-                        pos_category    : 'field',
-                        pos_id          : frontPos,
-                    });
-                    if (iGameCardId && !iFrontGameCardId) {
+                    if (iGameCardId) {
                         g_field_data.queues.push({
                             actor_id        : val.game_card_id,
                             log_message     : g_master_data.m_monster[val.monster_id].name + 'が前進',
@@ -1020,6 +1019,7 @@ new function () {
         var bOldQueue = false;
 
         if (0 < g_field_data.old_queues.length) {
+            console.log('old_queues proc.');
             bAllResolved = false;
             bOldQueue = true;
             aExecAct = g_field_data.old_queues.shift();
@@ -1063,7 +1063,7 @@ new function () {
                 if (bOldQueue) {
                     // OldQueueを処理した時は誘発処理を発動されると困るので、queuesのバックアップを取る
                     backupQueuesWhileOldQueueProcessing = [];
-                    $.extend(true, g_field_data.queues, backupQueuesWhileOldQueueProcessing);
+                    $.extend(true, backupQueuesWhileOldQueueProcessing, g_field_data.queues);
                 } else {
                     (function(a) {
                         $.each(a.queue_units, function(i,q) {
@@ -1822,6 +1822,7 @@ new function () {
                                 case 1022:
                                     var p = game_field_utility.getXYFromPosId(q.param1);
                                     var aCard = g_field_data.cards[q.target_id];
+                                    var bSystem = (aExecAct.priority.indexOf('system', 0) != -1);
                                     if (aCard.status) {
                                         if (aCard.status[114]) {
                                             throw new Error('Move failed. Mover has kagenui.');
@@ -1835,7 +1836,7 @@ new function () {
                                         bMoveQueueResolved = true;
 
                                         // ダークホールの効果を消す
-                                        if (aCard.status) {
+                                        if (!bSystem && aCard.status) {
                                             if (aCard.status[116]) {
                                                 g_field_data.queues.push({
                                                     actor_id        : aCard.game_card_id,
@@ -1973,7 +1974,8 @@ new function () {
                                             case 'P':
                                             case 'S':
                                                 aAlreadyStatus[aSt.status_type] = true;
-                                                // breakは書かない
+                                                aAlreadyStatus[iStatusId] = true;
+                                                break;
                                             default:
                                                 aAlreadyStatus[iStatusId] = true;
                                                 break;
@@ -2032,6 +2034,21 @@ new function () {
                                             mon.monster_id = g_master_data.m_card[2].monster_id;
                                             break;
                                     }
+
+                                    var sDom = '#' + mon.pos_id;
+                                    g_field_data.animation_info.animations.push({
+                                        target_dom  : sDom,
+                                        animation_param : {
+                                            'background-color'  : '#ee0',
+                                        },
+                                    });
+                                    g_field_data.animation_info.animations.push({
+                                        target_dom  : sDom,
+                                        animation_param : {
+                                            'background-color'  : g_base_color.background,
+                                        },
+                                    });
+
                                     break;
                                 case 1027:
                                     q.param1 = Number(q.param1);
@@ -2224,6 +2241,7 @@ new function () {
     function execAnimation (bRecursive)
     {
         function _execAnimationUnit (bRecursive) {
+
             try {
                 var iAnimationTime = parseInt($('[name=animation_speed]:checked').val());
                 if (isNaN(iAnimationTime) || iAnimationTime <= 0) {
@@ -2232,6 +2250,7 @@ new function () {
             } catch (e) {
                 iAnimationTime = 100;
             }
+
             if (0 < g_field_data.animation_info.animations.length) {
                 try {
                     var aArgs = g_field_data.animation_info.animations.shift();
@@ -2270,14 +2289,30 @@ new function () {
             } else {
                 g_field_data.animation_info.bAnimationProcessing = false;
                 $('#game_field td[style]').removeAttr('style');
+
+                var iNextInterval = 1;
+                if (0 < g_field_data.old_queues.length) {
+                    // 前のターンのキューを処理するときはアニメーションの時間を長くする
+                    try {
+                        var iOld = parseInt($('[name=old_animation_speed]:checked').val());
+                        if (isNaN(iOld) || iOld <= 0) {
+                            throw new Error('no_setting');
+                        }
+                    } catch (e) {
+                        iOld = 200;
+                    }
+                    iNextInterval = iOld;
+                }
+
                 setTimeout( function () {
-                    game_field_reactions.updateField({
-                        field_data  : g_field_data,
-                    });
                     if (bRecursive) {
                         execQueue({ resolve_all : true });
                     }
-                }, 1);
+                }, iNextInterval);
+
+                game_field_reactions.updateField({
+                    field_data  : g_field_data,
+                });
             }
         }
 

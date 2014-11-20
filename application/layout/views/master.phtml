@@ -81,7 +81,7 @@ _eos_;
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title><?php echo $sTitle; ?>カードヒーローをスマホで遊べるサイト</title>
+<title><?php echo $sTitle; ?>カードヒーロー@スマホ</title>
 <meta name="keywords" content="カードヒーロー,スマホ" />
 <meta name="description" content="<?php echo $sDescription; ?>" />
 <meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1,minimum-scale=1" />
@@ -98,9 +98,13 @@ _eos_;
 </head>
 <body>
 <?php
+if (isset($this->layout()->bHideHeader)) {
+    echo $this->layout()->content;
+} else {
     echo $this->render('header.phtml');
     echo $this->layout()->content;
     echo $this->render('footer.phtml');
+}
 ?>
 </body>
 </html>

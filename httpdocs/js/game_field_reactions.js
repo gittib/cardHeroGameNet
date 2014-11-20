@@ -228,7 +228,7 @@ game_field_reactions = (function () {
                         sLvHp += '<span class="mini-font">HP</span><span class="hp">?</span>';
                         if (!val.standby_flg) {
                             sImgSrc = '/images/card/';
-                            if (game_field_utility.getMaxActCount(val.monster_id) <= val.act_count) {
+                            if (val.owner == 'my' && game_field_utility.getMaxActCount(val.monster_id) <= val.act_count) {
                                 sImgClass += ' gray';
                             }
                             sImgSrc += g_master_data.m_monster[val.monster_id].image_file_name;

@@ -1,0 +1,29 @@
+<style>
+p {
+    text-align: center;
+    margin: 15px;
+}
+
+textarea {
+    width: 333px;
+    height: 400px;
+}
+</style>
+<form name="form1" method="post">
+<p>
+<input type="submit" value="SAVE" />
+</p>
+<br />
+<textarea name="memo">
+<?php
+if (isset($_POST) && isset($_POST['memo'])) {
+    file_put_contents('/var/www/vhosts/memo.txt', $_POST['memo']);
+}
+echo file_get_contents('/var/www/vhosts/memo.txt');
+?>
+</textarea>
+<br />
+<p>
+<input type="submit" value="SAVE" />
+</p>
+</form>

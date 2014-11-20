@@ -25,6 +25,14 @@ class CardController extends Zend_Controller_Action
         $this->_layout->javascript = $this->_javascript;
     }
 
+    public function detailInnerAction()
+    {
+        $cardId = $this->getRequest()->getParam('card_id');
+        $this->_layout->canonical = "/card/detail/{$cardId}/";
+        $this->_layout->bHideHeader = true;
+        $this->forward('detail');
+    }
+
     public function detailAction()
     {
         // action body

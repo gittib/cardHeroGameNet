@@ -60,7 +60,7 @@ class GameController extends Zend_Controller_Action
         // ゲームを始めるため、初期デッキ選択
         $request = $this->getRequest();
 
-        require_once APPLICATION_PATH . '/models/deck.php';
+        require_once APPLICATION_PATH . '/modules/default/models/deck.php';
         $modelDeck = new model_Deck();
         $this->_stylesheet[] = '/css/game_list.css';
         $this->_stylesheet[] = '/css/deck_list.css';
@@ -91,7 +91,6 @@ class GameController extends Zend_Controller_Action
 
         $iGameFieldId = $this->_model->standby($deckId);
         $request->setParam('game_field_id', $iGameFieldId);
-        $request->setParam('ignore_open_flg', true);
 
         $this->forward('field');
     }
@@ -99,11 +98,11 @@ class GameController extends Zend_Controller_Action
     public function receiveAction()
     {
         $this->_getModel();
-        require_once APPLICATION_PATH . '/models/deck.php';
+        require_once APPLICATION_PATH . '/modules/default/models/deck.php';
         $modelDeck = new model_Deck();
 
         $request = $this->getRequest();
-        $nGameFieldId   = $request->getParam('game_field_id');
+        $iGameFieldId   = $request->getParam('game_field_id');
         $iPage          = $request->getParam('page_no');
         $this->_stylesheet[] = '/css/game_list.css';
         $this->_stylesheet[] = '/css/deck_list.css';
@@ -113,7 +112,7 @@ class GameController extends Zend_Controller_Action
         $this->_layout->noindex = true;
 
         $aCardInfoArray = $this->_model->getFieldDetail(array(
-            'game_field_id' => $nGameFieldId,
+            'game_field_id' => $iGameFieldId,
             'open_flg'      => 1,
         ));
         $aDeckList = $modelDeck->getDeckList(array(
@@ -121,7 +120,7 @@ class GameController extends Zend_Controller_Action
         ));
         $this->view->assign('aCardInfoInField', reset($aCardInfoArray));
         $this->view->assign('aDeckList', $aDeckList);
-        $this->view->assign('nGameFieldId', $nGameFieldId);
+        $this->view->assign('iGameFieldId', $iGameFieldId);
         $this->view->assign('bGameStart', true);
         $this->view->assign('sDispMessage', '使用するデッキを選んでください。');
         $this->render('deck/index', null, true);
@@ -143,7 +142,6 @@ class GameController extends Zend_Controller_Action
             'deck_id'       => $request->getParam('deck_id'),
         ));
         $request->setParam('game_field_id', $iGameFieldId);
-        $request->setParam('ignore_open_flg', true);
 
         $this->forward('field');
     }
@@ -153,7 +151,7 @@ class GameController extends Zend_Controller_Action
         $this->_getModel();
 
         $request = $this->getRequest();
-        $nGameFieldId = $request->getParam('game_field_id');
+        $iGameFieldId = $request->getParam('game_field_id');
         $this->_stylesheet[] = '/css/game_field.css';
         if (APPLICATION_ENV == 'testing') {
             $this->_javascript[] = '/js/js_debug.js';
@@ -165,20 +163,26 @@ class GameController extends Zend_Controller_Action
         $this->_javascript[] = '/js/arts_queue.js';
         $this->_javascript[] = '/js/magic_queue.js';
         $this->_javascript[] = '/js/game_field.js';
-        //$this->_layout->description = 'スマホでカードヒーローが遊べます。';
+        $this->_layout->description = 'スマホで遊べるカードヒーロー！';
 
+        $iBeforeFieldId = $this->_model->getBeforeFieldId($iGameFieldId);
         $aSelectCond = array(
-            'game_field_id' => $nGameFieldId,
+            'game_field_id' => $iBeforeFieldId,
         );
-        $iOpenFlg = $request->getParam('ignore_open_flg');
-        if (!isset($iOpenFlg) || $iOpenFlg == '') {
-            $aSelectCond['open_flg'] = 1;
-        }
         $aFields = $this->_model->getFieldDetail($aSelectCond);
         $aCardInfo = reset($aFields);
-        $this->_layout->title = "ゲーム{$aCardInfo['field_info']['title_str']}";
+        $aQueue = array('');
+        if ($iBeforeFieldId != $iGameFieldId) {
+            $aQueue = $this->_model->getQueueInfo($iGameFieldId, array(
+                'swap_pos_id'   => true,
+            ));
+            $this->_model->getQueueText($iGameFieldId);
+        }
+        $this->_layout->title = "ゲーム[{$iGameFieldId}]";
         $this->view->assign('aCardInfo', $aCardInfo);
-        $this->view->assign('nGameFieldId', $nGameFieldId);
+        $this->view->assign('iGameFieldId', $iGameFieldId);
+        $this->view->assign('bBefore', ($iGameFieldId != $iBeforeFieldId));
+        $this->view->assign('aQueue', $aQueue);
     }
 
     public function turnEndAction()
@@ -186,7 +190,7 @@ class GameController extends Zend_Controller_Action
         $this->_getModel();
 
         $request = $this->getRequest();
-        $nGameFieldId = $request->getParam('game_field_id');
+        $iGameFieldId = $request->getParam('game_field_id');
         $this->_stylesheet[] = '/css/turn_end.css';
         $this->_layout->title = '投稿完了';
         $this->_layout->noindex = true;

@@ -37,11 +37,10 @@ class model_Game {
 
     /**
      *  @param aOption:
-     *      game_field_id   : 抽出対象フィールドのID
-     *      page_no         : ページング用ページ番号を指定
-     *      select_queue    : キュー情報も抽出する
-     *      open_flg        : t_game_fieldのopen_flgを指定
-     *      allow_no_field  : フィールドが抽出できなくても例外を投げない
+     *      game_field_id       : 抽出対象フィールドのID
+     *      page_no             : ページング用ページ番号を指定
+     *      open_flg            : t_game_fieldのopen_flgを指定
+     *      allow_no_field      : フィールドが抽出できなくても例外を投げない
      *
      *  @return array フィールド詳細の配列
      */
@@ -100,7 +99,7 @@ class model_Game {
             )
             ->joinLeft(
                 array('first' => 't_game_field'),
-                "first.game_field_id = regexp_replace(field.field_id_path, '-.*$', '')::int",
+                "first.game_field_id::varchar = regexp_replace(field.field_id_path, '-.*$', '')::varchar",
                 array(
                     'first_field_id'    => 'game_field_id',
                     'start_date'        => new Zend_Db_Expr("to_char(first.upd_date,'yyyy/mm/dd HH24:MI')"),
@@ -108,7 +107,7 @@ class model_Game {
             )
             ->joinLeft(
                 array('bf' => 't_game_field'),
-                "bf.game_field_id = regexp_replace(field.field_id_path, '^.*-', '')::int",
+                "bf.game_field_id::varchar = regexp_replace(field.field_id_path, '^.*-', '')::varchar",
                 array()
             )
             ->joinLeft(
@@ -137,8 +136,7 @@ class model_Game {
             ->order(array(
                 'field.upd_date desc',
                 'game_field_id desc',
-            ))
-            ;
+            ));
         $rslt = $this->_db->fetchAll($sel);
         if (count($rslt) <= 0 && !isset($aOption['allow_no_field'])) {
             throw new Zend_Controller_Action_Exception('Field data not found', 404);
@@ -335,13 +333,6 @@ class model_Game {
             $aRet[$iGameFieldId][$sPosCategory][$iGameCardId] = $aTmpRow;
         }
 
-        if (isset($aOption['select_queue']) && $aOption['select_queue']) {
-            $aQ = $this->_getQueueInfo($selField);
-            foreach ($aQ as $iGameFieldId => $val) {
-                $aRet[$iGameFieldId]['queue'] = $val;
-            }
-        }
-
         return $aRet;
     }
 
@@ -474,7 +465,38 @@ class model_Game {
         return $sPos;
     }
 
-    private function _getQueueInfo ($selField)
+    /**
+     *  @param iGameFieldId :   今のフィールドID
+     *
+     *  @return int １ターン前のフィールドID
+     */
+    public function getBeforeFieldId ($iGameFieldId)
+    {
+        $sel = $this->_db->select()
+            ->from(
+                array('tgf' => 't_game_field'),
+                array(
+                    'fid'   => new Zend_Db_Expr("regexp_replace(field_id_path, '^.*-', '')::int"),
+                )
+            )
+            ->where('field_id_path like ?', '%-%')
+            ->where('game_field_id = ?', $iGameFieldId);
+        $iBeforeFieldId = $this->_db->fetchOne($sel);
+        if (!$iBeforeFieldId) {
+            return $iGameFieldId;
+        } else {
+            return $iBeforeFieldId;
+        }
+    }
+
+    /**
+     *  @param iGameFieldId :   キュー情報を抽出する対象フィールドID
+     *  @param aOption:
+     *      swap_pos_id : trueならpos_idの敵味方を入れ替える
+     *
+     *  @return array キュー情報配列
+     */
+    public function getQueueInfo ($iGameFieldId, $aOption = array())
     {
         $sel = $this->_db->select()
             ->from(
@@ -483,6 +505,7 @@ class model_Game {
                     'queue_id',
                     'game_field_id',
                     'actor_id'      => 'act_card_id',
+                    'priority'      => 'pri_str_id',
                     'log_message',
                 )
             )
@@ -499,31 +522,181 @@ class model_Game {
                 )
             )
             ->where('tq.resolved_flg = ?', 1)
-            ->where('tq.game_field_id in(?)', $selField)
+            ->where('tq.game_field_id = ?', $iGameFieldId)
             ->order(array(
-                'tq.game_field_id',
                 'tq.queue_id',
                 'tqu.queue_unit_id',
             ));
         $rslt = $this->_db->fetchAll($sel);
         $aRet = array();
+        $iQueueId = null;
+        $aTmp = null;
         foreach ($rslt as $val) {
-            if (!isset($aRet[$val['game_field_id']])) {
-                $aRet[$val['game_field_id']] = array();
-            }
-            if (!isset($aRet[$val['game_field_id']][$val['queue_id']])) {
-                $aRet[$val['game_field_id']][$val['queue_id']] = array(
+            if ($val['queue_id'] != $iQueueId) {
+                if (isset($aTmp)) {
+                    $aRet[] = $aTmp;
+                }
+                $aTmp = array(
                     'queue_id'      => $val['queue_id'],
                     'game_field_id' => $val['game_field_id'],
                     'actor_id'      => $val['actor_id'],
                     'log_message'   => $val['log_message'],
+                    'priority'      => $val['priority'],
+                    'queue_units'   => array(),
+                );
+                $iQueueId = $val['queue_id'];
+            }
+            if (isset($aOption['swap_pos_id']) && $aOption['swap_pos_id']) {
+                if (preg_match('/^my/', $val['param1'])) {
+                    $val['param1'] = preg_replace('/^my/', 'enemy', $val['param1']);
+                } else {
+                    $val['param1'] = preg_replace('/^enemy/', 'my', $val['param1']);
+                }
+                if (preg_match('/^my/', $val['param2'])) {
+                    $val['param2'] = preg_replace('/^my/', 'enemy', $val['param2']);
+                } else {
+                    $val['param2'] = preg_replace('/^enemy/', 'my', $val['param2']);
+                }
+            }
+            $aTmp['queue_units'][] = array(
+                'cost_flg'      => $val['cost_flg'],
+                'queue_type_id' => $val['queue_type_id'],
+                'target_id'     => $val['target_id'],
+                'param1'        => $val['param1'],
+                'param2'        => $val['param2'],
+            );
+        }
+        if (isset($aTmp)) {
+            $aRet[] = $aTmp;
+        }
+        return $aRet;
+    }
+
+    /**
+     *  @param iGameFieldId:    今のフィールドID。１コ前じゃない
+     *  @param aOption:   将来用
+     *
+     *  @return array 棋譜的な文字列
+     */
+    public function getQueueText ($iGameFieldId, $aOption = array())
+    {
+        $sSql = "unnest(array_append(string_to_array(field_id_path, '-'), game_field_id::text))";
+        $sub = $this->_db->select()
+            ->from(
+                't_game_field',
+                array(
+                    'fields'    => new Zend_Db_Expr($sSql),
+                )
+            )
+            ->where('game_field_id = ?', $iGameFieldId)
+        ;
+        $sel = $this->_db->select()
+            ->from(
+                array('tq' => 't_queue'),
+                array(
+                    'game_field_id',
+                    'queue_id',
+                    'log_message',
+                    'actor_id'  => 'act_card_id',
+                )
+            )
+            ->join(
+                array('tqu' => 't_queue_unit'),
+                'tqu.queue_id = tq.queue_id',
+                array(
+                    'queue_unit_id',
+                    'cost_flg',
+                    'queue_type_id',
+                    'q_pri'             => new Zend_Db_Expr("case when queue_type_id = '1002' or queue_type_id = '1003' then 1 else 2 end"),
+                    'target_id'         => 'target_card_id',
+                    'param1',
+                    'param2',
+                )
+            )
+            ->joinLeft(
+                array('tgc_act' => 't_game_card'),
+                'tgc_act.game_field_id = tq.game_field_id and tgc_act.game_card_id = tq.act_card_id',
+                array()
+            )
+            ->joinLeft(
+                array('mc_act' => 'm_card'),
+                'mc_act.card_id = tgc_act.card_id',
+                array(
+                    'actor_name'    => 'card_name',
+                )
+            )
+            ->joinLeft(
+                array('tgc_target' => 't_game_card'),
+                'tgc_target.game_field_id = tq.game_field_id and tgc_target.game_card_id = tqu.target_card_id',
+                array()
+            )
+            ->joinLeft(
+                array('mc_target' => 'm_card'),
+                'mc_target.card_id = tgc_target.card_id',
+                array(
+                    'target_name'    => 'card_name',
+                )
+            )
+            ->where('tq.game_field_id::text in(?)', $sub)
+            ->where('tq.resolved_flg = ?', 1)
+            ->order(array(
+                'tq.game_field_id',
+                'tq.queue_id',
+                'q_pri',
+                'tqu.queue_unit_id',
+            ));
+        $rslt = $this->_db->fetchAll($sel);
+
+        $aQ = array();
+        foreach ($rslt as $val) {
+            $iGameFieldId   = $val['game_field_id'];
+            $iQueueId       = $val['queue_id'];
+            $iQueueUnitId   = $val['queue_unit_id'];
+
+            if (!isset($aQ[$iGameFieldId])) {
+                $aQ[$iGameFieldId] = array();
+            }
+            if (!isset($aQ[$iGameFieldId][$iQueueId])) {
+                $aQ[$iGameFieldId][$iQueueId] = array(
+                    'queue_id'      => $val['queue_id'],
+                    'log_message'   => $val['log_message'],
+                    'actor_id'      => $val['actor_id'],
+                    'actor_name'    => $val['actor_name'],
                     'queue_units'   => array(),
                 );
             }
-            $aRet[$val['game_field_id']][$val['queue_id']]['queue_units'][] = array(
-                'queue_type_id',
+            $aQ[$iGameFieldId][$iQueueId]['queue_units'][$iQueueUnitId] = array(
+                'queue_unit_id' => $val['queue_unit_id'],
+                'queue_type_id' => $val['queue_type_id'],
+                'actor_id'      => $val['actor_id'],
+                'target_id'     => $val['target_id'],
+                'target_name'   => $val['target_name'],
+                'param1'        => $val['param1'],
+                'param2'        => $val['param2'],
             );
         }
+
+        $aRet = array();
+        $iTurn = 1;
+        foreach ($aQ as $iGameFieldId => $v1) {
+            $aRet[] = "--------";
+            $aRet[] = "ターン{$iTurn}開始";
+            foreach ($v1 as $iQueueId => $v2) {
+                if (isset($v2['log_message']) && 0 < strlen($v2['log_message'])) {
+                    $aRet[] = $v2['log_message'];
+                }
+                foreach ($v2['queue_units'] as $iQueueUnitId => $v3) {
+                    $aRet[] = "{$v2['actor_name']}が{$v3['target_name']}に{$v3['queue_type_id']}を実行";
+                }
+            }
+            $aRet[] = 'ターンエンド';
+            $iTurn++;
+        }
+        $aRet[] = "--------";
+        $sRet = implode("<br />\n", $aRet);
+        echo $sel . "<br />\n<br />\n";
+        echo $sRet;
+        //exit;
     }
 
     public function start ($aArgs)

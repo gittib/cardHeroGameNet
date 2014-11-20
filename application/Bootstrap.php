@@ -110,7 +110,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             '.*/?([^/]+)\.(png|jpg|gif)',
             array(
                 'module'        =>  'api',
-                'controller'    => 'index',
+                'controller'    =>  'index',
                 'action'        =>  'no-image',
                 1               =>  'dot',
                 2               =>  'png',
@@ -128,7 +128,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             '(.*)/gray_([^/]+)\.(png|jpg|gif)',
             array(
                 'module'        =>  'api',
-                'controller'    => 'index',
+                'controller'    =>  'index',
                 'action'        =>  'gray-image',
                 1               =>  '/images',
                 2               =>  'dot',
@@ -147,7 +147,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             'js/([^/]+)\.js',
             array(
                 'module'        =>  'api',
-                'controller'    => 'index',
+                'controller'    =>  'index',
                 'action'        =>  'build-javascript',
                 1               =>  1,
             ),
@@ -162,10 +162,24 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             'sitemap.xml',
             array(
                 'module'        =>  'api',
-                'controller'    => 'index',
+                'controller'    =>  'index',
                 'action'        =>  'sitemap',
             ),
             array()
+        );
+        $router->addRoute('sitemap', $route);
+
+        // apiモジュールのindexコントローラー
+        $route = new Zend_Controller_Router_Route_Regex(
+            'api/([^/]+)/?',
+            array(
+                'module'        =>  'api',
+                'controller'    =>  'index',
+                'action'        =>  'index',
+            ),
+            array(
+                1   => 'action',
+            )
         );
         $router->addRoute('sitemap', $route);
     }
