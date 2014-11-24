@@ -157,13 +157,12 @@ class GameController extends Zend_Controller_Action
             $this->_javascript[] = '/js/js_debug.js';
         }
         $this->_javascript[] = '/js/master_data.js';
-      //$this->_javascript[] = '/js/game_field.min.js';
-        $this->_javascript[] = '/js/game_field_utility.js';
-        $this->_javascript[] = '/js/game_field_reactions.js';
-        $this->_javascript[] = '/js/arts_queue.js';
-        $this->_javascript[] = '/js/magic_queue.js';
-        $this->_javascript[] = '/js/game_field.js';
-        $this->_layout->description = 'スマホで遊べるカードヒーロー！';
+        $this->_javascript[] = '/js/game_field.min.js';
+      //$this->_javascript[] = '/js/game_field_utility.js';
+      //$this->_javascript[] = '/js/game_field_reactions.js';
+      //$this->_javascript[] = '/js/arts_queue.js';
+      //$this->_javascript[] = '/js/magic_queue.js';
+      //$this->_javascript[] = '/js/game_field.js';
 
         $iBeforeFieldId = $this->_model->getBeforeFieldId($iGameFieldId);
         $aSelectCond = array(
@@ -176,7 +175,7 @@ class GameController extends Zend_Controller_Action
             $aQueue = $this->_model->getQueueInfo($iGameFieldId, array(
                 'swap_pos_id'   => true,
             ));
-            $this->_model->getQueueText($iGameFieldId);
+            //$this->_model->getQueueText($iGameFieldId);
         }
         $this->_layout->title = "ゲーム[{$iGameFieldId}]";
         $this->view->assign('aCardInfo', $aCardInfo);

@@ -181,7 +181,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
                 1   => 'action',
             )
         );
-        $router->addRoute('sitemap', $route);
+        $router->addRoute('api_index', $route);
     }
 }
 

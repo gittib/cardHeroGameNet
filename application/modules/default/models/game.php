@@ -576,7 +576,7 @@ class model_Game {
      *  @param iGameFieldId:    今のフィールドID。１コ前じゃない
      *  @param aOption:   将来用
      *
-     *  @return array 棋譜的な文字列
+     *  @return array 棋譜的な文字列の配列
      */
     public function getQueueText ($iGameFieldId, $aOption = array())
     {
@@ -673,6 +673,7 @@ class model_Game {
                 'target_name'   => $val['target_name'],
                 'param1'        => $val['param1'],
                 'param2'        => $val['param2'],
+                'cost_flg'      => $val['cost_flg'],
             );
         }
 
@@ -683,20 +684,58 @@ class model_Game {
             $aRet[] = "ターン{$iTurn}開始";
             foreach ($v1 as $iQueueId => $v2) {
                 if (isset($v2['log_message']) && 0 < strlen($v2['log_message'])) {
-                    $aRet[] = $v2['log_message'];
+                    $aRet[] = '<strong>' . $v2['log_message'] . '</strong>';
                 }
                 foreach ($v2['queue_units'] as $iQueueUnitId => $v3) {
-                    $aRet[] = "{$v2['actor_name']}が{$v3['target_name']}に{$v3['queue_type_id']}を実行";
+                    switch ($v3['queue_type_id']) {
+                        case 1002:
+                            if ($v3['cost_flg']) {
+                                $aRet[] = "{$v2['actor_name']}が特技を発動";
+                            }
+                            break;
+                        case 1003:
+                            if ($v3['cost_flg']) {
+                                $aRet[] = "{$v2['actor_name']}を使用";
+                            }
+                            break;
+                        case 1004:
+                            if (0 < $v3['param1']) {
+                                $sActor = '';
+                                if (isset($v2['actor_name']) && $v2['actor_name'] != '') {
+                                    $sActor = $v2['actor_name'] . 'が';
+                                }
+                                $aRet[] = "{$sActor}ストーンを{$v3['param1']}コ獲得";
+                            } else if ( $v3['param1'] < 0) {
+                                $inum = -1 * $v3['param1'];
+                                $aRet[] = "ストーンを{$inum}コ消費";
+                            }
+                            break;
+                        case 1005:
+                            $aRet[] = "{$v3['target_name']}に{$v3['param1']}パワーで攻撃";
+                            break;
+                        case 1006:
+                            $aRet[] = "{$v3['target_name']}に{$v3['param1']}ダメージ";
+                            break;
+                        case 1007:
+                            $aRet[] = "{$v3['target_name']}のHPが{$v3['param1']}回復";
+                            break;
+                        case 1008:
+                            $aRet[] = "{$v3['target_name']}はフィールドを離れた";
+                            break;
+                        case 1009:
+                            $aRet[] = "{$v3['target_name']}は手札に戻った";
+                            break;
+                        case 1010:
+                            $aRet[] = "{$v3['target_name']}が登場";
+                            break;
+                    }
                 }
             }
             $aRet[] = 'ターンエンド';
             $iTurn++;
         }
         $aRet[] = "--------";
-        $sRet = implode("<br />\n", $aRet);
-        echo $sel . "<br />\n<br />\n";
-        echo $sRet;
-        //exit;
+        return $aRet;
     }
 
     public function start ($aArgs)
