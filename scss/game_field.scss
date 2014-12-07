@@ -17,175 +17,178 @@
     }
 }
 
-#game_field {
-    width: 100%;
-    border: 1px solid;
-    border-collapse: collapse;
-
-    td {
-        width: 30%;
-        height: 51px;
-        border: 1px solid;
-        padding-top: 0;
-        padding-left: 0;
-
-        .pict {
-            float: left;
-            height: 50px;
-            width:  50px;
-            position: relative;
-
-            img.card_image {
-                position: absolute;
-                left: 0;
-                top: 0;
-                border: 1px solid;
-                height: 100%;
-                max-width: 100%;
-            }
-        }
-
-        .param {
-            float: left;
-            padding-left: 3px;
-            font-size: 12px;
-
-            span.power {
-                color: #ff0000;
-            }
-
-            span.shield {
-                color: #0060ff;
-            }
-
-            span.magic {
-                color: #00aa00;
-            }
-
-            span.charge {
-                color: #ffffff;
-                background-color: #ff0000;
-            }
-        }
-
-        div.num_info {
-            margin-left: 1px;
-
-            img {
-                height: 13px;
-            }
-        }
-    }
-
-    td.actor {
-        background-color: #ffff00;
-    }
-
-    td.target {
-        background-color: #ffeeee;
-    }
-
-    td.lvup_checking {
-        background-color: #888;
-    }
-    td.lvup_checking.lvup_ok {
-        background-color: #fff;
-    }
-}
-
 .mini-font {
     font-size: 8px;
 }
 
-#hand_card {
-    $img_size : 45px;
+#primary_part {
 
-    border: 1px solid;
-    text-align: center;
-    padding: 12px 0;
-
-    div {
-        float: left;
-        min-width: 53px;
-        img {
-            border: solid 1px;
-            height: $img_size;
-            width: $img_size;
+    #game_field {
+        width: 100%;
+        border: 1px solid;
+        border-collapse: collapse;
+    
+        td {
+            width: 30%;
+            height: 51px;
+            border: 1px solid;
+            padding-top: 0;
+            padding-left: 0;
+    
+            .pict {
+                float: left;
+                height: 50px;
+                width:  50px;
+                position: relative;
+    
+                img.card_image {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    border: 1px solid;
+                    height: 100%;
+                    max-width: 100%;
+                }
+            }
+    
+            .param {
+                float: left;
+                padding-left: 3px;
+                font-size: 12px;
+    
+                span.power {
+                    color: #ff0000;
+                }
+    
+                span.shield {
+                    color: #0060ff;
+                }
+    
+                span.magic {
+                    color: #00aa00;
+                }
+    
+                span.charge {
+                    color: #ffffff;
+                    background-color: #ff0000;
+                }
+            }
+    
+            div.num_info {
+                margin-left: 1px;
+    
+                img {
+                    height: 13px;
+                }
+            }
+        }
+    
+        td.actor {
+            background-color: #ffff00;
+        }
+    
+        td.target {
+            background-color: #ffeeee;
+        }
+    
+        td.lvup_checking {
+            background-color: #888;
+        }
+        td.lvup_checking.lvup_ok {
+            background-color: #fff;
         }
     }
-
-    div.actor {
-        img {
-            border-color: #eeee00;
-        }
-    }
-
-    div.target {
-        img {
-            border-color: #ff0000;
-        }
-    }
-}
-
-.sort_card_frame {
-    $font_size : 18px;
-
-    width: 100%;
-    border-top: solid 1px;
-    border-bottom: solid 1px;
-    padding-top: 12px;
-
-    .sort_card_title {
-        border: solid 2px;
-        border-bottom: solid 1px;
-    }
-
-    .sort_card_target {
-        border:solid 1px;
-        border-left:solid 2px;
-        border-right:solid 2px;
-        font-size:$font_size;
-
-        &.selected {
-            background-color: #ff0;
-        }
-
+    
+    #hand_card {
+        $img_size : 45px;
+    
+        border: 1px solid;
+        text-align: center;
+        padding: 12px 0;
+    
         div {
             float: left;
-            font-size:$font_size;
-
-            &.dtl_link {
-                float: right;
-                margin-right: 3px;
-            }
-
-            span.next_draw {
-                font-size: 12px;
+            min-width: 53px;
+            img {
+                border: solid 1px;
+                height: $img_size;
+                width: $img_size;
             }
         }
-
-        .pict {
-            width: 50px;
-            height: 50px;
+    
+        div.actor {
+            img {
+                border-color: #eeee00;
+            }
+        }
+    
+        div.target {
+            img {
+                border-color: #ff0000;
+            }
         }
     }
 
-    .sort_end_button_frame {
-        border: solid 2px;
+    .sort_card_frame {
+        $font_size : 18px;
+    
+        width: 100%;
         border-top: solid 1px;
         border-bottom: solid 1px;
-
-        .sort_end_button {
-            $border_rb: solid #00f;
-
-            margin: 12px;
-            border: solid #ddddff;
-            border-right: $border_rb;
-            border-bottom: $border_rb;
-            background-color: #88f;
-
+        padding-top: 12px;
+    
+        .sort_card_title {
+            border: solid 2px;
+            border-bottom: solid 1px;
+        }
+    
+        .sort_card_target {
+            border:solid 1px;
+            border-left:solid 2px;
+            border-right:solid 2px;
             font-size:$font_size;
-            text-align: center;
+    
+            &.selected {
+                background-color: #ff0;
+            }
+    
+            div {
+                float: left;
+                font-size:$font_size;
+    
+                &.dtl_link {
+                    float: right;
+                    margin-right: 3px;
+                }
+    
+                span.next_draw {
+                    font-size: 12px;
+                }
+            }
+    
+            .pict {
+                width: 50px;
+                height: 50px;
+            }
+        }
+    
+        .sort_end_button_frame {
+            border: solid 2px;
+            border-top: solid 1px;
+            border-bottom: solid 1px;
+    
+            .sort_end_button {
+                $border_rb: solid #00f;
+    
+                margin: 12px;
+                border: solid #ddddff;
+                border-right: $border_rb;
+                border-bottom: $border_rb;
+                background-color: #88f;
+    
+                font-size:$font_size;
+                text-align: center;
+            }
         }
     }
 }
@@ -199,157 +202,160 @@ div.close_button {
     padding: 2px;
 }
 
-#card_info {
-    $border_style: solid 2px;
+#secondary_part {
 
-    margin: 1em 0;
-    border: $border_style;
-
-    #card_info_frame {
-        $cmd_img_size : 50px;
-        $cmd_font_size: 18px;
-
-        div.card_info_title {
-            border-bottom: $border_style;
-
-            div {
-                float: left;
-
-                &.proposer {
-                    float: right;
-                }
-            }
-        }
-
-        div.card_summary {
-
-            min-height: $cmd_img_size;
-
-            div {
-                float: left;
-
-                &.card_image {
-                    img {
-                        margin: 1px;
-                        border: solid 1px;
-                        width: $cmd_img_size;
-                        height: $cmd_img_size;
-                    }
-                }
-
-                &.card_name {
-                    font-size: $cmd_font_size;
-                }
-
-                &.dtl_link {
-                    float: right;
-                    text-align: right;
-                    padding-right: 1em;
-
-                    a {
-                        font-size: $cmd_font_size;
+    #card_info {
+        $border_style: solid 2px;
+    
+        margin: 1em 0;
+        border: $border_style;
+    
+        #card_info_frame {
+            $cmd_img_size : 50px;
+            $cmd_font_size: 18px;
+    
+            div.card_info_title {
+                border-bottom: $border_style;
+    
+                div {
+                    float: left;
+    
+                    &.proposer {
+                        float: right;
                     }
                 }
             }
-        }
-
-        div.act_commands {
-            border-top:solid 1px;
-
-            div.command_row {
-                border-top:solid 1px;
-                padding: 12px 3px;
-                font-size: $cmd_font_size;
-
-                div.num_info {
-                    float: right;
-                    font-size: $cmd_font_size;
-
-                    span.range_pic {
+    
+            div.card_summary {
+    
+                min-height: $cmd_img_size;
+    
+                div {
+                    float: left;
+    
+                    &.card_image {
                         img {
-                            height: 18px;
+                            margin: 1px;
+                            border: solid 1px;
+                            width: $cmd_img_size;
+                            height: $cmd_img_size;
                         }
                     }
-
-                    span.stone_cost {
-                        font-size: 16px;
+    
+                    &.card_name {
+                        font-size: $cmd_font_size;
+                    }
+    
+                    &.dtl_link {
+                        float: right;
+                        text-align: right;
+                        padding-right: 1em;
+    
+                        a {
+                            font-size: $cmd_font_size;
+                        }
                     }
                 }
             }
-
-            div.command_row.selected_act {
-                background-color: #ffff00;
+    
+            div.act_commands {
+                border-top:solid 1px;
+    
+                div.command_row {
+                    border-top:solid 1px;
+                    padding: 12px 3px;
+                    font-size: $cmd_font_size;
+    
+                    div.num_info {
+                        float: right;
+                        font-size: $cmd_font_size;
+    
+                        span.range_pic {
+                            img {
+                                height: 18px;
+                            }
+                        }
+    
+                        span.stone_cost {
+                            font-size: 16px;
+                        }
+                    }
+                }
+    
+                div.command_row.selected_act {
+                    background-color: #ffff00;
+                }
             }
         }
     }
-}
-
-#buttons_frame {
-    width: 100%;
-
-    div {
-        margin: 20px;
-        padding: 3px 0;
-        border: solid 2px;
-        font-size: 18px;
-        text-align: center;
-    }
-
-    div.marigan_button {
-        $upper_line_color : #ffffdd;
-        $under_line_color : #888800;
-
-        background-color: #ffffee;
-        border-top-color:    $upper_line_color;
-        border-left-color:   $upper_line_color;
-        border-right-color:  $under_line_color;
-        border-bottom-color: $under_line_color;
-    }
-
-    div.cancel_button {
-        $upper_line_color : #ffdddd;
-        $under_line_color : #880000;
-
-        background-color: #ffeeee;
-        border-top-color:    $upper_line_color;
-        border-left-color:   $upper_line_color;
-        border-right-color:  $under_line_color;
-        border-bottom-color: $under_line_color;
-    }
-
-    div.rollback_button {
-        $upper_line_color : #ffdddd;
-        $under_line_color : #880000;
-
-        display: none;
-
-        background-color: #ffeeee;
-        border-top-color:    $upper_line_color;
-        border-left-color:   $upper_line_color;
-        border-right-color:  $under_line_color;
-        border-bottom-color: $under_line_color;
-    }
-
-    div.execute_button {
-        $upper_line_color : #ddffdd;
-        $under_line_color : #008800;
-
-        background-color: #eeffee;
-        border-top-color:    $upper_line_color;
-        border-left-color:   $upper_line_color;
-        border-right-color:  $under_line_color;
-        border-bottom-color: $under_line_color;
-    }
-
-    div.turn_end_button {
-        $upper_line_color : #ddddff;
-        $under_line_color : #000088;
-
-        background-color: #eeeeff;
-        border-top-color:    $upper_line_color;
-        border-left-color:   $upper_line_color;
-        border-right-color:  $under_line_color;
-        border-bottom-color: $under_line_color;
+    
+    #buttons_frame {
+        width: 100%;
+    
+        div {
+            margin: 20px;
+            padding: 3px 0;
+            border: solid 2px;
+            font-size: 18px;
+            text-align: center;
+        }
+    
+        div.marigan_button {
+            $upper_line_color : #ffffdd;
+            $under_line_color : #888800;
+    
+            background-color: #ffffee;
+            border-top-color:    $upper_line_color;
+            border-left-color:   $upper_line_color;
+            border-right-color:  $under_line_color;
+            border-bottom-color: $under_line_color;
+        }
+    
+        div.cancel_button {
+            $upper_line_color : #ffdddd;
+            $under_line_color : #880000;
+    
+            background-color: #ffeeee;
+            border-top-color:    $upper_line_color;
+            border-left-color:   $upper_line_color;
+            border-right-color:  $under_line_color;
+            border-bottom-color: $under_line_color;
+        }
+    
+        div.rollback_button {
+            $upper_line_color : #ffdddd;
+            $under_line_color : #880000;
+    
+            display: none;
+    
+            background-color: #ffeeee;
+            border-top-color:    $upper_line_color;
+            border-left-color:   $upper_line_color;
+            border-right-color:  $under_line_color;
+            border-bottom-color: $under_line_color;
+        }
+    
+        div.execute_button {
+            $upper_line_color : #ddffdd;
+            $under_line_color : #008800;
+    
+            background-color: #eeffee;
+            border-top-color:    $upper_line_color;
+            border-left-color:   $upper_line_color;
+            border-right-color:  $under_line_color;
+            border-bottom-color: $under_line_color;
+        }
+    
+        div.turn_end_button {
+            $upper_line_color : #ddddff;
+            $under_line_color : #000088;
+    
+            background-color: #eeeeff;
+            border-top-color:    $upper_line_color;
+            border-left-color:   $upper_line_color;
+            border-right-color:  $under_line_color;
+            border-bottom-color: $under_line_color;
+        }
     }
 }
 

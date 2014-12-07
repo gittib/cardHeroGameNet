@@ -25,7 +25,8 @@ _eos_;
 </div>
 <?php
 echo $this->render($this->template);
-$sDescription = str_replace('%descend%', '', $this->aCardInfo['description']);
+$sDescription = str_replace('%descstart%', '', $this->aCardInfo['description']);
+$sDescription = str_replace('%descend%', '', $sDescription);
 if (trim($sDescription) != '') {
     echo <<<_eos_
     <div class="card_description_frame">

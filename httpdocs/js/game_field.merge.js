@@ -4799,8 +4799,12 @@ new function () {
         });
 
         $(document).on('click', '#buttons_frame div.turn_end_button', function () {
-            if (confirm("ターンエンドしてもよろしいですか？")) {
-                turnEndProc();
+            if (g_field_data.finish_flg) {
+                alert('決着がついているので、ターンエンドはできません。');
+            } else {
+                if (confirm("ターンエンドしてもよろしいですか？")) {
+                    turnEndProc();
+                }
             }
         });
     });
@@ -4822,6 +4826,17 @@ new function () {
 
         g_field_data.cards      = getCardsJson();
         g_field_data.old_queues = getQueueJson();
+        g_field_data.old_queues.push({
+            actor_id        : null,
+            log_message     : '',
+            resolved_flg    : 0,
+            priority        : 'system',
+            queue_units : [{
+                queue_type_id   : 9999,
+                target_id       : null,
+                param1          : 'game_end_check',
+            }],
+        });
         $.each(g_field_data.cards, function(iGameCardId, val) {
             if (val.next_game_card_id) {
                 g_field_data.cards[val.next_game_card_id].before_game_card_id = iGameCardId;
@@ -5493,12 +5508,18 @@ new function () {
         g_field_data.actor = {game_card_id : null};
         game_field_reactions.updateActorDom();
 
+        if (g_field_data.finish_flg) {
+            // 決着がついていたらキューの処理はしない
+            g_field_data.queues = [];
+        }
+
         var bRecursive = aArgs.resolve_all;
         var act = g_field_data.queues;
         var bAllResolved = true;
         var aExecAct = null;
         var bOldQueue = false;
 
+        // 処理対象キューの選択
         if (0 < g_field_data.old_queues.length) {
             console.log('old_queues proc.');
             bAllResolved = false;
@@ -6367,13 +6388,25 @@ new function () {
                                             pos_category    : 'field',
                                             pos_id          : 'myMaster',
                                         });
-                                        g_field_data.cards[iGameCardId].hp -= q.param1;
                                     } else if (aCard.owner == 'enemy') {
                                         var iGameCardId = game_field_reactions.getGameCardId({
                                             pos_category    : 'field',
                                             pos_id          : 'enemyMaster',
                                         });
-                                        g_field_data.cards[iGameCardId].hp -= q.param1;
+                                    }
+                                    var mon = g_field_data.cards[iGameCardId];
+                                    mon.hp -= q.param1;
+                                    if (mon.hp <= 0) {
+                                        g_field_data.queues.push({
+                                            actor_id        : mon.game_card_id,
+                                            log_message     : '',
+                                            resolved_flg    : 0,
+                                            priority        : 'system',
+                                            queue_units : [{
+                                                queue_type_id   : 1008,
+                                                target_id       : mon.game_card_id,
+                                            }],
+                                        });
                                     }
                                     break;
                                 case 1024:
@@ -6562,10 +6595,11 @@ new function () {
                                     }
                                     if (iDelSt) {
                                         g_field_data.queues.push({
-                                            actor_id        : mon.status[q.param1].param1,
-                                            log_message     : '',
-                                            resolved_flg    : 0,
-                                            priority        : 'same_time',
+                                            actor_id            : mon.status[q.param1].param1,
+                                            log_message         : '',
+                                            resolved_flg        : 0,
+                                            priority            : 'same_time',
+                                            actor_anime_disable : true,
                                             queue_units : [{
                                                 queue_type_id   : 1027,
                                                 target_id       : mon.status[q.param1].param1,
@@ -6605,6 +6639,37 @@ new function () {
                                         mon.sort_no = aCard.sort_no + 1;
                                     }
                                     _insertDrawAnimation(q);
+                                    break;
+                                case 1032:
+                                    q.param1 = Number(q.param1);
+                                    var mon = g_field_data.cards[q.target_id];
+                                    var aSt = mon.status[q.param1];
+                                    aSt.turn_count--;
+                                    if (aSt.turn_count <= 0) {
+                                        g_field_data.queues.push({
+                                            actor_id        : mon.game_card_id,
+                                            log_message     : '',
+                                            resolved_flg    : 0,
+                                            priority        : 'system',
+                                            queue_units : [{
+                                                queue_type_id   : 1027,
+                                                target_id       : mon.game_card_id,
+                                                param1          : q.param1,
+                                            }],
+                                        });
+                                        if (q.param1 == 116) {
+                                            g_field_data.queues.push({
+                                                actor_id        : mon.game_card_id,
+                                                log_message     : 'ダークホールにより消滅',
+                                                resolved_flg    : 0,
+                                                priority        : 'follow',
+                                                queue_units : [{
+                                                    queue_type_id   : 1008,
+                                                    target_id       : mon.game_card_id,
+                                                }],
+                                            });
+                                        }
+                                    }
                                     break;
                                 case 9999:
                                     switch (q.param1) {
@@ -6654,6 +6719,11 @@ new function () {
                                             g_field_data.aSortingCards = [];
                                             for (var i = 0 ; i < 5 ; i++) {
                                                 g_field_data.aSortingCards.push(aPicks.shift());
+                                            }
+                                            break;
+                                        case 'game_end_check':
+                                            if (isGameEnd()) {
+                                                g_field_data.finish_flg = true;
                                             }
                                             break;
                                         default:
@@ -7074,9 +7144,10 @@ new function () {
                 }
                 if (sid) {
                     g_field_data.queues.push({
-                        actor_id        : null,
-                        resolved_flg    : 0,
-                        priority        : 'same_time',
+                        actor_id            : null,
+                        resolved_flg        : 0,
+                        priority            : 'same_time',
+                        actor_anime_disable : true,
                         queue_units : [
                             {
                                 queue_type_id   : 1027,
@@ -7099,6 +7170,28 @@ new function () {
         delete mon.mad_hole_cnt;
     }
 
+    function isGameEnd()
+    {
+        try {
+
+            var my = game_field_reactions.getGameCardId({
+                'pos_category'  : 'field',
+                'pos_id'        : 'myMaster',
+            });
+            var enemy = game_field_reactions.getGameCardId({
+                'pos_category'  : 'field',
+                'pos_id'        : 'enemyMaster',
+            });
+
+            if (!my || !enemy) {
+                return true;
+            }
+
+        } catch (e) {}
+
+        return false;
+    }
+
     function turnEndProc()
     {
         $.each(g_field_data.cards, function(i, val) {
@@ -7114,14 +7207,12 @@ new function () {
                             log_message     : '仮死から復活',
                             resolved_flg    : 0,
                             priority        : 'system',
-                            queue_units : [
-                                {
-                                    queue_type_id   : 1021,
-                                    target_id       : val.game_card_id,
-                                    param1          : game_field_utility.getModifyMonsterId(val.monster_id),
-                                    param2          : false,
-                                }
-                            ],
+                            queue_units : [{
+                                queue_type_id   : 1021,
+                                target_id       : val.game_card_id,
+                                param1          : game_field_utility.getModifyMonsterId(val.monster_id),
+                                param2          : false,
+                            }],
                         });
                         break;
                 }
@@ -7129,36 +7220,17 @@ new function () {
                 // ステータス継続時間更新
                 if (typeof val.status != 'undefined') {
                     $.each(val.status, function(status_id, val2) {
-                        val2.turn_count--;
-                        if (val2.turn_count <= 0) {
-                            g_field_data.queues.push({
-                                actor_id        : val.game_card_id,
-                                log_message     : '',
-                                resolved_flg    : 0,
-                                priority        : 'system',
-                                queue_units : [
-                                    {
-                                        queue_type_id   : 1027,
-                                        target_id       : val.game_card_id,
-                                        param1          : status_id,
-                                    }
-                                ],
-                            });
-                            if (status_id == 116) {
-                                g_field_data.queues.push({
-                                    actor_id        : val.game_card_id,
-                                    log_message     : 'ダークホールにより消滅',
-                                    resolved_flg    : 0,
-                                    priority        : 'follow',
-                                    queue_units : [
-                                        {
-                                            queue_type_id   : 1008,
-                                            target_id       : val.game_card_id,
-                                        }
-                                    ],
-                                });
-                            }
-                        }
+                        g_field_data.queues.push({
+                            actor_id        : null,
+                            log_message     : '',
+                            resolved_flg    : 0,
+                            priority        : 'system',
+                            queue_units : [{
+                                queue_type_id   : 1032,
+                                target_id       : val.game_card_id,
+                                param1          : status_id,
+                            }],
+                        });
                     });
                 }
 
@@ -7169,12 +7241,10 @@ new function () {
                         log_message     : '',
                         resolved_flg    : 0,
                         priority        : 'system',
-                        queue_units : [
-                            {
-                                queue_type_id   : 1025,
-                                target_id       : val.game_card_id,
-                            }
-                        ],
+                        queue_units : [{
+                            queue_type_id   : 1025,
+                            target_id       : val.game_card_id,
+                        }],
                     })
                 }
             }

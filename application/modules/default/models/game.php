@@ -37,10 +37,11 @@ class model_Game {
 
     /**
      *  @param aOption:
-     *      game_field_id       : 抽出対象フィールドのID
-     *      page_no             : ページング用ページ番号を指定
-     *      open_flg            : t_game_fieldのopen_flgを指定
-     *      allow_no_field      : フィールドが抽出できなくても例外を投げない
+     *      game_field_id           : 抽出対象フィールドのID
+     *      page_no                 : ページング用ページ番号を指定
+     *      open_flg                : t_game_fieldのopen_flgを指定
+     *      allow_no_field          : フィールドが抽出できなくても例外を投げない
+     *      select_standby_field    : 対戦相手の存在するフィールドは抽出禁止
      *
      *  @return array フィールド詳細の配列
      */
@@ -82,7 +83,10 @@ class model_Game {
                 array('path' => 't_game_field'),
                 "path.field_id_path like '%' || res.game_field_id || '%'",
                 array()
-            );
+            )
+            ->where('path.open_flg = ?', 1)
+            ->where('path.del_flg != ?', 1)
+            ;
 
         $sel = $this->_db->select()
             ->from(
@@ -264,6 +268,13 @@ class model_Game {
         $aTmpRow = null;
         foreach ($rslt as $val) {
             if ($iGameCardId != $val['game_card_id']) {
+
+                if (isset($aOption['select_standby_field']) && $aOption['select_standby_field']) {
+                    if ($val['owner'] == 2) {
+                        throw new Zend_Controller_Action_Exception('This field is already started.', 410);
+                    }
+                }
+
                 if (isset($aTmpRow) && $aTmpRow) {
                     $aRet[$iGameFieldId][$sPosCategory][$iGameCardId] = $aTmpRow;
                     if ($val['owner'] != 1) {

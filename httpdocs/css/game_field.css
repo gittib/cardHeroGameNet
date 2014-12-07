@@ -9,104 +9,102 @@
   #game_infomation_frame div.info {
     min-height: 1em; }
 
-#game_field {
+.mini-font {
+  font-size: 8px; }
+
+#primary_part #game_field {
   width: 100%;
   border: 1px solid;
   border-collapse: collapse; }
-  #game_field td {
+  #primary_part #game_field td {
     width: 30%;
     height: 51px;
     border: 1px solid;
     padding-top: 0;
     padding-left: 0; }
-    #game_field td .pict {
+    #primary_part #game_field td .pict {
       float: left;
       height: 50px;
       width: 50px;
       position: relative; }
-      #game_field td .pict img.card_image {
+      #primary_part #game_field td .pict img.card_image {
         position: absolute;
         left: 0;
         top: 0;
         border: 1px solid;
         height: 100%;
         max-width: 100%; }
-    #game_field td .param {
+    #primary_part #game_field td .param {
       float: left;
       padding-left: 3px;
       font-size: 12px; }
-      #game_field td .param span.power {
+      #primary_part #game_field td .param span.power {
         color: #ff0000; }
-      #game_field td .param span.shield {
+      #primary_part #game_field td .param span.shield {
         color: #0060ff; }
-      #game_field td .param span.magic {
+      #primary_part #game_field td .param span.magic {
         color: #00aa00; }
-      #game_field td .param span.charge {
+      #primary_part #game_field td .param span.charge {
         color: #ffffff;
         background-color: #ff0000; }
-    #game_field td div.num_info {
+    #primary_part #game_field td div.num_info {
       margin-left: 1px; }
-      #game_field td div.num_info img {
+      #primary_part #game_field td div.num_info img {
         height: 13px; }
-  #game_field td.actor {
+  #primary_part #game_field td.actor {
     background-color: #ffff00; }
-  #game_field td.target {
+  #primary_part #game_field td.target {
     background-color: #ffeeee; }
-  #game_field td.lvup_checking {
+  #primary_part #game_field td.lvup_checking {
     background-color: #888; }
-  #game_field td.lvup_checking.lvup_ok {
+  #primary_part #game_field td.lvup_checking.lvup_ok {
     background-color: #fff; }
-
-.mini-font {
-  font-size: 8px; }
-
-#hand_card {
+#primary_part #hand_card {
   border: 1px solid;
   text-align: center;
   padding: 12px 0; }
-  #hand_card div {
+  #primary_part #hand_card div {
     float: left;
     min-width: 53px; }
-    #hand_card div img {
+    #primary_part #hand_card div img {
       border: solid 1px;
       height: 45px;
       width: 45px; }
-  #hand_card div.actor img {
+  #primary_part #hand_card div.actor img {
     border-color: #eeee00; }
-  #hand_card div.target img {
+  #primary_part #hand_card div.target img {
     border-color: #ff0000; }
-
-.sort_card_frame {
+#primary_part .sort_card_frame {
   width: 100%;
   border-top: solid 1px;
   border-bottom: solid 1px;
   padding-top: 12px; }
-  .sort_card_frame .sort_card_title {
+  #primary_part .sort_card_frame .sort_card_title {
     border: solid 2px;
     border-bottom: solid 1px; }
-  .sort_card_frame .sort_card_target {
+  #primary_part .sort_card_frame .sort_card_target {
     border: solid 1px;
     border-left: solid 2px;
     border-right: solid 2px;
     font-size: 18px; }
-    .sort_card_frame .sort_card_target.selected {
+    #primary_part .sort_card_frame .sort_card_target.selected {
       background-color: #ff0; }
-    .sort_card_frame .sort_card_target div {
+    #primary_part .sort_card_frame .sort_card_target div {
       float: left;
       font-size: 18px; }
-      .sort_card_frame .sort_card_target div.dtl_link {
+      #primary_part .sort_card_frame .sort_card_target div.dtl_link {
         float: right;
         margin-right: 3px; }
-      .sort_card_frame .sort_card_target div span.next_draw {
+      #primary_part .sort_card_frame .sort_card_target div span.next_draw {
         font-size: 12px; }
-    .sort_card_frame .sort_card_target .pict {
+    #primary_part .sort_card_frame .sort_card_target .pict {
       width: 50px;
       height: 50px; }
-  .sort_card_frame .sort_end_button_frame {
+  #primary_part .sort_card_frame .sort_end_button_frame {
     border: solid 2px;
     border-top: solid 1px;
     border-bottom: solid 1px; }
-    .sort_card_frame .sort_end_button_frame .sort_end_button {
+    #primary_part .sort_card_frame .sort_end_button_frame .sort_end_button {
       margin: 12px;
       border: solid #ddddff;
       border-right: solid blue;
@@ -122,82 +120,81 @@ div.close_button {
   float: right;
   padding: 2px; }
 
-#card_info {
+#secondary_part #card_info {
   margin: 1em 0;
   border: solid 2px; }
-  #card_info #card_info_frame div.card_info_title {
+  #secondary_part #card_info #card_info_frame div.card_info_title {
     border-bottom: solid 2px; }
-    #card_info #card_info_frame div.card_info_title div {
+    #secondary_part #card_info #card_info_frame div.card_info_title div {
       float: left; }
-      #card_info #card_info_frame div.card_info_title div.proposer {
+      #secondary_part #card_info #card_info_frame div.card_info_title div.proposer {
         float: right; }
-  #card_info #card_info_frame div.card_summary {
+  #secondary_part #card_info #card_info_frame div.card_summary {
     min-height: 50px; }
-    #card_info #card_info_frame div.card_summary div {
+    #secondary_part #card_info #card_info_frame div.card_summary div {
       float: left; }
-      #card_info #card_info_frame div.card_summary div.card_image img {
+      #secondary_part #card_info #card_info_frame div.card_summary div.card_image img {
         margin: 1px;
         border: solid 1px;
         width: 50px;
         height: 50px; }
-      #card_info #card_info_frame div.card_summary div.card_name {
+      #secondary_part #card_info #card_info_frame div.card_summary div.card_name {
         font-size: 18px; }
-      #card_info #card_info_frame div.card_summary div.dtl_link {
+      #secondary_part #card_info #card_info_frame div.card_summary div.dtl_link {
         float: right;
         text-align: right;
         padding-right: 1em; }
-        #card_info #card_info_frame div.card_summary div.dtl_link a {
+        #secondary_part #card_info #card_info_frame div.card_summary div.dtl_link a {
           font-size: 18px; }
-  #card_info #card_info_frame div.act_commands {
+  #secondary_part #card_info #card_info_frame div.act_commands {
     border-top: solid 1px; }
-    #card_info #card_info_frame div.act_commands div.command_row {
+    #secondary_part #card_info #card_info_frame div.act_commands div.command_row {
       border-top: solid 1px;
       padding: 12px 3px;
       font-size: 18px; }
-      #card_info #card_info_frame div.act_commands div.command_row div.num_info {
+      #secondary_part #card_info #card_info_frame div.act_commands div.command_row div.num_info {
         float: right;
         font-size: 18px; }
-        #card_info #card_info_frame div.act_commands div.command_row div.num_info span.range_pic img {
+        #secondary_part #card_info #card_info_frame div.act_commands div.command_row div.num_info span.range_pic img {
           height: 18px; }
-        #card_info #card_info_frame div.act_commands div.command_row div.num_info span.stone_cost {
+        #secondary_part #card_info #card_info_frame div.act_commands div.command_row div.num_info span.stone_cost {
           font-size: 16px; }
-    #card_info #card_info_frame div.act_commands div.command_row.selected_act {
+    #secondary_part #card_info #card_info_frame div.act_commands div.command_row.selected_act {
       background-color: #ffff00; }
-
-#buttons_frame {
+#secondary_part #buttons_frame {
   width: 100%; }
-  #buttons_frame div {
+  #secondary_part #buttons_frame div {
     margin: 20px;
     padding: 3px 0;
     border: solid 2px;
     font-size: 18px;
     text-align: center; }
-  #buttons_frame div.marigan_button {
+  #secondary_part #buttons_frame div.marigan_button {
     background-color: #ffffee;
     border-top-color: #ffffdd;
     border-left-color: #ffffdd;
     border-right-color: #888800;
     border-bottom-color: #888800; }
-  #buttons_frame div.cancel_button {
+  #secondary_part #buttons_frame div.cancel_button {
     background-color: #ffeeee;
     border-top-color: #ffdddd;
     border-left-color: #ffdddd;
     border-right-color: #880000;
     border-bottom-color: #880000; }
-  #buttons_frame div.rollback_button {
+  #secondary_part #buttons_frame div.rollback_button {
     display: none;
     background-color: #ffeeee;
     border-top-color: #ffdddd;
     border-left-color: #ffdddd;
     border-right-color: #880000;
     border-bottom-color: #880000; }
-  #buttons_frame div.execute_button {
+  #secondary_part #buttons_frame div.execute_button {
     background-color: #eeffee;
     border-top-color: #ddffdd;
     border-left-color: #ddffdd;
     border-right-color: #008800;
     border-bottom-color: #008800; }
-  #buttons_frame div.turn_end_button {
+  #secondary_part #buttons_frame div.turn_end_button {
     background-color: #eeeeff;
     border-top-color: #ddddff;
     border-left-color: #ddddff;

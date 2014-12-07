@@ -1,6 +1,6 @@
 <?php
 
-class CardController extends Zend_Controller_Action
+class Touhou_IndexController extends Zend_Controller_Action
 {
     private $_model;
     private $_layout;
@@ -72,4 +72,5 @@ class CardController extends Zend_Controller_Action
         $this->_model = new model_Card();
     }
 }
+
 

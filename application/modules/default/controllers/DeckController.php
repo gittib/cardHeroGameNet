@@ -40,6 +40,7 @@ class DeckController extends Zend_Controller_Action
 
         $this->view->assign('aDeckList', $ret);
         $this->view->assign('bDeckEdit', true);
+        $this->view->assign('aUserInfo', Common::checkLogin());
     }
 
     public function editAction()

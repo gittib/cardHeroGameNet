@@ -112,8 +112,9 @@ class GameController extends Zend_Controller_Action
         $this->_layout->noindex = true;
 
         $aCardInfoArray = $this->_model->getFieldDetail(array(
-            'game_field_id' => $iGameFieldId,
-            'open_flg'      => 1,
+            'game_field_id'         => $iGameFieldId,
+            'open_flg'              => 1,
+            'select_standby_field'  => true,
         ));
         $aDeckList = $modelDeck->getDeckList(array(
             'page_no'   => $iPage,
@@ -179,6 +180,7 @@ class GameController extends Zend_Controller_Action
         }
         $this->_layout->title = "ゲーム[{$iGameFieldId}]";
         $this->view->assign('aCardInfo', $aCardInfo);
+        $this->view->assign('aUserInfo', Common::checkLogin());
         $this->view->assign('iGameFieldId', $iGameFieldId);
         $this->view->assign('bBefore', ($iGameFieldId != $iBeforeFieldId));
         $this->view->assign('aQueue', $aQueue);

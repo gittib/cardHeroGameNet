@@ -190,7 +190,7 @@ $sClass = 'game_row';
 if (isset($aCardInfo['field_info']['responced']) && $aCardInfo['field_info']['responced']) {
     $sClass .= ' res';
 }
-$aUserInfo = Common::checkLogin();
+$aUserInfo = $this->aUserInfo;
 if (isset($aCardInfo['field_info']['user_id']) && $aCardInfo['field_info']['user_id'] == $aUserInfo['user_id']) {
     $sClass .= ' mine';
 }

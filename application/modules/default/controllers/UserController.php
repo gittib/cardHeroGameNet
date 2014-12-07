@@ -142,7 +142,7 @@ class UserController extends Zend_Controller_Action
         $this->_getModel();
         $request = $this->getRequest();
         $aInput = array();
-        foreach ($this->_aCols as $key => $val) {
+        foreach ($_POST as $key => $val) {
             $aInput[$key] = $request->getPost($key);
         }
         $ret = $this->_model->regist($aInput);
