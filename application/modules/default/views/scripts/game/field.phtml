@@ -270,41 +270,44 @@ _eos_;
     <div class="info">
     </div>
 </div>
-<div id="primary_part">
-    <table id="game_field">
+<div id="responcive_frame" class="clearfix">
+    <div id="primary_part">
+        <table id="game_field">
 <?php
     foreach ($aPosId as $aLine) {
-        echo "        <tr>\n";
+        echo "            <tr>\n";
         foreach ($aLine as $posId) {
             if (!isset($aMonsterData[$posId])) {
-                $aMonsterData[$posId] = "            <td id='{$posId}' class='monster_space'><div class='pict'></div></td>\n";
+                $aMonsterData[$posId] = "                <td id='{$posId}' class='monster_space'><div class='pict'></div></td>\n";
             }
             echo $aMonsterData[$posId];
         }
-        echo "        </tr>\n";
+        echo "            </tr>\n";
     }
 ?>
-    </table>
-    <div id="hand_card" class="clearfix">
+        </table>
+        <div id="hand_card" class="clearfix">
 <?php echo $sMyHandHtml; ?>
+        </div>
     </div>
-</div>
-<div id="secondary_part">
-    <div id="card_info">
-        <div id="card_info_frame">
-            <div class="card_info_title">
-                Card Infomation
-            </div>
-            <div class="card_summary clearfix">
-                <div class="card_image"></div>
-                <div class="card_name"></div>
-                <div class="dtl_link"></div>
-            </div>
-            <div class="act_commands">
+    <div id="secondary_part">
+        <div id="card_info">
+            <div id="card_info_frame">
+                <div class="card_info_title">
+                    Card Infomation
+                </div>
+                <div class="card_summary clearfix">
+                    <div class="card_image"></div>
+                    <div class="card_name"></div>
+                    <div class="dtl_link"></div>
+                </div>
+                <div class="act_commands">
+                </div>
             </div>
         </div>
     </div>
-    <div id="buttons_frame">
+</div>
+<div id="buttons_frame">
 <?php
 //if ($aCardInfo['field_info']['turn_count'] <= 2) {
 //    echo <<<_eos_
@@ -315,12 +318,11 @@ _eos_;
 //_eos_;
 //}
 ?>
-        <div class="cancel_button">
-            キャンセル
-        </div>
-        <div class="turn_end_button">
-            ターンエンド
-        </div>
+    <div class="cancel_button">
+        キャンセル
+    </div>
+    <div class="turn_end_button">
+        ターンエンド
     </div>
 </div>
 <input type="BUTTON" class="disp_button toggle_setting" value="設定" />

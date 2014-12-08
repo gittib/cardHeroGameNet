@@ -12,6 +12,46 @@
 .mini-font {
   font-size: 8px; }
 
+@media screen and (max-width: 759px) {
+  #responcive_frame {
+    width: 100%; }
+    #responcive_frame #primary_part {
+      width: 100%; }
+    #responcive_frame #secondary_part {
+      width: 100%;
+      margin: 1em 0; } }
+@media screen and (min-width: 760px) {
+  #game_infomation_frame {
+    width: 750px;
+    margin: 10px auto 0;
+    padding: 10px;
+    padding-bottom: 0;
+    background-color: #eeeeff; }
+    #game_infomation_frame > * {
+      background-color: #fff; }
+    #game_infomation_frame .info {
+      border-bottom: 1px solid; }
+
+  #responcive_frame {
+    width: 750px;
+    overflow: visible;
+    margin: auto;
+    padding: 10px;
+    padding-top: 0;
+    background-color: #eeeeff; }
+    #responcive_frame > * {
+      background-color: #fff; }
+    #responcive_frame #primary_part {
+      width: 50%;
+      float: left; }
+    #responcive_frame #secondary_part {
+      width: 50%;
+      float: left;
+      margin-right: -3px; }
+
+  #buttons_frame {
+    max-width: 750px;
+    margin: 0 auto; } }
 #primary_part #game_field {
   width: 100%;
   border: 1px solid;
@@ -121,7 +161,6 @@ div.close_button {
   padding: 2px; }
 
 #secondary_part #card_info {
-  margin: 1em 0;
   border: solid 2px; }
   #secondary_part #card_info #card_info_frame div.card_info_title {
     border-bottom: solid 2px; }
@@ -161,40 +200,41 @@ div.close_button {
           font-size: 16px; }
     #secondary_part #card_info #card_info_frame div.act_commands div.command_row.selected_act {
       background-color: #ffff00; }
-#secondary_part #buttons_frame {
+
+#buttons_frame {
   width: 100%; }
-  #secondary_part #buttons_frame div {
+  #buttons_frame div {
     margin: 20px;
     padding: 3px 0;
     border: solid 2px;
     font-size: 18px;
     text-align: center; }
-  #secondary_part #buttons_frame div.marigan_button {
+  #buttons_frame div.marigan_button {
     background-color: #ffffee;
     border-top-color: #ffffdd;
     border-left-color: #ffffdd;
     border-right-color: #888800;
     border-bottom-color: #888800; }
-  #secondary_part #buttons_frame div.cancel_button {
+  #buttons_frame div.cancel_button {
     background-color: #ffeeee;
     border-top-color: #ffdddd;
     border-left-color: #ffdddd;
     border-right-color: #880000;
     border-bottom-color: #880000; }
-  #secondary_part #buttons_frame div.rollback_button {
+  #buttons_frame div.rollback_button {
     display: none;
     background-color: #ffeeee;
     border-top-color: #ffdddd;
     border-left-color: #ffdddd;
     border-right-color: #880000;
     border-bottom-color: #880000; }
-  #secondary_part #buttons_frame div.execute_button {
+  #buttons_frame div.execute_button {
     background-color: #eeffee;
     border-top-color: #ddffdd;
     border-left-color: #ddffdd;
     border-right-color: #008800;
     border-bottom-color: #008800; }
-  #secondary_part #buttons_frame div.turn_end_button {
+  #buttons_frame div.turn_end_button {
     background-color: #eeeeff;
     border-top-color: #ddddff;
     border-left-color: #ddddff;

@@ -127,7 +127,7 @@ body {
                     white  0px  1px 0px,
                     white  0px -1px 0px;
 
-    &.res[disp_mode=small] {
+    &[disp_mode=small] {
         background-color: lightgray;
 
         table.game_field {
@@ -156,7 +156,7 @@ body {
         }
     }
 
-    &.res[disp_mode=hide] {
+    &[disp_mode=hide] {
         background-color: lightgray;
 
         * {
