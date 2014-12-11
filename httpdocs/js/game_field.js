@@ -479,12 +479,10 @@ new function () {
                     log_message     : game_field_utility.getPosCodeFromPosId(mon.pos_id) + aMonsterData.name + '登場',
                     resolved_flg    : 0,
                     priority        : 'standby_system',
-                    queue_units : [
-                        {
-                            queue_type_id   : 1010,
-                            target_id       : mon.game_card_id,
-                        }
-                    ],
+                    queue_units : [{
+                        queue_type_id   : 1010,
+                        target_id       : mon.game_card_id,
+                    }],
                 });
             }
         }
@@ -1544,6 +1542,12 @@ new function () {
                                 case 1010:
                                     console.log(q);
                                     var targetMon = g_field_data.cards[q.target_id];
+                                    if (targetMon.pos_category != 'field') {
+                                        throw new Error('invalid_target');
+                                    }
+                                    if (!targetMon.standby_flg) {
+                                        throw new Error('invalid_target');
+                                    }
                                     console.log(targetMon);
                                     targetMon = game_field_utility.loadMonsterInfo({
                                         target_monster  : targetMon,
@@ -1844,8 +1848,11 @@ new function () {
                                     var p = game_field_utility.getXYFromPosId(q.param1);
                                     var aCard = g_field_data.cards[q.target_id];
                                     var bSystem = (aExecAct.priority.indexOf('system', 0) != -1);
+                                    if (aCard.pos_category != 'field') {
+                                        throw new Error('invalid_target');
+                                    }
                                     if (aCard.status) {
-                                        if (aCard.status[114]) {
+                                        if (aCard.status[114] && !bSystem) {
                                             throw new Error('Move failed. Mover has kagenui.');
                                         }
                                     }
@@ -1864,13 +1871,11 @@ new function () {
                                                     log_message     : '移動したのでダークホール効果消滅',
                                                     resolved_flg    : 0,
                                                     priority        : 'follow',
-                                                    queue_units : [
-                                                        {
-                                                            queue_type_id   : 1027,
-                                                            target_id       : aCard.game_card_id,
-                                                            param1          : 116,
-                                                        }
-                                                    ],
+                                                    queue_units : [{
+                                                        queue_type_id   : 1027,
+                                                        target_id       : aCard.game_card_id,
+                                                        param1          : 116,
+                                                    }],
                                                 });
                                             }
                                         }
@@ -2425,13 +2430,11 @@ new function () {
                         resolved_flg        : 0,
                         priority            : 'same_time',
                         actor_anime_disable : true,
-                        queue_units : [
-                            {
-                                queue_type_id   : 1027,
-                                param1          : 100,
-                                target_id       : targetId,
-                            }
-                        ],
+                        queue_units : [{
+                            queue_type_id   : 1027,
+                            param1          : 100,
+                            target_id       : targetId,
+                        }],
                     });
                 }
                 if (act.status[101] != null) {
@@ -2442,13 +2445,11 @@ new function () {
                         resolved_flg        : 0,
                         priority            : 'same_time',
                         actor_anime_disable : true,
-                        queue_units : [
-                            {
-                                queue_type_id   : 1027,
-                                param1          : 101,
-                                target_id       : actorId,
-                            }
-                        ],
+                        queue_units : [{
+                            queue_type_id   : 1027,
+                            param1          : 101,
+                            target_id       : actorId,
+                        }],
                     });
                 }
                 if (act.status[102] != null) {
@@ -2468,6 +2469,7 @@ new function () {
                                 queue_type_id   : 1027,
                                 param1          : 102,
                                 target_id       : actorId,
+                                cost_flg        : true,
                             }
                         ],
                     });
@@ -2480,13 +2482,11 @@ new function () {
                         resolved_flg        : 0,
                         priority            : 'same_time',
                         actor_anime_disable : true,
-                        queue_units : [
-                            {
-                                queue_type_id   : 1027,
-                                param1          : 103,
-                                target_id       : actorId,
-                            }
-                        ],
+                        queue_units : [{
+                            queue_type_id   : 1027,
+                            param1          : 103,
+                            target_id       : actorId,
+                        }],
                     });
                 }
                 if (act.status[104] != null) {
@@ -2499,17 +2499,30 @@ new function () {
                         resolved_flg        : 0,
                         priority            : 'same_time',
                         actor_anime_disable : true,
-                        queue_units : [
-                            {
-                                queue_type_id   : 1027,
-                                param1          : 104,
-                                target_id       : actorId,
-                            }
-                        ],
+                        queue_units : [{
+                            queue_type_id   : 1027,
+                            param1          : 104,
+                            target_id       : actorId,
+                        }],
                     });
                 }
                 if (act.status[105] != null) {
                     pow += 2;
+                }
+                if (act.status[130] != null) {
+                    pow += 2;
+                    g_field_data.queues.push({
+                        actor_id            : actorId,
+                        log_message         : 'パワーチャージLV2効果発揮',
+                        resolved_flg        : 0,
+                        priority            : 'same_time',
+                        actor_anime_disable : true,
+                        queue_units : [{
+                            queue_type_id   : 1027,
+                            param1          : 130,
+                            target_id       : actorId,
+                        }],
+                    });
                 }
             }
 
@@ -2531,13 +2544,11 @@ new function () {
                     resolved_flg        : 0,
                     priority            : 'same_time',
                     actor_anime_disable : true,
-                    queue_units : [
-                        {
-                            queue_type_id   : 1027,
-                            param1          : 107,
-                            target_id       : targetId,
-                        }
-                    ],
+                    queue_units : [{
+                        queue_type_id   : 1027,
+                        param1          : 107,
+                        target_id       : targetId,
+                    }],
                 });
             }
             if (pow && target.status[108] != null) {
@@ -2554,13 +2565,11 @@ new function () {
                     resolved_flg        : 0,
                     priority            : 'same_time',
                     actor_anime_disable : true,
-                    queue_units : [
-                        {
-                            queue_type_id   : 1027,
-                            param1          : 100,
-                            target_id       : targetId,
-                        }
-                    ],
+                    queue_units : [{
+                        queue_type_id   : 1027,
+                        param1          : 100,
+                        target_id       : targetId,
+                    }],
                 });
             }
             if (pow < 0) {
@@ -2609,13 +2618,11 @@ new function () {
                     resolved_flg        : 0,
                     priority            : 'same_time',
                     actor_anime_disable : true,
-                    queue_units : [
-                        {
-                            queue_type_id   : 1027,
-                            param1          : 100,
-                            target_id       : targetId,
-                        }
-                    ],
+                    queue_units : [{
+                        queue_type_id   : 1027,
+                        param1          : 100,
+                        target_id       : targetId,
+                    }],
                 });
             }
         } catch (e) {
@@ -2667,13 +2674,11 @@ new function () {
                         resolved_flg        : 0,
                         priority            : 'same_time',
                         actor_anime_disable : true,
-                        queue_units : [
-                            {
-                                queue_type_id   : 1027,
-                                target_id       : aSt.param1,
-                                param1          : sid,
-                            },
-                        ],
+                        queue_units : [{
+                            queue_type_id   : 1027,
+                            target_id       : aSt.param1,
+                            param1          : sid,
+                        }],
                     });
                 }
             });
@@ -2691,6 +2696,7 @@ new function () {
 
     function isGameEnd()
     {
+        // 想定外のパターンは全て未決着としてfalseを返す
         try {
 
             var my = game_field_reactions.getGameCardId({
@@ -2701,8 +2707,13 @@ new function () {
                 'pos_category'  : 'field',
                 'pos_id'        : 'enemyMaster',
             });
+            var enemyUsed = game_field_reactions.getGameCardId({
+                'pos_category'  : 'used',
+                'owner'         : 'enemy',
+                'sort_type'     : 'first',
+            });
 
-            if (!my || !enemy) {
+            if (enemyUsed && (!my || !enemy)) {
                 return true;
             }
 
@@ -2776,11 +2787,9 @@ new function () {
             log_message     : 'ターンエンド',
             resolved_flg    : 0,
             priority        : 'turn_end',
-            queue_units : [
-                {
-                    queue_type_id : 1000,
-                }
-            ],
+            queue_units : [{
+                queue_type_id : 1000,
+            }],
         });
 
         execQueue({ resolve_all : true });

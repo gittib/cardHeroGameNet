@@ -1,32 +1,36 @@
 <?php
-$nPages = (int)(($this->nFields - 1) / 10) + 1;
-$nDispLinkRange = 3;
+$iFieldsInPage = 10;    // 1ページ当たりに表示されるフィールドの数
+$iDispLinkRange = 2;    // 前後何ページまでページングするか
+
+// 合計で何ページ存在してるか計算
+$iPages = (int)(($this->nFields - 1) / $iFieldsInPage) + 1;
+
+// ページング対象のページ番号の最大値・最小値を計算
+$aDispPageNum = array(
+    'min'   => max($this->nPage - $iDispLinkRange, 1),  // 1未満だったら1にする
+    'max'   => min($this->nPage + $iDispLinkRange, $iPages),    // 全ページ数を超えるならそれに合わせる
+);
 
 $sPageLinkTag = "<div class='page_link'>\n";
-if ($nDispLinkRange+1 < $this->nPage) {
+if (1 < $aDispPageNum['min']) {
     $sPageLinkTag .= <<<_eos_
-    <span><a href="/game/">1</a>...</span>
+    <span><a href="/game/">1...</a></span>
 
 _eos_;
 }
 
-for ($i = $this->nPage - $nDispLinkRange ; $i <= $this->nPage + $nDispLinkRange ; $i++) {
-    if ($i < 1) {
-        continue;
-    } else if ($i > $nPages) {
-        break;
-    }
+for ($i = $aDispPageNum['min'] ; $i <= $aDispPageNum['max'] ; $i++) {
     if ($i == $this->nPage) {
-        $sPageLinkText = $i;
+        $sPageLinkText = "<b>{$i}</b>";
     } else {
         $sPageLinkText = "<a href='/game/{$i}/'>{$i}</a>";
     }
     $sPageLinkTag .= "<span>{$sPageLinkText}</span>\n";
 }
 
-if ($this->nPage < $nPages - ($nDispLinkRange+1)) {
+if ($aDispPageNum['max'] < $iPages) {
     $sPageLinkTag .= <<<_eos_
-    <span>...<a href="/game/{$nPages}/">{$nPages}</a></span>
+    <span><a href="/game/{$iPages}/">...{$iPages}</a></span>
 
 _eos_;
 }
