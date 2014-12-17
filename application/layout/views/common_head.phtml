@@ -1,0 +1,93 @@
+<?php
+$conf = Zend_Registry::get('config');
+
+// title
+$sTitle = '';
+if (isSet($this->layout()->title)) {
+    $sTitle = $this->layout()->title . ' - ';
+}
+$sTitle = $conf->title->prefix . $sTitle;
+
+// description
+$sDescription = '';
+if (isset($this->layout()->description)) {
+    $sDescription = $this->layout()->description;
+}
+
+// canonical
+$sDefaultCanonical = preg_replace('/\?.*$/', '', $_SERVER['REQUEST_URI']);
+$sCanonical = "<link rel='canonical' href='{$sDefaultCanonical}' />\n";
+if (isSet($this->layout()->canonical)) {
+    $sCanonical = "<link rel='canonical' href='{$this->layout()->canonical}' />\n";
+}
+
+// noindex
+$sNoIndex = '';
+if (isSet($this->layout()->noindex)) {
+    $sNoIndex = '<meta name="robots" content="noindex,nofollow" />' . "\n";
+}
+
+// stylesheet
+$sStylesheet = '';
+if (isSet($this->layout()->stylesheet)) {
+    foreach ($this->layout()->stylesheet as $key => $val) {
+        if ($val != '') {
+            $sStylesheet .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"{$val}\" media=\"all\" />\n";
+        }
+    }
+}
+
+// javascript
+$sJavascript = '';
+
+if (isSet($this->layout()->javascript)) {
+    foreach ($this->layout()->javascript as $key => $val) {
+        if ($val != '') {
+            $sJavascript .= "<script type=\"text/javascript\" src=\"{$val}\"></script>\n";
+        }
+    }
+}
+if (isSet($this->layout()->javascriptCode)) {
+    $sJavascript .= <<<_eos_
+<script type="text/javascript">
+<!--
+{$this->layout()->javascriptCode}
+-->
+</script>
+
+_eos_;
+}
+
+if (APPLICATION_ENV == 'production') {
+    // Googleアナリティクスタグ
+    $sJavascript .= <<<_eos_
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-53206929-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+_eos_;
+} else {
+    $sJavascript .= "<!-- Google Analytics -->\n";
+}
+?>
+<title><?php echo $sTitle; ?>カードヒーロー@スマホ</title>
+<meta name="keywords" content="カードヒーロー,スマホ" />
+<meta name="description" content="<?php echo $sDescription; ?>" />
+<meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1,minimum-scale=1" />
+<link rel="shortcut icon" href="/images/favicon.ico" />
+<?php echo $sNoIndex; ?>
+<?php echo $sCanonical; ?>
+<link rel="stylesheet" type="text/css" href="/css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="/css/header.css" media="all" />
+<?php echo $sStylesheet; ?>
+<script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="/js/jquery.color-2.1.2.min.js"></script>
+<script type="text/javascript" src="/js/to_kana_zenkaku.js"></script>
+<?php echo $sJavascript; ?>
