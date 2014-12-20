@@ -12,28 +12,46 @@ $aDispPageNum = array(
 );
 
 $sPageLinkTag = "<div class='page_link'>\n";
+
+//if (1 < $this->nPage) {
+//    $iBeforePage = $this->nPage - 1;
+//    $sPageLinkTag .= <<<_eos_
+//    <span><a href="/game/{$iBeforePage}/">前へ</a></span>
+//
+//_eos_;
+//}
+
 if (1 < $aDispPageNum['min']) {
     $sPageLinkTag .= <<<_eos_
-    <span><a href="/game/">1...</a></span>
+    <a href="/game/"><span class="first_page_link">1</span></a>...
 
 _eos_;
 }
 
 for ($i = $aDispPageNum['min'] ; $i <= $aDispPageNum['max'] ; $i++) {
     if ($i == $this->nPage) {
-        $sPageLinkText = "<b>{$i}</b>";
+        $sPageLinkText = "<span><strong>{$i}</strong></span>";
     } else {
-        $sPageLinkText = "<a href='/game/{$i}/'>{$i}</a>";
+        $sPageLinkText = "<a href='/game/{$i}/'><span>{$i}</span></a>";
     }
-    $sPageLinkTag .= "<span>{$sPageLinkText}</span>\n";
+    $sPageLinkTag .= "{$sPageLinkText}\n";
 }
 
-if ($aDispPageNum['max'] < $iPages) {
+//if ($aDispPageNum['max'] < $iPages) {
+//    $sPageLinkTag .= <<<_eos_
+//    <span><a href="/game/{$iPages}/">...{$iPages}</a></span>
+//
+//_eos_;
+//}
+
+if ($this->nPage < $iPages) {
+    $iNextPage = $this->nPage + 1;
     $sPageLinkTag .= <<<_eos_
-    <span><a href="/game/{$iPages}/">...{$iPages}</a></span>
+    <a href="/game/{$iNextPage}/"><span class="next_page_link">次へ</span></a>
 
 _eos_;
 }
+
 $sPageLinkTag .= "</div>\n";
 
 $sSelectOldFieldDispray = <<<_eos_

@@ -11,7 +11,7 @@ class GameController extends Zend_Controller_Action
     {
         /* Initialize action controller here */
 
-        $this->_layout = new Zend_Layout();
+        $this->_layout = Zend_Registry::get('layout');
 
         $this->_stylesheet = array();
 

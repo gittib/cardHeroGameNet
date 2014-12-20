@@ -10,15 +10,20 @@ body {
   margin-bottom: 0; }
 
 .page_link {
-  border-top: 1px solid;
-  border-bottom: 1px solid;
-  border-color: #AA00FF;
   text-align: right;
-  margin-top: 2em;
+  padding-top: 8px;
+  padding-bottom: 8px;
   padding-right: 5px;
-  background-color: #f7f7ff; }
+  overflow: visible;
+  height: 30px;
+  margin-top: 20px; }
   .page_link span {
-    margin-right: 15px; }
+    margin: 0 3px;
+    border: solid 2px;
+    padding: 3px 5px;
+    background-color: white; }
+    .page_link span.next_page_link {
+      border-color: white; }
 
 .field_title {
   background-color: #FFFFFF;

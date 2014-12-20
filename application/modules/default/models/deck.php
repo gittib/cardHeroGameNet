@@ -187,6 +187,7 @@ class model_Deck {
                     'card_name',
                     'category',
                     'rare',
+                    'proposer',
                     'image_file_name',
                 )
             )

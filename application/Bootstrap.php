@@ -19,11 +19,12 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
     protected function _initLayout()
     {
-        Zend_Layout::startMvc(array(
+        $l = Zend_Layout::startMvc(array(
             'layoutPath'   => APPLICATION_PATH . '/layout/views'
             ,'layout'      => 'master'
             ,'contentKey'  => 'content'
         ));
+        Zend_Registry::set('layout', $l);
     }
 
     protected function _initRoute()

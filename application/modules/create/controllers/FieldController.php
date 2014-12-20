@@ -11,7 +11,7 @@ class Create_FieldController extends Zend_Controller_Action
     {
         /* Initialize action controller here */
 
-        $this->_layout = new Zend_Layout();
+        $this->_layout = Zend_Registry::get('layout');
 
         $this->_stylesheet = array();
 
@@ -22,5 +22,16 @@ class Create_FieldController extends Zend_Controller_Action
     {
         $this->_layout->stylesheet = $this->_stylesheet;
         $this->_layout->javascript = $this->_javascript;
+    }
+
+    public function indexAction()
+    {
+        $this->_getModel();
+    }
+
+    private function _getModel()
+    {
+        require_once APPLICATION_PATH . '/modules/create/models/field.php';
+        $this->_model = new model_Field();
     }
 }

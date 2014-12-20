@@ -31,6 +31,9 @@ if (isset($this->aDeckInfo['deck_name'])) {
     $sDeckName = $this->escape($this->aDeckInfo['deck_name']);
 }
 foreach ($this->card_list as $val) {
+    foreach ($val as $k => $v) {
+        $val[$k] = htmlspecialchars($v, ENT_QUOTES);
+    }
     if ($val['category'] == 'master') {
         $sMasterImages .= <<<_eos_
                 <div cardid="{$val['card_id']}">
@@ -48,9 +51,19 @@ _eos_;
 
 _eos_;
     } else {
+        if (isset($val['proposer']) && $val['proposer'] != '') {
+            $val['proposer'] = 'Arranged by ' . $val['proposer'];
+        }
         $sCardCatalog .= <<<_eos_
     <div class="catalog {$val['category']}">
-        <img alt="{$val['card_name']}" cardid="{$val['card_id']}" rare="{$val['rare']}" original-src="/images/card/{$val['image_file_name']}" src="/images/card/card.jpg" />
+        <img
+            alt="{$val['card_name']}"
+            cardid="{$val['card_id']}"
+            rare="{$val['rare']}"
+            proposer="{$val['proposer']}"
+            original-src="/images/card/{$val['image_file_name']}"
+            src="/images/card/card.jpg"
+        />
     </div>
 
 _eos_;

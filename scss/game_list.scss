@@ -15,17 +15,25 @@ body {
 
 .page_link {
     $border_width : 1px;
+    $vert_padding : 8px;
 
-    border-top:     $border_width solid;
-    border-bottom:  $border_width solid;
-    border-color:   #AA00FF;
     text-align: right;
-    margin-top: 2em;
+    padding-top: $vert_padding;
+    padding-bottom: $vert_padding;
     padding-right: 5px;
-    background-color: #f7f7ff;
+    overflow: visible;
+    height: 30px;
+    margin-top: 20px;
 
     span {
-        margin-right: 15px;
+        margin: 0 3px;
+        border: solid 2px;
+        padding:3px 5px;
+        background-color: white;
+
+        &.next_page_link {
+            border-color: white;
+        }
     }
 }
 

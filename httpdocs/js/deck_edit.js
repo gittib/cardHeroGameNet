@@ -56,7 +56,7 @@ $(function() {
                     '<img src="' + $(this).attr('src') + '" cardid="' + num + '" cate="' + category_name + '" rare="' + $(this).attr('rare') + '" />' +
                 '</div>' +
                 '<div class="insert_card">' +
-                    $(this).attr('alt') + '　★' + $(this).attr('rare') + '<br />' +
+                    $(this).attr('alt') + '　★' + $(this).attr('rare') + '　' + $(this).attr('proposer') + '<br />' +
                     '<a num="0" href="javascript:void(0)">0枚</a>' + sSpace +
                     '<a num="1" href="javascript:void(0)">1枚</a>' + sSpace +
                     '<a num="2" href="javascript:void(0)">2枚</a>' + sSpace +

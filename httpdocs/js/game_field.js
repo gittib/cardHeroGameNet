@@ -430,13 +430,11 @@ new function () {
             log_message     : 'ストーン3個を支給',
             resolved_flg    : 0,
             priority        : 'standby_system',
-            queue_units : [
-                {
-                    queue_type_id   : 1004,
-                    target_id       : myMasterId,
-                    param1          : 3,
-                }
-            ],
+            queue_units : [{
+                queue_type_id   : 1004,
+                target_id       : myMasterId,
+                param1          : 3,
+            }],
         });
 
         var targetId = game_field_reactions.getGameCardId({
@@ -449,14 +447,12 @@ new function () {
             log_message     : 'カードを1枚ドロー',
             resolved_flg    : 0,
             priority        : 'standby_system',
-            queue_units : [
-                {
-                    queue_type_id   : 1011,
-                    target_id       : targetId,
-                    param1          : 'draw',
-                    param2          : 1,
-                }
-            ],
+            queue_units : [{
+                queue_type_id   : 1011,
+                target_id       : targetId,
+                param1          : 'draw',
+                param2          : 1,
+            }],
         });
 
         var keys = [
@@ -490,24 +486,19 @@ new function () {
             if (val.pos_category == 'field') {
 
                 // 前衛が空いてたら前進する
-                // キュー自体は毎回入れてしまって、前衛が埋まってたらキューをコカす
-                if (val.pos_id == 'myBack1' || val.pos_id == 'myBack2') {
-                    var frontPos = game_field_utility.getRelativePosId(val.pos_id, {x:0, y:-1});
-                    if (iGameCardId) {
-                        g_field_data.queues.push({
-                            actor_id        : val.game_card_id,
-                            log_message     : g_master_data.m_monster[val.monster_id].name + 'が前進',
-                            resolved_flg    : 0,
-                            priority        : 'standby_system',
-                            queue_units : [
-                                {
-                                    queue_type_id   : 1022,
-                                    target_id       : iGameCardId,
-                                    param1          : frontPos,
-                                }
-                            ],
-                        });
-                    }
+                // 移動マジックがあるから、味方モンスター全員に専用パラメータ付のキューを入れる
+                if (val.owner == 'my') {
+                    g_field_data.queues.push({
+                        actor_id        : val.game_card_id,
+                        log_message     : g_master_data.m_monster[val.monster_id].name + 'が前進',
+                        resolved_flg    : 0,
+                        priority        : 'standby_system',
+                        queue_units : [{
+                            queue_type_id   : 1022,
+                            target_id       : iGameCardId,
+                            param2          : 'front_slide',
+                        }],
+                    });
                 }
 
                 // ターン開始時に誘発する性格の処理
@@ -1267,12 +1258,10 @@ new function () {
                                                     resolved_flg        : 0,
                                                     actor_anime_disable : true,
                                                     priority            : 'reaction',
-                                                    queue_units : [
-                                                        {
-                                                            queue_type_id   : 1008,
-                                                            target_id       : actorMon.game_card_id,
-                                                        },
-                                                    ],
+                                                    queue_units : [{
+                                                        queue_type_id   : 1008,
+                                                        target_id       : actorMon.game_card_id,
+                                                    }],
                                                 });
                                                 break;
                                             case 10:
@@ -1281,14 +1270,12 @@ new function () {
                                                     log_message         : 'ロロは飛び去った',
                                                     resolved_flg        : 0,
                                                     priority            : 'reaction',
-                                                    queue_units : [
-                                                        {
-                                                            queue_type_id   : 1021,
-                                                            target_id       : actorMon.game_card_id,
-                                                            param1          : game_field_utility.getModifyMonsterId(actorMon.monster_id),
-                                                            param2          : false,
-                                                        },
-                                                    ],
+                                                    queue_units : [{
+                                                        queue_type_id   : 1021,
+                                                        target_id       : actorMon.game_card_id,
+                                                        param1          : game_field_utility.getModifyMonsterId(actorMon.monster_id),
+                                                        param2          : false,
+                                                    }],
                                                 });
                                                 break;
                                             case 12:
@@ -1298,13 +1285,11 @@ new function () {
                                                     resolved_flg        : 0,
                                                     actor_anime_disable : true,
                                                     priority            : 'reaction',
-                                                    queue_units : [
-                                                        {
-                                                            queue_type_id   : 1022,
-                                                            target_id       : actorMon.game_card_id,
-                                                            param1          : game_field_utility.getRelativePosId(actorMon.pos_id, {x:0, y:1}),
-                                                        },
-                                                    ],
+                                                    queue_units : [{
+                                                        queue_type_id   : 1022,
+                                                        target_id       : actorMon.game_card_id,
+                                                        param1          : game_field_utility.getRelativePosId(actorMon.pos_id, {x:0, y:1}),
+                                                    }],
                                                 });
                                                 break;
                                         }
@@ -1468,8 +1453,9 @@ new function () {
                                     break;
                                 case 1008:
                                     var targetMon = g_field_data.cards[q.target_id];
-                                    if (g_master_data.m_monster[targetMon.monster_id].category == 'master') {
-                                        // マスターが倒れる場合、墓地に送るとかの処理はしない
+                                    if (g_master_data.m_card[targetMon.card_id].category == 'master') {
+                                        // マスターが倒れたらfinish_flgを立てる
+                                        g_field_data.finish_flg = true;
                                         break;
                                     }
 
@@ -1844,18 +1830,39 @@ new function () {
                                         },
                                     });
                                     break;
+
                                 case 1022:
+                                    /**
+                                     * q.param1     : 移動先 pos_id
+                                     * q.param2     : オプション文字列
+                                     *                'front_slide' : ターン開始時の前進処理
+                                     */
+
                                     var p = game_field_utility.getXYFromPosId(q.param1);
                                     var aCard = g_field_data.cards[q.target_id];
                                     var bSystem = (aExecAct.priority.indexOf('system', 0) != -1);
+
+                                    if (g_master_data.m_card[aCard.card_id].category == 'master') {
+                                        throw new Error('invalid_target');
+                                    }
                                     if (aCard.pos_category != 'field') {
                                         throw new Error('invalid_target');
                                     }
+
+                                    if (q.param2 == 'front_slide') {
+                                        q.param1 = game_field_utility.getRelativePosId(
+                                            aCard.pos_id,
+                                            {x:0, y:-1}
+                                        );
+                                        p = game_field_utility.getXYFromPosId(q.param1);
+                                    }
+
                                     if (aCard.status) {
                                         if (aCard.status[114] && !bSystem) {
                                             throw new Error('Move failed. Mover has kagenui.');
                                         }
                                     }
+
                                     if ((aCard.owner == 'my' && 2 <= p.y) || (aCard.owner == 'enemy' && p.y <= 1)) {
                                         aCard.pos_id = q.param1;
                                         if (aCard.before_game_card_id && typeof g_field_data.cards[aCard.before_game_card_id] != 'undefined') {
