@@ -77,14 +77,17 @@ div.submit {
   width: 45px;
   height: 45px;
   border: solid 1px; }
-.card_catalog .selected_card div {
-  float: left;
-  margin-top: 9px; }
-.card_catalog .selected_card div.card_image_frame {
-  margin: 2px; }
-.card_catalog .selected_card div.card_detail {
-  float: right;
-  margin-top: 12px;
-  padding-right: 15px; }
-  .card_catalog .selected_card div.card_detail a {
-    font-size: 16px; }
+.card_catalog .selected_card {
+  clear: both;
+  max-width: 350px; }
+  .card_catalog .selected_card div {
+    float: left;
+    margin-top: 9px; }
+  .card_catalog .selected_card div.card_image_frame {
+    margin: 2px; }
+  .card_catalog .selected_card div.card_detail {
+    float: right;
+    margin-top: 12px;
+    padding-right: 15px; }
+    .card_catalog .selected_card div.card_detail a {
+      font-size: 16px; }

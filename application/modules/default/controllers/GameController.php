@@ -158,7 +158,7 @@ class GameController extends Zend_Controller_Action
             $this->_javascript[] = '/js/js_debug.js';
         }
         $this->_javascript[] = '/js/master_data.js';
-        $this->_javascript[] = '/js/game_field.min.js?ver=20141212';
+        $this->_javascript[] = '/js/game_field.min.js?ver=20150103';
       //$this->_javascript[] = '/js/game_field_utility.js';
       //$this->_javascript[] = '/js/game_field_reactions.js';
       //$this->_javascript[] = '/js/arts_queue.js';

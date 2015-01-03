@@ -12,7 +12,7 @@
 .mini-font {
   font-size: 8px; }
 
-@media screen and (max-width: 759px) {
+@media screen and (max-width: 719px) {
   #responcive_frame {
     width: 100%; }
     #responcive_frame #primary_part {
@@ -20,9 +20,9 @@
     #responcive_frame #secondary_part {
       width: 100%;
       margin: 1em 0; } }
-@media screen and (min-width: 760px) {
+@media screen and (min-width: 720px) {
   #game_infomation_frame {
-    width: 750px;
+    width: 680px;
     margin: 10px auto 0;
     padding: 10px;
     padding-bottom: 0;
@@ -33,7 +33,7 @@
       border-bottom: 1px solid; }
 
   #responcive_frame {
-    width: 750px;
+    width: 680px;
     overflow: visible;
     margin: auto;
     padding: 10px;
@@ -50,7 +50,7 @@
       margin-right: -3px; }
 
   #buttons_frame {
-    max-width: 750px;
+    max-width: 680px;
     margin: 0 auto; } }
 #primary_part #game_field {
   width: 100%;

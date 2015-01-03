@@ -68,7 +68,7 @@ _eos_;
 
 _eos_;
         $nRowImg++;
-        if ($nRowImg >= 6) {
+        if ($nRowImg >= 6000) {
             $sCardCatalog .= <<<_eos_
 </div>
 <div class="card_catalog clearfix">
@@ -78,6 +78,7 @@ _eos_;
         }
     }
 }
+$sCardCatalog .= '<div class="line_head" style="clear:both;width:0;height:0;">&nbsp;</div>';
 ?>
 <form name="deck_edit_form" method="post">
 <?php echo $deckIdHtml; ?>

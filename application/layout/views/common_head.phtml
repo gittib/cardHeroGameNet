@@ -23,7 +23,7 @@ if (isSet($this->layout()->canonical)) {
 
 // noindex
 $sNoIndex = '';
-if (isSet($this->layout()->noindex)) {
+if ($conf->web->noindex || isSet($this->layout()->noindex)) {
     $sNoIndex = '<meta name="robots" content="noindex,nofollow" />' . "\n";
 }
 

@@ -21,7 +21,7 @@
     font-size: 8px;
 }
 
-@media screen and (max-width: 759px) {
+@media screen and (max-width: 719px) {
     #responcive_frame {
         width: 100%;
 
@@ -36,8 +36,8 @@
     }
 }
 
-@media screen and (min-width: 760px) {
-    $max_width_window : 750px;
+@media screen and (min-width: 720px) {
+    $max_width_window : 680px;
     $field_background_color : #eeeeff;
 
     #game_infomation_frame {

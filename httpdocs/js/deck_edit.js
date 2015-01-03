@@ -29,34 +29,58 @@ function refreshDeckCardNum() {
     }
 }
 
+function addLineHeadClass () {
+    var iLineHeadX = 20;
+    $('.selected_card').hide();
+    $('.catalog').each(function() {
+        if ($(this).offset().left < iLineHeadX) {
+            $(this).addClass('line_head');
+        } else {
+            $(this).removeClass('line_head');
+        }
+    });
+    $('.selected_card').show();
+}
+
 $(function() {
     var master_card_id = $('div.master_select select[name=master]').val();
     $('div.master_select a.blank_link').attr('href', '/card/detail/' + master_card_id + '/');
     $('div.master_image div').hide();
     $('div.master_image div[cardid=' + master_card_id + ']').show();
+    addLineHeadClass();
     refreshDeckCardNum();
 
+    var oResizeTimer = false;
+    $(window).resize(function () {
+        if (oResizeTimer !== false) {
+            clearTimeout(oResizeTimer);
+        }
+        oResizeTimer = setTimeout(function() {
+            addLineHeadClass();
+        }, 200);
+    });
+
     $('.catalog img').on('click', function() {
-        $("div.selected_card").remove();
-        var num = $(this).attr('cardid');
+        var oThis = $(this);
+        var num = oThis.attr('cardid');
         var category_name = '';
-        if ($(this).parent().hasClass('monster_front')) {
+        if (oThis.parent().hasClass('monster_front')) {
             category_name = 'front';
-        } else if ($(this).parent().hasClass('monster_back')) {
+        } else if (oThis.parent().hasClass('monster_back')) {
             category_name = 'back';
-        } else if ($(this).parent().hasClass('magic')) {
+        } else if (oThis.parent().hasClass('magic')) {
             category_name = 'magic';
         } else {
             category_name = 'super';
         }
         var sSpace = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-        var content =
+        var sContent =
             '<div class="selected_card clearfix">' +
                 '<div class="card_image_frame">' +
-                    '<img src="' + $(this).attr('src') + '" cardid="' + num + '" cate="' + category_name + '" rare="' + $(this).attr('rare') + '" />' +
+                    '<img src="' + oThis.attr('src') + '" cardid="' + num + '" cate="' + category_name + '" rare="' + oThis.attr('rare') + '" />' +
                 '</div>' +
                 '<div class="insert_card">' +
-                    $(this).attr('alt') + '　★' + $(this).attr('rare') + '　' + $(this).attr('proposer') + '<br />' +
+                    oThis.attr('alt') + '　★' + oThis.attr('rare') + '　' + oThis.attr('proposer') + '<br />' +
                     '<a num="0" href="javascript:void(0)">0枚</a>' + sSpace +
                     '<a num="1" href="javascript:void(0)">1枚</a>' + sSpace +
                     '<a num="2" href="javascript:void(0)">2枚</a>' + sSpace +
@@ -67,7 +91,10 @@ $(function() {
                     '<a class="blank_link" href="/card/detail/' + num + '/" target="_blank">詳細</a>' +
                 '</div>' +
             '</div>';
-        $(this).parent().parent().append(content);
+
+        $(".selected_card").remove();
+        $(oThis.closest('.catalog').nextAll('.line_head')[0]).before(sContent);
+
         refreshDeckCardNum();
     });
 
@@ -126,4 +153,4 @@ $(function() {
             alert('デッキ枚数が３０枚になっていません');
         }
     });
-})
+});

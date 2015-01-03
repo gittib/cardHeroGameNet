@@ -1502,69 +1502,80 @@ game_field_reactions = (function () {
     {
         console.log('getGameCardId started.');
         console.log(aArgs);
-        var iRetGameCardId = null;
-        var aFirstInfo  = null;
-        var aLastInfo   = null;
-        $.each(g_field_data.cards, function(iGameCardId, val) {
-            if (val.pos_category != aArgs.pos_category) {
-                return true;
-            }
-            if (aArgs.owner) {
-                if (aArgs.owner != val.owner) {
+
+        try {
+            var iRetGameCardId = null;
+            var aFirstInfo  = null;
+            var aLastInfo   = null;
+            $.each(g_field_data.cards, function(iGameCardId, val) {
+                if (val.pos_category != aArgs.pos_category) {
                     return true;
                 }
-            }
-            switch(aArgs.pos_category) {
-                case 'field':
-                    if (val.pos_id == aArgs.pos_id) {
-                        if (val.next_game_card_id) {
-                            iRetGameCardId = val.next_game_card_id;
-                        } else {
-                            iRetGameCardId = iGameCardId;
-                        }
-                        return false;
+                if (aArgs.owner) {
+                    if (aArgs.owner != val.owner) {
+                        return true;
                     }
-                    break;
-                case 'deck':
-                case 'hand':
-                case 'used':
-                    if (aFirstInfo == null || aLastInfo == null) {
-                        aFirstInfo = {
-                            sort_no         : val.sort_no,
-                            game_card_id    : iGameCardId,
-                        };
-                        aLastInfo = {
-                            sort_no         : val.sort_no,
-                            game_card_id    : iGameCardId,
-                        };
-                    } else {
-                        if (val.sort_no < aFirstInfo.sort_no) {
+                }
+                switch(aArgs.pos_category) {
+                    case 'field':
+                        if (val.pos_id == aArgs.pos_id) {
+                            if (val.next_game_card_id) {
+                                iRetGameCardId = val.next_game_card_id;
+                            } else {
+                                iRetGameCardId = iGameCardId;
+                            }
+                            return false;
+                        }
+                        break;
+                    case 'deck':
+                    case 'hand':
+                    case 'used':
+                        if (aFirstInfo == null || aLastInfo == null) {
                             aFirstInfo = {
                                 sort_no         : val.sort_no,
                                 game_card_id    : iGameCardId,
                             };
-                        }
-                        if (aLastInfo.sort_no < val.sort_no) {
                             aLastInfo = {
                                 sort_no         : val.sort_no,
                                 game_card_id    : iGameCardId,
                             };
+                        } else {
+                            if (val.sort_no < aFirstInfo.sort_no) {
+                                aFirstInfo = {
+                                    sort_no         : val.sort_no,
+                                    game_card_id    : iGameCardId,
+                                };
+                            }
+                            if (aLastInfo.sort_no < val.sort_no) {
+                                aLastInfo = {
+                                    sort_no         : val.sort_no,
+                                    game_card_id    : iGameCardId,
+                                };
+                            }
                         }
-                    }
-                    break;
-                default:
-                    break;
+                        break;
+                    default:
+                        break;
+                }
+            });
+
+            if (aArgs.sort_type == 'first') {
+                iRetGameCardId = aFirstInfo.game_card_id;
+            } else if (aArgs.sort_type == 'last') {
+                iRetGameCardId = aLastInfo.game_card_id;
             }
-        });
-        if (aArgs.sort_type == 'first') {
-            iRetGameCardId = aFirstInfo.game_card_id;
-        } else if (aArgs.sort_type == 'last') {
-            iRetGameCardId = aLastInfo.game_card_id;
-        }
-        if (isNaN(iRetGameCardId)) {
+            if (isNaN(iRetGameCardId)) {
+                throw new Error('game_card_id couldn\'t get.');
+            }
+
+            return iRetGameCardId;
+
+        } catch (e) {
+            console.log('unexpected in getGameCardId');
+            console.log(e.stack);
+            console.log(e);
             return null;
         }
-        return iRetGameCardId;
     }
 
     function isProvoked (aArgs) {

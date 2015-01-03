@@ -1,16 +1,19 @@
+<?php $conf = Zend_Registry::get('config'); ?>
 <br />
 <div style="clear:both;"></div>
 <div id="footer">
     <div class="footer_tweet">
-        <a href="https://twitter.com/share" class="twitter-share-button" data-via="gittib_gittib" data-lang="ja" data-count="none" data-hashtags="cardhero">ツイート</a>
+        <?php if ($conf->web->footer->display_tweet) : ?>
+        <a href="https://twitter.com.display/share" class="twitter-share-button" data-via="gittib_gittib" data-lang="ja" data-count="none" data-hashtags="cardhero">ツイート</a>
         <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+        <?php endif; ?>
         <span>
             カードヒーロー＠スマホ　制作/gitti <a class="blank_link" href="https://twitter.com/gittib_gittib" target="_blank">@gittib_gittib</a>
         </span>
     </div>
 </div>
 <?php
-if (APPLICATION_ENV != 'production') {
+if ($conf->web->footer->display_sql) {
     echo "<br />\n";
     echo Common::checkSQL();
 }

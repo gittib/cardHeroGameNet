@@ -156,6 +156,8 @@ div.submit {
     }
 
     .selected_card {
+        clear:both;
+        max-width: 350px;
 
         div {
             float:left;

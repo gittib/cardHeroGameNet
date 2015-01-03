@@ -1,31 +1,27 @@
 <?php
-    if (isset($this->bGameStart) && $this->bGameStart) {
-        echo <<<_eos_
+$aUserInfo = Common::checkLogin();
+
+$sMessageHtml = '';
+if (isset($this->sDispMessage)) {
+    $sMessageHtml = <<<_eos_
 <div class="message">
-    フィールド状況
+    {$this->sDispMessage}
 </div>
 
 _eos_;
-        echo $this->render('game_field_table.phtml');
-    }
-?>
-<div class="message">
-<?php
-    if (isset($this->sDispMessage)) {
-        echo $this->sDispMessage;
-    }
-?>
-</div>
-<?php
+}
+
+$sNewLink = '';
 if (isset($this->bDeckEdit) && $this->bDeckEdit) {
-    echo <<<_eos_
+    $sNewLink = <<<_eos_
 <div class="edit_link">
     <a href="/deck/edit/">デッキ新規作成</a>
 </div>
 
 _eos_;
 }
-$aUserInfo = Common::checkLogin();
+
+$sDeckListHtml = '<div id="deck_list_frame" class="clearfix">';
 foreach ($this->aDeckList as $deckId => $val) {
     $sDeckLink = '';
     if (isset($this->bGameStandby) && $this->bGameStandby) {
@@ -72,7 +68,7 @@ _eos_;
             $val[$key] = $this->escape($v);
         }
     }
-    echo <<<_eos_
+    $sDeckListHtml .= <<<_eos_
 <div class="deck_frame">
     <div class="deck_header clearfix">
         <div class="master_image">
@@ -104,12 +100,23 @@ _eos_;
 
 _eos_;
 }
-if (isset($this->bDeckEdit) && $this->bDeckEdit) {
-    echo <<<_eos_
-<div class="edit_link">
-    <a href="/deck/edit/">デッキ新規作成</a>
+$sDeckListHtml .= '</div>';
+
+$sGameStartHtml = '';
+if (isset($this->bGameStart) && $this->bGameStart) {
+    $sGameStartHtml = <<<_eos_
+<div class="message">
+    フィールド状況
 </div>
 
 _eos_;
+    $sGameStartHtml .= '<div id="game_field_list_frame">';
+    $sGameStartHtml .= $this->render('game_field_table.phtml');
+    $sGameStartHtml .= '</div>';
 }
-?>
+
+echo $sGameStartHtml;
+echo $sMessageHtml;
+echo $sNewLink;
+echo $sDeckListHtml;
+echo $sNewLink;

@@ -30,6 +30,10 @@
         ),
     );
     foreach ($aCardInfo['field'] as $val) {
+        if (isset($val['next_game_card_id'])) {
+            continue;
+        }
+
         switch ($val['position'])
         {
             case 'Front1':

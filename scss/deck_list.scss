@@ -1,10 +1,17 @@
 @charset "utf-8";
 
+$max_frame_width : 400px;
 $img_size : 46px;
 
+body {
+    background-color: #eeeeff;
+}
+
 div.message {
+    max-width: $max_frame_width;
+    margin: 0 auto;
     padding: 3px;
-    background-color: #ffffff;
+    text-align: center;
 }
 
 .edit_link {
@@ -17,13 +24,19 @@ div.message {
 }
 
 .deck_frame {
+    width: 100%;
+    max-width: $max_frame_width;
+    margin: 0 auto;
     border: solid 3px;
+    background-color: #fff;
+
     div.card_list_frame {
-        width: 100%;
+        width: 300px;
         text-align: center;
+        margin: 0 auto;
 
         div.card_list {
-            max-width: 320px;
+            max-width: 300px;
             float: left;
             border: none;
             text-align: center;
@@ -36,6 +49,9 @@ div.message {
     }
 
     div.deck_header {
+        max-width: 350px;
+        margin: 0 auto;
+
         > div {
             padding: 2px;
             float:left;

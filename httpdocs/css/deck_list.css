@@ -1,7 +1,12 @@
 @charset "utf-8";
+body {
+  background-color: #eeeeff; }
+
 div.message {
+  max-width: 400px;
+  margin: 0 auto;
   padding: 3px;
-  background-color: #ffffff; }
+  text-align: center; }
 
 .edit_link {
   margin: 5px;
@@ -10,21 +15,29 @@ div.message {
     font-size: 12px; }
 
 .deck_frame {
-  border: solid 3px; }
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  border: solid 3px;
+  background-color: #fff; }
   .deck_frame div.card_list_frame {
-    width: 100%;
-    text-align: center; }
+    width: 300px;
+    text-align: center;
+    margin: 0 auto; }
     .deck_frame div.card_list_frame div.card_list {
-      max-width: 320px;
+      max-width: 300px;
       float: left;
       border: none;
       text-align: center; }
       .deck_frame div.card_list_frame div.card_list div.card_image {
         float: left;
         padding: 1px; }
-  .deck_frame div.deck_header > div {
-    padding: 2px;
-    float: left; }
+  .deck_frame div.deck_header {
+    max-width: 350px;
+    margin: 0 auto; }
+    .deck_frame div.deck_header > div {
+      padding: 2px;
+      float: left; }
   .deck_frame div.edit_link.mine {
     margin-bottom: 20px; }
   .deck_frame img {

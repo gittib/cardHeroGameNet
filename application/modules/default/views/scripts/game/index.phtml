@@ -1,4 +1,7 @@
 <?php
+//
+// ページングリンク生成処理
+//
 $iFieldsInPage = 10;    // 1ページ当たりに表示されるフィールドの数
 $iDispLinkRange = 2;    // 前後何ページまでページングするか
 
@@ -39,7 +42,7 @@ for ($i = $aDispPageNum['min'] ; $i <= $aDispPageNum['max'] ; $i++) {
 
 //if ($aDispPageNum['max'] < $iPages) {
 //    $sPageLinkTag .= <<<_eos_
-//    <span><a href="/game/{$iPages}/">...{$iPages}</a></span>
+//    ...<a href="/game/{$iPages}/"><span>{$iPages}</span></a>
 //
 //_eos_;
 //}
@@ -53,6 +56,9 @@ _eos_;
 }
 
 $sPageLinkTag .= "</div>\n";
+//
+// ページングリンク生成処理終了
+//
 
 $sSelectOldFieldDispray = <<<_eos_
 <div class="old_field_disp_select_frame">
