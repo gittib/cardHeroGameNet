@@ -16,6 +16,8 @@ class model_Deck {
      */
     public function getDeckList($aArgs)
     {
+        $iDecksInPage = 10;  // １ページあたりに表示するデッキの数
+
         // ログインしてない時用に、絶対にヒットしないダミーIDで初期化しておく
         $userId = -1;
         $nPage = 1;
@@ -37,7 +39,7 @@ class model_Deck {
                 'upd_date desc',
                 'deck_id desc',
             ))
-            ->limitPage($nPage, 10);
+            ->limitPage($nPage, $iDecksInPage);
         if (isset($aArgs['max_rare_max']) && $aArgs['max_rare_max'] != '') {
             $sub2 = $this->_db->select()
                 ->distinct()

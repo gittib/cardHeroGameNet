@@ -21,6 +21,23 @@ if (isset($this->bDeckEdit) && $this->bDeckEdit) {
 _eos_;
 }
 
+$aPageInfo = array(
+    'page_cd'   => 'deck_list',
+    'user_id'   => $aUserInfo['user_id'],
+);
+if (isset($this->bGameStandby) && $this->bGameStandby) {
+    $aPageInfo['page_cd'] = 'game_standby';
+    $aPageInfo['game_field_id'] = $this->iGameFieldId;
+} else if (isset($this->bGameStart) && $this->bGameStart) {
+    $aPageInfo['page_cd'] = 'game_start';
+    $aPageInfo['game_field_id'] = $this->iGameFieldId;
+}
+$sPageInfoHtml = "<div id='page_info' style='display:none;'";
+foreach ($aPageInfo as $key => $val) {
+    $sPageInfoHtml .= " {$key}='{$val}'";
+}
+$sPageInfoHtml .= ' ></div>';
+
 $sDeckListHtml = '<div id="deck_list_frame" class="clearfix">';
 foreach ($this->aDeckList as $deckId => $val) {
     $sDeckLink = '';
@@ -102,6 +119,8 @@ _eos_;
 }
 $sDeckListHtml .= '</div>';
 
+$sMoreDeckList = '<input type="button" id="more_deck_list" page="1" value="もっと見る" />';
+
 $sGameStartHtml = '';
 if (isset($this->bGameStart) && $this->bGameStart) {
     $sGameStartHtml = <<<_eos_
@@ -119,4 +138,6 @@ echo $sGameStartHtml;
 echo $sMessageHtml;
 echo $sNewLink;
 echo $sDeckListHtml;
+echo $sMoreDeckList;
 echo $sNewLink;
+echo $sPageInfoHtml;

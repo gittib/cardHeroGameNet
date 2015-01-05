@@ -345,6 +345,25 @@ new function () {
 
         g_field_data.cards      = getCardsJson();
         g_field_data.old_queues = getQueueJson();
+        $.each(g_field_data.cards, function(iGameCardId, val) {
+            if (val.next_game_card_id) {
+                g_field_data.cards[val.next_game_card_id].before_game_card_id = iGameCardId;
+            }
+            if (val.status) {
+                if (val.status.length <= 0) {
+                    val.status = {};
+                }
+            }
+        });
+        g_field_data.old_queues.push({
+            actor_id        : null,
+            log_message     : '',
+            resolved_flg    : 0,
+            priority        : 'system',
+            queue_units : [{
+                queue_type_id   : 1018,
+            }],
+        });
         g_field_data.old_queues.push({
             actor_id        : null,
             log_message     : '',
@@ -356,16 +375,7 @@ new function () {
                 param1          : 'game_end_check',
             }],
         });
-        $.each(g_field_data.cards, function(iGameCardId, val) {
-            if (val.next_game_card_id) {
-                g_field_data.cards[val.next_game_card_id].before_game_card_id = iGameCardId;
-            }
-            if (val.status) {
-                if (val.status.length <= 0) {
-                    val.status = {};
-                }
-            }
-        });
+
         game_field_reactions.updateField({
             field_data  : g_field_data,
         });

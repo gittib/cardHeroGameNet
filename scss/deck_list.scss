@@ -23,49 +23,57 @@ div.message {
     }
 }
 
-.deck_frame {
+#deck_list_frame {
     width: 100%;
     max-width: $max_frame_width;
     margin: 0 auto;
-    border: solid 3px;
-    background-color: #fff;
 
-    div.card_list_frame {
-        width: 300px;
-        text-align: center;
+    .deck_frame {
         margin: 0 auto;
+        border: solid 3px;
+        background-color: #fff;
 
-        div.card_list {
-            max-width: 300px;
-            float: left;
-            border: none;
+        div.card_list_frame {
+            width: 300px;
             text-align: center;
+            margin: 0 auto;
 
-            div.card_image {
+            div.card_list {
+                max-width: 300px;
                 float: left;
-                padding: 1px;
+                border: none;
+                text-align: center;
+
+                div.card_image {
+                    float: left;
+                    padding: 1px;
+                }
             }
         }
-    }
 
-    div.deck_header {
-        max-width: 350px;
-        margin: 0 auto;
+        div.deck_header {
+            max-width: 350px;
+            margin: 0 auto;
 
-        > div {
-            padding: 2px;
-            float:left;
+            > div {
+                padding: 2px;
+                float:left;
+            }
         }
-    }
 
-    div.edit_link.mine {
-        margin-bottom: 20px;
-    }
+        div.edit_link.mine {
+            margin-bottom: 20px;
+        }
 
-    img {
-        border: solid 1px;
-        width: $img_size;
-        height: $img_size;
+        img {
+            border: solid 1px;
+            width: $img_size;
+            height: $img_size;
+        }
     }
 }
 
+#more_deck_list {
+    display: block;
+    margin: 12px auto;
+}

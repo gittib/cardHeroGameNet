@@ -14,33 +14,39 @@ div.message {
   .edit_link a {
     font-size: 12px; }
 
-.deck_frame {
+#deck_list_frame {
   width: 100%;
   max-width: 400px;
-  margin: 0 auto;
-  border: solid 3px;
-  background-color: #fff; }
-  .deck_frame div.card_list_frame {
-    width: 300px;
-    text-align: center;
-    margin: 0 auto; }
-    .deck_frame div.card_list_frame div.card_list {
-      max-width: 300px;
-      float: left;
-      border: none;
-      text-align: center; }
-      .deck_frame div.card_list_frame div.card_list div.card_image {
+  margin: 0 auto; }
+  #deck_list_frame .deck_frame {
+    margin: 0 auto;
+    border: solid 3px;
+    background-color: #fff; }
+    #deck_list_frame .deck_frame div.card_list_frame {
+      width: 300px;
+      text-align: center;
+      margin: 0 auto; }
+      #deck_list_frame .deck_frame div.card_list_frame div.card_list {
+        max-width: 300px;
         float: left;
-        padding: 1px; }
-  .deck_frame div.deck_header {
-    max-width: 350px;
-    margin: 0 auto; }
-    .deck_frame div.deck_header > div {
-      padding: 2px;
-      float: left; }
-  .deck_frame div.edit_link.mine {
-    margin-bottom: 20px; }
-  .deck_frame img {
-    border: solid 1px;
-    width: 46px;
-    height: 46px; }
+        border: none;
+        text-align: center; }
+        #deck_list_frame .deck_frame div.card_list_frame div.card_list div.card_image {
+          float: left;
+          padding: 1px; }
+    #deck_list_frame .deck_frame div.deck_header {
+      max-width: 350px;
+      margin: 0 auto; }
+      #deck_list_frame .deck_frame div.deck_header > div {
+        padding: 2px;
+        float: left; }
+    #deck_list_frame .deck_frame div.edit_link.mine {
+      margin-bottom: 20px; }
+    #deck_list_frame .deck_frame img {
+      border: solid 1px;
+      width: 46px;
+      height: 46px; }
+
+#more_deck_list {
+  display: block;
+  margin: 12px auto; }

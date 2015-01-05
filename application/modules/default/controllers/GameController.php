@@ -64,6 +64,7 @@ class GameController extends Zend_Controller_Action
         $modelDeck = new model_Deck();
         $this->_stylesheet[] = '/css/game_list.css';
         $this->_stylesheet[] = '/css/deck_list.css';
+        $this->_javascript[] = '/js/deck_list.js';
         $this->_javascript[] = '/js/game_list.js';
         $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_layout->title = 'ゲーム開始';
@@ -107,6 +108,7 @@ class GameController extends Zend_Controller_Action
         $this->_stylesheet[] = '/css/game_list.css';
         $this->_stylesheet[] = '/css/deck_list.css';
         $this->_stylesheet[] = '/css/game_receive.css';
+        $this->_javascript[] = '/js/deck_list.js';
         $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_layout->title = 'ゲーム開始';
         $this->_layout->noindex = true;
@@ -158,12 +160,12 @@ class GameController extends Zend_Controller_Action
             $this->_javascript[] = '/js/js_debug.js';
         }
         $this->_javascript[] = '/js/master_data.js';
-        $this->_javascript[] = '/js/game_field.min.js?ver=20150103';
-      //$this->_javascript[] = '/js/game_field_utility.js';
-      //$this->_javascript[] = '/js/game_field_reactions.js';
-      //$this->_javascript[] = '/js/arts_queue.js';
-      //$this->_javascript[] = '/js/magic_queue.js';
-      //$this->_javascript[] = '/js/game_field.js';
+      //$this->_javascript[] = '/js/game_field.min.js?ver=20150103';
+        $this->_javascript[] = '/js/game_field_utility.js';
+        $this->_javascript[] = '/js/game_field_reactions.js';
+        $this->_javascript[] = '/js/arts_queue.js';
+        $this->_javascript[] = '/js/magic_queue.js';
+        $this->_javascript[] = '/js/game_field.js';
 
         $iBeforeFieldId = $this->_model->getBeforeFieldId($iGameFieldId);
         $aSelectCond = array(
