@@ -10,6 +10,7 @@ class Api_DeckController extends Zend_Controller_Action
     public function preDispatch()
     {
         $this->_helper->layout->disableLayout();
+        $this->_helper->viewRenderer->setNoRender();
     }
 
     public function moreAction()
@@ -26,7 +27,6 @@ class Api_DeckController extends Zend_Controller_Action
 
         $this->getResponse()->setHeader('Content-Type', 'application/json; charset=utf-8');
         echo json_encode($aDeckInfo);
-        exit;
     }
 
 }

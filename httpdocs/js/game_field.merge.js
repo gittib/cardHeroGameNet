@@ -925,6 +925,9 @@ game_field_reactions = (function () {
         if (typeof aArgs == 'undefined') {
             aArgs = {'field_data' : g_field_data};
         }
+        if (typeof aArgs.game_state == 'undefined') {
+            aArgs.game_state = checkGameState();
+        }
         g_field_data = aArgs.field_data;
         try {
             var _buildArtsRow = function (mon) {
@@ -1012,6 +1015,8 @@ game_field_reactions = (function () {
             var sDtlLink    = '<a class="blank_link" target="_blank" href="/card/detail/' + aCardData.card_id + '/">詳細</a>';
             var sCommandsHtml = '';
 
+            console.log('updateActorDom aCard.pos_category:'+aCard.pos_category);
+            console.log('updateActorDom aArgs.game_state:'+aArgs.game_state);
             if (aCard.pos_category == 'hand') {
                 if (aArgs.game_state == 'tokugi_fuuji') {
                     aCard = g_field_data.cards[g_field_data.actor.aTargets[0].game_card_id];
@@ -2629,6 +2634,13 @@ game_field_reactions = (function () {
             console.log('tokugi_fuuji');
             return 'tokugi_fuuji';
         }
+
+        // ターン終了時
+        if (g_field_data.end_phase_flg) {
+            console.log('end_phase');
+            return 'end_phase';
+        }
+
         try {
             $.each(g_field_data.cards, function (i, val) {
                 if (val.status) {
@@ -2692,6 +2704,9 @@ game_field_reactions = (function () {
                 break;
             case 'tokugi_fuuji':
                 s = '封じる特技を選択してください';
+                break;
+            case 'end_phase':
+                s = '不要な手札を捨ててください';
                 break;
             default:
                 return;
@@ -2920,7 +2935,7 @@ arts_queue = (function () {
                 if (Math.random() * 2 < 1) {
                     aRet.push({
                         queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
-                        target_id       : targetId,
+                        target_id       : aArgs.targets[0].game_card_id,
                         param1          : aArtInfo.power,
                     });
                 } else {
@@ -3052,8 +3067,9 @@ arts_queue = (function () {
                 ];
                 break;
             case 1015:
-                var aMonsterInfo = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var aMonsterInfo = aArgs.field_data.cards[aArgs.actor_id];
                 var iMaxHP = game_field_utility.getMaxHP(aMonsterInfo);
+                alert('iMaxHP:'+iMaxHP);
                 var aRet = [{
                     queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
                     target_id       : aArgs.targets[0].game_card_id,
@@ -4493,6 +4509,7 @@ magic_queue = (function () {
 new function () {
     // グローバル変数宣言
     var g_master_data = master_data.getInfo();
+    var iHandMax = 5;
 
     var g_field_data = {
         turn                : null,
@@ -4560,6 +4577,7 @@ new function () {
                 case 'select_actor':
                 case 'select_action':
                 case 'lvup_standby':
+                case 'end_phase':
                     _updateActorInfo();
                     break;
                 case 'select_target':
@@ -4656,6 +4674,35 @@ new function () {
                         }
                         g_field_data.queues.push(aQueue);
                         g_field_data.actor = {game_card_id : null};
+                        execQueue({ resolve_all : true });
+                    }
+                    break;
+                case 'end_phase':
+                    var iGameCardId = oDom.attr('game_card_id');
+                    var sCardName = g_master_data.m_card[g_field_data.cards[iGameCardId].card_id].card_name;
+                    if (confirm(sCardName + 'を捨てますか？')) {
+                        g_field_data.queues.push({
+                            actor_id        : iGameCardId,
+                            log_message     : '手札調整',
+                            resolved_flg    : 0,
+                            priority        : 'system',
+                            queue_units : [{
+                                queue_type_id   : 1014,
+                                target_id       : iGameCardId,
+                            }],
+                        });
+                        var iHands = 0;
+                        $.each(g_field_data.cards, function(iGameCardId, val) {
+                            if (val.pos_category == 'hand' && val.owner == 'my') {
+                                iHands++;
+                            }
+                        });
+                        if (iHands <= iHandMax+1) {
+                            $('#hand_card').css('backgroundColor', g_base_color.background);
+                            turnEndProc({
+                                ignore_hand_num : true,
+                            });
+                        }
                         execQueue({ resolve_all : true });
                     }
                     break;
@@ -4777,6 +4824,7 @@ new function () {
                     break;
                 case 'select_action':
                 case 'select_target':
+                case 'end_phase':
                     _delActorInfo();
                     break;
                 case 'lvup_standby':
@@ -4837,6 +4885,25 @@ new function () {
 
         g_field_data.cards      = getCardsJson();
         g_field_data.old_queues = getQueueJson();
+        $.each(g_field_data.cards, function(iGameCardId, val) {
+            if (val.next_game_card_id) {
+                g_field_data.cards[val.next_game_card_id].before_game_card_id = iGameCardId;
+            }
+            if (val.status) {
+                if (val.status.length <= 0) {
+                    val.status = {};
+                }
+            }
+        });
+        g_field_data.old_queues.push({
+            actor_id        : null,
+            log_message     : '',
+            resolved_flg    : 0,
+            priority        : 'system',
+            queue_units : [{
+                queue_type_id   : 1018,
+            }],
+        });
         g_field_data.old_queues.push({
             actor_id        : null,
             log_message     : '',
@@ -4848,16 +4915,7 @@ new function () {
                 param1          : 'game_end_check',
             }],
         });
-        $.each(g_field_data.cards, function(iGameCardId, val) {
-            if (val.next_game_card_id) {
-                g_field_data.cards[val.next_game_card_id].before_game_card_id = iGameCardId;
-            }
-            if (val.status) {
-                if (val.status.length <= 0) {
-                    val.status = {};
-                }
-            }
-        });
+
         game_field_reactions.updateField({
             field_data  : g_field_data,
         });
@@ -6171,6 +6229,8 @@ new function () {
                                             reset_hp        : true,
                                             aBefore         : g_field_data.cards[q.target_id],
                                         });
+                                        aSuperInHand.lvup_standby = mon.lvup_standby;
+                                        mon.lvup_standby = 0;
                                     } else if (aMonsterData.next_monster_id) {
                                         // next_monster_idに値が入ってる場合は1枚のカードで完結するレベルアップ
                                         mon = game_field_utility.loadMonsterInfo({
@@ -7261,8 +7321,39 @@ new function () {
         return false;
     }
 
-    function turnEndProc()
+    /**
+     * @param aArgs.ignore_hand_num : trueなら手札調整のための枚数チェックは行わない
+     */
+    function turnEndProc(aArgs)
     {
+        if (typeof aArgs == 'undefined') {
+            aArgs = {};
+        }
+
+        if (!aArgs.ignore_hand_num) {
+            // 手札がオーバーしていたら、ターン終了処理の前に手札調整を行う
+            var iHands = 0;
+            $.each(g_field_data.cards, function(i, val) {
+                if (val.owner == 'my' && val.pos_category == 'hand') {
+                    iHands++;
+                }
+            });
+            if (iHandMax < iHands) {
+                g_field_data.end_phase_flg = true;
+                var _delActorInfo = function() {
+                    g_field_data.actor = {game_card_id : null};
+                    $('.actor').removeClass('actor');
+                    $('.target').removeClass('target');
+                    game_field_reactions.updateField({
+                        field_data  : g_field_data,
+                    });
+                };
+                _delActorInfo();
+                $('#hand_card').css('backgroundColor', '#fdd');
+                return;
+            }
+        }
+
         $.each(g_field_data.cards, function(i, val) {
 
             // フィールドのモンスターの処理

@@ -208,7 +208,8 @@ div.close_button {
     padding: 3px 0;
     border: solid 2px;
     font-size: 18px;
-    text-align: center; }
+    text-align: center;
+    cursor: pointer; }
   #buttons_frame div.marigan_button {
     background-color: #ffffee;
     border-top-color: #ffffdd;

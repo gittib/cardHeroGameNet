@@ -3,6 +3,7 @@
 class GameController extends Zend_Controller_Action
 {
     private $_model;
+    private $_config;
     private $_layout;
     private $_stylesheet;
     private $_javascript;
@@ -16,6 +17,8 @@ class GameController extends Zend_Controller_Action
         $this->_stylesheet = array();
 
         $this->_javascript = array();
+
+        $this->_config = Zend_Registry::get('config');
     }
 
     public function postDispatch()
@@ -64,7 +67,11 @@ class GameController extends Zend_Controller_Action
         $modelDeck = new model_Deck();
         $this->_stylesheet[] = '/css/game_list.css';
         $this->_stylesheet[] = '/css/deck_list.css';
-        $this->_javascript[] = '/js/deck_list.js';
+        if ($this->_config->web->js->debug) {
+            $this->_javascript[] = '/js/deck_list.min.js';
+        } else {
+            $this->_javascript[] = '/js/deck_list.min.js?ver=20150111';
+        }
         $this->_javascript[] = '/js/game_list.js';
         $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_layout->title = 'ゲーム開始';
@@ -108,7 +115,11 @@ class GameController extends Zend_Controller_Action
         $this->_stylesheet[] = '/css/game_list.css';
         $this->_stylesheet[] = '/css/deck_list.css';
         $this->_stylesheet[] = '/css/game_receive.css';
-        $this->_javascript[] = '/js/deck_list.js';
+        if ($this->_config->web->js->debug) {
+            $this->_javascript[] = '/js/deck_list.js';
+        } else {
+            $this->_javascript[] = '/js/deck_list.min.js?ver=20150111';
+        }
         $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_layout->title = 'ゲーム開始';
         $this->_layout->noindex = true;
@@ -156,16 +167,23 @@ class GameController extends Zend_Controller_Action
         $request = $this->getRequest();
         $iGameFieldId = $request->getParam('game_field_id');
         $this->_stylesheet[] = '/css/game_field.css';
-        if (APPLICATION_ENV == 'testing') {
+
+        if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/js_debug.js';
+            $this->_javascript[] = '/js/master_data.js';
+            /*
+            $this->_javascript[] = '/js/game_field.min.js';
+            /*/
+            $this->_javascript[] = '/js/game_field_utility.js';
+            $this->_javascript[] = '/js/game_field_reactions.js';
+            $this->_javascript[] = '/js/arts_queue.js';
+            $this->_javascript[] = '/js/magic_queue.js';
+            $this->_javascript[] = '/js/game_field.js';
+            //*/
+        } else {
+            $this->_javascript[] = '/js/master_data.js';
+            $this->_javascript[] = '/js/game_field.min.js?ver=20150111';
         }
-        $this->_javascript[] = '/js/master_data.js';
-      //$this->_javascript[] = '/js/game_field.min.js?ver=20150103';
-        $this->_javascript[] = '/js/game_field_utility.js';
-        $this->_javascript[] = '/js/game_field_reactions.js';
-        $this->_javascript[] = '/js/arts_queue.js';
-        $this->_javascript[] = '/js/magic_queue.js';
-        $this->_javascript[] = '/js/game_field.js';
 
         $iBeforeFieldId = $this->_model->getBeforeFieldId($iGameFieldId);
         $aSelectCond = array(

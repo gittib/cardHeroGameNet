@@ -215,7 +215,7 @@ arts_queue = (function () {
                 if (Math.random() * 2 < 1) {
                     aRet.push({
                         queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
-                        target_id       : targetId,
+                        target_id       : aArgs.targets[0].game_card_id,
                         param1          : aArtInfo.power,
                     });
                 } else {
@@ -347,8 +347,9 @@ arts_queue = (function () {
                 ];
                 break;
             case 1015:
-                var aMonsterInfo = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var aMonsterInfo = aArgs.field_data.cards[aArgs.actor_id];
                 var iMaxHP = game_field_utility.getMaxHP(aMonsterInfo);
+                alert('iMaxHP:'+iMaxHP);
                 var aRet = [{
                     queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
                     target_id       : aArgs.targets[0].game_card_id,

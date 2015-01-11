@@ -74,6 +74,21 @@ div.message {
 }
 
 #more_deck_list {
-    display: block;
-    margin: 12px auto;
+    text-align: center;
+    margin: 40px auto;
+    padding: 3px;
+
+    span {
+        $border_width: 3px;
+
+        border-top:     solid $border_width #ccccff;
+        border-left:    solid $border_width #ccccff;
+        border-right:   solid $border_width #8888ff;
+        border-bottom:  solid $border_width #8888ff;
+        background-color: #fff;
+
+        cursor: pointer;
+        padding: 3px;
+        font-size: 14px;
+    }
 }

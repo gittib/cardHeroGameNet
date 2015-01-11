@@ -3,6 +3,7 @@
 class DeckController extends Zend_Controller_Action
 {
     private $_model;
+    private $_config;
     private $_layout;
     private $_stylesheet;
     private $_javascript;
@@ -16,6 +17,8 @@ class DeckController extends Zend_Controller_Action
         $this->_stylesheet = array();
 
         $this->_javascript = array();
+
+        $this->_config = Zend_Registry::get('config');
 
         $this->_getModel();
     }
@@ -31,8 +34,12 @@ class DeckController extends Zend_Controller_Action
         $request = $this->getRequest();
         $this->_layout->title = 'デッキ一覧';
         $this->_stylesheet[] = '/css/deck_list.css';
-        $this->_javascript[] = '/js/deck_list.js';
         $this->_javascript[] = '/js/img_delay_load.min.js';
+        if ($this->_config->web->js->debug) {
+            $this->_javascript[] = '/js/deck_list.js';
+        } else {
+            $this->_javascript[] = '/js/deck_list.min.js?ver=20150111';
+        }
         $nPage = $request->getParam('page_no');
         $ret = $this->_model->getDeckList(array(
             'page_no'   => $nPage,

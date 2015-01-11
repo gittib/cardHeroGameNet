@@ -39,7 +39,8 @@ foreach ($aPageInfo as $key => $val) {
 $sPageInfoHtml .= ' ></div>';
 
 $sDeckListHtml = '<div id="deck_list_frame" class="clearfix">';
-foreach ($this->aDeckList as $deckId => $val) {
+foreach ($this->aDeckList as $val) {
+    $deckId = $val['deck_id'];
     $sDeckLink = '';
     if (isset($this->bGameStandby) && $this->bGameStandby) {
         $sDeckLink = <<<_eos_
@@ -119,7 +120,7 @@ _eos_;
 }
 $sDeckListHtml .= '</div>';
 
-$sMoreDeckList = '<input type="button" id="more_deck_list" page="1" value="もっと見る" />';
+$sMoreDeckList = '<div id="more_deck_list" page="1"><span>もっと見る</span></div>';
 
 $sGameStartHtml = '';
 if (isset($this->bGameStart) && $this->bGameStart) {

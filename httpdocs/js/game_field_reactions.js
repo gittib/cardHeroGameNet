@@ -360,6 +360,9 @@ game_field_reactions = (function () {
         if (typeof aArgs == 'undefined') {
             aArgs = {'field_data' : g_field_data};
         }
+        if (typeof aArgs.game_state == 'undefined') {
+            aArgs.game_state = checkGameState();
+        }
         g_field_data = aArgs.field_data;
         try {
             var _buildArtsRow = function (mon) {
@@ -447,6 +450,8 @@ game_field_reactions = (function () {
             var sDtlLink    = '<a class="blank_link" target="_blank" href="/card/detail/' + aCardData.card_id + '/">詳細</a>';
             var sCommandsHtml = '';
 
+            console.log('updateActorDom aCard.pos_category:'+aCard.pos_category);
+            console.log('updateActorDom aArgs.game_state:'+aArgs.game_state);
             if (aCard.pos_category == 'hand') {
                 if (aArgs.game_state == 'tokugi_fuuji') {
                     aCard = g_field_data.cards[g_field_data.actor.aTargets[0].game_card_id];
@@ -2064,6 +2069,13 @@ game_field_reactions = (function () {
             console.log('tokugi_fuuji');
             return 'tokugi_fuuji';
         }
+
+        // ターン終了時
+        if (g_field_data.end_phase_flg) {
+            console.log('end_phase');
+            return 'end_phase';
+        }
+
         try {
             $.each(g_field_data.cards, function (i, val) {
                 if (val.status) {
@@ -2127,6 +2139,9 @@ game_field_reactions = (function () {
                 break;
             case 'tokugi_fuuji':
                 s = '封じる特技を選択してください';
+                break;
+            case 'end_phase':
+                s = '不要な手札を捨ててください';
                 break;
             default:
                 return;

@@ -130,6 +130,7 @@ class model_Deck {
                     $val['nick_name'] = 'Guest';
                 }
                 $aDeck[$deckId] = array(
+                    'deck_id'           => $val['deck_id'],
                     'deck_name'         => $val['deck_name'],
                     'rare_sum'          => $val['master_rare'],
                     'rare_max'          => $val['master_rare'],
@@ -146,8 +147,8 @@ class model_Deck {
                 );
             }
             if (isset($val['card_id'])) {
-                $cardId = $val['card_id'];
-                $aDeck[$deckId]['cards'][$cardId] = array(
+                $aDeck[$deckId]['cards'][] = array(
+                    'card_id'           => $val['card_id'],
                     'num'               => $val['num'],
                     'card_name'         => $val['card_name'],
                     'rare'              => $val['rare'],
@@ -177,7 +178,12 @@ class model_Deck {
             }
         }
 
-        return $aDeck;
+        // APIからjsに渡す際、順序が狂わないように配列の添字を外す
+        $aRet = array();
+        foreach ($aDeck as $val) {
+            $aRet[] = $val;
+        }
+        return $aRet;
     }
 
     public function getCardList() {

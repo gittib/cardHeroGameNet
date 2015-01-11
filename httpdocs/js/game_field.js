@@ -1,6 +1,7 @@
 new function () {
     // グローバル変数宣言
     var g_master_data = master_data.getInfo();
+    var iHandMax = 5;
 
     var g_field_data = {
         turn                : null,
@@ -68,6 +69,7 @@ new function () {
                 case 'select_actor':
                 case 'select_action':
                 case 'lvup_standby':
+                case 'end_phase':
                     _updateActorInfo();
                     break;
                 case 'select_target':
@@ -164,6 +166,35 @@ new function () {
                         }
                         g_field_data.queues.push(aQueue);
                         g_field_data.actor = {game_card_id : null};
+                        execQueue({ resolve_all : true });
+                    }
+                    break;
+                case 'end_phase':
+                    var iGameCardId = oDom.attr('game_card_id');
+                    var sCardName = g_master_data.m_card[g_field_data.cards[iGameCardId].card_id].card_name;
+                    if (confirm(sCardName + 'を捨てますか？')) {
+                        g_field_data.queues.push({
+                            actor_id        : iGameCardId,
+                            log_message     : '手札調整',
+                            resolved_flg    : 0,
+                            priority        : 'system',
+                            queue_units : [{
+                                queue_type_id   : 1014,
+                                target_id       : iGameCardId,
+                            }],
+                        });
+                        var iHands = 0;
+                        $.each(g_field_data.cards, function(iGameCardId, val) {
+                            if (val.pos_category == 'hand' && val.owner == 'my') {
+                                iHands++;
+                            }
+                        });
+                        if (iHands <= iHandMax+1) {
+                            $('#hand_card').css('backgroundColor', g_base_color.background);
+                            turnEndProc({
+                                ignore_hand_num : true,
+                            });
+                        }
                         execQueue({ resolve_all : true });
                     }
                     break;
@@ -285,6 +316,7 @@ new function () {
                     break;
                 case 'select_action':
                 case 'select_target':
+                case 'end_phase':
                     _delActorInfo();
                     break;
                 case 'lvup_standby':
@@ -1689,6 +1721,8 @@ new function () {
                                             reset_hp        : true,
                                             aBefore         : g_field_data.cards[q.target_id],
                                         });
+                                        aSuperInHand.lvup_standby = mon.lvup_standby;
+                                        mon.lvup_standby = 0;
                                     } else if (aMonsterData.next_monster_id) {
                                         // next_monster_idに値が入ってる場合は1枚のカードで完結するレベルアップ
                                         mon = game_field_utility.loadMonsterInfo({
@@ -2779,8 +2813,39 @@ new function () {
         return false;
     }
 
-    function turnEndProc()
+    /**
+     * @param aArgs.ignore_hand_num : trueなら手札調整のための枚数チェックは行わない
+     */
+    function turnEndProc(aArgs)
     {
+        if (typeof aArgs == 'undefined') {
+            aArgs = {};
+        }
+
+        if (!aArgs.ignore_hand_num) {
+            // 手札がオーバーしていたら、ターン終了処理の前に手札調整を行う
+            var iHands = 0;
+            $.each(g_field_data.cards, function(i, val) {
+                if (val.owner == 'my' && val.pos_category == 'hand') {
+                    iHands++;
+                }
+            });
+            if (iHandMax < iHands) {
+                g_field_data.end_phase_flg = true;
+                var _delActorInfo = function() {
+                    g_field_data.actor = {game_card_id : null};
+                    $('.actor').removeClass('actor');
+                    $('.target').removeClass('target');
+                    game_field_reactions.updateField({
+                        field_data  : g_field_data,
+                    });
+                };
+                _delActorInfo();
+                $('#hand_card').css('backgroundColor', '#fdd');
+                return;
+            }
+        }
+
         $.each(g_field_data.cards, function(i, val) {
 
             // フィールドのモンスターの処理

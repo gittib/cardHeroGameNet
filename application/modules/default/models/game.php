@@ -271,7 +271,7 @@ class model_Game {
 
                 if (isset($aOption['select_standby_field']) && $aOption['select_standby_field']) {
                     if ($val['owner'] == 2) {
-                        throw new Zend_Controller_Action_Exception('This field is already started.', 410);
+                        throw new Zend_Controller_Action_Exception('This field is already started.', 404);
                     }
                 }
 
