@@ -221,16 +221,8 @@ _eos_;
 
 _eos_;
 
-    $sDeckCards = '';
     if (isset($aCardInfo['deck']) && $aCardInfo['deck'] != '') {
         foreach ($aCardInfo['deck'] as $iGameCardId => $val) {
-            $sDeckCards .= <<<_eos_
-<div class="deck_card"
-    game_card_id="{$iGameCardId}"
-    card_id="{$val['card_id']}"
-    owner="{$val['owner']}" ></div>
-
-_eos_;
             $sOwner = ($aCardInfo['field_info']['turn'] == $val['owner']) ? 'my' : 'enemy';
             $aCards[$iGameCardId] = array(
                 'game_card_id'  => $iGameCardId,
@@ -242,16 +234,8 @@ _eos_;
         }
     }
 
-    $sUsedCards = '';
     if (isset($aCardInfo['used']) && $aCardInfo['used'] != '') {
         foreach ($aCardInfo['used'] as $iGameCardId => $val) {
-            $sUsedCards .= <<<_eos_
-<div class="used_card"
-    game_card_id="{$iGameCardId}"
-    card_id="{$val['card_id']}"
-    owner="{$val['owner']}" ></div>
-
-_eos_;
             $sOwner = ($aCardInfo['field_info']['turn'] == $val['owner']) ? 'my' : 'enemy';
             $aCards[$iGameCardId] = array(
                 'game_card_id'  => $iGameCardId,
@@ -359,7 +343,7 @@ _eos_;
 
 <div class="hidden_cards_info">
 <?php
-    echo '<div turn_num="' . $aCardInfo['field_info']['turn'] . '"></div>';
+    echo "<div turn_num='{$aCardInfo['field_info']['turn']}' turn_count='{$aCardInfo['field_info']['turn_count']}'></div>";
 ?>
 </div>
 <script type="text/javascript">

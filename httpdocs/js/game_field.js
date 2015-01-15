@@ -10,7 +10,7 @@ new function () {
         lvup_assist         : 0,
         tokugi_fuuji_flg    : false,
         sort_card_flg       : false,
-        aSortingCards       : [],
+        sorting_cards       : [],
 
         cards               : {},
         queues              : [],
@@ -40,7 +40,10 @@ new function () {
 
         initSortCardProc();
 
-        setTimeout(function () { startingProc(); }, 333);
+        setTimeout(function () {
+            startingProc({
+            });
+        }, 333);
 
         $(document).on('click', '#game_field td.monster_space', function () {
             var _updateActorInfo = function () {
@@ -455,14 +458,16 @@ new function () {
         });
     }
 
-    function startingProc()
+    /**
+     * ターン開始時の処理。おおよそ、以下の処理を行う。
+     * ストーン支給、 カードドロー、 準備中の味方モンスター登場、 ルールによる前進処理、 その他ターン開始時に処理する効果
+     *
+     * @param   aArgs.first_turn_flg    : trueだったら先攻１ターン目。何か先攻ペナルティつける
+     *
+     * @return  true:適正対象、false:不適正
+     */
+    function startingProc(aArgs)
     {
-        // ストーン支給
-        // カードドロー
-        // 準備中の味方モンスターを登場させる
-        // ルールによる前進処理
-        // その他ターン開始時に処理する効果
-
         var myMasterId = game_field_reactions.getGameCardId({
             pos_category    : 'field',
             pos_id          : 'myMaster',
@@ -571,11 +576,11 @@ new function () {
         $(document).on('click', '.sort_card_target', function () {
             try {
                 var iRef = parseInt($(this).closest('[iref]').attr('iref'));
-                var iSortNo = g_field_data.aSortingCards[iRef].sort_no;
+                var iSortNo = g_field_data.sorting_cards[iRef].sort_no;
                 var bResolved = false;
-                $.each(g_field_data.aSortingCards, function(i,val) {
+                $.each(g_field_data.sorting_cards, function(i,val) {
                     if (val.bSelected) {
-                        g_field_data.aSortingCards[iRef].sort_no = val.sort_no;
+                        g_field_data.sorting_cards[iRef].sort_no = val.sort_no;
                         val.sort_no = iSortNo;
                         delete val.bSelected;
                         bResolved = true;
@@ -583,7 +588,7 @@ new function () {
                     }
                 });
                 if (!bResolved) {
-                    g_field_data.aSortingCards[iRef].bSelected = true;
+                    g_field_data.sorting_cards[iRef].bSelected = true;
                 }
             } catch(e) {
                 console.log(e.stack);
@@ -606,7 +611,7 @@ new function () {
                     priority        : 'command',
                     queue_units     : [],
                 };
-                $.each(g_field_data.aSortingCards, function(i,val) {
+                $.each(g_field_data.sorting_cards, function(i,val) {
                     aQueue.queue_units.push({
                         queue_type_id   : 1012,
                         target_id       : val.game_card_id,
@@ -615,7 +620,7 @@ new function () {
                 });
                 g_field_data.queues.push(aQueue);
                 g_field_data.sort_card_flg = false;
-                g_field_data.aSortingCards = [];
+                g_field_data.sorting_cards = [];
                 execQueue({ resolve_all : true });
             }
         });
@@ -1516,6 +1521,7 @@ new function () {
                                 case 1008:
                                     var targetMon = g_field_data.cards[q.target_id];
 
+                                    // スーパーとかが乙る時はその下の進化元も墓地に行くので、eachで繰り返し判定する
                                     $.each(g_field_data.cards, function(ii, vv) {
                                         if (vv.pos_category != 'field') {
                                             return true;
@@ -1536,19 +1542,33 @@ new function () {
                                         vv.pos_category  = 'used';
                                         vv.sort_no       = iSortNo;
                                     });
+
+                                    $.each(targetMon.status, function(iStatusId, val) {
+                                        var sStName = g_master_data.m_status[iStatusId].status_name;
+                                        g_field_data.queues.push({
+                                            actor_id            : targetMon.game_card_id,
+                                            log_message         : '倒れたためステータス解除[' + sStName + ']',
+                                            resolved_flg        : 0,
+                                            actor_anime_disable : true,
+                                            priority            : 'same_time',
+                                            queue_units : [{
+                                                queue_type_id   : 1027,
+                                                target_id       : targetMon.game_card_id,
+                                                param1          : iStatusId,
+                                            }],
+                                        });
+                                    });
                                     g_field_data.queues.push({
                                         actor_id            : targetMon.game_card_id,
                                         log_message         : 'LV分のストーンを還元',
                                         resolved_flg        : 0,
                                         actor_anime_disable : true,
                                         priority            : 'system',
-                                        queue_units : [
-                                            {
-                                                queue_type_id   : 1004,
-                                                target_id       : targetMon.game_card_id,
-                                                param1          : g_master_data.m_monster[targetMon.monster_id].lv,
-                                            }
-                                        ],
+                                        queue_units : [{
+                                            queue_type_id   : 1004,
+                                            target_id       : targetMon.game_card_id,
+                                            param1          : g_master_data.m_monster[targetMon.monster_id].lv,
+                                        }],
                                     });
                                     g_field_data.animation_info.animations.push({
                                         target_dom  : '#' + targetMon.pos_id + ' .pict img',
@@ -1563,12 +1583,21 @@ new function () {
                                     var mon = g_field_data.cards[q.target_id];
                                     if (q.param1 == 'draw' && q.param2 && (mon.pos_id == 'myMaster' || mon.pos_id == 'enemyMaster')) {
                                         (function() {
+                                            var bPicked = false;
                                             for (var i = 0 ; i < q.param2 ; i++) {
                                                 var iGameCardId = game_field_reactions.getGameCardId({
                                                     pos_category    : 'deck',
                                                     owner           : mon.owner,
                                                     sort_type       : 'first',
                                                 });
+                                                if (iGameCardId) {
+                                                    bPicked = true;
+                                                } else {
+                                                    if (!bPicked) {
+                                                        throw new Error('デッキ切れ');
+                                                    }
+                                                    return;
+                                                }
                                                 g_field_data.cards[iGameCardId].pos_category = 'hand';
                                             }
                                         })();
@@ -1648,17 +1677,23 @@ new function () {
                                     break;
                                 case 1017:
                                     var mon = g_field_data.cards[q.target_id];
-                                    // レベルアップできず、アシストも持ってないモンスターにはレベルアップ権利を与えない
-                                    if (!game_field_reactions.isLvupOk(mon) && g_master_data.m_monster[mon.monster_id].skill.id != 11) {
-                                        throw new Error('invalid_target');
-                                    }
-                                    mon.lvup_standby += parseInt(q.param1);
+                                    var bAssist = false;
                                     if (g_master_data.m_monster[mon.monster_id].skill) {
                                         if (g_master_data.m_monster[mon.monster_id].skill.id == 11) {
-                                            g_field_data.lvup_assist = mon.lvup_standby;
-                                            mon.lvup_standby = 0;
+                                            bAssist = true;
                                         }
                                     }
+
+                                    if (bAssist) {
+                                        //g_field_data.lvup_assist += parseInt(q.param1);
+                                        g_field_data.lvup_assist += 1;
+                                    } else if (game_field_reactions.isLvupOk(mon)) {
+                                        mon.lvup_standby += parseInt(q.param1);
+                                    } else {
+                                        // レベルアップできず、アシストも持ってないモンスターにはレベルアップ権利を与えない
+                                        throw new Error('invalid_target');
+                                    }
+
                                     if (q.param2) {
                                         console.log('lvup_magic_flg set.');
                                         g_field_data.lvup_magic_flg = true;
@@ -1998,7 +2033,7 @@ new function () {
                                     if (mon.hp <= 0) {
                                         g_field_data.queues.push({
                                             actor_id        : mon.game_card_id,
-                                            log_message     : '',
+                                            log_message     : 'ペナルティによりマスター消滅',
                                             resolved_flg    : 0,
                                             priority        : 'system',
                                             queue_units : [{
@@ -2195,7 +2230,7 @@ new function () {
                                     if (iDelSt) {
                                         g_field_data.queues.push({
                                             actor_id            : mon.status[q.param1].param1,
-                                            log_message         : '',
+                                            log_message         : '対になっているモンスターのステータスも同時解除',
                                             resolved_flg        : 0,
                                             priority            : 'same_time',
                                             actor_anime_disable : true,
@@ -2248,7 +2283,7 @@ new function () {
                                     if (aSt.turn_count <= 0) {
                                         g_field_data.queues.push({
                                             actor_id        : mon.game_card_id,
-                                            log_message     : '',
+                                            log_message     : '効果時間が切れたため、ステータス解除',
                                             resolved_flg    : 0,
                                             priority        : 'system',
                                             queue_units : [{
@@ -2316,9 +2351,9 @@ new function () {
                                             aPicks.sort(function(v1, v2) {
                                                 return v1.sort_no - v2.sort_no;
                                             });
-                                            g_field_data.aSortingCards = [];
+                                            g_field_data.sorting_cards = [];
                                             for (var i = 0 ; i < 5 ; i++) {
-                                                g_field_data.aSortingCards.push(aPicks.shift());
+                                                g_field_data.sorting_cards.push(aPicks.shift());
                                             }
                                             break;
                                         case 'game_end_check':
@@ -2874,7 +2909,7 @@ new function () {
                     $.each(val.status, function(status_id, val2) {
                         g_field_data.queues.push({
                             actor_id        : null,
-                            log_message     : '',
+                            log_message     : 'ステータス継続時間を更新',
                             resolved_flg    : 0,
                             priority        : 'system',
                             queue_units : [{
@@ -2890,7 +2925,7 @@ new function () {
                 if (val.owner == 'my' && val.act_count < game_field_utility.getMaxActCount(val.monster_id) && !val.standby_flg) {
                     g_field_data.queues.push({
                         actor_id        : null,
-                        log_message     : '',
+                        log_message     : '行動してないので気合だめ',
                         resolved_flg    : 0,
                         priority        : 'system',
                         queue_units : [{

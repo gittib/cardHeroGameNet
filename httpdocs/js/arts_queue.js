@@ -197,7 +197,6 @@ arts_queue = (function () {
                     target_id       : aArgs.targets[0].game_card_id,
                     param1          : 1,
                     param2          : true,
-                    cost_flg        : true,
                 }];
                 var aMonsterData = g_master_data.m_monster[aArgs.field_data.cards[aArgs.targets[0].game_card_id].monster_id];
                 if (aMonsterData.next_monster_id) {
@@ -233,7 +232,6 @@ arts_queue = (function () {
                     target_id       : aArgs.targets[0].game_card_id,
                     param1          : 1,
                     param2          : true,
-                    cost_flg        : true,
                 }, {
                     queue_type_id   : 1019,
                     target_id       : aArgs.targets[0].game_card_id,

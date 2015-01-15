@@ -571,6 +571,11 @@ game_field_reactions = (function () {
                 }
             } else if (aCard.pos_category == 'field') {
                 if (aArgs.game_state == 'lvup_standby') {
+
+                    if (aCard.owner == 'enemy' && aCard.standby_flg) {
+                        throw new Error('standby monster');
+                    }
+
                     var aMonsterData = g_master_data.m_monster[aCard.monster_id];
                     var sCommandName = null;
                     if (0 < aCard.lvup_standby || 0 < g_field_data.lvup_assist) {
@@ -710,18 +715,19 @@ game_field_reactions = (function () {
                                 '</div>' +
                             '</div>';
                     } else {
-                        switch (g_master_data.m_monster[aCardData.monster_id].skill.id) {
-                            case 4:
-                            case 5:
-                                sCommandsHtml +=
-                                    '<div class="command_row" act_type="charge">' +
-                                        '気合だめ' +
-                                        '<div class="num_info">' +
-                                            sCost +
-                                        '</div>' +
-                                    '</div>';
-                                break;
-                        }
+                        // 気合溜めコマンドは禁止
+                        // switch (g_master_data.m_monster[aCardData.monster_id].skill.id) {
+                        //     case 4:
+                        //     case 5:
+                        //         sCommandsHtml +=
+                        //             '<div class="command_row" act_type="charge">' +
+                        //                 '気合だめ' +
+                        //                 '<div class="num_info">' +
+                        //                     sCost +
+                        //                 '</div>' +
+                        //             '</div>';
+                        //         break;
+                        // }
                         sCommandsHtml +=
                             '<div class="command_row" act_type="move">' +
                                 '移動' +
@@ -788,6 +794,9 @@ game_field_reactions = (function () {
         var aOption = aOption || {};
 
         if (aOption.bCheckLvupCnt && mon.lvup_standby <= 0 && g_field_data.lvup_assist <= 0) {
+            return false;
+        }
+        if (mon.standby_flg) {
             return false;
         }
         if (mon.status) {
