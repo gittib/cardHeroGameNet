@@ -4557,6 +4557,7 @@ new function () {
 
         setTimeout(function () {
             startingProc({
+                'first_turn_flg'    : ($('div[turn_num=1][turn_count=2]').size()),
             });
         }, 333);
 
@@ -5000,18 +5001,20 @@ new function () {
             }],
         });
 
-        g_field_data.queues.push({
-            actor_id        : null,
-            log_message     : 'カードを1枚ドロー',
-            resolved_flg    : 0,
-            priority        : 'standby_system',
-            queue_units : [{
-                queue_type_id   : 1011,
-                target_id       : myMasterId,
-                param1          : 'draw',
-                param2          : 1,
-            }],
-        });
+        if (!aArgs.first_turn_flg) {
+            g_field_data.queues.push({
+                actor_id        : null,
+                log_message     : 'カードを1枚ドロー',
+                resolved_flg    : 0,
+                priority        : 'standby_system',
+                queue_units : [{
+                    queue_type_id   : 1011,
+                    target_id       : myMasterId,
+                    param1          : 'draw',
+                    param2          : 1,
+                }],
+            });
+        }
 
         var keys = [
             'myMaster',
