@@ -36,7 +36,7 @@ $(function() {
         _changeDispMode($('.old_field_disp_select:first'));
     })();
 
-    $(".game_field_info").on("click", function() {
+    $(".game_field_info div.game_play.button").on("click", function() {
         if ($(this).find(".game_row").hasClass('mine')) {
             if (!confirm('あなたが投稿したフィールド図です。\n対戦相手の手札などネタバレになりますが、よろしいですか？')) {
                 return;

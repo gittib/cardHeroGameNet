@@ -343,7 +343,11 @@ _eos_;
 
 <div class="hidden_cards_info">
 <?php
-    echo "<div turn_num='{$aCardInfo['field_info']['turn']}' turn_count='{$aCardInfo['field_info']['turn_count']}'></div>";
+    $sFirstTrun = '1';
+    if ($this->bBefore) {
+        $sFirstTrun = '0';
+    }
+    echo "<div turn_num='{$aCardInfo['field_info']['turn']}' turn_count='{$aCardInfo['field_info']['turn_count']}' first_turn='{$sFirstTrun}'></div>";
 ?>
 </div>
 <script type="text/javascript">
@@ -356,4 +360,5 @@ function getQueueJson() {
 </script>
 <form name="form_current_field" method="post" action="/game/turn-end/">
 <input type="hidden" name="game_field_id" value="<?php echo $this->iGameFieldId; ?>" />
+<input type="hidden" name="referer" value="<?php echo $this->sReferer; ?>" />
 </form>

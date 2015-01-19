@@ -193,14 +193,24 @@
             }
         }
     }
+}
+
+div.card_name {
+    float: left;
+}
+
+div.close_button {
+    float: right;
+    padding: 2px;
+}
+
+#secondary_part {
 
     .sort_card_frame {
         $font_size : 18px;
 
         width: 100%;
-        border-top: solid 1px;
         border-bottom: solid 1px;
-        padding-top: 12px;
 
         .sort_card_title {
             border: solid 2px;
@@ -253,21 +263,10 @@
 
                 font-size:$font_size;
                 text-align: center;
+                cursor: pointer;
             }
         }
     }
-}
-
-div.card_name {
-    float: left;
-}
-
-div.close_button {
-    float: right;
-    padding: 2px;
-}
-
-#secondary_part {
 
     #card_info {
         $border_style: solid 2px;
@@ -360,17 +359,17 @@ div.close_button {
     div {
         margin: 20px;
         padding: 3px 0;
-        border: solid 2px;
+        border: solid 3px;
         font-size: 18px;
         text-align: center;
         cursor: pointer;
     }
 
     div.marigan_button {
-        $upper_line_color : #ffffdd;
+        $upper_line_color : #ffffee;
         $under_line_color : #888800;
 
-        background-color: #ffffee;
+        background-color: #ffffdd;
         border-top-color:    $upper_line_color;
         border-left-color:   $upper_line_color;
         border-right-color:  $under_line_color;
@@ -378,10 +377,10 @@ div.close_button {
     }
 
     div.cancel_button {
-        $upper_line_color : #ffdddd;
+        $upper_line_color : #ffeeee;
         $under_line_color : #880000;
 
-        background-color: #ffeeee;
+        background-color: #ffdddd;
         border-top-color:    $upper_line_color;
         border-left-color:   $upper_line_color;
         border-right-color:  $under_line_color;
@@ -389,12 +388,12 @@ div.close_button {
     }
 
     div.rollback_button {
-        $upper_line_color : #ffdddd;
+        $upper_line_color : #ffeeee;
         $under_line_color : #880000;
 
         display: none;
 
-        background-color: #ffeeee;
+        background-color: #ffdddd;
         border-top-color:    $upper_line_color;
         border-left-color:   $upper_line_color;
         border-right-color:  $under_line_color;
@@ -402,10 +401,10 @@ div.close_button {
     }
 
     div.execute_button {
-        $upper_line_color : #ddffdd;
+        $upper_line_color : #eeffee;
         $under_line_color : #008800;
 
-        background-color: #eeffee;
+        background-color: #ddffdd;
         border-top-color:    $upper_line_color;
         border-left-color:   $upper_line_color;
         border-right-color:  $under_line_color;
@@ -413,10 +412,10 @@ div.close_button {
     }
 
     div.turn_end_button {
-        $upper_line_color : #ddddff;
+        $upper_line_color : #eeeeff;
         $under_line_color : #000088;
 
-        background-color: #eeeeff;
+        background-color: #ddddff;
         border-top-color:    $upper_line_color;
         border-left-color:   $upper_line_color;
         border-right-color:  $under_line_color;

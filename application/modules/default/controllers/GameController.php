@@ -39,23 +39,40 @@ class GameController extends Zend_Controller_Action
         $this->_layout->canonical   = '/game/';
         $this->_layout->description = 'カードヒーローを実際に遊んで、1ターン分の結果を投稿できます。投稿されたフィールドに返信する形で遊ぶこともできます。';
         $nPage = $request->getParam('page_no');
+        $bLast = $request->getParam('bLast');
         $aCardInfoArray = $this->_model->getFieldDetail(array(
             'page_no'           => $nPage,
             'open_flg'          => 1,
+            'new_arrival'       => $bLast,
             'allow_no_field'    => 1,
         ));
         $nFields = $this->_model->getFieldCount(array(
             'page_no'           => $nPage,
             'open_flg'          => 1,
+            'new_arrival'       => $bLast,
         ));
+        $bLast = false;
+        if ($request->getParam('bLast')) {
+            $bLast = true;
+        }
+
         $this->view->assign('aCardInfoArray', $aCardInfoArray);
         $this->view->assign('nFields', $nFields);
         $this->view->assign('nPage', $nPage);
+        $this->view->assign('bLast', $bLast);
 
         $bFieldSended = $request->getParam('field_sended');
         if (isset($bFieldSended) && $bFieldSended) {
             $this->view->assign('bFieldSended', true);
         }
+    }
+
+    public function lastAction()
+    {
+        $request = $this->getRequest();
+        $request->setParam('bLast', true);
+
+        $this->forward('index');
     }
 
     public function newAction()
@@ -112,6 +129,7 @@ class GameController extends Zend_Controller_Action
         $request = $this->getRequest();
         $iGameFieldId   = $request->getParam('game_field_id');
         $iPage          = $request->getParam('page_no');
+        $sReferer       = $request->getParam('referer');
         $this->_stylesheet[] = '/css/game_list.css';
         $this->_stylesheet[] = '/css/deck_list.css';
         $this->_stylesheet[] = '/css/game_receive.css';
@@ -136,6 +154,7 @@ class GameController extends Zend_Controller_Action
         $this->view->assign('aDeckList', $aDeckList);
         $this->view->assign('iGameFieldId', $iGameFieldId);
         $this->view->assign('bGameStart', true);
+        $this->view->assign('sReferer', $sReferer);
         $this->view->assign('sDispMessage', '使用するデッキを選んでください。');
         $this->render('deck/index', null, true);
     }
@@ -166,12 +185,13 @@ class GameController extends Zend_Controller_Action
 
         $request = $this->getRequest();
         $iGameFieldId = $request->getParam('game_field_id');
-        $this->_stylesheet[] = '/css/game_field.css';
+        $sReferer = $request->getParam('referer');
+        $this->_stylesheet[] = '/css/game_field.css?ver=20150118';
 
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/js_debug.js';
             $this->_javascript[] = '/js/master_data.js';
-            //*
+            /*
             $this->_javascript[] = '/js/game_field.min.js';
             /*/
             $this->_javascript[] = '/js/game_field_utility.js';
@@ -182,7 +202,7 @@ class GameController extends Zend_Controller_Action
             //*/
         } else {
             $this->_javascript[] = '/js/master_data.js';
-            $this->_javascript[] = '/js/game_field.min.js?ver=20150115';
+            $this->_javascript[] = '/js/game_field.min.js?ver=20150118';
         }
 
         $iBeforeFieldId = $this->_model->getBeforeFieldId($iGameFieldId);
@@ -203,6 +223,7 @@ class GameController extends Zend_Controller_Action
         $this->view->assign('aUserInfo', Common::checkLogin());
         $this->view->assign('iGameFieldId', $iGameFieldId);
         $this->view->assign('bBefore', ($iGameFieldId != $iBeforeFieldId));
+        $this->view->assign('sReferer', $sReferer);
         $this->view->assign('aQueue', $aQueue);
     }
 
@@ -212,6 +233,7 @@ class GameController extends Zend_Controller_Action
 
         $request = $this->getRequest();
         $iGameFieldId = $request->getParam('game_field_id');
+        $sReferer = $request->getParam('referer');
         $this->_stylesheet[] = '/css/turn_end.css';
         $this->_layout->title = '投稿完了';
         $this->_layout->noindex = true;
@@ -223,8 +245,15 @@ class GameController extends Zend_Controller_Action
             'field_data'    => $aFieldData,
         ));
 
+        $sUrl = '/game/';
+        switch ($sReferer) {
+            case 'last':
+                $sUrl = '/game/last/';
+                break;
+        }
+
         $this->_redirect(
-            '/game/',
+            $sUrl,
             array('code' => 301)
         );
         exit();

@@ -175,19 +175,19 @@ game_field_reactions = (function () {
             $('.lvup_checking').removeClass('lvup_checking');
 
             (function _getSortCardHtml() {
-                if (checkGameState() != 'sort_card' || !g_field_data.aSortingCards || g_field_data.aSortingCards.length <= 0) {
+                if (checkGameState() != 'sort_card' || !g_field_data.sorting_cards || g_field_data.sorting_cards.length <= 0) {
                     $('.sort_card_frame').remove();
                     return;
                 } else if ($('.sort_card_frame').size() <= 0) {
-                    $('#hand_card').after('<div class="sort_card_frame"></div>');
+                    $('#secondary_part').prepend('<div class="sort_card_frame"></div>');
                 }
 
-                g_field_data.aSortingCards.sort(function(v1,v2) {
+                g_field_data.sorting_cards.sort(function(v1,v2) {
                     return v1.sort_no - v2.sort_no;
                 });
                 var sHtml = '<div class="sort_card_title">Sort Card</div>';
                 var sNext = ' <span class="next_draw">NEXT DRAW</span>';
-                $.each(g_field_data.aSortingCards, function(i,val) {
+                $.each(g_field_data.sorting_cards, function(i,val) {
                     var aCardData = g_master_data.m_card[g_field_data.cards[val.game_card_id].card_id];
                     var sImgSrc = game_field_utility.getImg('/images/card/'+ aCardData.image_file_name);
                     var sClass = 'sort_card_target clearfix';

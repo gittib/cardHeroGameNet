@@ -63,6 +63,15 @@ body {
             }
         }
 
+        $myTextShadow:  white  1px  1px 0px,
+                        white -1px  1px 0px,
+                        white  1px -1px 0px,
+                        white -1px -1px 0px,
+                        white  1px  0px 0px,
+                        white -1px  0px 0px,
+                        white  0px  1px 0px,
+                        white  0px -1px 0px;
+
         table.game_field {
             height: 100%;
             width: 100%;
@@ -118,6 +127,49 @@ body {
             td.explain {
                 width:50%;
                 vertical-align:top;
+
+                div.player_name {
+                    text-align: left;
+                }
+
+                div.magic_effects {
+                    margin-top: 1em;
+                    text-align: left;
+                }
+
+                div.button {
+                    margin: 32px 5px;
+                    padding: 3px 0;
+                    cursor: pointer;
+
+                    &.game_play {
+                        $border_width: 3px;
+                        $border_tl: $border_width solid #ffeeee;
+                        $border_br: $border_width solid #880000;
+
+                        border-top: $border_tl;
+                        border-left: $border_tl;
+                        border-bottom: $border_br;
+                        border-right: $border_br;
+                        background-color: #ffcccc;
+
+                        text-shadow: $myTextShadow;
+                    }
+
+                    &.view_log {
+                        $border_width: 3px;
+                        $border_tl: $border_width solid #eeeeff;
+                        $border_br: $border_width solid #000088;
+
+                        border-top: $border_tl;
+                        border-left: $border_tl;
+                        border-bottom: $border_br;
+                        border-right: $border_br;
+                        background-color: #ccccff;
+
+                        text-shadow: $myTextShadow;
+                    }
+                }
             }
         }
 
@@ -131,15 +183,6 @@ body {
                 width: 49px;
             }
         }
-
-        $myTextShadow:  white  1px  1px 0px,
-                        white -1px  1px 0px,
-                        white  1px -1px 0px,
-                        white -1px -1px 0px,
-                        white  1px  0px 0px,
-                        white -1px  0px 0px,
-                        white  0px  1px 0px,
-                        white  0px -1px 0px;
 
         &[disp_mode=small] {
             background-color: lightgray;
@@ -192,6 +235,10 @@ body {
 
                     div {
                         min-height: 5px;
+
+                        &.button {
+                            margin: 24px 5px;
+                        }
                     }
 
                     span.charge {

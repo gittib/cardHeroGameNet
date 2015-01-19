@@ -213,7 +213,23 @@ foreach ($aPosId as $i => $aLine) {
         echo $aMonsterData[$posId];
     }
     if ($i == 0) {
-        echo "            <td colspan=3 rowspan=4 class=\"explain\">{$sPlayers}<br />&nbsp;<br />{$sExplain}</td>\n";
+        echo <<<_eos_
+            <td colspan=3 rowspan=4 class="explain">
+                <div class="player_name">
+                    {$sPlayers}
+                </div>
+                <div class="magic_effects">
+                    {$sExplain}
+                </div>
+                <div class="button game_play">
+                    このフィールドで遊ぶ
+                </div>
+                <div class="button view_log">
+                    プレイログを見る
+                </div>
+            </td>
+
+_eos_;
     }
     echo "        </tr>\n";
 }

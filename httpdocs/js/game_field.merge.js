@@ -740,19 +740,19 @@ game_field_reactions = (function () {
             $('.lvup_checking').removeClass('lvup_checking');
 
             (function _getSortCardHtml() {
-                if (checkGameState() != 'sort_card' || !g_field_data.aSortingCards || g_field_data.aSortingCards.length <= 0) {
+                if (checkGameState() != 'sort_card' || !g_field_data.sorting_cards || g_field_data.sorting_cards.length <= 0) {
                     $('.sort_card_frame').remove();
                     return;
                 } else if ($('.sort_card_frame').size() <= 0) {
-                    $('#hand_card').after('<div class="sort_card_frame"></div>');
+                    $('#secondary_part').prepend('<div class="sort_card_frame"></div>');
                 }
 
-                g_field_data.aSortingCards.sort(function(v1,v2) {
+                g_field_data.sorting_cards.sort(function(v1,v2) {
                     return v1.sort_no - v2.sort_no;
                 });
                 var sHtml = '<div class="sort_card_title">Sort Card</div>';
                 var sNext = ' <span class="next_draw">NEXT DRAW</span>';
-                $.each(g_field_data.aSortingCards, function(i,val) {
+                $.each(g_field_data.sorting_cards, function(i,val) {
                     var aCardData = g_master_data.m_card[g_field_data.cards[val.game_card_id].card_id];
                     var sImgSrc = game_field_utility.getImg('/images/card/'+ aCardData.image_file_name);
                     var sClass = 'sort_card_target clearfix';
@@ -4557,7 +4557,7 @@ new function () {
 
         setTimeout(function () {
             startingProc({
-                'first_turn_flg'    : ($('div[turn_num=1][turn_count=2]').size()),
+                'first_turn_flg'    : ($('div[first_turn_flg]').attr('first_turn_flg')),
             });
         }, 333);
 
@@ -4871,6 +4871,7 @@ new function () {
         $(document).on('click', '#buttons_frame div.turn_end_button', function () {
             if (g_field_data.already_finished) {
                 alert('決着がついているので、ターンエンドはできません。');
+            } else if (game_field_reactions.checkGameState() == 'sort_card') {
             } else {
                 if (confirm("ターンエンドしてもよろしいですか？")) {
                     turnEndProc();

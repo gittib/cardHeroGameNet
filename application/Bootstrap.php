@@ -35,7 +35,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         // デッキ編集
         $route = new Zend_Controller_Router_Route_Regex(
-            'deck/edit(/(\d+))?/?',
+            'deck/edit(/(\d+))?',
             array(
                 'controller'    =>  'deck',
                 'action'        =>  'edit',
@@ -47,9 +47,23 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         );
         $router->addRoute('deck_edit', $route);
 
+        // 返信の無いゲームフィールド一覧
+        $route = new Zend_Controller_Router_Route_Regex(
+            'game/last(/(\d+))?',
+            array(
+                'controller'    =>  'game',
+                'action'        =>  'last',
+                2               =>  1,
+            ),
+            array(
+                2   => 'page_no',
+            )
+        );
+        $router->addRoute('game_last', $route);
+
         // ゲームフィールド一覧
         $route = new Zend_Controller_Router_Route_Regex(
-            'game(/(\d+))?/?',
+            'game(/(\d+))?',
             array(
                 'controller'    =>  'game',
                 'action'        =>  'index',
@@ -63,7 +77,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         // ゲーム受領
         $route = new Zend_Controller_Router_Route_Regex(
-            'game/receive/(\d+)(/(\d+))?/?',
+            'game/receive/(\d+)(/(\d+))?',
             array(
                 'controller'    =>  'game',
                 'action'        =>  'receive',
@@ -80,7 +94,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         // ゲームプレイ
         $route = new Zend_Controller_Router_Route_Regex(
-            'game/field/(\d+)/?',
+            'game/field/(\d+)',
             array(
                 'controller'    =>  'game',
                 'action'        =>  'field',

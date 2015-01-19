@@ -42,7 +42,7 @@ new function () {
 
         setTimeout(function () {
             startingProc({
-                'first_turn_flg'    : ($('div[turn_num=1][turn_count=2]').size()),
+                'first_turn_flg'    : ($('div[first_turn_flg]').attr('first_turn_flg')),
             });
         }, 333);
 
@@ -356,6 +356,7 @@ new function () {
         $(document).on('click', '#buttons_frame div.turn_end_button', function () {
             if (g_field_data.already_finished) {
                 alert('決着がついているので、ターンエンドはできません。');
+            } else if (game_field_reactions.checkGameState() == 'sort_card') {
             } else {
                 if (confirm("ターンエンドしてもよろしいですか？")) {
                     turnEndProc();

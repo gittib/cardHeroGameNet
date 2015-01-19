@@ -60,7 +60,9 @@ $sPageLinkTag .= "</div>\n";
 // ページングリンク生成処理終了
 //
 
-$sSelectOldFieldDispray = <<<_eos_
+$sSelectOldFieldDispray = '';
+if (!$this->bLast) {
+    $sSelectOldFieldDispray = <<<_eos_
 <div class="old_field_disp_select_frame">
     返信済みフィールド：
     <select class="old_field_disp_select">
@@ -71,6 +73,7 @@ $sSelectOldFieldDispray = <<<_eos_
 </div>
 
 _eos_;
+}
 ?>
 
 <div id="game_field_list_frame">
@@ -87,6 +90,9 @@ if (empty($this->aCardInfoArray)) {
         $sHref = "/game/receive/{$aFieldInfo['game_field_id']}/";
         if (isset($aFieldInfo['started_flg']) && $aFieldInfo['started_flg']) {
             $sHref = "/game/field/{$aFieldInfo['game_field_id']}/";
+        }
+        if ($this->bLast) {
+            $sHref .= '?referer=last';
         }
         echo <<<_eos_
 <div class="game_field_info">

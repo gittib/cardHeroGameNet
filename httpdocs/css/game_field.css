@@ -114,44 +114,6 @@
     border-color: #eeee00; }
   #primary_part #hand_card div.target img {
     border-color: #ff0000; }
-#primary_part .sort_card_frame {
-  width: 100%;
-  border-top: solid 1px;
-  border-bottom: solid 1px;
-  padding-top: 12px; }
-  #primary_part .sort_card_frame .sort_card_title {
-    border: solid 2px;
-    border-bottom: solid 1px; }
-  #primary_part .sort_card_frame .sort_card_target {
-    border: solid 1px;
-    border-left: solid 2px;
-    border-right: solid 2px;
-    font-size: 18px; }
-    #primary_part .sort_card_frame .sort_card_target.selected {
-      background-color: #ff0; }
-    #primary_part .sort_card_frame .sort_card_target div {
-      float: left;
-      font-size: 18px; }
-      #primary_part .sort_card_frame .sort_card_target div.dtl_link {
-        float: right;
-        margin-right: 3px; }
-      #primary_part .sort_card_frame .sort_card_target div span.next_draw {
-        font-size: 12px; }
-    #primary_part .sort_card_frame .sort_card_target .pict {
-      width: 50px;
-      height: 50px; }
-  #primary_part .sort_card_frame .sort_end_button_frame {
-    border: solid 2px;
-    border-top: solid 1px;
-    border-bottom: solid 1px; }
-    #primary_part .sort_card_frame .sort_end_button_frame .sort_end_button {
-      margin: 12px;
-      border: solid #ddddff;
-      border-right: solid blue;
-      border-bottom: solid blue;
-      background-color: #88f;
-      font-size: 18px;
-      text-align: center; }
 
 div.card_name {
   float: left; }
@@ -160,6 +122,43 @@ div.close_button {
   float: right;
   padding: 2px; }
 
+#secondary_part .sort_card_frame {
+  width: 100%;
+  border-bottom: solid 1px; }
+  #secondary_part .sort_card_frame .sort_card_title {
+    border: solid 2px;
+    border-bottom: solid 1px; }
+  #secondary_part .sort_card_frame .sort_card_target {
+    border: solid 1px;
+    border-left: solid 2px;
+    border-right: solid 2px;
+    font-size: 18px; }
+    #secondary_part .sort_card_frame .sort_card_target.selected {
+      background-color: #ff0; }
+    #secondary_part .sort_card_frame .sort_card_target div {
+      float: left;
+      font-size: 18px; }
+      #secondary_part .sort_card_frame .sort_card_target div.dtl_link {
+        float: right;
+        margin-right: 3px; }
+      #secondary_part .sort_card_frame .sort_card_target div span.next_draw {
+        font-size: 12px; }
+    #secondary_part .sort_card_frame .sort_card_target .pict {
+      width: 50px;
+      height: 50px; }
+  #secondary_part .sort_card_frame .sort_end_button_frame {
+    border: solid 2px;
+    border-top: solid 1px;
+    border-bottom: solid 1px; }
+    #secondary_part .sort_card_frame .sort_end_button_frame .sort_end_button {
+      margin: 12px;
+      border: solid #ddddff;
+      border-right: solid blue;
+      border-bottom: solid blue;
+      background-color: #88f;
+      font-size: 18px;
+      text-align: center;
+      cursor: pointer; }
 #secondary_part #card_info {
   border: solid 2px; }
   #secondary_part #card_info #card_info_frame div.card_info_title {
@@ -206,39 +205,39 @@ div.close_button {
   #buttons_frame div {
     margin: 20px;
     padding: 3px 0;
-    border: solid 2px;
+    border: solid 3px;
     font-size: 18px;
     text-align: center;
     cursor: pointer; }
   #buttons_frame div.marigan_button {
-    background-color: #ffffee;
-    border-top-color: #ffffdd;
-    border-left-color: #ffffdd;
+    background-color: #ffffdd;
+    border-top-color: #ffffee;
+    border-left-color: #ffffee;
     border-right-color: #888800;
     border-bottom-color: #888800; }
   #buttons_frame div.cancel_button {
-    background-color: #ffeeee;
-    border-top-color: #ffdddd;
-    border-left-color: #ffdddd;
+    background-color: #ffdddd;
+    border-top-color: #ffeeee;
+    border-left-color: #ffeeee;
     border-right-color: #880000;
     border-bottom-color: #880000; }
   #buttons_frame div.rollback_button {
     display: none;
-    background-color: #ffeeee;
-    border-top-color: #ffdddd;
-    border-left-color: #ffdddd;
+    background-color: #ffdddd;
+    border-top-color: #ffeeee;
+    border-left-color: #ffeeee;
     border-right-color: #880000;
     border-bottom-color: #880000; }
   #buttons_frame div.execute_button {
-    background-color: #eeffee;
-    border-top-color: #ddffdd;
-    border-left-color: #ddffdd;
+    background-color: #ddffdd;
+    border-top-color: #eeffee;
+    border-left-color: #eeffee;
     border-right-color: #008800;
     border-bottom-color: #008800; }
   #buttons_frame div.turn_end_button {
-    background-color: #eeeeff;
-    border-top-color: #ddddff;
-    border-left-color: #ddddff;
+    background-color: #ddddff;
+    border-top-color: #eeeeff;
+    border-left-color: #eeeeff;
     border-right-color: #000088;
     border-bottom-color: #000088; }
 

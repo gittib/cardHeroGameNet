@@ -14,6 +14,7 @@ class model_Game {
      *  @param aOption:
      *      game_field_id   : 抽出対象フィールドのID
      *      open_flg        : t_game_fieldのopen_flgを指定
+     *      new_arrival     : 返信されていないフィールドのみ抽出する
      */
     public function getFieldCount($aOption = array())
     {
@@ -21,7 +22,7 @@ class model_Game {
             ->from(
                 't_game_field',
                 array(
-                    'game_fields'   => new Zend_Db_Expr("count(game_field_id)"),
+                    'game_fields'   => new Zend_Db_Expr("count(t_game_field.game_field_id)"),
                 )
             )
             ->where('t_game_field.del_flg = ?', 0)
@@ -32,6 +33,13 @@ class model_Game {
         if (isset($aOption['open_flg']) && $aOption['open_flg'] != '') {
             $selFieldCnt->where('t_game_field.open_flg = ?', $aOption['open_flg']);
         }
+        if (isset($aOption['new_arrival']) && $aOption['new_arrival'] != '') {
+            $selFieldCnt->join(
+                array('vlf' => 'v_last_field'),
+                'vlf.game_field_id = t_game_field.game_field_id',
+                array()
+            );
+        }
         return $this->_db->fetchOne($selFieldCnt);
     }
 
@@ -40,6 +48,7 @@ class model_Game {
      *      game_field_id           : 抽出対象フィールドのID
      *      page_no                 : ページング用ページ番号を指定
      *      open_flg                : t_game_fieldのopen_flgを指定
+     *      new_arrival             : 返信されていないフィールドのみ抽出する
      *      allow_no_field          : フィールドが抽出できなくても例外を投げない
      *      select_standby_field    : 対戦相手の存在するフィールドは抽出禁止
      *
@@ -70,22 +79,27 @@ class model_Game {
         if (isset($aOption['open_flg']) && $aOption['open_flg'] != '') {
             $selField->where('t_game_field.open_flg = ?', $aOption['open_flg']);
         }
+        if (isset($aOption['new_arrival']) && $aOption['new_arrival'] != '') {
+            $selField->join(
+                array('vlf' => 'v_last_field'),
+                'vlf.game_field_id = t_game_field.game_field_id',
+                array()
+            );
+        }
 
         $selResponced = $this->_db->select()
-            ->distinct()
             ->from(
                 array('res' => 't_game_field'),
                 array(
                     'game_field_id',
                 )
             )
-            ->join(
-                array('path' => 't_game_field'),
-                "path.field_id_path like '%' || res.game_field_id || '%'",
+            ->joinLeft(
+                array('vlf' => 'v_last_field'),
+                "vlf.game_field_id = res.game_field_id",
                 array()
             )
-            ->where('path.open_flg = ?', 1)
-            ->where('path.del_flg != ?', 1)
+            ->where('vlf.game_field_id is null')
             ;
 
         $sel = $this->_db->select()
@@ -94,6 +108,7 @@ class model_Game {
                 array(
                     'game_field_id',
                     'field_id_path',
+                    'turn_count' => new Zend_Db_Expr("length(regexp_replace(field.field_id_path, '[^-]', '', 'g')) + 2"),
                     'turn',
                     'user_id',
                     'stone1',
@@ -153,8 +168,6 @@ class model_Game {
             if ($val['opponent_name'] == '') {
                 $val['opponent_name'] = 'Guest';
             }
-            $aBeforeFields = explode('-', $val['field_id_path']);
-            $val['turn_count'] = count($aBeforeFields) + 1;
             $val['title_str'] = '';
             $iGameFieldId = $val['game_field_id'];
             $aRet[$iGameFieldId] = array(
@@ -901,7 +914,7 @@ class model_Game {
             'monster_id'        => $arr['master_monster_id'],
             'hp'                => 10,
         );
-        for ($i = 0 ; $i < 5 ; $i++) {
+        for ($i = 0 ; $i < 4 ; $i++) {
             $aCardInfo['hand_cards'][] = array_pop($aCardInfo['deck_cards']);
         }
 
