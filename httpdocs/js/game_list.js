@@ -1,5 +1,10 @@
 $(function() {
+
     function _changeDispMode (oSelect) {
+        if (oSelect.size() <= 0) {
+            return;
+        }
+
         var sSelect = oSelect.val();
         $(".old_field_disp_select").each(function() {
             $(this).val(sSelect);
@@ -18,6 +23,12 @@ $(function() {
         try {
             sessionStorage.setItem('old_field_disp_mode', sSelect);
         } catch (e) {}
+    }
+
+    if ($('div.pict.standby img').size()) {
+        setInterval(function() {
+            $('div.pict.standby img').toggle();
+        }, 1000);
     }
 
     (function _initSelect() {
@@ -45,8 +56,8 @@ $(function() {
         document.location = $(this).closest('div.game_field_info').find('div.field_title').find('a').attr('href');
     });
 
-    $(".game_field_info .field_title a").on('click', function(e) {
-        e.preventDefault();
+    $(".game_field_info div.view_log.button").on("click", function() {
+        document.location = '/game/kifu/' + $(this).attr('game_field_id') + '/';
     });
 
     $(".old_field_disp_select").on("change", function() {

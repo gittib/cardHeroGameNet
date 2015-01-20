@@ -36,7 +36,6 @@ class GameController extends Zend_Controller_Action
         $this->_javascript[] = '/js/game_list.js';
         $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_layout->title       = 'ゲームフィールド一覧';
-        $this->_layout->canonical   = '/game/';
         $this->_layout->description = 'カードヒーローを実際に遊んで、1ターン分の結果を投稿できます。投稿されたフィールドに返信する形で遊ぶこともできます。';
         $nPage = $request->getParam('page_no');
         $bLast = $request->getParam('bLast');
@@ -54,6 +53,8 @@ class GameController extends Zend_Controller_Action
         $bLast = false;
         if ($request->getParam('bLast')) {
             $bLast = true;
+            $this->_layout->title = '未返信フィールド一覧';
+            $this->_layout->description = '中断しているフィールド一覧です。あなたの返信が思わぬ戦略につながるかも？';
         }
 
         $this->view->assign('aCardInfoArray', $aCardInfoArray);
@@ -73,6 +74,29 @@ class GameController extends Zend_Controller_Action
         $request->setParam('bLast', true);
 
         $this->forward('index');
+    }
+
+    public function kifuAction()
+    {
+        $this->_getModel();
+
+        $request = $this->getRequest();
+        $iGameFieldId = $request->getParam('game_field_id');
+        $this->_stylesheet[] = '/css/game_list.css';
+        $this->_javascript[] = '/js/game_list.js';
+        $this->_javascript[] = '/js/img_delay_load.min.js';
+        $this->_layout->title       = "対戦棋譜[{$iGameFieldId}]";
+        $this->_layout->description = "[{$iGameFieldId}]のフィールドが組み上がるまでの戦況を記した一覧です。対戦の反省や戦術研究にどうぞ。";
+        $bFinished = $this->_model->checkFinished($iGameFieldId);
+        $aCardInfoArray = $this->_model->getFieldDetail(array(
+            'last_game_field_id'    => $iGameFieldId,
+            'open_flg'              => 1,
+        ));
+
+        $this->view->assign('aCardInfoArray', $aCardInfoArray);
+        $this->view->assign('iGameFieldId', $iGameFieldId);
+        $this->view->assign('bKifu', true);
+        $this->view->assign('bFinished', $bFinished);
     }
 
     public function newAction()

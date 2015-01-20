@@ -44,8 +44,38 @@ class model_Game {
     }
 
     /**
+     *  @param iGameFieldId : 抽出対象フィールドのID
+     *
+     *  @return trueだったら終了してる
+     */
+    public function checkFinished($iGameFieldId)
+    {
+        $sel = $this->_db->select()
+            ->from(
+                array('tgc' => 't_game_card'),
+                array(
+                    'cnt'   => new Zend_Db_Expr("count(*)"),
+                )
+            )
+            ->join(
+                array('mc' => 'm_card'),
+                'mc.card_id = tgc.card_id',
+                array()
+            )
+            ->where('tgc.game_field_id = ?', $iGameFieldId)
+            ->where('tgc.position_category = ?', 'used')
+            ->where('mc.category = ?', 'master');
+        $rslt = $this->_db->fetchOne($sel);
+        if ($rslt <= 0) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      *  @param aOption:
      *      game_field_id           : 抽出対象フィールドのID
+     *      last_game_field_id      : 指定されたID及びfield_id_pathに連なるIDを拾ってくる
      *      page_no                 : ページング用ページ番号を指定
      *      open_flg                : t_game_fieldのopen_flgを指定
      *      new_arrival             : 返信されていないフィールドのみ抽出する
@@ -70,6 +100,20 @@ class model_Game {
                 'upd_date desc',
                 'game_field_id desc',
             ));
+        if (isset($aOption['last_game_field_id']) && $aOption['last_game_field_id'] != '') {
+            $sub = $this->_db->select()
+                ->from(
+                    't_game_field',
+                    array(
+                        'field_id_path' => new Zend_Db_Expr("field_id_path || '-' || game_field_id"),
+                    )
+                )
+                ->where('game_field_id = ?', $aOption['last_game_field_id']);
+            $sFieldIds = $this->_db->fetchOne($sub);
+            $aFieldIds = explode('-', $sFieldIds);
+
+            $selField->where('t_game_field.game_field_id in(?)', $aFieldIds);
+        }
         if (isset($aOption['game_field_id']) && $aOption['game_field_id'] != '') {
             $selField->where('t_game_field.game_field_id in(?)', $aOption['game_field_id']);
         }
@@ -101,6 +145,17 @@ class model_Game {
             )
             ->where('vlf.game_field_id is null')
             ;
+
+        $aOrder = array(
+            'field.upd_date desc',
+            'game_field_id desc',
+        );
+        if (isset($aOption['last_game_field_id']) && $aOption['last_game_field_id'] != '') {
+            $aOrder = array(
+                'field.upd_date',
+                'game_field_id',
+            );
+        }
 
         $sel = $this->_db->select()
             ->from(
@@ -152,10 +207,7 @@ class model_Game {
             )
             ->where('field.del_flg = 0')
             ->where('field.game_field_id in(?)', $selField)
-            ->order(array(
-                'field.upd_date desc',
-                'game_field_id desc',
-            ));
+            ->order($aOrder);
         $rslt = $this->_db->fetchAll($sel);
         if (count($rslt) <= 0 && !isset($aOption['allow_no_field'])) {
             throw new Zend_Controller_Action_Exception('Field data not found', 404);
@@ -206,6 +258,7 @@ class model_Game {
                     'card_id',
                     'owner',
                     'position_category',
+                    'finished_flg'      => new Zend_Db_Expr("case when card.position_category = 'used' and mc.category = 'master' then 1 else 0 end"),
                 )
             )
             ->join(
@@ -292,6 +345,9 @@ class model_Game {
                     $aRet[$iGameFieldId][$sPosCategory][$iGameCardId] = $aTmpRow;
                     if ($val['owner'] != 1) {
                         $aRet[$iGameFieldId]['field_info']['started_flg'] = true;
+                    }
+                    if ($val['finished_flg']) {
+                        $aRet[$iGameFieldId]['field_info']['finished_flg'] = true;
                     }
                 }
                 $aTmpRow = array(

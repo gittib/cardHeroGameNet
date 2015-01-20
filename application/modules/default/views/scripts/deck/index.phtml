@@ -38,6 +38,11 @@ foreach ($aPageInfo as $key => $val) {
 }
 $sPageInfoHtml .= ' ></div>';
 
+$sRef = '';
+if (isset($this->bLast) && $this->bLast) {
+    $sRef = '?referer=last';
+}
+
 $sDeckListHtml = '<div id="deck_list_frame" class="clearfix">';
 foreach ($this->aDeckList as $val) {
     $deckId = $val['deck_id'];
@@ -45,7 +50,7 @@ foreach ($this->aDeckList as $val) {
     if (isset($this->bGameStandby) && $this->bGameStandby) {
         $sDeckLink = <<<_eos_
     <div class="edit_link clearfix">
-        <form action="/game/standby/" method="post">
+        <form action="/game/standby/{$sRef}" method="post">
             <input type="submit" value="このデッキを使ってゲームを始める" />
             <input type="hidden" name="deck_id" value="{$deckId}" />
         </form>
@@ -55,7 +60,7 @@ _eos_;
     } else if (isset($this->bGameStart) && $this->bGameStart) {
         $sDeckLink = <<<_eos_
     <div class="edit_link clearfix">
-        <form action="/game/start/" method="post">
+        <form action="/game/start/{$sRef}" method="post">
             <input type="submit" value="このデッキを使ってゲームを受ける" />
             <input type="hidden" name="game_field_id" value="{$this->iGameFieldId}" />
             <input type="hidden" name="deck_id" value="{$deckId}" />

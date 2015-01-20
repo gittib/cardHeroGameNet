@@ -347,7 +347,6 @@ arts_queue = (function () {
             case 1015:
                 var aMonsterInfo = aArgs.field_data.cards[aArgs.actor_id];
                 var iMaxHP = game_field_utility.getMaxHP(aMonsterInfo);
-                alert('iMaxHP:'+iMaxHP);
                 var aRet = [{
                     queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
                     target_id       : aArgs.targets[0].game_card_id,
@@ -595,9 +594,15 @@ arts_queue = (function () {
                         pow += g_master_data.m_monster[val.monster_id].attack.power;
                         // ドリルブレイクの時はP効果の云々を自前で処理する
                         $.each(val.status, function(sid, stval) {
-                            switch (sid) {
-                                case 101:
+                            switch (Number(sid)) {
                                 case 102:
+                                    aRet.push({
+                                        queue_type_id   : 1006,
+                                        target_id       : val.game_card_id,
+                                        param1          : 1,
+                                    });
+                                    // breakは書かない
+                                case 101:
                                     pow++;
                                     break;
                                 case 103:

@@ -47,6 +47,20 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         );
         $router->addRoute('deck_edit', $route);
 
+        // 棋譜的な一覧
+        $route = new Zend_Controller_Router_Route_Regex(
+            'game/kifu(/(\d+))?',
+            array(
+                'controller'    =>  'game',
+                'action'        =>  'kifu',
+                2               =>  1,
+            ),
+            array(
+                2   => 'game_field_id',
+            )
+        );
+        $router->addRoute('game_kifu', $route);
+
         // 返信の無いゲームフィールド一覧
         $route = new Zend_Controller_Router_Route_Regex(
             'game/last(/(\d+))?',

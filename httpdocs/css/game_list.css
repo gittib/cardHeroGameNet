@@ -10,6 +10,9 @@ body {
   max-width: 640px;
   margin-left: auto;
   margin-right: auto; }
+  #game_field_list_frame div.game_list_link {
+    margin: 21px auto;
+    text-align: center; }
   #game_field_list_frame .old_field_disp_select_frame {
     margin: 15px;
     margin-bottom: 0; }
@@ -83,18 +86,18 @@ body {
           padding: 3px 0;
           cursor: pointer; }
           #game_field_list_frame .game_row table.game_field td.explain div.button.game_play {
-            border-top: 3px solid #ffeeee;
-            border-left: 3px solid #ffeeee;
-            border-bottom: 3px solid #880000;
-            border-right: 3px solid #880000;
-            background-color: #ffcccc;
-            text-shadow: white 1px 1px 0px, white -1px 1px 0px, white 1px -1px 0px, white -1px -1px 0px, white 1px 0px 0px, white -1px 0px 0px, white 0px 1px 0px, white 0px -1px 0px; }
-          #game_field_list_frame .game_row table.game_field td.explain div.button.view_log {
             border-top: 3px solid #eeeeff;
             border-left: 3px solid #eeeeff;
             border-bottom: 3px solid #000088;
             border-right: 3px solid #000088;
             background-color: #ccccff;
+            text-shadow: white 1px 1px 0px, white -1px 1px 0px, white 1px -1px 0px, white -1px -1px 0px, white 1px 0px 0px, white -1px 0px 0px, white 0px 1px 0px, white 0px -1px 0px; }
+          #game_field_list_frame .game_row table.game_field td.explain div.button.view_log {
+            border-top: 3px solid #eeffee;
+            border-left: 3px solid #eeffee;
+            border-bottom: 3px solid #008800;
+            border-right: 3px solid #008800;
+            background-color: #ccffcc;
             text-shadow: white 1px 1px 0px, white -1px 1px 0px, white 1px -1px 0px, white -1px -1px 0px, white 1px 0px 0px, white -1px 0px 0px, white 0px 1px 0px, white 0px -1px 0px; }
     #game_field_list_frame .game_row .hand_card {
       border: 1px solid;

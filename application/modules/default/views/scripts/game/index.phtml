@@ -15,18 +15,22 @@ $aDispPageNum = array(
 );
 
 $sPageLinkTag = "<div class='page_link'>\n";
+$sUrlBase = '/game/';
+if (isset($this->bLast) && $this->bLast) {
+    $sUrlBase = '/game/last/';
+}
 
 //if (1 < $this->nPage) {
 //    $iBeforePage = $this->nPage - 1;
 //    $sPageLinkTag .= <<<_eos_
-//    <span><a href="/game/{$iBeforePage}/">前へ</a></span>
+//    <span><a href="{$sUrlBase}{$iBeforePage}/">前へ</a></span>
 //
 //_eos_;
 //}
 
 if (1 < $aDispPageNum['min']) {
     $sPageLinkTag .= <<<_eos_
-    <a href="/game/"><span class="first_page_link">1</span></a>...
+    <a href="{$sUrlBase}"><span class="first_page_link">1</span></a>...
 
 _eos_;
 }
@@ -35,14 +39,14 @@ for ($i = $aDispPageNum['min'] ; $i <= $aDispPageNum['max'] ; $i++) {
     if ($i == $this->nPage) {
         $sPageLinkText = "<span><strong>{$i}</strong></span>";
     } else {
-        $sPageLinkText = "<a href='/game/{$i}/'><span>{$i}</span></a>";
+        $sPageLinkText = "<a href='{$sUrlBase}{$i}/'><span>{$i}</span></a>";
     }
     $sPageLinkTag .= "{$sPageLinkText}\n";
 }
 
 //if ($aDispPageNum['max'] < $iPages) {
 //    $sPageLinkTag .= <<<_eos_
-//    ...<a href="/game/{$iPages}/"><span>{$iPages}</span></a>
+//    ...<a href="{$sUrlBase}{$iPages}/"><span>{$iPages}</span></a>
 //
 //_eos_;
 //}
@@ -50,7 +54,7 @@ for ($i = $aDispPageNum['min'] ; $i <= $aDispPageNum['max'] ; $i++) {
 if ($this->nPage < $iPages) {
     $iNextPage = $this->nPage + 1;
     $sPageLinkTag .= <<<_eos_
-    <a href="/game/{$iNextPage}/"><span class="next_page_link">次へ</span></a>
+    <a href="{$sUrlBase}{$iNextPage}/"><span class="next_page_link">次へ</span></a>
 
 _eos_;
 }
@@ -61,7 +65,11 @@ $sPageLinkTag .= "</div>\n";
 //
 
 $sSelectOldFieldDispray = '';
-if (!$this->bLast) {
+$sBackgroundStyle = '';
+$sLastLink = "<div class='game_list_link'>返信の無いフィールドの一覧です。<br /><a href='/game/'>全フィールド一覧はこちら</a></div>";
+if (isset($this->bLast) && $this->bLast) {
+    $sBackgroundStyle = '<style>body { background-color:#ffeeee !important; }</style>';
+} else {
     $sSelectOldFieldDispray = <<<_eos_
 <div class="old_field_disp_select_frame">
     返信済みフィールド：
@@ -73,14 +81,17 @@ if (!$this->bLast) {
 </div>
 
 _eos_;
+    $sLastLink = "<div class='game_list_link'><a href='/game/last/'>未返信フィールドの一覧はこちら</a></div>";
 }
 ?>
 
 <div id="game_field_list_frame">
 <?php
+echo $sBackgroundStyle;
 if (empty($this->aCardInfoArray)) {
     echo '<div class="no-fields">まだフィールドが投稿されていません。</div>' . "\n";
 } else {
+    echo $sLastLink;
     echo $sSelectOldFieldDispray;
     echo $sPageLinkTag;
     foreach ($this->aCardInfoArray as $aCardInfo) {
@@ -106,6 +117,7 @@ _eos_;
     }
     echo $sPageLinkTag;
     echo $sSelectOldFieldDispray;
+    echo $sLastLink;
 }
 ?>
 </div>

@@ -58,11 +58,24 @@
         } else {
             $pos = 'enemy' . $val['position'];
         }
+        $sStandbyClass = '';
+        $sCardBack = '';
         if ($val['standby_flg'] && $val['position'] != 'Master') {
             $sLv = '?';
             $sHp = '?';
-            $val['image_file_name'] = 'card.jpg';
-            $val['card_name'] = 'カードヒーロー';
+            if (!isset($this->bKifu)) {
+                $this->bKifu = false;
+            }
+            if (!isset($this->bFinished)) {
+                $this->bFinished = false;
+            }
+            if ($this->bKifu && $this->bFinished && $aCardInfo['field_info']['turn'] == $val['owner']) {
+                $sStandbyClass = 'standby';
+                $sCardBack = "<img src='/images/card/card.jpg' style='display:none;'/>";
+            } else {
+                $val['image_file_name'] = 'card.jpg';
+                $val['card_name'] = 'カードヒーロー';
+            }
         } else {
             $sLv = $val['lv'];
             $sHp = $val['hp'];
@@ -113,8 +126,9 @@
             <div class="pos_id">
                 <span class="mini-font">{$sPosCode}</span>
             </div>
-            <div class="pict">
+            <div class="pict {$sStandbyClass}">
                 <img src="/images/card/card.jpg" original-src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
+                {$sCardBack}
             </div>
             <div class="param">
                 {$sLvHp}
@@ -135,8 +149,12 @@ _eos_;
     foreach ($aCardInfo['hand'] as $val) {
         if ($aCardInfo['field_info']['turn'] == $val['owner']) {
             $aHandCount['my']++;
+            $sOriginalSource = '';
+            if (isset($this->bFinished) && $this->bFinished) {
+                $sOriginalSource = " original-src='/images/card/{$val['image_file_name']}'";
+            }
             $sMyHandHtml .= <<<_eos_
-        <img src="/images/card/card.jpg" alt=""/>
+        <img src="/images/card/card.jpg" {$sOriginalSource} alt=""/>
 
 _eos_;
         } else {
@@ -213,6 +231,18 @@ foreach ($aPosId as $i => $aLine) {
         echo $aMonsterData[$posId];
     }
     if ($i == 0) {
+        $sButtonHtml = '';
+        if (!isset($this->bGameStart) || !$this->bGameStart) {
+            $sLabel = 'このフィールドで遊ぶ';
+            if (isset($this->bKifu) && $this->bKifu) {
+                $sLabel = 'このフィールドを詳しく見る';
+            }
+            $sButtonHtml .= "<div class='button game_play'>{$sLabel}</div>";
+            if (!isset($this->bKifu) || !$this->bKifu) {
+                $sButtonHtml .= "<div class='button view_log' game_field_id='{$aCardInfo['field_info']['game_field_id']}'>プレイログを見る</div>";
+            }
+        }
+
         echo <<<_eos_
             <td colspan=3 rowspan=4 class="explain">
                 <div class="player_name">
@@ -221,12 +251,7 @@ foreach ($aPosId as $i => $aLine) {
                 <div class="magic_effects">
                     {$sExplain}
                 </div>
-                <div class="button game_play">
-                    このフィールドで遊ぶ
-                </div>
-                <div class="button view_log">
-                    プレイログを見る
-                </div>
+                {$sButtonHtml}
             </td>
 
 _eos_;

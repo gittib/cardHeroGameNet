@@ -14,6 +14,11 @@ body {
     margin-left: auto;
     margin-right: auto;
 
+    div.game_list_link {
+        margin: 21px auto;
+        text-align: center;
+    }
+
     .old_field_disp_select_frame {
         margin: 15px;
         margin-bottom: 0;
@@ -144,20 +149,6 @@ body {
 
                     &.game_play {
                         $border_width: 3px;
-                        $border_tl: $border_width solid #ffeeee;
-                        $border_br: $border_width solid #880000;
-
-                        border-top: $border_tl;
-                        border-left: $border_tl;
-                        border-bottom: $border_br;
-                        border-right: $border_br;
-                        background-color: #ffcccc;
-
-                        text-shadow: $myTextShadow;
-                    }
-
-                    &.view_log {
-                        $border_width: 3px;
                         $border_tl: $border_width solid #eeeeff;
                         $border_br: $border_width solid #000088;
 
@@ -166,6 +157,20 @@ body {
                         border-bottom: $border_br;
                         border-right: $border_br;
                         background-color: #ccccff;
+
+                        text-shadow: $myTextShadow;
+                    }
+
+                    &.view_log {
+                        $border_width: 3px;
+                        $border_tl: $border_width solid #eeffee;
+                        $border_br: $border_width solid #008800;
+
+                        border-top: $border_tl;
+                        border-left: $border_tl;
+                        border-bottom: $border_br;
+                        border-right: $border_br;
+                        background-color: #ccffcc;
 
                         text-shadow: $myTextShadow;
                     }

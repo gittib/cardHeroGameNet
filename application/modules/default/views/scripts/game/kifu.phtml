@@ -1,0 +1,45 @@
+<?php
+$sFinishedMessage = '';
+if (isset($this->bFinished) && $this->bFinished) {
+    $sFinishedMessage = '決着がついているログの場合、味方の伏せモンスターと手札が開示されます。<br />';
+}
+?>
+<style>
+body {
+    background-color:#eeffee !important;
+}
+</style>
+<div id="kifu_message">
+    ゲームフィールド[<?php echo $this->iGameFieldId; ?>]までのプレイログ一覧です。<br />
+    <?php echo $sFinishedMessage; ?>
+    対戦の反省や戦術の研究にどうぞ。
+</div>
+<div id="game_field_list_frame">
+<?php
+if (empty($this->aCardInfoArray)) {
+    echo '<div class="no-fields">まだフィールドが投稿されていません。</div>' . "\n";
+} else {
+    foreach ($this->aCardInfoArray as $aCardInfo) {
+        $this->aCardInfoInField = $aCardInfo;
+        $aFieldInfo = $aCardInfo['field_info'];
+        $sLinkTitle = "{$aFieldInfo['title_str']} [{$aFieldInfo['upd_date']}]";
+        $sHref = "/game/receive/{$aFieldInfo['game_field_id']}/";
+        if (isset($aFieldInfo['started_flg']) && $aFieldInfo['started_flg']) {
+            $sHref = "/game/field/{$aFieldInfo['game_field_id']}/";
+        }
+        if ($this->bLast) {
+            $sHref .= '?referer=last';
+        }
+        echo <<<_eos_
+<div class="game_field_info">
+    <div class="field_title">
+        <a href="{$sHref}">{$sLinkTitle}</a>
+    </div>
+    {$this->render('game_field_table.phtml')}
+</div>
+
+_eos_;
+    }
+}
+?>
+</div>
