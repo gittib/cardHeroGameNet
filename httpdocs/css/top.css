@@ -5,29 +5,60 @@
 #welcome {
   margin: 15px;
   font-family: 'メイリオ', 'ヒラギノ角ゴ ProN W3', 'Hiragino Kaku Gothic ProN', 'Lucida Grande', 'Meiryo', 'メイリオ', sans-serif; }
-  #welcome div {
-    float: left;
-    width: 120px;
-    height: 120px;
-    margin: 15px;
-    border: solid 3px;
-    position: relative; }
-    #welcome div.card_list {
-      background-color: #e0eeff; }
-    #welcome div.field_list {
-      background-color: #efe; }
-    #welcome div.deck_list {
-      background-color: #ffe; }
-    #welcome div.new_game {
-      background-color: #fee; }
-    #welcome div * {
-      position: absolute; }
-    #welcome div img {
-      top: 5px;
-      left: 15px;
-      width: 90px;
-      max-height: 90px; }
-    #welcome div span {
-      bottom: 0;
-      width: 100%;
-      text-align: center; }
+  #welcome h1 {
+    text-align: center;
+    color: #0087ff;
+    text-shadow: 2px 2px 7px;
+    font-size: 18px; }
+  #welcome #what_is_this {
+    width: 100%;
+    max-width: 590px;
+    margin: 0 auto; }
+    #welcome #what_is_this h2 {
+      color: #0087ff;
+      text-shadow: #64649b 1px 1px 3px; }
+    #welcome #what_is_this p {
+      margin: 5px;
+      padding: 5px;
+      border: solid 1px;
+      background-color: #eeffee; }
+  #welcome #panel_frame {
+    max-width: 624px;
+    margin: 0 auto;
+    padding-left: 5px; }
+    #welcome #panel_frame div {
+      float: left;
+      width: 120px;
+      height: 120px;
+      margin: 15px;
+      border: solid 3px;
+      position: relative; }
+      #welcome #panel_frame div.card_list {
+        background-color: #e0eeff; }
+      #welcome #panel_frame div.field_list {
+        background-color: #efe; }
+      #welcome #panel_frame div.deck_list {
+        background-color: #ffe; }
+      #welcome #panel_frame div.new_game {
+        background-color: #fee; }
+      #welcome #panel_frame div * {
+        position: absolute; }
+      #welcome #panel_frame div img {
+        top: 5px;
+        left: 15px;
+        width: 90px;
+        max-height: 90px; }
+      #welcome #panel_frame div span {
+        bottom: 0;
+        width: 100%;
+        text-align: center; }
+  #welcome #outbound_links {
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto; }
+    #welcome #outbound_links h2 {
+      font-size: 14px; }
+    #welcome #outbound_links ul {
+      padding-left: 16px; }
+      #welcome #outbound_links ul li a {
+        line-height: 30px; }

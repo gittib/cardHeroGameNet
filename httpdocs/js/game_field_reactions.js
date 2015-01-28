@@ -1174,8 +1174,24 @@ game_field_reactions = (function () {
                         });
                         break;
                 }
+            } else {
+                g_field_data.queues.push({
+                    actor_id            : act.game_card_id,
+                    log_message         : '',
+                    resolved_flg        : 0,
+                    actor_anime_disable : true,
+                    priority            : 'react_system',
+                    queue_units : [
+                        {
+                            queue_type_id   : 1008,
+                            target_id       : target.game_card_id,
+                        },
+                    ],
+                });
             }
+
             if (aArgs.priority == 'command') {
+                // 優先度commandの場合はレベルアップ権利を与える
                 if (act.owner == target.owner) {
                     if (act.game_card_id != target.game_card_id) {
                         g_field_data.queues.push({
@@ -1310,12 +1326,10 @@ game_field_reactions = (function () {
                 log_message     : '',
                 resolved_flg    : 0,
                 priority        : 'same_time',
-                queue_units : [
-                    {
-                        queue_type_id   : 1028,
-                        target_id       : aArgs.target_id,
-                    },
-                ],
+                queue_units : [{
+                    queue_type_id   : 1029,
+                    target_id       : aArgs.target_id,
+                }],
             });
         }
     }

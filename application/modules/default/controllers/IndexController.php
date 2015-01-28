@@ -15,8 +15,11 @@ class IndexController extends Zend_Controller_Action
         $layout->stylesheet = array(
                 '/css/top.css',
                 );
+
         $layout->title = 'スマホで遊べるカードヒーロー！';
-        $layout->description = 'スマホでカードヒーローを遊べるWebサイトです。１ターンの行動を投稿することで、掲示板形式で対戦ができます。面白そうな投稿があれば、横から投稿するのもOKです。';
+        $sExp = "カードヒーロー@スマホは、ブラウザ上でカードヒーローを遊べるサイトです。\nフィールド一覧から気になったフィールドを選ぶと、実際にカードヒーローをプレイする事ができます。%descend%\n投稿されたフィールドへ返信し合う事で、ゲーム同様に対戦する事もできます。";
+        $layout->description = preg_replace("/(\r|\n|%descend%.*)/", '', $sExp);
+        $this->view->assign('sExplain', str_replace('%descend%', '', $sExp));
     }
 
     public function memoAction()

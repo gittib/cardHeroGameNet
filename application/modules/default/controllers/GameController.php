@@ -123,7 +123,7 @@ class GameController extends Zend_Controller_Action
 
         $this->view->assign('aDeckList', $ret);
         $this->view->assign('bGameStandby', true);
-        $this->view->assign('sDispMessage', '使用するデッキを選んでください。');
+        $this->view->assign('sDispMessage', '新しくゲームを開始します。<br />使用するデッキを選んでください。');
         $this->render('deck/index', null, true);
     }
 
@@ -226,7 +226,7 @@ class GameController extends Zend_Controller_Action
             //*/
         } else {
             $this->_javascript[] = '/js/master_data.js';
-            $this->_javascript[] = '/js/game_field.min.js?ver=20150118';
+            $this->_javascript[] = '/js/game_field.min.js?ver=20150121';
         }
 
         $iBeforeFieldId = $this->_model->getBeforeFieldId($iGameFieldId);

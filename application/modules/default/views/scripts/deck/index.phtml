@@ -1,5 +1,14 @@
 <?php
 $aUserInfo = Common::checkLogin();
+if (!isset($this->sExplain)) {
+    $this->sExplain = '';
+}
+$this->sExplain = <<<_eos_
+<div class="message">
+    {$this->sExplain}
+</div>
+
+_eos_;
 
 $sMessageHtml = '';
 if (isset($this->sDispMessage)) {
@@ -140,6 +149,7 @@ _eos_;
     $sGameStartHtml .= '</div>';
 }
 
+echo $this->sExplain;
 echo $sGameStartHtml;
 echo $sMessageHtml;
 echo $sNewLink;

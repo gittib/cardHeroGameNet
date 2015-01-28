@@ -10,9 +10,25 @@ body {
   max-width: 640px;
   margin-left: auto;
   margin-right: auto; }
-  #game_field_list_frame div.game_list_link {
-    margin: 21px auto;
+  #game_field_list_frame div.page_description {
+    margin: 10px auto 0;
     text-align: center; }
+  #game_field_list_frame div.game_list_link {
+    margin: 8px auto;
+    text-align: center;
+    width: 180px; }
+    #game_field_list_frame div.game_list_link a {
+      display: block;
+      margin: 3px 8px;
+      padding: 2px;
+      border: solid 3px #880000;
+      border-top-color: #ffeeee;
+      border-left-color: #ffeeee;
+      background-color: #ffcccc;
+      text-decoration: none;
+      text-shadow: white 1px 1px 0px, white -1px 1px 0px, white 1px -1px 0px, white -1px -1px 0px, white 1px 0px 0px, white -1px 0px 0px, white 0px 1px 0px, white 0px -1px 0px; }
+      #game_field_list_frame div.game_list_link a:visited {
+        text-decoration: none; }
   #game_field_list_frame .old_field_disp_select_frame {
     margin: 15px;
     margin-bottom: 0; }

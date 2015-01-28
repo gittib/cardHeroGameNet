@@ -32,7 +32,10 @@ class DeckController extends Zend_Controller_Action
     public function indexAction()
     {
         $request = $this->getRequest();
+        $sExp = 'カードヒーロー@スマホに登録されているデッキ一覧です。誰でもデッキを作成することができます。また、ユーザー登録しておくと自分のデッキを編集する事もできます。';
+
         $this->_layout->title = 'デッキ一覧';
+        $this->_layout->description = preg_replace('/%descend%.*$/', '', $sExp);
         $this->_stylesheet[] = '/css/deck_list.css';
         $this->_javascript[] = '/js/img_delay_load.min.js';
         if ($this->_config->web->js->debug) {
@@ -45,6 +48,7 @@ class DeckController extends Zend_Controller_Action
             'page_no'   => $nPage,
         ));
 
+        $this->view->assign('sExplain', str_replace('%descend%', '', $sExp));
         $this->view->assign('aDeckList', $ret);
         $this->view->assign('bDeckEdit', true);
         $this->view->assign('aUserInfo', Common::checkLogin());

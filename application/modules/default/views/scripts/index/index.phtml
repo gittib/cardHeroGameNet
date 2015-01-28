@@ -1,34 +1,51 @@
 <div id="welcome">
-    <a href='/card/'>
-      <div class="card_list">
-          <img src="/images/card_list_icon.png" alt="カードリスト" />
-          <span>
-              カードリスト
-          </span>
-      </div>
-    </a>
-    <a href='/game/'>
-      <div class="field_list">
-          <img src="/images/field_list_icon.png" alt="フィールドリスト" />
-          <span>
-              フィールド一覧
-          </span>
-      </div>
-    </a>
-    <a href='/deck/'>
-      <div class="deck_list">
-          <img src="/images/deck_icon.png" alt="デッキ一覧" />
-          <span>
-              デッキ一覧
-          </span>
-      </div>
-    </a>
-    <a href='/game/new/'>
-      <div class="new_game">
-          <img src="/images/new_game_icon.png" alt="新規ゲーム開始" />
-          <span>
-              新規ゲーム開始
-          </span>
-      </div>
-    </a>
+    <h1>カードヒーロー＠スマホ へようこそ！</h1>
+    <div id="what_is_this">
+        <h2 style='display:none;'>このサイトについて</h2>
+        <p>
+        <?php echo nl2br($this->sExplain); ?>
+        </p>
+    </div>
+    <div id="panel_frame" class="clearfix">
+        <a href='/card/'>
+          <div class="card_list">
+              <img src="/images/card_list_icon.png" alt="カードリスト" />
+              <span>
+                  カードリスト
+              </span>
+          </div>
+        </a>
+        <a href='/game/'>
+          <div class="field_list">
+              <img src="/images/field_list_icon.png" alt="フィールドリスト" />
+              <span>
+                  フィールド一覧
+              </span>
+          </div>
+        </a>
+        <a href='/deck/'>
+          <div class="deck_list">
+              <img src="/images/deck_icon.png" alt="デッキ一覧" />
+              <span>
+                  デッキ一覧
+              </span>
+          </div>
+        </a>
+        <a href='/game/new/'>
+          <div class="new_game">
+              <img src="/images/new_game_icon.png" alt="新規ゲーム開始" />
+              <span>
+                  新規ゲーム開始
+              </span>
+          </div>
+        </a>
+    </div>
+    <div id="outbound_links">
+        <h2>カードヒーロー　関連リンク</h2>
+        <ul>
+            <li><a class="blank_link" target="_blank" href="http://www.nintendo.co.jp/n02/dmg/ahhj/">カードヒーローBGC版　公式サイト</a></li>
+            <li><a class="blank_link" target="_blank" href="http://www.nintendo.co.jp/ds/ychj/">カードヒーローDS版　公式サイト</a></li>
+            <li><a class="blank_link" target="_blank" href="http://www.cardhero-bu.com/">カードヒーロー部.com</a></li>
+        </ul>
+    </div>
 </div>

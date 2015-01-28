@@ -39,7 +39,12 @@ for ($i = $aDispPageNum['min'] ; $i <= $aDispPageNum['max'] ; $i++) {
     if ($i == $this->nPage) {
         $sPageLinkText = "<span><strong>{$i}</strong></span>";
     } else {
-        $sPageLinkText = "<a href='{$sUrlBase}{$i}/'><span>{$i}</span></a>";
+        if ($i == 1) {
+            $sUrl = $sUrlBase;
+        } else {
+            $sUrl = $sUrlBase . $i . '/';
+        }
+        $sPageLinkText = "<a href='{$sUrl}'><span>{$i}</span></a>";
     }
     $sPageLinkTag .= "{$sPageLinkText}\n";
 }
@@ -66,7 +71,8 @@ $sPageLinkTag .= "</div>\n";
 
 $sSelectOldFieldDispray = '';
 $sBackgroundStyle = '';
-$sLastLink = "<div class='game_list_link'>返信の無いフィールドの一覧です。<br /><a href='/game/'>全フィールド一覧はこちら</a></div>";
+$sDescription = '返信の無いフィールドの一覧です。';
+$sLastLink = "<a href='/game/'>全フィールド一覧はこちら</a>";
 if (isset($this->bLast) && $this->bLast) {
     $sBackgroundStyle = '<style>body { background-color:#ffeeee !important; }</style>';
 } else {
@@ -81,7 +87,8 @@ if (isset($this->bLast) && $this->bLast) {
 </div>
 
 _eos_;
-    $sLastLink = "<div class='game_list_link'><a href='/game/last/'>未返信フィールドの一覧はこちら</a></div>";
+    $sDescription = '投稿されたフィールドの一覧です。';
+    $sLastLink = "<a href='/game/last/'>未返信フィールドの一覧へ</a>";
 }
 ?>
 
@@ -91,7 +98,12 @@ echo $sBackgroundStyle;
 if (empty($this->aCardInfoArray)) {
     echo '<div class="no-fields">まだフィールドが投稿されていません。</div>' . "\n";
 } else {
+    echo "<div class='page_description'>";
+    echo $sDescription;
+    echo "</div>";
+    echo "<div class='game_list_link'>";
     echo $sLastLink;
+    echo "</div>";
     echo $sSelectOldFieldDispray;
     echo $sPageLinkTag;
     foreach ($this->aCardInfoArray as $aCardInfo) {
