@@ -11,6 +11,7 @@
     font-family:'メイリオ', 'ヒラギノ角ゴ ProN W3', 'Hiragino Kaku Gothic ProN', 'Lucida Grande', 'Meiryo', 'メイリオ', sans-serif;
 
     $divSize : 120px;
+    $infoWindowMaxWidth : 590px;
 
     $textColor: rgb(0, 135, 255);
 
@@ -23,7 +24,7 @@
 
     #what_is_this {
         width: 100%;
-        max-width: 590px;
+        max-width: $infoWindowMaxWidth;
         margin: 0 auto;
 
         h2 {
@@ -80,6 +81,55 @@
 
             span {
                 bottom: 0;
+                width: 100%;
+                text-align: center;
+            }
+        }
+    }
+
+    #update_history {
+        width: 100%;
+        max-width: $infoWindowMaxWidth;
+        margin: 0 auto;
+
+        $iSpace : 5px;
+
+        h2 {
+            margin: $iSpace;
+            font-size: 14px;
+        }
+
+        >div {
+            margin: $iSpace;
+            padding: $iSpace;
+            border: solid 1px;
+            background-color: #eeeeff;
+            overflow: hidden;
+
+            ul {
+                margin: 0;
+                padding-left: 0;
+
+                li {
+                    $liBorderColor : #aaaadd;
+
+                    display: none;
+                    margin: 3px;
+                    border-bottom: solid 1px $liBorderColor;
+
+                    &:first-child {
+                        display: block;
+                        border-top: solid 1px $liBorderColor;
+                    }
+
+                    &.important {
+                        display: block;
+                    }
+                }
+            }
+
+            a.more {
+                display: block;
                 width: 100%;
                 text-align: center;
             }

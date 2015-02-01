@@ -52,6 +52,35 @@
         bottom: 0;
         width: 100%;
         text-align: center; }
+  #welcome #update_history {
+    width: 100%;
+    max-width: 590px;
+    margin: 0 auto; }
+    #welcome #update_history h2 {
+      margin: 5px;
+      font-size: 14px; }
+    #welcome #update_history > div {
+      margin: 5px;
+      padding: 5px;
+      border: solid 1px;
+      background-color: #eeeeff;
+      overflow: hidden; }
+      #welcome #update_history > div ul {
+        margin: 0;
+        padding-left: 0; }
+        #welcome #update_history > div ul li {
+          display: none;
+          margin: 3px;
+          border-bottom: solid 1px #aaaadd; }
+          #welcome #update_history > div ul li:first-child {
+            display: block;
+            border-top: solid 1px #aaaadd; }
+          #welcome #update_history > div ul li.important {
+            display: block; }
+      #welcome #update_history > div a.more {
+        display: block;
+        width: 100%;
+        text-align: center; }
   #welcome #outbound_links {
     width: 100%;
     max-width: 280px;

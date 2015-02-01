@@ -30,8 +30,7 @@ body {
       #game_field_list_frame div.game_list_link a:visited {
         text-decoration: none; }
   #game_field_list_frame .old_field_disp_select_frame {
-    margin: 15px;
-    margin-bottom: 0; }
+    margin: 15px; }
   #game_field_list_frame .page_link {
     text-align: right;
     padding-top: 8px;

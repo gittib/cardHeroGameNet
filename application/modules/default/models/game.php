@@ -172,14 +172,6 @@ class model_Game {
                 )
             )
             ->joinLeft(
-                array('first' => 't_game_field'),
-                "first.game_field_id::varchar = regexp_replace(field.field_id_path, '-.*$', '')::varchar",
-                array(
-                    'first_field_id'    => 'game_field_id',
-                    'start_date'        => new Zend_Db_Expr("to_char(first.upd_date,'yyyy/mm/dd HH24:MI')"),
-                )
-            )
-            ->joinLeft(
                 array('bf' => 't_game_field'),
                 "bf.game_field_id::varchar = regexp_replace(field.field_id_path, '^.*-', '')::varchar",
                 array()
@@ -230,25 +222,32 @@ class model_Game {
                 'queue'         => array(),
             );
         }
-        $sub = $this->_db->select()
+        $sel = $this->_db->select()
             ->from(
-                array('sub_tgc' => 't_game_card'),
+                array('tgc' => 't_game_card'),
                 array(
                     'game_field_id',
                     'owner',
                 )
             )
             ->join(
-                array('sub_mc' => 'm_card'),
-                'sub_mc.card_id = sub_tgc.card_id',
+                array('mc' => 'm_card'),
+                'mc.card_id = tgc.card_id',
                 array(
                     'max_rare'  => new Zend_Db_Expr("max(rare)"),
                 )
             )
+            ->where('tgc.game_field_id in(?)', $selField)
             ->group(array(
-                'sub_tgc.game_field_id',
-                'sub_tgc.owner',
+                'tgc.game_field_id',
+                'tgc.owner',
             ));
+        $rslt = $this->_db->fetchAll($sel);
+        $aRareInfo = array();
+        foreach ($rslt as $val) {
+            $aRareInfo[$val['game_field_id']][$val['owner']] = $val['max_rare'];
+        }
+
         $sel = $this->_db->select()
             ->from(
                 array('card' => 't_game_card'),
@@ -309,14 +308,6 @@ class model_Game {
                 array(
                     'status_name',
                     'status_type',
-                )
-            )
-            ->joinLeft(
-                array('rare_data' => $sub),
-                'rare_data.game_field_id = card.game_field_id and ' .
-                'rare_data.owner = card.owner',
-                array(
-                    'max_rare',
                 )
             )
             ->where('card.game_field_id in(?)', $selField)
@@ -381,7 +372,9 @@ class model_Game {
                             $sMaster = '白';
                             break;
                     }
-                    $sMaster .= '★' . $val['max_rare'];
+                    $iGameFieldId = $val['game_field_id'];
+                    $sOwner = $val['owner'];
+                    $sMaster .= '★' . $aRareInfo[$iGameFieldId][$sOwner];
                     if ($aRet[$iGameFieldId]['field_info']['title_str'] == '') {
                         $aRet[$iGameFieldId]['field_info']['title_str'] = "[{$iGameFieldId}]";
                         $aRet[$iGameFieldId]['field_info']['title_str'] .= "【{$sMaster}】";

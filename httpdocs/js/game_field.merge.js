@@ -1739,8 +1739,24 @@ game_field_reactions = (function () {
                         });
                         break;
                 }
+            } else {
+                g_field_data.queues.push({
+                    actor_id            : act.game_card_id,
+                    log_message         : '',
+                    resolved_flg        : 0,
+                    actor_anime_disable : true,
+                    priority            : 'react_system',
+                    queue_units : [
+                        {
+                            queue_type_id   : 1008,
+                            target_id       : target.game_card_id,
+                        },
+                    ],
+                });
             }
+
             if (aArgs.priority == 'command') {
+                // 優先度commandの場合はレベルアップ権利を与える
                 if (act.owner == target.owner) {
                     if (act.game_card_id != target.game_card_id) {
                         g_field_data.queues.push({
@@ -1875,12 +1891,10 @@ game_field_reactions = (function () {
                 log_message     : '',
                 resolved_flg    : 0,
                 priority        : 'same_time',
-                queue_units : [
-                    {
-                        queue_type_id   : 1028,
-                        target_id       : aArgs.target_id,
-                    },
-                ],
+                queue_units : [{
+                    queue_type_id   : 1029,
+                    target_id       : aArgs.target_id,
+                }],
             });
         }
     }
@@ -5625,7 +5639,7 @@ new function () {
                     game_card_id    : aExecAct.actor_id
                 });
                 var bIgnoreProvoke = false; // 挑発の制限がかかってても、これがtrueなら行動できる
-                if (aExecAct.priority != 'command') {
+                if (aExecAct.priority != 'command' || bOldQueue) {
                     bIgnoreProvoke = true;
                 }
 
@@ -5638,12 +5652,12 @@ new function () {
                 }
 
                 var backupQueuesWhileOldQueueProcessing = null;
-                if (bOldQueue) {
-                    // OldQueueを処理した時は誘発処理を発動されると困るので、queuesのバックアップを取る
-                    backupQueuesWhileOldQueueProcessing = [];
-                    $.extend(true, backupQueuesWhileOldQueueProcessing, g_field_data.queues);
-                } else {
-                    (function(a) {
+                (function(a) {
+                    if (bOldQueue) {
+                        // OldQueueを処理した時は誘発処理を発動されると困るので、queuesのバックアップを取る
+                        backupQueuesWhileOldQueueProcessing = [];
+                        $.extend(true, backupQueuesWhileOldQueueProcessing, g_field_data.queues);
+                    } else {
                         $.each(a.queue_units, function(i,q) {
                             switch (Number(q.queue_type_id)) {
                                 case 1001:
@@ -5652,7 +5666,9 @@ new function () {
 
                                     // 挑発対象に攻撃してるかチェック
                                     if (bProvoked) {
-                                        if (q.target_id == g_field_data.cards[aExecAct.actor_id].status[117].param1) {
+                                        var iTargetId = Number(q.target_id);
+                                        var iProvokerId = Number(g_field_data.cards[aExecAct.actor_id].status[117].param1);
+                                        if (iTargetId == iProvokerId) {
                                             bIgnoreProvoke = true;
                                             g_field_data.queues.push({
                                                 actor_id        : aExecAct.actor_id,
@@ -5690,8 +5706,8 @@ new function () {
                         $.extend(true, _b, a);
                         g_field_data.resolved_queues.push(_b);
 
-                    })(aExecAct);
-                }
+                    }
+                })(aExecAct);
 
                 try {
                     if (!aExecAct.actor_anime_disable) {
@@ -6730,6 +6746,7 @@ new function () {
                                     }
                                     var iDelSt = null;
                                     switch (q.param1) {
+                                        case 121:
                                         case 127:
                                         case 128:
                                             mon.monster_id = mon.status[q.param1].param1;

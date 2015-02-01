@@ -343,6 +343,7 @@ class model_Api_Index {
                 't_game_field',
                 array(
                     'game_field_id',
+                    'field_id_path',
                     'upd_date'  => new Zend_Db_Expr("to_char(upd_date, 'yyyy-mm-dd')"),
                 )
             )
@@ -350,10 +351,15 @@ class model_Api_Index {
             ->where('open_flg = 1');
         $rslt = $this->_db->fetchAll($sel);
         foreach ($rslt as $val) {
-            $aUrls[] = array(
+            $aTmp = array(
                 'loc'       => 'http://' . $_SERVER['SERVER_NAME'] . '/game/field/' . $val['game_field_id'] . '/',
                 'lastmod'   => $val['upd_date'],
             );
+            $iTurnCount = substr_count($val['field_id_path'], '-') + 1;
+            if ($iTurnCount < 7) {
+                $aTmp['priority'] = 0.1;
+            }
+            $aUrls[] = $aTmp;
         }
 
         $sel = $this->_db->select()
