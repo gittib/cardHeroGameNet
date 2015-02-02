@@ -577,9 +577,10 @@ class model_Game {
                 array(
                     'queue_id',
                     'game_field_id',
-                    'actor_id'      => 'act_card_id',
-                    'priority'      => 'pri_str_id',
+                    'actor_id'              => 'act_card_id',
+                    'priority'              => 'pri_str_id',
                     'log_message',
+                    'actor_anime_disable',
                 )
             )
             ->join(
@@ -610,11 +611,12 @@ class model_Game {
                     $aRet[] = $aTmp;
                 }
                 $aTmp = array(
-                    'queue_id'      => $val['queue_id'],
-                    'game_field_id' => $val['game_field_id'],
-                    'actor_id'      => $val['actor_id'],
-                    'log_message'   => $val['log_message'],
-                    'priority'      => $val['priority'],
+                    'queue_id'              => $val['queue_id'],
+                    'game_field_id'         => $val['game_field_id'],
+                    'actor_id'              => $val['actor_id'],
+                    'log_message'           => $val['log_message'],
+                    'priority'              => $val['priority'],
+                    'actor_anime_disable'   => $val['actor_anime_disable'],
                     'queue_units'   => array(),
                 );
                 $iQueueId = $val['queue_id'];
@@ -1162,12 +1164,13 @@ class model_Game {
                 $sql = "select nextval('t_queue_queue_id_seq')";
                 $iQueueId = $this->_db->fetchOne($sql);
                 $set = array(
-                    'queue_id'      => $iQueueId,
-                    'game_field_id' => $iGameFieldId,
-                    'act_card_id'   => $val['actor_id'],
-                    'pri_str_id'    => $val['priority'],
-                    'resolved_flg'  => $val['resolved_flg'],
-                    'log_message'   => $val['log_message'],
+                    'queue_id'              => $iQueueId,
+                    'game_field_id'         => $iGameFieldId,
+                    'act_card_id'           => $val['actor_id'],
+                    'pri_str_id'            => $val['priority'],
+                    'resolved_flg'          => $val['resolved_flg'],
+                    'log_message'           => $val['log_message'],
+                    'actor_anime_disable'   => $val['actor_anime_disable'],
                 );
                 $this->_db->insert('t_queue', $set);
                 foreach ($val['queue_units'] as $q) {
