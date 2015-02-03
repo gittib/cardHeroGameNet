@@ -575,6 +575,25 @@ arts_queue = (function () {
                     if (val.standby_flg) {
                         return true;
                     }
+
+                    if (val.status) {
+                        if (val.status[110]) {
+                            throw new Error('特技封じ利いてるからダメ');
+                        }
+                        if (val.status[129]) {
+                            throw new Error('かなしばり食らってるからダメ');
+                        }
+                        var bProvoked = game_field_reactions.isProvoked({
+                            game_card_id    : val.game_card_id,
+                        });
+                        if (bProvoked) {
+                            var iProvokingId = val.status[117].param1;
+                            if (iProvokingId != aArgs.targets[0].game_card_id) {
+                                throw new Error('挑発利いてるからダメ');
+                            }
+                        }
+                    }
+
                     var p = game_field_utility.getXYFromPosId(val.pos_id);
                     if (p.y == p0.y && p.x != 1) {
                         if (p.x == 0 && val.card_id != 108) {
