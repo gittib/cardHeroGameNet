@@ -111,19 +111,23 @@
                 padding-left: 0;
 
                 li {
-                    $liBorderColor : #aaaadd;
+                    $liBorderStyle : solid 1px #aaaadd;
 
                     display: none;
                     margin: 3px;
-                    border-bottom: solid 1px $liBorderColor;
+                    border-bottom: $liBorderStyle;
 
                     &:first-child {
                         display: block;
-                        border-top: solid 1px $liBorderColor;
+                        border-top: $liBorderStyle;
                     }
 
                     &.important {
                         display: block;
+                    }
+
+                    &.red {
+                        color: red;
                     }
                 }
             }

@@ -3319,24 +3319,6 @@ arts_queue = (function () {
                         return true;
                     }
 
-                    if (val.status) {
-                        if (val.status[110]) {
-                            throw new Error('特技封じ利いてるからダメ');
-                        }
-                        if (val.status[129]) {
-                            throw new Error('かなしばり食らってるからダメ');
-                        }
-                        var bProvoked = game_field_reactions.isProvoked({
-                            game_card_id    : val.game_card_id,
-                        });
-                        if (bProvoked) {
-                            var iProvokingId = val.status[117].param1;
-                            if (iProvokingId != aArgs.targets[0].game_card_id) {
-                                throw new Error('挑発利いてるからダメ');
-                            }
-                        }
-                    }
-
                     var p = game_field_utility.getXYFromPosId(val.pos_id);
                     if (p.y == p0.y && p.x != 1) {
                         if (p.x == 0 && val.card_id != 108) {
@@ -3346,13 +3328,45 @@ arts_queue = (function () {
                             throw new Error('ラオンいないのでダメ');
                         }
                         lrCnt++;
+
+                        // 相方も行動する扱いなので、発動者と同様にキューを追加する。行動済みとか石呪いとか
                         if (val.game_card_id != mon.game_card_id) {
+                            // 行動済みにするのは確定
                             aRet.push({
                                 queue_type_id   : 1024,
                                 target_id       : val.game_card_id,
                                 cost_flg        : true,
                             });
+
+                            // 他に魔法効果を受けてるならその処理
+                            if (val.status) {
+                                if (val.status[110]) {
+                                    throw new Error('特技封じ利いてるからダメ');
+                                }
+                                if (val.status[129]) {
+                                    throw new Error('かなしばり食らってるからダメ');
+                                }
+                                var bProvoked = game_field_reactions.isProvoked({
+                                    game_card_id    : val.game_card_id,
+                                });
+                                if (bProvoked) {
+                                    var iProvokingId = val.status[117].param1;
+                                    if (iProvokingId != aArgs.targets[0].game_card_id) {
+                                        throw new Error('挑発利いてるからダメ');
+                                    }
+                                }
+                                if (val.status[123]) {
+                                    // ストーン呪い
+                                    aRet.push({
+                                        queue_type_id   : 1004,
+                                        target_id       : val.game_card_id,
+                                        param1          : -2,
+                                        cost_flg        : true,
+                                    });
+                                }
+                            }
                         }
+
                         pow += g_master_data.m_monster[val.monster_id].attack.power;
                         // ドリルブレイクの時はP効果の云々を自前で処理する
                         $.each(val.status, function(sid, stval) {

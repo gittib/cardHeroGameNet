@@ -77,6 +77,8 @@
             border-top: solid 1px #aaaadd; }
           #welcome #update_history > div ul li.important {
             display: block; }
+          #welcome #update_history > div ul li.red {
+            color: red; }
       #welcome #update_history > div a.more {
         display: block;
         width: 100%;

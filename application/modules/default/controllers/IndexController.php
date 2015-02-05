@@ -3,6 +3,8 @@
 class IndexController extends Zend_Controller_Action
 {
 
+    private $_model;
+
     public function init()
     {
         /* Initialize action controller here */
@@ -10,7 +12,6 @@ class IndexController extends Zend_Controller_Action
 
     public function indexAction()
     {
-        // action body
         $layout = new Zend_Layout();
         $layout->stylesheet = array(
                 '/css/top.css?ver=20150201',

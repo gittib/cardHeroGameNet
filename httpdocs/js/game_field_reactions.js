@@ -1343,6 +1343,11 @@ game_field_reactions = (function () {
         var bReactionPushed = false;
         if (typeof target.skill_disable_flg == 'undefined' || !target.skill_disable_flg) {
             switch (aMonsterData.skill.id) {
+                case 23:
+                    // ラオンソード
+                case 24:
+                    // レオンソード
+                    break;
                 case 26:
                     if (Math.random() < 0.5) {
                         sLogMessage = 'きまぐれによりパワーアップ';

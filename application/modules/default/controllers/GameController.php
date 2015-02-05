@@ -226,7 +226,7 @@ class GameController extends Zend_Controller_Action
             //*/
         } else {
             $this->_javascript[] = '/js/master_data.js';
-            $this->_javascript[] = '/js/game_field.min.js?ver=20150121';
+            $this->_javascript[] = '/js/game_field.min.js?ver=20150205';
         }
 
         $iBeforeFieldId = $this->_model->getBeforeFieldId($iGameFieldId);
