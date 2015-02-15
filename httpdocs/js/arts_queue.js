@@ -82,6 +82,22 @@ arts_queue = (function () {
 
     function _getQueueUnitsFromScriptId (aArgs) {
         var aArtInfo = g_master_data.m_arts[aArgs.art_id];
+
+        // 適正に進化できるスーパーカードが手札にあるかチェックする
+        var _checkTargetEvolOK = function (aMonsterInfo) {
+            var b = false;
+            $.each(aArgs.field_data.cards, function (i, val) {
+                b = game_field_utility.isValidSuper({
+                    aBefore : aMonsterInfo,
+                    aAfter  : val,
+                });
+                if (b) {
+                    return false;
+                }
+            });
+            return b;
+        };
+
         switch (Number(aArtInfo.script_id)) {
             case 1000:
                 return [
@@ -192,19 +208,20 @@ arts_queue = (function () {
                 }];
                 break;
             case 1006:
+                var aMonsterInfo = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var aMonsterData = g_master_data.m_monster[aMonsterInfo.monster_id];
                 var aRet = [{
                     queue_type_id   : 1017,
-                    target_id       : aArgs.targets[0].game_card_id,
+                    target_id       : aMonsterInfo.game_card_id,
                     param1          : 1,
                     param2          : true,
                 }];
-                var aMonsterData = g_master_data.m_monster[aArgs.field_data.cards[aArgs.targets[0].game_card_id].monster_id];
-                if (aMonsterData.next_monster_id) {
+                if (aMonsterData.next_monster_id || _checkTargetEvolOK(aMonsterInfo)) {
                     aRet.push({
                         queue_type_id   : 1019,
-                        target_id       : aArgs.targets[0].game_card_id,
+                        target_id       : aMonsterInfo.game_card_id,
                     });
-                } else if (typeof aMonsterData.supers == 'undefined' || !aMonsterData.supers.length) {
+                } else {
                     break;
                 }
                 return aRet;
@@ -241,17 +258,7 @@ arts_queue = (function () {
                 if (aMonsterData.next_monster_id) {
                     return aRet;
                 }
-                var bSuper = false;
-                $.each(aArgs.field_data.cards, function (i, val) {
-                    bSuper = game_field_utility.isValidSuper({
-                        aBefore : aMonsterInfo,
-                        aAfter  : val,
-                    });
-                    if (bSuper) {
-                        return false;
-                    }
-                });
-                if (bSuper) {
+                if (_checkTargetEvolOK(aMonsterInfo)) {
                     return aRet;
                 } else {
                     return [{
@@ -560,7 +567,6 @@ arts_queue = (function () {
                 break;
             case 1026:
                 var mon = aArgs.field_data.cards[aArgs.actor_id];
-                var aMonsterData = g_master_data.m_monster[mon.monster_id];
                 var p0 = game_field_utility.getXYFromPosId(mon.pos_id);
                 var lrCnt = 0;
                 var pow = 0;
@@ -578,10 +584,11 @@ arts_queue = (function () {
 
                     var p = game_field_utility.getXYFromPosId(val.pos_id);
                     if (p.y == p0.y && p.x != 1) {
-                        if (p.x == 0 && val.card_id != 108) {
+                        var aMonsterData = g_master_data.m_monster[val.monster_id];
+                        if (p.x == 0 && Number(aMonsterData.skill.id) != 24) {
                             throw new Error('レオンいないのでダメ');
                         }
-                        if (p.x == 2 && val.card_id != 107) {
+                        if (p.x == 2 && Number(aMonsterData.skill.id) != 23) {
                             throw new Error('ラオンいないのでダメ');
                         }
                         lrCnt++;

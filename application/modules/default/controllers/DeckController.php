@@ -41,7 +41,7 @@ class DeckController extends Zend_Controller_Action
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/deck_list.js';
         } else {
-            $this->_javascript[] = '/js/deck_list.min.js?ver=20150111';
+            $this->_javascript[] = '/js/deck_list.min.js?ver=20150215';
         }
         $nPage = $request->getParam('page_no');
         $ret = $this->_model->getDeckList(array(
@@ -52,6 +52,36 @@ class DeckController extends Zend_Controller_Action
         $this->view->assign('aDeckList', $ret);
         $this->view->assign('bDeckEdit', true);
         $this->view->assign('aUserInfo', Common::checkLogin());
+    }
+
+    public function mineAction()
+    {
+        $request = $this->getRequest();
+        $sExp = 'あなたが投稿したデッキ一覧です。';
+
+        $this->_layout->noindex = true;
+        $this->_layout->title = 'マイデッキ一覧';
+        $this->_layout->description = preg_replace('/%descend%.*$/', '', $sExp);
+        $this->_stylesheet[] = '/css/deck_list.css';
+        $this->_javascript[] = '/js/img_delay_load.min.js';
+        if ($this->_config->web->js->debug) {
+            $this->_javascript[] = '/js/deck_list.js';
+        } else {
+            $this->_javascript[] = '/js/deck_list.min.js?ver=20150215';
+        }
+        $nPage = $request->getParam('page_no');
+        $ret = $this->_model->getDeckList(array(
+            'page_no'   => $nPage,
+            'mine'      => true,
+        ));
+
+        $this->view->assign('sExplain', str_replace('%descend%', '', $sExp));
+        $this->view->assign('aDeckList', $ret);
+        $this->view->assign('bDeckEdit', true);
+        $this->view->assign('bMine', true);
+        $this->view->assign('aUserInfo', Common::checkLogin());
+
+        $this->render('deck/index', null, true);
     }
 
     public function editAction()

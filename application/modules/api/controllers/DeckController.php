@@ -17,13 +17,24 @@ class Api_DeckController extends Zend_Controller_Action
     {
         $request = $this->getRequest();
         $iPageNo = $request->getParam('p');
+        $bMine   = false;
+        if ($request->getParam('mine', 'f') == 't') {
+            $bMine = true;
+        }
 
         require_once APPLICATION_PATH . '/modules/default/models/deck.php';
         $model = new model_Deck();
 
-        $aDeckInfo = $model->getDeckList(array(
-            'page_no'   => $iPageNo,
-        ));
+        if ($bMine) {
+            $aDeckInfo = $model->getDeckList(array(
+                'page_no'   => $iPageNo,
+                'mine'      => $bMine,
+            ));
+        } else {
+            $aDeckInfo = $model->getDeckList(array(
+                'page_no'   => $iPageNo,
+            ));
+        }
 
         $this->getResponse()->setHeader('Content-Type', 'application/json; charset=utf-8');
         echo json_encode($aDeckInfo);

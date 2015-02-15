@@ -4,6 +4,10 @@ $sLoginInfo = '<a href="/user/login-input/">ログイン</a>';
 if (isset($aUserInfo)) {
     $sLoginInfo = "ようこそ{$aUserInfo['nick_name']}さん <a href=\"/user/\">管理</a>";
 }
+
+if (APPLICATION_ENV == 'evaluate') {
+    echo '<div style="color:red;font-size:22px;"><br />ここは評価環境です。カードヒーロー@スマホにお越しの方は、下記リンクより通常サイトをご利用下さい。<br /><br /><a style="font-size:22px;" href="http://cardhero-game.net/">カードヒーロー@スマホ 通常サイト</a><br /><br /></div>';
+}
 ?>
 <div id='header'>
     <div class="title">

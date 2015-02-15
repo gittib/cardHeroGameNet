@@ -3,6 +3,16 @@
   margin: 6px;
   font-size: 12px; }
 
+div.narrow_area {
+  max-width: 300px;
+  border: 3px double darkblue;
+  margin: 5px auto;
+  font-size: 12px;
+  text-align: center;
+  line-height: 28px; }
+  div.narrow_area select {
+    font-size: 12px; }
+
 div.line_width_adjust {
   margin: 0;
   padding: 0;

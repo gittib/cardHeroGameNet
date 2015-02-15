@@ -23,7 +23,7 @@ _eos_;
 $sNewLink = '';
 if (isset($this->bDeckEdit) && $this->bDeckEdit) {
     $sNewLink = <<<_eos_
-<div class="edit_link">
+<div class="edit_link zabuton_blue">
     <a href="/deck/edit/">デッキ新規作成</a>
 </div>
 
@@ -46,6 +46,43 @@ foreach ($aPageInfo as $key => $val) {
     $sPageInfoHtml .= " {$key}='{$val}'";
 }
 $sPageInfoHtml .= ' ></div>';
+
+$sMydeckLink = '';
+switch ($aPageInfo['page_cd']) {
+    case 'deck_list':
+        if (isset($aUserInfo['user_id']) && $aUserInfo['user_id'] && !$this->bMine) {
+            $sMydeckLink = <<<_eos_
+<div class="edit_link zabuton_pink" style="width:120px">
+    <a href="/deck/mine/">自分のデッキ一覧へ</a>
+</div>
+
+_eos_;
+        }
+    break;
+    case 'game_standby':
+        if (isset($aUserInfo['user_id']) && $aUserInfo['user_id'] && !$this->bMine) {
+            $sMydeckLink = <<<_eos_
+<div class="edit_link zabuton_pink" style="width:120px">
+    <a href="/game/new/deck/mine/">自分のデッキで戦う</a>
+</div>
+
+_eos_;
+        }
+    break;
+    case 'game_start':
+        if (isset($aUserInfo['user_id']) && $aUserInfo['user_id'] && !$this->bMine) {
+            $sMydeckLink = <<<_eos_
+<div class="edit_link zabuton_pink" style="width:120px">
+    <a href="/game/receive/deck/mine/{$aPageInfo['game_field_id']}">自分のデッキで戦う</a>
+</div>
+
+_eos_;
+        }
+    break;
+}
+if ($this->bMine) {
+    $sMydeckLink .= '<div style="display:none;" mydeck="t"></div>';
+}
 
 $sRef = '';
 if (isset($this->bLast) && $this->bLast) {
@@ -79,7 +116,7 @@ _eos_;
 _eos_;
     } else if ($val['owner_id'] != null && $val['owner_id'] == $aUserInfo['user_id']) {
         $sDeckLink = <<<_eos_
-    <div class="edit_link mine clearfix">
+    <div class="edit_link zabuton_blue mine clearfix">
         <a href="/deck/edit/{$deckId}/">デッキ編集</a>
     </div>
 
@@ -89,9 +126,9 @@ _eos_;
     foreach ($val['cards'] as $listCard) {
         for ($i = 0 ; $i < $listCard['num'] ; $i++)
         $sCardListHtml .= <<<_eos_
-        <div class="card_image">
-            <img src="/images/card/card.jpg" original-src="/images/card/{$listCard['image_file_name']}" alt="{$listCard['card_name']}" />
-        </div>
+            <div class="card_image">
+                <img src="/images/card/card.jpg" original-src="/images/card/{$listCard['image_file_name']}" alt="{$listCard['card_name']}" />
+            </div>
 
 _eos_;
     }
@@ -135,6 +172,9 @@ _eos_;
 $sDeckListHtml .= '</div>';
 
 $sMoreDeckList = '<div id="more_deck_list" page="1"><span>もっと見る</span></div>';
+if (isset($this->bMine) && $this->bMine) {
+    $sMoreDeckList .= '<div id="mydecks" style="display:none;"></div>';
+}
 
 $sGameStartHtml = '';
 if (isset($this->bGameStart) && $this->bGameStart) {
@@ -153,7 +193,9 @@ echo $this->sExplain;
 echo $sGameStartHtml;
 echo $sMessageHtml;
 echo $sNewLink;
+echo $sMydeckLink;
 echo $sDeckListHtml;
 echo $sMoreDeckList;
 echo $sNewLink;
+echo $sMydeckLink;
 echo $sPageInfoHtml;

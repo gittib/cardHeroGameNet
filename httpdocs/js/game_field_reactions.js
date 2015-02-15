@@ -91,6 +91,14 @@ game_field_reactions = (function () {
         'updateField'               : updateField,
 
         /**
+         * 特技使用時の反撃行動を処理する
+         *
+         * @param   aArgs.field_data    : フィールド情報管理オブジェクト
+         * @param   aArgs.actor_id      : 登場者のgame_card_id
+         */
+        'artsUsedReaction'            : artsUsedReaction,
+
+        /**
          * 登場時の反撃行動を処理する
          *
          * @param   aArgs.field_data    : フィールド情報管理オブジェクト
@@ -444,7 +452,7 @@ game_field_reactions = (function () {
             var sImg        = '<img src="/images/card/' + sImageFileName + '" alt="' + sImageAlt + '" />';
             var sProposer   = '';
             if (aCardData.proposer) {
-                sProposer   = '<div class="proposer"> arranged by ' + aCardData.proposer + '</div>';
+                sProposer   = '<div class="proposer"> Arranged&nbsp; </div>';
             }
             var sStatusLink = '';
             var sDtlLink    = '<a class="blank_link" target="_blank" href="/card/detail/' + aCardData.card_id + '/">詳細</a>';
@@ -1331,6 +1339,59 @@ game_field_reactions = (function () {
                     target_id       : aArgs.target_id,
                 }],
             });
+        }
+    }
+
+    function artsUsedReaction(aArgs)
+    {
+        g_field_data = aArgs.field_data;
+        var act = g_field_data.cards[aArgs.actor_id];
+        var aMonsterData = g_master_data.m_monster[act.monster_id];
+        var bReactionPushed = false;
+        if (typeof act.skill_disable_flg == 'undefined' || !act.skill_disable_flg) {
+            switch (aMonsterData.skill.id) {
+                case 7:
+                    g_field_data.queues.push({
+                        actor_id            : act.game_card_id,
+                        log_message         : '',
+                        resolved_flg        : 0,
+                        actor_anime_disable : true,
+                        priority            : 'reaction',
+                        queue_units : [{
+                            queue_type_id   : 1008,
+                            target_id       : act.game_card_id,
+                        }],
+                    });
+                    break;
+                case 10:
+                    g_field_data.queues.push({
+                        actor_id            : act.game_card_id,
+                        log_message         : 'ロロは飛び去った',
+                        resolved_flg        : 0,
+                        priority            : 'reaction',
+                        queue_units : [{
+                            queue_type_id   : 1021,
+                            target_id       : act.game_card_id,
+                            param1          : game_field_utility.getModifyMonsterId(act.monster_id),
+                            param2          : false,
+                        }],
+                    });
+                    break;
+                case 12:
+                    g_field_data.queues.push({
+                        actor_id            : act.game_card_id,
+                        log_message         : '性格「後退」発動',
+                        resolved_flg        : 0,
+                        actor_anime_disable : true,
+                        priority            : 'reaction',
+                        queue_units : [{
+                            queue_type_id   : 1022,
+                            target_id       : act.game_card_id,
+                            param1          : game_field_utility.getRelativePosId(act.pos_id, {x:0, y:1}),
+                        }],
+                    });
+                    break;
+            }
         }
     }
 

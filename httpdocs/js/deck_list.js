@@ -7,6 +7,9 @@ function loadMoreDeck (iPageNo) {
     }
 
     var sUrl = '/api/deck/more/p/' + iPageNo + '/';
+    if ($('[mydeck]').size()) {
+        sUrl += 'mine/t/';
+    }
     $.getJSON(sUrl, function(json) {
         try {
             var sHtml = '';
@@ -39,7 +42,7 @@ function loadMoreDeck (iPageNo) {
                         case 'deck_list':
                             if ($('#page_info').attr('user_id') == val['owner_id']) {
                                 sDeckLink =
-                                    '<div class="edit_link mine clearfix">' +
+                                    '<div class="edit_link zabuton_blue mine clearfix">' +
                                         '<a href="/deck/edit/' + iDeckNo + '/">デッキ編集</a>' +
                                     '</div>';
                             }

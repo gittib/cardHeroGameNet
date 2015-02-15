@@ -106,6 +106,24 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         );
         $router->addRoute('game_receive', $route);
 
+        // ゲーム受領(自分のデッキを使用)
+        $route = new Zend_Controller_Router_Route_Regex(
+            'game/receive/deck/mine/(\d+)(/(\d+))?',
+            array(
+                'controller'    =>  'game',
+                'action'        =>  'receive',
+                'deck'          => 'mine',
+                1               =>  1,
+                2               =>  1,
+                3               =>  1,
+            ),
+            array(
+                1   => 'game_field_id',
+                3   => 'page_no',
+            )
+        );
+        $router->addRoute('game_receive_mine', $route);
+
         // ゲームプレイ
         $route = new Zend_Controller_Router_Route_Regex(
             'game/field/(\d+)',

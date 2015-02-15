@@ -9,6 +9,7 @@ class model_Deck {
 
     /**
      * @param aArgs['page_no']
+     * @param aArgs['mine']
      * @param aArgs['max_rare_max']
      * @param aArgs['sum_rare_max']
      *
@@ -40,6 +41,9 @@ class model_Deck {
                 'deck_id desc',
             ))
             ->limitPage($nPage, $iDecksInPage);
+        if (isset($aArgs['mine']) && $aArgs['mine'] != '') {
+            $sub->where('td.user_id = ?', $userId);
+        }
         if (isset($aArgs['max_rare_max']) && $aArgs['max_rare_max'] != '') {
             $sub2 = $this->_db->select()
                 ->distinct()

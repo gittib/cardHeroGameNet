@@ -443,6 +443,8 @@ game_field_utility = (function () {
                 throw new Error('not_super');
             }
         } catch (e) {
+            console.log('isValidSuper Failure.');
+            console.log(e.stack);
             return false;
         }
 

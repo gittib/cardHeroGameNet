@@ -14,10 +14,10 @@ class IndexController extends Zend_Controller_Action
     {
         $layout = new Zend_Layout();
         $layout->stylesheet = array(
-                '/css/top.css?ver=20150201',
+                '/css/top.css?ver=20150207',
                 );
         $layout->javascript = array(
-                '/js/top.js?ver=20150201',
+                '/js/top.js?ver=20150207',
                 );
 
         $layout->title = 'スマホで遊べるカードヒーロー！';

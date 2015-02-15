@@ -14,7 +14,7 @@
 【使い方】
   1.「UA-*******-*」を自分のAnalyticsのトラッキングIDに書き換えてからご使用ください。
   2.「dimension1」を自分のカスタムディメンション番号に書き換えます。
-    
+
   以下を書き換え↓
 ----------------------------------------------------------*/
   ga('create', 'UA-53206929-1');
@@ -33,13 +33,16 @@ body {
     color: #c00;
 }
 </style>
-  </head>
-  <body>
-    <div id="ready">
-      <p>GoogleAnalyticsからの除外設定が完了しました。
-        <br><span class="txt-warn">※2年間有効ですが、月1回程度の定期的な訪問をお願いいたします。</span></p>
-      <p><a href="/">TOPへ</a></p>
-    </div>
-  </body>
+</head>
+<body>
+  <div id="ready">
+    <p>
+      GoogleAnalyticsからの除外設定が完了しました。<br />
+      <span class="txt-warn">※2年間有効ですが、月1回程度の定期的な訪問をお願いいたします。</span>
+    </p>
+    <p>
+      <a href="/">TOPへ</a>
+    </p>
+  </div>
+</body>
 </html>
-

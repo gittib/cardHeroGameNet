@@ -1304,53 +1304,10 @@ new function () {
                                         // param2 が立ってる時は何もしないでキュー処理成功扱いとする
                                         break;
                                     }
-                                    var actorMon = g_field_data.cards[aExecAct.actor_id];
-                                    if (!actorMon.skill_disable_flg) {
-                                        var aMonsterData = g_master_data.m_monster[actorMon.monster_id];
-                                        switch (aMonsterData.skill.id) {
-                                            case 7:
-                                                g_field_data.queues.push({
-                                                    actor_id            : actorMon.game_card_id,
-                                                    log_message         : '',
-                                                    resolved_flg        : 0,
-                                                    actor_anime_disable : true,
-                                                    priority            : 'reaction',
-                                                    queue_units : [{
-                                                        queue_type_id   : 1008,
-                                                        target_id       : actorMon.game_card_id,
-                                                    }],
-                                                });
-                                                break;
-                                            case 10:
-                                                g_field_data.queues.push({
-                                                    actor_id            : actorMon.game_card_id,
-                                                    log_message         : 'ロロは飛び去った',
-                                                    resolved_flg        : 0,
-                                                    priority            : 'reaction',
-                                                    queue_units : [{
-                                                        queue_type_id   : 1021,
-                                                        target_id       : actorMon.game_card_id,
-                                                        param1          : game_field_utility.getModifyMonsterId(actorMon.monster_id),
-                                                        param2          : false,
-                                                    }],
-                                                });
-                                                break;
-                                            case 12:
-                                                g_field_data.queues.push({
-                                                    actor_id            : actorMon.game_card_id,
-                                                    log_message         : '性格「後退」発動',
-                                                    resolved_flg        : 0,
-                                                    actor_anime_disable : true,
-                                                    priority            : 'reaction',
-                                                    queue_units : [{
-                                                        queue_type_id   : 1022,
-                                                        target_id       : actorMon.game_card_id,
-                                                        param1          : game_field_utility.getRelativePosId(actorMon.pos_id, {x:0, y:1}),
-                                                    }],
-                                                });
-                                                break;
-                                        }
-                                    }
+                                    game_field_reactions.artsUsedReaction({
+                                        field_data  : g_field_data,
+                                        actor_id    : aExecAct.actor_id,
+                                    });
                                     break;
                                 case 1003:
                                     var sPosId = '#myMaster .pict';
@@ -2704,6 +2661,8 @@ new function () {
             }
             if (pow < 0) {
                 throw new Error('minus_power');
+            } else if (target.hp < pow) {
+                pow = target.hp;
             }
         } catch (e) {
             // 計算処理に失敗したら０パワーを返す
@@ -2757,6 +2716,9 @@ new function () {
                         target_id       : targetId,
                     }],
                 });
+            }
+            if (target.hp < dam) {
+                dam = target.hp;
             }
         } catch (e) {
             // 計算処理に失敗したら０ダメージを返す

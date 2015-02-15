@@ -111,19 +111,28 @@ class GameController extends Zend_Controller_Action
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/deck_list.min.js';
         } else {
-            $this->_javascript[] = '/js/deck_list.min.js?ver=20150111';
+            $this->_javascript[] = '/js/deck_list.min.js?ver=20150215';
         }
         $this->_javascript[] = '/js/game_list.js';
         $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_layout->title = 'ゲーム開始';
+
         $iPage = $request->getParam('page_no');
+        $sExp = '新しくゲームを開始します。<br />使用するデッキを選んでください。';
+        $bMine = false;
+        if ($request->getParam('deck', '') == 'mine') {
+            $bMine = true;
+            $sExp = 'あなたが投稿したデッキを使って、新しくゲームを開始します。<br />使用するデッキを選んでください。';
+        }
         $ret = $modelDeck->getDeckList(array(
             'page_no'   => $iPage,
+            'mine'      => $bMine,
         ));
 
         $this->view->assign('aDeckList', $ret);
         $this->view->assign('bGameStandby', true);
-        $this->view->assign('sDispMessage', '新しくゲームを開始します。<br />使用するデッキを選んでください。');
+        $this->view->assign('bMine', $bMine);
+        $this->view->assign('sDispMessage', $sExp);
         $this->render('deck/index', null, true);
     }
 
@@ -151,20 +160,31 @@ class GameController extends Zend_Controller_Action
         $modelDeck = new model_Deck();
 
         $request = $this->getRequest();
-        $iGameFieldId   = $request->getParam('game_field_id');
-        $iPage          = $request->getParam('page_no');
-        $sReferer       = $request->getParam('referer');
+        $iGameFieldId   = $request->getParam('game_field_id', '');
+        $iPage          = $request->getParam('page_no', '');
+        $sReferer       = $request->getParam('referer', '');
+
+        if (!$iGameFieldId) {
+            throw new Zend_Controller_Action_Exception('game_field_id is null.');
+        }
         $this->_stylesheet[] = '/css/game_list.css';
         $this->_stylesheet[] = '/css/deck_list.css';
         $this->_stylesheet[] = '/css/game_receive.css';
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/deck_list.js';
         } else {
-            $this->_javascript[] = '/js/deck_list.min.js?ver=20150111';
+            $this->_javascript[] = '/js/deck_list.min.js?ver=20150215';
         }
         $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_layout->title = 'ゲーム開始';
         $this->_layout->noindex = true;
+
+        $sExp = '使用するデッキを選んでください。';
+        $bMine = false;
+        if ($request->getParam('deck', '') == 'mine') {
+            $bMine = true;
+            $sExp = 'あなたが投稿したデッキを使って、対戦を受けます。<br />使用するデッキを選んでください。';
+        }
 
         $aCardInfoArray = $this->_model->getFieldDetail(array(
             'game_field_id'         => $iGameFieldId,
@@ -173,13 +193,15 @@ class GameController extends Zend_Controller_Action
         ));
         $aDeckList = $modelDeck->getDeckList(array(
             'page_no'   => $iPage,
+            'mine'      => $bMine,
         ));
         $this->view->assign('aCardInfoInField', reset($aCardInfoArray));
         $this->view->assign('aDeckList', $aDeckList);
         $this->view->assign('iGameFieldId', $iGameFieldId);
         $this->view->assign('bGameStart', true);
         $this->view->assign('sReferer', $sReferer);
-        $this->view->assign('sDispMessage', '使用するデッキを選んでください。');
+        $this->view->assign('bMine', $bMine);
+        $this->view->assign('sDispMessage', $sExp);
         $this->render('deck/index', null, true);
     }
 
@@ -226,7 +248,7 @@ class GameController extends Zend_Controller_Action
             //*/
         } else {
             $this->_javascript[] = '/js/master_data.js';
-            $this->_javascript[] = '/js/game_field.min.js?ver=20150205';
+            $this->_javascript[] = '/js/game_field.min.js?ver=20150215';
         }
 
         $iBeforeFieldId = $this->_model->getBeforeFieldId($iGameFieldId);
