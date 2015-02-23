@@ -228,7 +228,7 @@ arts_queue = (function () {
                 break;
             case 1007:
                 var aRet = [];
-                if (Math.random() * 2 < 1) {
+                if (rand_gen.rand(0, 1)) {
                     aRet.push({
                         queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
                         target_id       : aArgs.targets[0].game_card_id,
@@ -299,7 +299,7 @@ arts_queue = (function () {
                 }];
                 break;
             case 1012:
-                var dam = parseInt(Math.random() * 4) + 2;
+                var dam = rand_gen.rand(2, 5);
                 return [
                     {
                         queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
@@ -437,7 +437,7 @@ arts_queue = (function () {
                         'enemyFront2',
                         'enemyMaster',
                     ];
-                    return a[parseInt(Math.random() * 5)];
+                    return a[rand_gen.rand(0, 4)];
                 })();
                 var aRet = [{
                     queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
@@ -925,7 +925,7 @@ arts_queue = (function () {
             case 1041:
                 var aRet = [];
                 var sOwner = 'my';
-                if (parseInt(Math.random() * 2)) {
+                if (rand_gen.rand(0, 1)) {
                     sOwner = 'enemy';
                 }
                 $.each(aArgs.field_data.cards, function(i, val) {

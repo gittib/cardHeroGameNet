@@ -105,7 +105,7 @@ class model_Game {
                 ->from(
                     't_game_field',
                     array(
-                        'field_id_path' => new Zend_Db_Expr("field_id_path || '-' || game_field_id"),
+                        'field_id_path' => new Zend_Db_Expr("case field_id_path when '' then game_field_id::text else field_id_path || '-' || game_field_id end"),
                     )
                 )
                 ->where('game_field_id = ?', $aOption['last_game_field_id']);
@@ -163,7 +163,7 @@ class model_Game {
                 array(
                     'game_field_id',
                     'field_id_path',
-                    'turn_count' => new Zend_Db_Expr("length(regexp_replace(field.field_id_path, '[^-]', '', 'g')) + 2"),
+                    'turn_count' => new Zend_Db_Expr("case when field.field_id_path = '' then 0 else length(regexp_replace(field.field_id_path, '[^-]', '', 'g')) + 1 end"),
                     'turn',
                     'user_id',
                     'stone1',
@@ -245,7 +245,11 @@ class model_Game {
         $rslt = $this->_db->fetchAll($sel);
         $aRareInfo = array();
         foreach ($rslt as $val) {
-            $aRareInfo[$val['game_field_id']][$val['owner']] = $val['max_rare'];
+            if ($val['max_rare'] < 8) {
+                $aRareInfo[$val['game_field_id']][$val['owner']] = '８無';
+            } else {
+                $aRareInfo[$val['game_field_id']][$val['owner']] = '８有';
+            }
         }
 
         $sel = $this->_db->select()
@@ -366,10 +370,10 @@ class model_Game {
                 if ($aTmpRow['category'] == 'master') {
                     switch ($aTmpRow['card_id']) {
                         case 1002:
-                            $sMaster = '黒';
+                            $sMaster = '<span style="display:none;">黒</span>';
                             break;
                         case 1003:
-                            $sMaster = '白';
+                            $sMaster = '<span style="display:none;">白</span>';
                             break;
                     }
                     $iGameFieldId = $val['game_field_id'];
@@ -381,6 +385,7 @@ class model_Game {
                     } else {
                         $aRet[$iGameFieldId]['field_info']['title_str'] .= "VS【{$sMaster}】";
                         $aRet[$iGameFieldId]['field_info']['title_str'] .= "{$aRet[$iGameFieldId]['field_info']['turn_count']}ターン目";
+                        $aRet[$iGameFieldId]['field_info']['title_str'] = str_replace('style="display:none;"', '', $aRet[$iGameFieldId]['field_info']['title_str']);
                         //$aRet[$iGameFieldId]['field_info']['title_str'] .= "[{$aRet[$iGameFieldId]['field_info']['upd_date']}]";
                     }
                 }
@@ -438,6 +443,8 @@ class model_Game {
             case 129:
             case 130:
                 return "{$sPos}{$row['monster_name']}に{$row['status_name']}";
+            case 132:
+                return "{$sPos}{$row['monster_name']}は{$row['status_name']}";
             case 119:
                 if ($row['game_card_id'] < $row['status_param1']) {
                     return '';
@@ -861,9 +868,9 @@ class model_Game {
             'monster_id'        => $arr['master_monster_id'],
             'hp'                => 10,
         );
-        for ($i = 0 ; $i < 5 ; $i++) {
-            $aCardInfo['hand_cards'][] = array_pop($aCardInfo['deck_cards']);
-        }
+        // for ($i = 0 ; $i < 5 ; $i++) {
+        //     $aCardInfo['hand_cards'][] = array_pop($aCardInfo['deck_cards']);
+        // }
 
         try {
             $this->_db->beginTransaction();
@@ -965,9 +972,9 @@ class model_Game {
             'monster_id'        => $arr['master_monster_id'],
             'hp'                => 10,
         );
-        for ($i = 0 ; $i < 4 ; $i++) {
-            $aCardInfo['hand_cards'][] = array_pop($aCardInfo['deck_cards']);
-        }
+        // for ($i = 0 ; $i < 4 ; $i++) {
+        //     $aCardInfo['hand_cards'][] = array_pop($aCardInfo['deck_cards']);
+        // }
 
         try {
             $this->_db->beginTransaction();
@@ -977,9 +984,10 @@ class model_Game {
             $set = array(
                 'game_field_id'     => $iGameFieldId,
                 'user_id'           => $userId,
-                'turn'              => 1,
+                'turn'              => 2,
                 'stone1'            => 0,
                 'stone2'            => 0,
+                'open_flg'          => 1,
             );
             $this->_db->insert('t_game_field', $set);
             $iSort = 1000;

@@ -50,6 +50,7 @@ class GameController extends Zend_Controller_Action
             'open_flg'          => 1,
             'new_arrival'       => $bLast,
         ));
+
         $bLast = false;
         if ($request->getParam('bLast')) {
             $bLast = true;
@@ -57,10 +58,16 @@ class GameController extends Zend_Controller_Action
             $this->_layout->description = '中断しているフィールド一覧です。あなたの返信が思わぬ戦略につながるかも？';
         }
 
+        $bNewFieldCommited = false;
+        if ($request->getParam('referer', '') == 'standby') {
+            $bNewFieldCommited = true;
+        }
+
         $this->view->assign('aCardInfoArray', $aCardInfoArray);
         $this->view->assign('nFields', $nFields);
         $this->view->assign('nPage', $nPage);
         $this->view->assign('bLast', $bLast);
+        $this->view->assign('bNewFieldCommited', $bNewFieldCommited);
 
         $bFieldSended = $request->getParam('field_sended');
         if (isset($bFieldSended) && $bFieldSended) {
@@ -147,10 +154,15 @@ class GameController extends Zend_Controller_Action
 
         $this->_getModel();
 
-        $iGameFieldId = $this->_model->standby($deckId);
-        $request->setParam('game_field_id', $iGameFieldId);
+        $this->_model->standby($deckId);
 
-        $this->forward('field');
+        $this->_redirect(
+            '/game/?referer=standby',
+            array(
+                'exit' => true,
+                'code' => 301
+            )
+        );
     }
 
     public function receiveAction()
@@ -221,6 +233,8 @@ class GameController extends Zend_Controller_Action
             'deck_id'       => $request->getParam('deck_id'),
         ));
         $request->setParam('game_field_id', $iGameFieldId);
+        $request->setParam('bStandby', true);
+        $request->setParam('bMarigan', true);
 
         $this->forward('field');
     }
@@ -231,12 +245,15 @@ class GameController extends Zend_Controller_Action
 
         $request = $this->getRequest();
         $iGameFieldId = $request->getParam('game_field_id');
+        $bStandby = $request->getParam('bStandby', false);
+        $bMarigan = $request->getParam('bMarigan', false);
         $sReferer = $request->getParam('referer');
         $this->_stylesheet[] = '/css/game_field.css?ver=20150118';
 
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/js_debug.js';
             $this->_javascript[] = '/js/master_data.js';
+            $this->_javascript[] = '/js/rand_gen.js';
             /*
             $this->_javascript[] = '/js/game_field.min.js';
             /*/
@@ -248,6 +265,7 @@ class GameController extends Zend_Controller_Action
             //*/
         } else {
             $this->_javascript[] = '/js/master_data.js';
+            $this->_javascript[] = '/js/rand_gen.js';
             $this->_javascript[] = '/js/game_field.min.js?ver=20150215';
         }
 
@@ -270,6 +288,8 @@ class GameController extends Zend_Controller_Action
         $this->view->assign('iGameFieldId', $iGameFieldId);
         $this->view->assign('bBefore', ($iGameFieldId != $iBeforeFieldId));
         $this->view->assign('sReferer', $sReferer);
+        $this->view->assign('bStandby', $bStandby);
+        $this->view->assign('bMarigan', $bMarigan);
         $this->view->assign('aQueue', $aQueue);
     }
 
@@ -300,9 +320,11 @@ class GameController extends Zend_Controller_Action
 
         $this->_redirect(
             $sUrl,
-            array('code' => 301)
+            array(
+                'exit' => true,
+                'code' => 301
+            )
         );
-        exit();
     }
 
     private function _getModel() {

@@ -60,7 +60,7 @@
         }
         $sStandbyClass = '';
         $sCardBack = '';
-        if ($val['standby_flg'] && $val['position'] != 'Master') {
+        if ($val['standby_flg']) {
             $sLv = '?';
             $sHp = '?';
             if (!isset($this->bKifu)) {

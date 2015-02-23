@@ -343,12 +343,18 @@ _eos_;
 
 <div class="hidden_cards_info">
 <?php
-    $sFirstTrun = '1';
-    if ($this->bBefore) {
-        $sFirstTrun = '0';
-    }
-    echo "<div turn_num='{$aCardInfo['field_info']['turn']}' turn_count='{$aCardInfo['field_info']['turn_count']}' first_turn='{$sFirstTrun}'></div>";
+    echo <<<_eos_
+<div
+    turn_num='{$aCardInfo['field_info']['turn']}'
+    turn_count='{$aCardInfo['field_info']['turn_count']}'
+    bStandby='{$this->bStandby}'
+    bMarigan='{$this->bMarigan}'
+></div>
+
+_eos_;
 ?>
+<input type="hidden" name="bStandby" value="<?php echo $this->bStandby; ?>" />
+<input type="hidden" name="bMarigan" value="<?php echo $this->bMarigan; ?>" />
 </div>
 <script type="text/javascript">
 function getCardsJson() {

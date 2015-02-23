@@ -702,10 +702,11 @@ game_field_reactions = (function () {
                     // 移動、逃げる or メイクカード
                     var sCost = '';
                     var iStone = 0;
-                    if (aCard.status) {
-                        if (typeof aCard.status[123] != 'undefined') {
-                            iStone += 2;
-                        }
+                    if (!aCard.status) {
+                        aCard.status = {};
+                    }
+                    if (aCard.status[123]) {
+                        iStone += 2;
                     }
                     if (iStone > 0) {
                         sCost =
@@ -715,13 +716,23 @@ game_field_reactions = (function () {
                             '</span>';
                     }
                     if (aCardData.category == 'master') {
-                        sCommandsHtml +=
-                            '<div class="command_row" act_type="make_card">' +
-                                'メイクカード' +
-                                '<div class="num_info">' +
-                                    sCost +
-                                '</div>' +
-                            '</div>';
+                        if (aCard.status[132]) {
+                            sCommandsHtml +=
+                                '<div class="command_row" act_type="marigan">' +
+                                    'マリガン' +
+                                    '<div class="num_info">' +
+                                        sCost +
+                                    '</div>' +
+                                '</div>';
+                        } else {
+                            sCommandsHtml +=
+                                '<div class="command_row" act_type="make_card">' +
+                                    'メイクカード' +
+                                    '<div class="num_info">' +
+                                        sCost +
+                                    '</div>' +
+                                '</div>';
+                        }
                     } else {
                         // 気合溜めコマンドは禁止
                         // switch (g_master_data.m_monster[aCardData.monster_id].skill.id) {
@@ -1544,6 +1555,22 @@ game_field_reactions = (function () {
                     ],
                 });
             }
+            if (targetMon.status[132]) {
+                g_field_data.queues.push({
+                    actor_id        : aArgs.target_id,
+                    log_message     : 'マリガン無効化',
+                    resolved_flg    : 0,
+                    priority        : 'same_time',
+                    actor_anime_disable : true,
+                    queue_units : [
+                        {
+                            queue_type_id   : 1027,
+                            param1          : 132,
+                            target_id       : aArgs.target_id,
+                        }
+                    ],
+                });
+            }
             if (targetMon.status[122]) {
                 if (1 < targetMon.hp) {
                     g_field_data.queues.push({
@@ -2149,6 +2176,12 @@ game_field_reactions = (function () {
     {
         console.log('checkGameState started.');
 
+        // ゲーム開始時
+        if ($('div[bStandby]').attr('bStandby') && !$('div[bMarigan]').attr('bMarigan')) {
+            console.log('standby_game');
+            return 'standby_game';
+        }
+
         // 特技封じの対象特技選択とか、特殊な状態の判定
         if (g_field_data.sort_card_flg) {
             console.log('sort_card');
@@ -2207,13 +2240,16 @@ game_field_reactions = (function () {
     }
 
     function updateGameInfoMessage() {
-        var s =  checkGameState();
+        var s = checkGameState();
 
         if (g_sBeforeGameState == s) {
             return;
         }
         g_sBeforeGameState = s;
         switch (s) {
+            case 'standby_game':
+                s = 'ゲーム準備完了。このままターンエンドして、対戦相手を待って下さい';
+                break;
             case 'select_actor':
                 s = 'カードを選択してください';
                 break;

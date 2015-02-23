@@ -40,11 +40,7 @@ new function () {
 
         initSortCardProc();
 
-        setTimeout(function () {
-            startingProc({
-                'first_turn_flg'    : ($('div[first_turn_flg]').attr('first_turn_flg')),
-            });
-        }, 333);
+        setTimeout(function () { startingProc(); }, 333);
 
         $(document).on('click', '#game_field td.monster_space', function () {
             var _updateActorInfo = function () {
@@ -376,9 +372,12 @@ new function () {
         var iGameFieldScrollPos = $('#game_field').offset().top;
         $('html,body').animate({ scrollTop: iGameFieldScrollPos }, 1);
 
+        g_field_data.game_field_id  = Number($('input[name=game_field_id]').val());
         g_field_data.turn           = Number($('div[turn_num]').attr('turn_num'));
         g_field_data.my_stone       = Number($('#myPlayersInfo div.stone span').text());
         g_field_data.enemy_stone    = Number($('#enemyPlayersInfo div.stone span').text());
+
+        rand_gen.srand(g_field_data.game_field_id, 100);
 
         g_field_data.cards      = getCardsJson();
         g_field_data.old_queues = getQueueJson();
@@ -464,8 +463,6 @@ new function () {
      * ターン開始時の処理。おおよそ、以下の処理を行う。
      * ストーン支給、 カードドロー、 準備中の味方モンスター登場、 ルールによる前進処理、 その他ターン開始時に処理する効果
      *
-     * @param   aArgs.first_turn_flg    : trueだったら先攻１ターン目。何か先攻ペナルティつける
-     *
      * @return  true:適正対象、false:不適正
      */
     function startingProc(aArgs)
@@ -475,19 +472,81 @@ new function () {
             pos_id          : 'myMaster',
         });
 
-        g_field_data.queues.push({
-            actor_id        : null,
-            log_message     : 'ストーン3個を支給',
-            resolved_flg    : 0,
-            priority        : 'standby_system',
-            queue_units : [{
-                queue_type_id   : 1004,
-                target_id       : myMasterId,
-                param1          : 3,
-            }],
-        });
+        // 初期状態か判定
+        var bInitial = (function() {
+            try {
+                if (g_field_data.my_stone != 0 || g_field_data.enemy_stone != 0) {
+                    throw 'not_initial';
+                }
+                var iInitialDeckCards = 60;
+                var iDeckCards = 0;
+                $.each (g_field_data.cards, function(iGameCardId, val) {
+                    if (val.pos_category == 'deck') {
+                        iDeckCards++;
+                    }
+                    if (val.pos_category == 'used' || val.pos_category == 'hand') {
+                        throw 'not_initial';
+                    }
+                });
+                if (iInitialDeckCards <= iDeckCards) {
+                    return true;
+                }
+            } catch (e) {}
+            return false;
+        })();
 
-        if (!aArgs.first_turn_flg) {
+        if (bInitial) {
+            var enemyMasterId = game_field_reactions.getGameCardId({
+                pos_category    : 'field',
+                pos_id          : 'enemyMaster',
+            });
+
+            g_field_data.queues.push({
+                actor_id        : enemyMasterId,
+                log_message     : '初期手札をドロー',
+                resolved_flg    : 0,
+                priority        : 'system',
+                queue_units : [{
+                    queue_type_id   : 1011,
+                    target_id       : enemyMasterId,
+                    param1          : 'draw',
+                    param2          : 4,
+                }, {
+                    queue_type_id   : 1026,
+                    target_id       : enemyMasterId,
+                    param1          : 132,
+                }],
+            });
+
+            g_field_data.queues.push({
+                actor_id        : myMasterId,
+                log_message     : '初期手札をドロー',
+                resolved_flg    : 0,
+                priority        : 'system',
+                queue_units : [{
+                    queue_type_id   : 1011,
+                    target_id       : myMasterId,
+                    param1          : 'draw',
+                    param2          : 5,
+                }, {
+                    queue_type_id   : 1026,
+                    target_id       : myMasterId,
+                    param1          : 132,
+                }],
+            });
+        } else {
+            g_field_data.queues.push({
+                actor_id        : null,
+                log_message     : 'ストーン3個を支給',
+                resolved_flg    : 0,
+                priority        : 'standby_system',
+                queue_units : [{
+                    queue_type_id   : 1004,
+                    target_id       : myMasterId,
+                    param1          : 3,
+                }],
+            });
+
             g_field_data.queues.push({
                 actor_id        : null,
                 log_message     : 'カードを1枚ドロー',
@@ -503,6 +562,7 @@ new function () {
         }
 
         var keys = [
+            'enemyMaster',
             'myMaster',
             'myFront1',
             'myFront2',
@@ -561,7 +621,7 @@ new function () {
                                 {
                                     queue_type_id   : 1026,
                                     target_id       : iGameCardId,
-                                    param1          : (Math.random() < 0.5) ? 101 : 104,
+                                    param1          : (rand_gen.rand() % 2) ? 101 : 104,
                                 }
                             ],
                         });
@@ -867,20 +927,16 @@ new function () {
                         }
                     }
                     break;
-                case 'make_card':
+                case 'marigan':
                     aQueue = {
                         actor_id        : actor.game_card_id,
-                        log_message     : 'メイクカードを使用',
+                        log_message     : 'マリガンを使用',
                         resolved_flg    : 0,
                         priority        : 'command',
                         queue_units : [{
-                            queue_type_id   : 1011,
+                            queue_type_id   : 1027,
                             target_id       : actor.game_card_id,
-                            param1          : 'draw',
-                            param2          : 1,
-                        },{
-                            queue_type_id   : 1023,
-                            target_id       : actor.game_card_id,
+                            param1          : 132,
                             cost_flg        : true,
                         },{
                             queue_type_id   : 1024,
@@ -888,7 +944,59 @@ new function () {
                             cost_flg        : true,
                         }],
                     };
+
+                    var iHands = 0;
+                    var aGameCardId = [];
+                    $.each (g_field_data.cards, function (iGameCardId, val) {
+                        if (val.owner == 'my' && val.pos_category == 'hand') {
+                            iHands++;
+                            aQueue.queue_units.push({
+                                queue_type_id   : 1031,
+                                target_id       : iGameCardId,
+                                cost_flg        : true,
+                            });
+                        }
+                    });
+
+                    aQueue.queue_units.push({
+                        queue_type_id   : 1012,
+                        target_id       : actor.game_card_id,
+                        param1          : 'shuffle',
+                        param2          : rand_gen.rand(),
+                    });
+                    aQueue.queue_units.push({
+                        queue_type_id   : 1011,
+                        target_id       : actor.game_card_id,
+                        param1          : 'draw',
+                        param2          : iHands,
+                    });
+
                     _addStoneNoroiCost(g_field_data.cards[aQueue.actor_id]);
+                    break;
+                case 'make_card':
+                    if (game_field_reactions.checkGameState() != 'standby_game') {
+                        aQueue = {
+                            actor_id        : actor.game_card_id,
+                            log_message     : 'メイクカードを使用',
+                            resolved_flg    : 0,
+                            priority        : 'command',
+                            queue_units : [{
+                                queue_type_id   : 1011,
+                                target_id       : actor.game_card_id,
+                                param1          : 'draw',
+                                param2          : 1,
+                            },{
+                                queue_type_id   : 1023,
+                                target_id       : actor.game_card_id,
+                                cost_flg        : true,
+                            },{
+                                queue_type_id   : 1024,
+                                target_id       : actor.game_card_id,
+                                cost_flg        : true,
+                            }],
+                        };
+                        _addStoneNoroiCost(g_field_data.cards[aQueue.actor_id]);
+                    }
                     break;
                 case 'lvup':
                     aQueue = {
@@ -1035,6 +1143,7 @@ new function () {
                 case 'charge':
                 case 'escape':
                 case 'make_card':
+                case 'marigan':
                     if (actor.game_card_id == aTargetInfo.game_card_id) {
                         _addActionFromActorInfo();
                         return true;
@@ -1154,7 +1263,7 @@ new function () {
                                     var mon = g_field_data.cards[q.target_id];
                                     if (typeof mon.status != 'undefined') {
                                         if (typeof mon.status[115] != 'undefined') {
-                                            if (Math.random() * 2 < 1) {
+                                            if (rand_gen.rand(0, 1)) {
                                                 console.log('omamori set');
                                                 q.queue_type_id = 9999;
                                                 q.param1 = 'omamori';
@@ -1598,7 +1707,31 @@ new function () {
                                     });
                                     break;
                                 case 1012:
-                                    g_field_data.cards[q.target_id].sort_no = q.param1;
+                                    if (q.param1 == 'shuffle') {
+                                        var sOwner = g_field_data.cards[q.target_id].owner;
+                                        var arr = [];
+                                        $.each (g_field_data.cards, function (iGameCardId, val) {
+                                            if (val.owner != sOwner || val.pos_category != 'deck') {
+                                                return true;
+                                            }
+                                            arr.push(iGameCardId);
+                                        });
+
+                                        rand_gen.srand(Number(q.param2, 20));
+                                        arr.sort(function() {
+                                            return rand_gen.rand(0, 1) - 0.5;
+                                        });
+                                        rand_gen.restore();
+
+                                        var iSortNo = 1000;
+                                        console.log(arr);
+                                        $.each(arr, function(i, iGameCardId) {
+                                            console.log(iGameCardId);
+                                            g_field_data.cards[iGameCardId].sort_no = iSortNo++;
+                                        });
+                                    } else {
+                                        g_field_data.cards[q.target_id].sort_no = q.param1;
+                                    }
                                     break;
                                 case 1013:
                                     if (game_field_reactions.getGameCardId({
@@ -2057,6 +2190,7 @@ new function () {
                                             case 125:
                                             case 129:
                                             case 130:
+                                            case 132:
                                                 // こいつらはマスターでも通す
                                                 break;
                                             default:
@@ -2237,7 +2371,6 @@ new function () {
                                     } else {
                                         mon.sort_no = aCard.sort_no + 1;
                                     }
-                                    _insertDrawAnimation(q);
                                     break;
                                 case 1032:
                                     q.param1 = Number(q.param1);
@@ -2876,17 +3009,31 @@ new function () {
                 // ステータス継続時間更新
                 if (typeof val.status != 'undefined') {
                     $.each(val.status, function(status_id, val2) {
-                        g_field_data.queues.push({
-                            actor_id        : null,
-                            log_message     : 'ステータス継続時間を更新',
-                            resolved_flg    : 0,
-                            priority        : 'system',
-                            queue_units : [{
-                                queue_type_id   : 1032,
-                                target_id       : val.game_card_id,
-                                param1          : status_id,
-                            }],
-                        });
+                        if (val.pos_id == 'myMaster' && Number(status_id) == 132) {
+                            g_field_data.queues.push({
+                                actor_id        : val.game_card_id,
+                                log_message     : 'マリガン権消失',
+                                resolved_flg    : 0,
+                                priority        : 'system',
+                                queue_units : [{
+                                    queue_type_id   : 1027,
+                                    target_id       : val.game_card_id,
+                                    param1          : status_id,
+                                }],
+                            });
+                        } else {
+                            g_field_data.queues.push({
+                                actor_id        : null,
+                                log_message     : 'ステータス継続時間を更新',
+                                resolved_flg    : 0,
+                                priority        : 'system',
+                                queue_units : [{
+                                    queue_type_id   : 1032,
+                                    target_id       : val.game_card_id,
+                                    param1          : status_id,
+                                }],
+                            });
+                        }
                     });
                 }
 

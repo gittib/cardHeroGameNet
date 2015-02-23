@@ -159,7 +159,7 @@ magic_queue = (function () {
                         param1          : 'invalid_target',
                     }];
                 }
-                if (Math.random() < 0.5) {
+                if (rand_gen.rand(0, 1)) {
                     aRet.push({
                         queue_type_id   : 1017,
                         target_id       : mon.game_card_id,
@@ -270,7 +270,7 @@ magic_queue = (function () {
                     queue_type_id   : 1008,
                     target_id       : aArgs.targets[0].game_card_id,
                 }];
-                if (Math.random() < 0.5) {
+                if (rand_gen.rand(0, 1)) {
                     aRet.push({
                         queue_type_id   : 1008,
                         target_id       : aArgs.targets[1].game_card_id,
@@ -374,9 +374,9 @@ magic_queue = (function () {
                         iHandNum++;
                     }
                 });
-                var iMaxPic = parseInt(Math.random() * 3) + 1;
+                var iMaxPic = 2;
                 for (var i = 0 ; i < iMaxPic ; i++) {
-                    var j = parseInt(Math.random() * aUsedCards.length);
+                    var j = rand_gen.rand(0, aUsedCards.length-1);
                     aRet.push({
                         queue_type_id   : 1015,
                         target_id       : aUsedCards[j],
@@ -391,7 +391,7 @@ magic_queue = (function () {
                     target_id       : aArgs.targets[0].game_card_id,
                     param1          : 2,
                 }];
-                if (Math.random() < 0.5) {
+                if (rand_gen.rand(0, 1)) {
                     var p1 = game_field_utility.getXYFromPosId(aArgs.targets[0].pos_id);
                     $.each(aArgs.field_data.cards, function(iGameCardId, val) {
                         if (val.pos_category != 'field') {
@@ -523,40 +523,29 @@ magic_queue = (function () {
                 var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
                 var aRet = [];
                 var aCards = [];
-                var nHand = 0;
+                var iHands = 0;
                 $.each(aArgs.field_data.cards, function(iGameCardId, val) {
-                    if (val.owner != mon.owner) {
-                        return true;
-                    }
-                    if (val.pos_category == 'hand') {
+                    if (val.owner == mon.owner && val.pos_category == 'hand') {
+                        iHands++;
                         aRet.push({
                             queue_type_id   : 1031,
                             target_id       : iGameCardId,
+                            cost_flg        : true,
                         });
-                        nHand++;
-                    }
-                    if (val.pos_category == 'hand' || val.pos_category == 'deck') {
-                        aCards.push(iGameCardId);
                     }
                 });
-                for (var i = 0 ; i < nHand ; i++) {
-                    var j = parseInt(Math.random() * aCards.length);
-                    aRet.push({
-                        queue_type_id   : 1011,
-                        target_id       : aCards[j],
-                    });
-                    aCards.splice(j, 1);
-                }
-                var i = 1000;
-                while (0 < aCards.length) {
-                    var j = parseInt(Math.random() * aCards.length);
-                    aRet.push({
-                        queue_type_id   : 1012,
-                        target_id       : aCards[j],
-                        param1          : i++,
-                    });
-                    aCards.splice(j, 1);
-                }
+                aRet.push({
+                    queue_type_id   : 1012,
+                    target_id       : mon.game_card_id,
+                    param1          : 'shuffle',
+                    param2          : rand_gen.rand(),
+                });
+                aRet.push({
+                    queue_type_id   : 1011,
+                    target_id       : mon.game_card_id,
+                    param1          : 'draw',
+                    param2          : iHands,
+                });
                 return aRet;
                 break;
             case 1150:
@@ -652,7 +641,7 @@ magic_queue = (function () {
                 return [{
                     queue_type_id   : 1004,
                     target_id       : aArgs.targets[0].game_card_id,
-                    param1          : parseInt(Math.random() * 3) + 1,
+                    param1          : rand_gen.rand(1, 3),
                 }];
                 break;
             case 1220:
@@ -706,7 +695,7 @@ magic_queue = (function () {
                 }
                 return [{
                     queue_type_id   : 1011,
-                    target_id       : aValidTargets[parseInt(Math.random()*aValidTargets.length)],
+                    target_id       : aValidTargets[rand_gen.rand(0, aValidTargets.length-1)],
                 }];
                 break;
             case 1240:

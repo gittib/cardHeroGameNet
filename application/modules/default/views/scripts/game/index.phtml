@@ -88,6 +88,9 @@ if (isset($this->bLast) && $this->bLast) {
 
 _eos_;
     $sDescription = '投稿されたフィールドの一覧です。';
+    if (isset($this->bNewFieldCommited) && $this->bNewFieldCommited) {
+        $sDescription = '新規ゲームの投稿が完了しました。';
+    }
     $sLastLink = "<a href='/game/last/'>未返信フィールドの一覧へ</a>";
 }
 ?>

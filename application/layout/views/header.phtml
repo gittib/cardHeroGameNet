@@ -8,12 +8,25 @@ if (isset($aUserInfo)) {
 if (APPLICATION_ENV == 'evaluate') {
     echo '<div style="color:red;font-size:22px;"><br />ここは評価環境です。カードヒーロー@スマホにお越しの方は、下記リンクより通常サイトをご利用下さい。<br /><br /><a style="font-size:22px;" href="http://cardhero-game.net/">カードヒーロー@スマホ 通常サイト</a><br /><br /></div>';
 }
+
+$sEnv = '';
+switch (APPLICATION_ENV) {
+    case 'evaluate':
+        $sEnv = '評価環境';
+        break;
+    case 'testing':
+        $sEnv = 'テスト環境';
+        break;
+}
 ?>
 <div id='header'>
-    <div class="title">
+    <div class="title clearfix">
         <h1>
             <img src="/images/cardhero-game.net.jpg" alt="カードヒーロー@スマホ" />
         </h1>
+        <div class="env_echo">
+            <?php echo $sEnv; ?>
+        </div>
     </div>
     <div class="links clearfix">
         <div class="top_link">
