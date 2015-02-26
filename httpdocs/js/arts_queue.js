@@ -42,6 +42,7 @@ arts_queue = (function () {
             if (bSealed) {
                 return null;
             }
+
             aQueue = {
                 actor_id        : aArgs.actor_id,
                 resolved_flg    : 0,
@@ -592,6 +593,14 @@ arts_queue = (function () {
                             throw new Error('ラオンいないのでダメ');
                         }
                         lrCnt++;
+
+                        // 特技チャージを解除
+                        aRet.push({
+                            queue_type_id   : 1027,
+                            target_id       : val.game_card_id,
+                            param1          : 133,
+                            cost_flg        : true,
+                        });
 
                         // 相方も行動する扱いなので、発動者と同様にキューを追加する。行動済みとか石呪いとか
                         if (val.game_card_id != mon.game_card_id) {

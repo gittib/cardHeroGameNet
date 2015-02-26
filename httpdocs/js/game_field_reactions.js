@@ -1415,28 +1415,17 @@ game_field_reactions = (function () {
         var bReactionPushed = false;
         if (typeof target.skill_disable_flg == 'undefined' || !target.skill_disable_flg) {
             switch (aMonsterData.skill.id) {
-                case 23:
-                    // ラオンソード
-                case 24:
-                    // レオンソード
-                    break;
-                case 26:
-                    if (Math.random() < 0.5) {
-                        sLogMessage = 'きまぐれによりパワーアップ';
-                        iStatusType = 101;
-                    } else {
-                        sLogMessage = 'きまぐれによりパワーダウン';
-                        iStatusType = 104;
-                    }
+                case 23: // ラオンソード
+                case 24: // レオンソード
                     g_field_data.queues.push({
                         actor_id        : aArgs.target_id,
-                        log_message     : sLogMessage,
+                        log_message     : '特技チャージ',
                         resolved_flg    : 0,
                         priority        : 'reaction',
                         queue_units : [
                             {
                                 queue_type_id   : 1026,
-                                param1          : iStatusType,
+                                param1          : 133,
                                 target_id       : aArgs.target_id,
                             },
                             {
@@ -1447,7 +1436,34 @@ game_field_reactions = (function () {
                     });
                     bReactionPushed = true;
                     break;
-                case 28:
+                case 26: // きまぐれ
+                    // if (rand_gen.rand(0, 1)) {
+                    //     sLogMessage = 'きまぐれによりパワーアップ';
+                    //     iStatusType = 101;
+                    // } else {
+                    //     sLogMessage = 'きまぐれによりパワーダウン';
+                    //     iStatusType = 104;
+                    // }
+                    // g_field_data.queues.push({
+                    //     actor_id        : aArgs.target_id,
+                    //     log_message     : sLogMessage,
+                    //     resolved_flg    : 0,
+                    //     priority        : 'reaction',
+                    //     queue_units : [
+                    //         {
+                    //             queue_type_id   : 1026,
+                    //             param1          : iStatusType,
+                    //             target_id       : aArgs.target_id,
+                    //         },
+                    //         {
+                    //             queue_type_id   : 1029,
+                    //             target_id       : aArgs.target_id,
+                    //         }
+                    //     ],
+                    // });
+                    // bReactionPushed = true;
+                    break;
+                case 28: // ホロウ
                     g_field_data.queues.push({
                         actor_id        : aArgs.target_id,
                         log_message     : 'ホロウによりストーン呪い',
@@ -1467,7 +1483,7 @@ game_field_reactions = (function () {
                     });
                     bReactionPushed = true;
                     break;
-                case 29:
+                case 29: // ウェイク還元
                     if (typeof aArgs.system_flg == 'undefined') {
                         throw new Error('argument_error');
                     }

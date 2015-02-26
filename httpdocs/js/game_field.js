@@ -40,7 +40,9 @@ new function () {
 
         initSortCardProc();
 
-        setTimeout(function () { startingProc(); }, 333);
+        setTimeout(function () {
+            execQueue({ resolve_all : true });
+        }, 333);
 
         $(document).on('click', '#game_field td.monster_space', function () {
             var _updateActorInfo = function () {
@@ -407,8 +409,17 @@ new function () {
             priority        : 'system',
             queue_units : [{
                 queue_type_id   : 9999,
-                target_id       : null,
                 param1          : 'game_end_check',
+            }],
+        });
+        g_field_data.old_queues.push({
+            actor_id        : null,
+            log_message     : '',
+            resolved_flg    : 0,
+            priority        : 'system',
+            queue_units : [{
+                queue_type_id   : 9999,
+                param1          : 'old_turn_end',
             }],
         });
 
@@ -462,6 +473,7 @@ new function () {
     /**
      * ターン開始時の処理。おおよそ、以下の処理を行う。
      * ストーン支給、 カードドロー、 準備中の味方モンスター登場、 ルールによる前進処理、 その他ターン開始時に処理する効果
+     * ゲーム開始時の場合は初期手札のドローとマリガン関連処理のみ行う。
      *
      * @return  true:適正対象、false:不適正
      */
@@ -481,11 +493,19 @@ new function () {
                 var iInitialDeckCards = 60;
                 var iDeckCards = 0;
                 $.each (g_field_data.cards, function(iGameCardId, val) {
-                    if (val.pos_category == 'deck') {
-                        iDeckCards++;
-                    }
-                    if (val.pos_category == 'used' || val.pos_category == 'hand') {
-                        throw 'not_initial';
+                    switch (val.pos_category) {
+                        case 'deck':
+                            iDeckCards++;
+                            break;
+                        case 'hand':
+                        case 'used':
+                            throw 'not_initial';
+                            break;
+                        case 'field':
+                            if (val.pos_id != 'myMaster' && val.pos_id != 'enemyMaster') {
+                                throw 'not_initial';
+                            }
+                            break;
                     }
                 });
                 if (iInitialDeckCards <= iDeckCards) {
@@ -593,10 +613,9 @@ new function () {
             if (val.pos_category == 'field') {
 
                 // 前衛が空いてたら前進する
-                // 移動マジックがあるから、味方モンスター全員に専用パラメータ付のキューを入れる
-                if (val.owner == 'my') {
+                if (val.pos_id == 'myBack1' || val.pos_id == 'myBack2') {
                     g_field_data.queues.push({
-                        actor_id        : val.game_card_id,
+                        actor_id        : iGameCardId,
                         log_message     : g_master_data.m_monster[val.monster_id].name + 'が前進',
                         resolved_flg    : 0,
                         priority        : 'standby_system',
@@ -612,26 +631,28 @@ new function () {
                 var aMonsterData = g_master_data.m_monster[val.monster_id];
                 switch (aMonsterData.skill.id) {
                     case 26:
-                        g_field_data.queues.push({
-                            actor_id        : val.game_card_id,
-                            log_message     : 'きまぐれ発動',
-                            resolved_flg    : 0,
-                            priority        : 'reaction',
-                            queue_units : [
-                                {
-                                    queue_type_id   : 1026,
-                                    target_id       : iGameCardId,
-                                    param1          : (rand_gen.rand() % 2) ? 101 : 104,
-                                }
-                            ],
-                        });
+                        if (val.owner == 'enemy' && !val.standby_flg) {
+                            g_field_data.queues.push({
+                                actor_id        : iGameCardId,
+                                log_message     : 'きまぐれ発動',
+                                resolved_flg    : 0,
+                                priority        : 'reaction',
+                                queue_units : [
+                                    {
+                                        queue_type_id   : 1026,
+                                        target_id       : iGameCardId,
+                                        param1          : rand_gen.rand(0, 1) ? 100 : 104,
+                                    }
+                                ],
+                            });
+                            console.log('kimagure kt');
+                            console.log(g_field_data.queues);
+                        }
                         break;
                 }
 
             }
         });
-
-        execQueue({ resolve_all : true });
     }
 
     // ソートカード使用中のアクション
@@ -2172,6 +2193,9 @@ new function () {
                                     break;
                                 case 1026:
                                     var mon = g_field_data.cards[q.target_id];
+                                    if (mon.standby_flg) {
+                                        throw new Error('standby_monster');
+                                    }
                                     q.param1 = Number(q.param1);
                                     if (g_master_data.m_card[mon.card_id].category == 'master') {
                                         // マスターは一部のステータスしか受け付けない
@@ -2452,6 +2476,10 @@ new function () {
                                             for (var i = 0 ; i < 5 ; i++) {
                                                 g_field_data.sorting_cards.push(aPicks.shift());
                                             }
+                                            break;
+                                        case 'old_turn_end':
+                                            startingProc();
+                                            bOldQueue = false;
                                             break;
                                         case 'game_end_check':
                                             if (isGameEnd()) {

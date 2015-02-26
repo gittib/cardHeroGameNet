@@ -1,4 +1,4 @@
-rand_gen = (function (a,b,c,d) {
+rand_gen = (function (a,b) {
     var s = 1026764286;
     var _s = [];
 
@@ -59,7 +59,7 @@ rand_gen = (function (a,b,c,d) {
 
     function _rand () {
         for (var i = 0 ; i < 32 ; i++) {
-            var t = ((s >> c) & 1) ^ ((s >> d) & 1);
+            var t = ((s >> a) & 1) ^ ((s >> b) & 1);
             s = ((s << 1) & 2147483647) + t;
         }
         return s;
@@ -81,4 +81,4 @@ rand_gen = (function (a,b,c,d) {
         }
         return _rand() % (max - min + 1) + min;
     }
-})(5,1,7,29);
+})(7,29);

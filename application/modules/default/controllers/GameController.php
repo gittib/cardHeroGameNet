@@ -51,17 +51,17 @@ class GameController extends Zend_Controller_Action
             'new_arrival'       => $bLast,
         ));
 
-        $bLast = false;
-        if ($request->getParam('bLast')) {
-            $bLast = true;
+        if ($bLast) {
             $this->_layout->title = '未返信フィールド一覧';
-            $this->_layout->description = '中断しているフィールド一覧です。あなたの返信が思わぬ戦略につながるかも？';
+            $this->_layout->description = '中断しているフィールド一覧です。あなたの返信を待っています！';
         }
 
+        $oSession = Zend_Registry::get('session');
         $bNewFieldCommited = false;
-        if ($request->getParam('referer', '') == 'standby') {
+        if (isset($oSession->bNewFieldCommited) && $oSession->bNewFieldCommited) {
             $bNewFieldCommited = true;
         }
+        $oSession->bNewFieldCommited = false;
 
         $this->view->assign('aCardInfoArray', $aCardInfoArray);
         $this->view->assign('nFields', $nFields);
@@ -156,8 +156,11 @@ class GameController extends Zend_Controller_Action
 
         $this->_model->standby($deckId);
 
+        $oSession = Zend_Registry::get('session');
+        $oSession->bNewFieldCommited = true;
+
         $this->_redirect(
-            '/game/?referer=standby',
+            '/game/',
             array(
                 'exit' => true,
                 'code' => 301
@@ -179,6 +182,10 @@ class GameController extends Zend_Controller_Action
         if (!$iGameFieldId) {
             throw new Zend_Controller_Action_Exception('game_field_id is null.');
         }
+
+        $oSession = Zend_Registry::get('session');
+        $oSession->bReceive = true;
+
         $this->_stylesheet[] = '/css/game_list.css';
         $this->_stylesheet[] = '/css/deck_list.css';
         $this->_stylesheet[] = '/css/game_receive.css';
@@ -224,17 +231,26 @@ class GameController extends Zend_Controller_Action
         if (!isset($deckId) || $deckId == '') {
             throw new Exception('デッキ情報の取得に失敗しました');
         }
+
         $this->_layout->noindex = true;
 
-        $this->_getModel();
+        $oSession = Zend_Registry::get('session');
+        if (isset($oSession->bReceive) && $oSession->bReceive) {
+            $this->_getModel();
 
-        $iGameFieldId = $this->_model->start(array(
-            'game_field_id' => $request->getParam('game_field_id'),
-            'deck_id'       => $request->getParam('deck_id'),
-        ));
+            $iGameFieldId = $this->_model->start(array(
+                'game_field_id' => $request->getParam('game_field_id'),
+                'deck_id'       => $request->getParam('deck_id'),
+            ));
+
+            $oSession->bReceive = false;
+            $oSession->iStartGameFieldId = $iGameFieldId;
+        } else if (isset($oSession->iStartGameFieldId)) {
+            $iGameFieldId = $oSession->iStartGameFieldId;
+        } else {
+            throw new Exception('invalid field id.');
+        }
         $request->setParam('game_field_id', $iGameFieldId);
-        $request->setParam('bStandby', true);
-        $request->setParam('bMarigan', true);
 
         $this->forward('field');
     }
@@ -245,8 +261,6 @@ class GameController extends Zend_Controller_Action
 
         $request = $this->getRequest();
         $iGameFieldId = $request->getParam('game_field_id');
-        $bStandby = $request->getParam('bStandby', false);
-        $bMarigan = $request->getParam('bMarigan', false);
         $sReferer = $request->getParam('referer');
         $this->_stylesheet[] = '/css/game_field.css?ver=20150118';
 
@@ -288,8 +302,6 @@ class GameController extends Zend_Controller_Action
         $this->view->assign('iGameFieldId', $iGameFieldId);
         $this->view->assign('bBefore', ($iGameFieldId != $iBeforeFieldId));
         $this->view->assign('sReferer', $sReferer);
-        $this->view->assign('bStandby', $bStandby);
-        $this->view->assign('bMarigan', $bMarigan);
         $this->view->assign('aQueue', $aQueue);
     }
 

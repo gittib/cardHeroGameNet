@@ -17,6 +17,13 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         Zend_Registry::set('db', $db);
     }
 
+    protected function _initSession()
+    {
+        Zend_Session::start();
+        $oSession = new Zend_Session_Namespace('CHSMT');
+        Zend_Registry::set('session', $oSession);
+    }
+
     protected function _initLayout()
     {
         $l = Zend_Layout::startMvc(array(

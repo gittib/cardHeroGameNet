@@ -33,7 +33,6 @@ $application = new Zend_Application(
 );
 
 try {
-    Zend_Session::start();
     $application->bootstrap()->run();
 } catch (Exception $e) {
     if (APPLICATION_ENV == 'testing') {

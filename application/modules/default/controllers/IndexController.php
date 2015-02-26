@@ -33,5 +33,14 @@ class IndexController extends Zend_Controller_Action
         }
     }
 
+    public function envAction()
+    {
+        if (APPLICATION_ENV != 'testing') {
+            throw new Zend_Controller_Action_Exception('test env only.', 403);
+        }
+        phpinfo();
+        exit;
+    }
+
 }
 
