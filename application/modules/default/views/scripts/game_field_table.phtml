@@ -2,7 +2,7 @@
     $aCardInfo = $this->aCardInfoInField;
 
     $sPlayers  = '投稿者：'   . $this->escape($aCardInfo['field_info']['nick_name']) . "<br />\n";
-    if (2 < $aCardInfo['field_info']['turn_count']) {
+    if (1 <= $aCardInfo['field_info']['turn_count']) {
         $sPlayers .= '対戦相手：' . $this->escape($aCardInfo['field_info']['opponent_name']);
     }
     $sExplain ='';

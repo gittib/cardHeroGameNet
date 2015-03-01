@@ -2192,12 +2192,6 @@ game_field_reactions = (function () {
     {
         console.log('checkGameState started.');
 
-        // ゲーム開始時
-        if ($('div[bStandby]').attr('bStandby') && !$('div[bMarigan]').attr('bMarigan')) {
-            console.log('standby_game');
-            return 'standby_game';
-        }
-
         // 特技封じの対象特技選択とか、特殊な状態の判定
         if (g_field_data.sort_card_flg) {
             console.log('sort_card');
@@ -2258,13 +2252,23 @@ game_field_reactions = (function () {
     function updateGameInfoMessage() {
         var s = checkGameState();
 
+        // ゲーム開始時は操作のステートによらず、常に固定文言を出す
+        if (g_field_data.standby_game_flg) {
+            game_field_utility.myAlertInField({
+                message     : 'あなたは後攻です。マリガンの確認をして、ターンを終了して下さい',
+                no_alert    : true,
+            });
+            return;
+        }
+
         if (g_sBeforeGameState == s) {
             return;
         }
+
         g_sBeforeGameState = s;
         switch (s) {
             case 'standby_game':
-                s = 'ゲーム準備完了。このままターンエンドして、対戦相手を待って下さい';
+                s = 'あなたは後攻です。マリガンの確認をして、ターンを終了して下さい';
                 break;
             case 'select_actor':
                 s = 'カードを選択してください';
@@ -2287,6 +2291,7 @@ game_field_reactions = (function () {
             default:
                 return;
         }
+
         game_field_utility.myAlertInField({
             message     : s,
             no_alert    : true,

@@ -267,10 +267,10 @@ class GameController extends Zend_Controller_Action
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/js_debug.js';
             $this->_javascript[] = '/js/master_data.js';
-            $this->_javascript[] = '/js/rand_gen.js';
             /*
             $this->_javascript[] = '/js/game_field.min.js';
             /*/
+            $this->_javascript[] = '/js/rand_gen.js';
             $this->_javascript[] = '/js/game_field_utility.js';
             $this->_javascript[] = '/js/game_field_reactions.js';
             $this->_javascript[] = '/js/arts_queue.js';
@@ -279,8 +279,7 @@ class GameController extends Zend_Controller_Action
             //*/
         } else {
             $this->_javascript[] = '/js/master_data.js';
-            $this->_javascript[] = '/js/rand_gen.js';
-            $this->_javascript[] = '/js/game_field.min.js?ver=20150215';
+            $this->_javascript[] = '/js/game_field.min.js?ver=20150301';
         }
 
         $iBeforeFieldId = $this->_model->getBeforeFieldId($iGameFieldId);

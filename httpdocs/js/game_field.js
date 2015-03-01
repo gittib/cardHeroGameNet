@@ -516,6 +516,7 @@ new function () {
         })();
 
         if (bInitial) {
+            g_field_data.standby_game_flg = true;
             var enemyMasterId = game_field_reactions.getGameCardId({
                 pos_category    : 'field',
                 pos_id          : 'enemyMaster',
