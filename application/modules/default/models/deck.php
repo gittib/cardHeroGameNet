@@ -1,5 +1,7 @@
 <?php
 
+Class newDeckInsertException extends Exception {};
+
 class model_Deck {
     private $_db;
 
@@ -77,6 +79,7 @@ class model_Deck {
                     'user_id',
                     'deck_name',
                     'master_card_id',
+                    'open_flg',
                 )
             )
             ->joinLeft(
@@ -138,6 +141,7 @@ class model_Deck {
                     'deck_name'         => $val['deck_name'],
                     'rare_sum'          => $val['master_rare'],
                     'rare_max'          => $val['master_rare'],
+                    'open_flg'          => $val['open_flg'],
                     'owner_id'          => $val['user_id'],
                     'owner_nick_name'   => $val['nick_name'],
                     'master_card_name'  => $val['master_card_name'],
@@ -210,13 +214,16 @@ class model_Deck {
     }
 
     public function initDeckCard($deckId) {
+        $aUserInfo = Common::checkLogin();
+
         $sel = $this->_db->select()
             ->from(
                 array('td' => 't_deck'),
                 array(
                     'deck_name',
-                    'user_id',
+                    'user_id' => new Zend_Db_Expr("case when td.user_id is null then -100 else td.user_id end"),
                     'master_card_id',
+                    'open_flg',
                 )
             )
             ->join(
@@ -251,43 +258,54 @@ class model_Deck {
                 'card_id',
             ));
         $stmt = $this->_db->fetchAll($sel);
-        $aRet = array();
-        foreach ($stmt as $val) {
-            $aRet['deck_name']              = $val['deck_name'];
-            $aRet['master_card_id']         = $val['master_card_id'];
-            $aRet['master_image_file_name'] = $val['master_image_file_name'];
-            $aRet['rare']                   = $val['master_rare'];
-            if (!isset($aRet['cards'])) {
-                $aRet['cards'] = array();
+
+        if (!empty($stmt)) {
+            $aFirst = reset($stmt);
+            if (!$aFirst['open_flg'] && $aFirst['user_id'] != $aUserInfo['user_id']) {
+                throw new Zend_Controller_Action_Exception('auth error.', 403);
             }
-            for ($i = 0 ; $i < $val['num'] ; $i++) {
-                $aCardData = array(
-                    'card_id'           => $val['card_id'],
-                    'card_name'         => $val['card_name'],
-                    'image_file_name'   => $val['image_file_name'],
-                    'rare'              => $val['rare'],
-                );
-                switch ($val['category']) {
-                    case 'monster_front':
-                        $aCardData['cate'] = 'front';
-                        break;
-                    case 'monster_back':
-                        $aCardData['cate'] = 'back';
-                        break;
-                    case 'magic':
-                        $aCardData['cate'] = 'magic';
-                        break;
-                    case 'super_front':
-                    case 'super_back':
-                        $aCardData['cate'] = 'super';
-                        break;
-                    default:
-                        break;
+
+            $aRet = array();
+            foreach ($stmt as $val) {
+                $aRet['deck_name']              = $val['deck_name'];
+                $aRet['master_card_id']         = $val['master_card_id'];
+                $aRet['master_image_file_name'] = $val['master_image_file_name'];
+                $aRet['rare']                   = 0;
+                $aRet['open_flg']               = $val['open_flg'];
+                if (!isset($aRet['cards'])) {
+                    $aRet['cards'] = array();
                 }
-                $aRet['cards'][] = $aCardData;
+                for ($i = 0 ; $i < $val['num'] ; $i++) {
+                    $aCardData = array(
+                        'card_id'           => $val['card_id'],
+                        'card_name'         => $val['card_name'],
+                        'image_file_name'   => $val['image_file_name'],
+                        'rare'              => $val['rare'],
+                    );
+                    switch ($val['category']) {
+                        case 'monster_front':
+                            $aCardData['cate'] = 'front';
+                            break;
+                        case 'monster_back':
+                            $aCardData['cate'] = 'back';
+                            break;
+                        case 'magic':
+                            $aCardData['cate'] = 'magic';
+                            break;
+                        case 'super_front':
+                        case 'super_back':
+                            $aCardData['cate'] = 'super';
+                            break;
+                        default:
+                            break;
+                    }
+                    $aRet['cards'][] = $aCardData;
+                }
             }
+            return $aRet;
         }
-        return $aRet;
+
+        return array();
     }
 
     public function registDeck($aDeckInfo, $aDeckCardID) {
@@ -296,13 +314,19 @@ class model_Deck {
 
             $deckId = '';
             try {
-                if (!isset($aDeckInfo['user_id']) || $aDeckInfo['user_id'] == '') {
-                    throw new Exception('new_regist');
+                if ($aDeckInfo['user_id'] == '') {
+                    throw new newDeckInsertException();
                 }
-                if (!isset($aDeckInfo['deck_id']) || $aDeckInfo['deck_id'] == '') {
-                    throw new Exception('new_regist');
+                if ($aDeckInfo['deck_id'] == '') {
+                    throw new newDeckInsertException();
+                }
+                if ($aDeckInfo['open_flg'] && $aDeckInfo['open_flg'] != 'off') {
+                    $aDeckInfo['open_flg'] = 1;
+                } else {
+                    $aDeckInfo['open_flg'] = 0;
                 }
                 $deckId = $aDeckInfo['deck_id'];
+
                 $sel = $this->_db->select()
                     ->from(
                         array('td' => 't_deck'),
@@ -314,12 +338,13 @@ class model_Deck {
                     ->where('user_id = ?', $aDeckInfo['user_id']);
                 $cnt = $this->_db->fetchOne($sel);
                 if ($cnt <= 0) {
-                    throw new Exception('new_regist');
+                    throw new newDeckInsertException();
                 }
                 $set = array(
                     'user_id'           => $aDeckInfo['user_id'],
                     'deck_name'         => $aDeckInfo['deck_name'],
                     'master_card_id'    => $aDeckInfo['master_card_id'],
+                    'open_flg'          => $aDeckInfo['open_flg'],
                     'upd_date'          => new Zend_Db_Expr('now()'),
                 );
                 $where = array(
@@ -327,14 +352,12 @@ class model_Deck {
                 );
                 $this->_db->update('t_deck', $set, $where);
                 $this->_db->delete('t_deck_card', $where);
-            } catch (Exception $e) {
-                if ($e->getMessage() != 'new_regist') {
-                    throw $e;
-                }
+            } catch (newDeckInsertException $e) {
                 $set = array(
                     'user_id'           => $aDeckInfo['user_id'],
                     'deck_name'         => $aDeckInfo['deck_name'],
                     'master_card_id'    => $aDeckInfo['master_card_id'],
+                    'open_flg'          => $aDeckInfo['open_flg'],
                 );
                 $this->_db->insert('t_deck', $set);
                 $sel = 'select max(deck_id) from t_deck';

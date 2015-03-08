@@ -137,8 +137,13 @@ _eos_;
             $val[$key] = $this->escape($v);
         }
     }
+    if ($val['open_flg']) {
+        $sSecretDeckClass = '';
+    } else {
+        $sSecretDeckClass = ' secret ';
+    }
     $sDeckListHtml .= <<<_eos_
-<div class="deck_frame">
+<div class="deck_frame{$sSecretDeckClass}">
     <div class="deck_header clearfix">
         <div class="master_image">
             <img src="/images/card/{$val['master_image']}" alt="{$val['master_card_name']}" />

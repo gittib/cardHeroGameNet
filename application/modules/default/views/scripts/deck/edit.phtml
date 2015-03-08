@@ -21,7 +21,6 @@ _eos_;
     }
 }
 
-$nRowImg = 0;
 $sMasterImages = '';
 $sMasterCatalog = '';
 $sDeckName = '';
@@ -52,7 +51,7 @@ _eos_;
 _eos_;
     } else {
         if (isset($val['proposer']) && $val['proposer'] != '') {
-            $val['proposer'] = 'Arranged by ' . $val['proposer'];
+            $val['proposer'] = 'Arranged';
         }
         $sCardCatalog .= <<<_eos_
     <div class="catalog {$val['category']}">
@@ -67,25 +66,20 @@ _eos_;
     </div>
 
 _eos_;
-        $nRowImg++;
-        if ($nRowImg >= 6000) {
-            $sCardCatalog .= <<<_eos_
-</div>
-<div class="card_catalog clearfix">
-
-_eos_;
-            $nRowImg = 0;
-        }
     }
 }
 $sCardCatalog .= '<div class="line_head" style="clear:both;width:0;height:0;">&nbsp;</div>';
+$sOpenFlgChecked = ' checked="checked" ';
+if (isset($this->input_deck_id, $this->aDeckInfo) && !empty($this->aDeckInfo) && $this->aDeckInfo['open_flg'] == false) {
+    $sOpenFlgChecked = '';
+}
 ?>
 <form name="deck_edit_form" method="post">
 <?php echo $deckIdHtml; ?>
     <div id="deck_frame">
         <div class="deck_header clearfix">
             <div class="master_image">
-<?php echo $sMasterImages; ?>
+                <?php echo $sMasterImages; ?>
             </div>
             <div class="deck_summary">
                 <div class="title">
@@ -93,10 +87,13 @@ $sCardCatalog .= '<div class="line_head" style="clear:both;width:0;height:0;">&n
                     <input type="text" name="deck_name" value="<?php echo $sDeckName; ?>" />
                 </div>
             </div>
+            <div class="open_switch">
+                <input type="checkbox" name="open_flg" <?php echo $sOpenFlgChecked; ?>/>デッキを公開する
+            </div>
         </div>
         <div class="master_select">
             <select name="master">
-<?php echo $sMasterCatalog; ?>
+                <?php echo $sMasterCatalog; ?>
             </select>
             <a class="blank_link" href="/card/detail/1002/" target="_blank">マスター詳細</a>
         </div>
@@ -108,19 +105,19 @@ $sCardCatalog .= '<div class="line_head" style="clear:both;width:0;height:0;">&n
             </div>
             <div class="front">前衛モンスター枚数:<span id="front_cards_num">0</span>枚</div>
             <div class="front card_image_frame">
-<?php echo $aDeckCardImages['front']; ?>
+                <?php echo $aDeckCardImages['front']; ?>
             </div>
             <div class="back">後衛モンスター枚数:<span id="back_cards_num">0</span>枚</div>
             <div class="back card_image_frame">
-<?php echo $aDeckCardImages['back']; ?>
+                <?php echo $aDeckCardImages['back']; ?>
             </div>
             <div class="magic">マジック枚数:<span id="magic_cards_num">0</span>枚</div>
             <div class="magic card_image_frame">
-<?php echo $aDeckCardImages['magic']; ?>
+                <?php echo $aDeckCardImages['magic']; ?>
             </div>
             <div class="super">スーパー枚数:<span id="super_cards_num">0</span>枚</div>
             <div class="super card_image_frame">
-<?php echo $aDeckCardImages['super']; ?>
+                <?php echo $aDeckCardImages['super']; ?>
             </div>
         </div>
     </div>

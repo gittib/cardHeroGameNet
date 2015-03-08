@@ -371,7 +371,7 @@ new function () {
             base_color  : g_base_color,
         });
 
-        var iGameFieldScrollPos = $('#game_field').offset().top;
+        var iGameFieldScrollPos = $('#game_infomation_frame').offset().top;
         $('html,body').animate({ scrollTop: iGameFieldScrollPos }, 1);
 
         g_field_data.game_field_id  = Number($('input[name=game_field_id]').val());

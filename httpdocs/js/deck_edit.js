@@ -5,7 +5,7 @@ function refreshDeckCardNum() {
     var nSuper = $("div.card_image_frame.super img").size();
     var nSum = nFront + nBack + nMagic + nSuper;
 
-    var nSumRare = Number($('.master_image div:visible img[rare]').attr('rare'));
+    var nSumRare = 0;
     var nMaxRare = nSumRare;
     $('.card_list_in_deck img[rare]').each(function () {
         var r = $(this).attr('rare');

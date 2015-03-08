@@ -69,8 +69,13 @@ function loadMoreDeck (iPageNo) {
                             break;
                     }
 
+                    var sSecretDeckClass = '';
+                    if (val['open_flg'] == 0) {
+                        sSecretDeckClass = ' secret ';
+                    }
+
                     sHtml +=
-                    '<div class="deck_frame">' +
+                    '<div class="deck_frame' + sSecretDeckClass + '">' +
                         '<div class="deck_header clearfix">' +
                             '<div class="master_image">' +
                                 '<img src="/images/card/' + val['master_image'] + '" alt="' + val['master_card_name'] + '" />' +

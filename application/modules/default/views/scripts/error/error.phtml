@@ -13,8 +13,9 @@
     </p>
 
     <h3>Stack trace:</h3>
-    <pre><?php echo $this->exception->getTraceAsString() ?>
-    </pre>
+    <div style="width:100%; min-height:100px; background-color:#eeffff; overflow:scroll;">
+        <pre><?php echo $this->exception->getTraceAsString() ?></pre>
+    </div>
 
     <h3>Request Parameters:</h3>
     <pre><?php echo $this->escape(var_export($this->request->getParams(), true)) ?>

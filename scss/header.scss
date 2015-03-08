@@ -59,4 +59,31 @@
             text-align: right;
         }
     }
+
+    $iAdHeight : 66px;
+    $iAdWidth  : 1280px;
+    .footer_ad {
+        display: block;
+        padding-top: 20px;
+        width: 100%;
+        height: $iAdHeight + 20px;
+        overflow: hidden;
+
+        background: #eeffff;
+
+        div.slide {
+            height: $iAdHeight + 20px;
+            overflow-x: scroll;
+
+            div.ad_frame {
+                width: $iAdWidth;
+
+                div {
+                    display: block;
+                    float: left;
+                    padding: 3px;
+                }
+            }
+        }
+    }
 }

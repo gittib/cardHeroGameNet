@@ -36,6 +36,10 @@ div.message {
         border: solid 3px;
         background-color: #fff;
 
+        &.secret {
+            background-color: #cccccc;
+        }
+
         div.card_list_frame {
             width: 300px;
             text-align: center;

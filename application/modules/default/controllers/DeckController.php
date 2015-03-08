@@ -31,6 +31,7 @@ class DeckController extends Zend_Controller_Action
 
     public function indexAction()
     {
+        $aUserInfo = Common::checkLogin();
         $request = $this->getRequest();
         $sExp = 'カードヒーロー@スマホに登録されているデッキ一覧です。誰でもデッキを作成することができます。また、ユーザー登録しておくと自分のデッキを編集する事もできます。';
 
@@ -86,8 +87,9 @@ class DeckController extends Zend_Controller_Action
 
     public function editAction()
     {
+        $aUserInfo = Common::checkLogin();
         $request = $this->getRequest();
-        $deckId = $request->getParam('deck_id');
+        $deckId = $request->getParam('deck_id', '');
         $this->_layout->title = 'デッキ編集';
         $this->_stylesheet[] = '/css/deck_edit.css';
         $this->_javascript[] = '/js/deck_edit.js';
@@ -96,7 +98,7 @@ class DeckController extends Zend_Controller_Action
         $aDeckInfo = $this->_model->initDeckCard($deckId);
         $aList = $this->_model->getCardList();
 
-        if (isset($deckId) && $deckId != '') {
+        if ($deckId != '') {
             $this->view->assign('input_deck_id', $deckId);
         }
         $this->view->assign('aDeckInfo', $aDeckInfo);
@@ -108,10 +110,11 @@ class DeckController extends Zend_Controller_Action
         $aUserInfo = Common::checkLogin();
         $request = $this->getRequest();
         $aDeckInfo = array(
-            'deck_id'           => $request->getParam('input_deck_id'),
-            'deck_name'         => $request->getParam('deck_name'),
+            'deck_id'           => $request->getPost('input_deck_id', ''),
+            'deck_name'         => $request->getPost('deck_name', ''),
             'user_id'           => $aUserInfo['user_id'],
-            'master_card_id'    => $request->getParam('master'),
+            'master_card_id'    => $request->getPost('master', ''),
+            'open_flg'          => $request->getPost('open_flg', true),
         );
         $aDeckCards = $request->getParam('deck_cards');
         $this->_model->registDeck($aDeckInfo, $aDeckCards);

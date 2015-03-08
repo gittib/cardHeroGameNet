@@ -46,7 +46,6 @@ class Common {
             ->where('tlk.limit_time >= now()');
         $aUserInfo = $db->fetchRow($sel);
         if (!isset($aUserInfo) || !$aUserInfo) {
-
             // クッキー値がDBに載ってなかったら消しておく
             setcookie('login_key', '', time() - 1800, '/');
             Zend_Registry::set('current_login_key', '');
@@ -64,12 +63,20 @@ class Common {
             $sel = "select count(*) from t_login_key where temp_key = '{$sNewKey}'";
             $cnt = $db->fetchOne($sel);
             if ($cnt <= 0) {
-                $set = array(
-                        'temp_key'      => $sNewKey,
-                        'limit_time'    => date('Y-m-d H:i:s', time() + $nCookieLimitSec),
-                        );
-                $where = array($db->quoteInto('user_id = ?', $userId));
-                $db->update('t_login_key', $set, $where);
+                try {
+                    $db->beginTransaction();
+                    $set = array(
+                            'temp_key'      => $sNewKey,
+                            'limit_time'    => date('Y-m-d H:i:s', time() + $nCookieLimitSec),
+                            );
+                    $where = array($db->quoteInto('user_id = ?', $userId));
+                    $db->update('t_login_key', $set, $where);
+                    $db->commit();
+                } catch (Exception $e) {
+                    $db->rollBack();
+                    return null;
+                }
+
                 setcookie('login_key', $sNewKey, time() + $nCookieLimitSec, '/');
                 Zend_Registry::set('current_login_key', $sNewKey);
 

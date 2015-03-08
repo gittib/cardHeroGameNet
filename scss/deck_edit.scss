@@ -42,6 +42,11 @@ $deck_super_back_color : unquote('#ffff' + $deck_card_back_color);
                 }
             }
         }
+
+        div.open_switch {
+            margin: 12px;
+            margin-top: 20px;
+        }
     }
 
     div.master_select {

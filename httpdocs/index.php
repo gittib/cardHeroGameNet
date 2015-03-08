@@ -32,20 +32,4 @@ $application = new Zend_Application(
     APPLICATION_PATH . '/configs/application.ini'
 );
 
-try {
-    $application->bootstrap()->run();
-} catch (Exception $e) {
-    if (APPLICATION_ENV == 'testing') {
-        $sError = $e->getMessage();
-        echo <<<_eos_
-テスト環境なのでエラー表示<br />
-<br />
-<b>{$sError}</b><br />
-<br />
-
-_eos_;
-        var_dump($e);
-    } else {
-        throw $e;
-    }
-}
+$application->bootstrap()->run();

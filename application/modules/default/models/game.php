@@ -921,6 +921,22 @@ class model_Game {
             throw $e;
         }
 
+        // カード使用率ランキングの更新
+        try {
+            $this->_db->beginTransaction();
+
+            $this->_db->delete('mv_card_ranking');
+            $sql = 'insert into mv_card_ranking select * from v_card_ranking';
+            $this->_db->query($sql);
+
+            $this->_db->commit();
+
+        } catch (Exception $e) {
+            $this->_db->rollBack();
+            var_dump($e);
+            // コケても大して影響無いので、上にthrowしないで処理を続行する
+        }
+
         return $iGameFieldId;
     }
 
@@ -1095,8 +1111,8 @@ class model_Game {
             $sFieldIdPath = $aField0['field_id_path'] . '-' . $aArgs['field_id0'];
         }
 
-        $this->_db->beginTransaction();
         try {
+            $this->_db->beginTransaction();
             $sql = "select nextval('t_game_field_game_field_id_seq')";
             $iGameFieldId = $this->_db->fetchOne($sql);
             $set = array(

@@ -374,8 +374,7 @@ magic_queue = (function () {
                         iHandNum++;
                     }
                 });
-                var iMaxPic = 2;
-                for (var i = 0 ; i < iMaxPic ; i++) {
+                for (var i = 0 ; i < 2 ; i++) {
                     var j = rand_gen.rand(0, aUsedCards.length-1);
                     aRet.push({
                         queue_type_id   : 1015,

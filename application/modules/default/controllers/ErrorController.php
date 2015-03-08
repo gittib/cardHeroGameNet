@@ -28,14 +28,10 @@ class ErrorController extends Zend_Controller_Action
             default:
                 // application error
                 $code = $errors->exception->getCode();
-                if (!isset($code) || !$code) {
-                    $code = 500;
-                }
-                $this->getResponse()->setHttpResponseCode($code);
                 switch ($code) {
                     case 403:
                         $priority = Zend_Log::NOTICE;
-                        $this->view->message = 'このページは工事中です。';
+                        $this->view->message = 'このページへのアクセス権限が確認出来ません。';
                         break;
                     case 410:
                         $priority = Zend_Log::NOTICE;
@@ -44,8 +40,13 @@ class ErrorController extends Zend_Controller_Action
                     default:
                         $priority = Zend_Log::CRIT;
                         $this->view->message = 'このページは工事中です。';
+                        $code = 500;
                         break;
                 }
+                if (!isset($code) || !$code) {
+                    $code = 500;
+                }
+                $this->getResponse()->setHttpResponseCode($code);
                 break;
         }
         $this->view->errorType = $errors->type;
