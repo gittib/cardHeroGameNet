@@ -2909,6 +2909,7 @@ game_field_reactions = (function () {
                 message     : 'あなたは後攻です。マリガンの確認をして、ターンを終了して下さい',
                 no_alert    : true,
             });
+            return;
         }
 
         if (g_sBeforeGameState == s) {
@@ -4322,8 +4323,7 @@ magic_queue = (function () {
                         iHandNum++;
                     }
                 });
-                var iMaxPic = 2;
-                for (var i = 0 ; i < iMaxPic ; i++) {
+                for (var i = 0 ; i < 2 ; i++) {
                     var j = rand_gen.rand(0, aUsedCards.length-1);
                     aRet.push({
                         queue_type_id   : 1015,
@@ -5151,7 +5151,7 @@ new function () {
             base_color  : g_base_color,
         });
 
-        var iGameFieldScrollPos = $('#game_field').offset().top;
+        var iGameFieldScrollPos = $('#game_infomation_frame').offset().top;
         $('html,body').animate({ scrollTop: iGameFieldScrollPos }, 1);
 
         g_field_data.game_field_id  = Number($('input[name=game_field_id]').val());
@@ -6494,6 +6494,7 @@ new function () {
                                     if (!targetMon.standby_flg) {
                                         throw new Error('invalid_target');
                                     }
+                                    delete targetMon.monster_id;
                                     console.log(targetMon);
                                     targetMon = game_field_utility.loadMonsterInfo({
                                         target_monster  : targetMon,

@@ -114,7 +114,7 @@ class DeckController extends Zend_Controller_Action
             'deck_name'         => $request->getPost('deck_name', ''),
             'user_id'           => $aUserInfo['user_id'],
             'master_card_id'    => $request->getPost('master', ''),
-            'open_flg'          => $request->getPost('open_flg', true),
+            'open_flg'          => $request->getPost('open_flg', 'off'),
         );
         $aDeckCards = $request->getParam('deck_cards');
         $this->_model->registDeck($aDeckInfo, $aDeckCards);

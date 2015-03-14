@@ -1,4 +1,5 @@
 <?php
+$aUserInfo = Common::checkLogin();
 $deckIdHtml = '';
 if (isset($this->input_deck_id) && $this->input_deck_id != '') {
     $deckIdHtml = <<<_eos_
@@ -73,6 +74,16 @@ $sOpenFlgChecked = ' checked="checked" ';
 if (isset($this->input_deck_id, $this->aDeckInfo) && !empty($this->aDeckInfo) && $this->aDeckInfo['open_flg'] == false) {
     $sOpenFlgChecked = '';
 }
+
+$sSecretDeckHtml = '';
+if ($aUserInfo) {
+    $sSecretDeckHtml = <<<_eos_
+            <div class="open_switch">
+                <input type="checkbox" name="open_flg" {$sOpenFlgChecked} />デッキを公開する
+            </div>
+
+_eos_;
+}
 ?>
 <form name="deck_edit_form" method="post">
 <?php echo $deckIdHtml; ?>
@@ -87,9 +98,7 @@ if (isset($this->input_deck_id, $this->aDeckInfo) && !empty($this->aDeckInfo) &&
                     <input type="text" name="deck_name" value="<?php echo $sDeckName; ?>" />
                 </div>
             </div>
-            <div class="open_switch">
-                <input type="checkbox" name="open_flg" <?php echo $sOpenFlgChecked; ?>/>デッキを公開する
-            </div>
+            <?php echo $sSecretDeckHtml; ?>
         </div>
         <div class="master_select">
             <select name="master">

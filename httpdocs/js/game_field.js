@@ -1714,6 +1714,7 @@ new function () {
                                     if (!targetMon.standby_flg) {
                                         throw new Error('invalid_target');
                                     }
+                                    delete targetMon.monster_id;
                                     console.log(targetMon);
                                     targetMon = game_field_utility.loadMonsterInfo({
                                         target_monster  : targetMon,

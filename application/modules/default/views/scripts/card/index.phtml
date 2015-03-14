@@ -1,3 +1,10 @@
+<?php if (APPLICATION_ENV == 'no_arrange') : ?>
+<p class="explain">
+    当サイトで使う事ができるカードのリストです。<br />
+    DS版カードヒーローのカードをベースにしていますが、効果や性能をアレンジしているカードもあります。<br />
+    アレンジされているカードには、右上に「Arranged」と表示されます。
+</p>
+<?php else: ?>
 <p class="explain">
     当サイトで使う事ができるカードのリストです。<br />
     DS版カードヒーローのカードをベースにしていますが、効果や性能をアレンジしているカードもあります。<br />
@@ -20,6 +27,7 @@
         <option value="only_super">スーパーのみ表示</option>
     </select><br />
 </div>
+<?php endif; ?>
 <div class="line_width_adjust"></div>
 <?php
 

@@ -320,7 +320,9 @@ class model_Deck {
                 if ($aDeckInfo['deck_id'] == '') {
                     throw new newDeckInsertException();
                 }
-                if ($aDeckInfo['open_flg'] && $aDeckInfo['open_flg'] != 'off') {
+                if (!Common::checkLogin()) {
+                    $aDeckInfo['open_flg'] = 1;
+                } else if ($aDeckInfo['open_flg'] && $aDeckInfo['open_flg'] == 'on') {
                     $aDeckInfo['open_flg'] = 1;
                 } else {
                     $aDeckInfo['open_flg'] = 0;
