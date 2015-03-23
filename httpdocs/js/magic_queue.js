@@ -1,6 +1,6 @@
-magic_queue = (function () {
+function createMagicQueue(m) {
     // 変数宣言
-    var g_master_data = master_data.getInfo();
+    var g_master_data = m;
 
     // public メンバ
     return {
@@ -521,24 +521,36 @@ magic_queue = (function () {
             case 1140:
                 var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
                 var aRet = [];
-                var aCards = [];
+                var aGameCardId = [];
                 var iHands = 0;
                 $.each(aArgs.field_data.cards, function(iGameCardId, val) {
-                    if (val.owner == mon.owner && val.pos_category == 'hand') {
-                        iHands++;
-                        aRet.push({
-                            queue_type_id   : 1031,
-                            target_id       : iGameCardId,
-                            cost_flg        : true,
-                        });
+                    if (val.owner == mon.owner) {
+                        if (val.pos_category == 'hand') {
+                            iHands++;
+                            aRet.push({
+                                queue_type_id   : 1031,
+                                target_id       : iGameCardId,
+                                cost_flg        : true,
+                            });
+                            aGameCardId.push(iGameCardId);
+                        } else if (val.pos_category == 'deck') {
+                            aGameCardId.push(iGameCardId);
+                        }
                     }
                 });
-                aRet.push({
-                    queue_type_id   : 1012,
-                    target_id       : mon.game_card_id,
-                    param1          : 'shuffle',
-                    param2          : rand_gen.rand(),
+
+                aGameCardId.sort(function() {
+                    return rand_gen.rand(0, 1) - 0.5;
                 });
+                var iSortNo = 1000;
+                $.each(aGameCardId, function(k, iGameCardId) {
+                    aQueue.queue_units.push({
+                        queue_type_id   : 1012,
+                        target_id       : iGameCardId,
+                        param1          : iSortNo++,
+                    });
+                });
+
                 aRet.push({
                     queue_type_id   : 1011,
                     target_id       : mon.game_card_id,
@@ -828,4 +840,4 @@ magic_queue = (function () {
         }
         throw new Error('_getQueueUnitsFromMagicId Failure.');
     }
-})();
+};

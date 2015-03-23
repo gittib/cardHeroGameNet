@@ -1,4 +1,6 @@
 <?php
+    $aConf = Zend_Registry::get('config');
+
     $aCardInfo = $this->aCardInfo;
 
     $aPosId = array(
@@ -347,6 +349,7 @@ _eos_;
 <div
     turn_num='{$aCardInfo['field_info']['turn']}'
     turn_count='{$aCardInfo['field_info']['turn_count']}'
+    no_arrange='{$aConf->web->no_arrange}'
 ></div>
 
 _eos_;

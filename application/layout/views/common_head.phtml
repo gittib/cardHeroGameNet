@@ -6,7 +6,7 @@ $sTitle = '';
 if (isSet($this->layout()->title)) {
     $sTitle = $this->layout()->title . ' - ';
 }
-$sTitle = $conf->title->prefix . $sTitle;
+$sTitle = $conf->web->title->prefix . $sTitle;
 
 // description
 $sDescription = '';

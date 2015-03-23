@@ -933,7 +933,6 @@ class model_Game {
 
         } catch (Exception $e) {
             $this->_db->rollBack();
-            var_dump($e);
             // コケても大して影響無いので、上にthrowしないで処理を続行する
         }
 

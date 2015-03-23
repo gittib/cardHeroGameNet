@@ -82,8 +82,8 @@ rand_gen = (function (a,b) {
         return _rand() % (max - min + 1) + min;
     }
 })(7,29);
-game_field_utility = (function () {
-    var g_master_data = master_data.getInfo();
+function createGameFieldUtility(m) {
+    var g_master_data = m;
     var g_image_data;
     _initImage();
 
@@ -648,8 +648,8 @@ game_field_utility = (function () {
             alert(sGameInfomationMessage);
         }
     }
-})();
-game_field_reactions = (function () {
+};
+function createGameFieldReactions() {
     // グローバル変数宣言
     var g_master_data;
     var g_field_data;
@@ -830,6 +830,7 @@ game_field_reactions = (function () {
             };
 
             var aMyHandHtml = [];
+            var aEnemyHandHtml = [];
             $('.lvup_ok').removeClass('lvup_ok');
             $('.lvup_checking').removeClass('lvup_checking');
 
@@ -958,28 +959,30 @@ game_field_reactions = (function () {
                         break;
                     case 'hand':
                         nHand[val.owner]++;
+
+                        var aCardData = g_master_data.m_card[val.card_id];
+                        var sImgSrc = '/images/card/' + g_master_data.m_card[val.card_id].image_file_name;
+                        var sImgAlt = aCardData.card_name;
+                        var sMagicAttr = '';
+                        if (aCardData.category == 'magic') {
+                            g_master_data.m_magic
+                        }
+                        sImgSrc = game_field_utility.getImg(sImgSrc);
+                        var oHandHtml = {
+                            sort_no : Number(val.sort_no),
+                            content : '<div class="hand_card" game_card_id="' + val.game_card_id + '">' +
+                                          '<img src="' + sImgSrc + '" alt="' + sImgAlt + '"/>' +
+                                      '</div>',
+                        };
                         if (val.owner == 'my') {
-                            var aCardData = g_master_data.m_card[val.card_id];
-                            var sImgSrc = '/images/card/' + g_master_data.m_card[val.card_id].image_file_name;
-                            var sImgAlt = aCardData.card_name;
-                            var sMagicAttr = '';
-                            if (aCardData.category == 'magic') {
-                                g_master_data.m_magic
-                            }
-
-                            sImgSrc = game_field_utility.getImg(sImgSrc);
-
-                            aMyHandHtml.push({
-                                sort_no : Number(val.sort_no),
-                                content : '<div class="hand_card" game_card_id="' + val.game_card_id + '">' +
-                                              '<img src="' + sImgSrc + '" alt="' + sImgAlt + '"/>' +
-                                          '</div>',
-                            });
+                            aMyHandHtml.push(oHandHtml);
+                        } else {
+                            aEnemyHandHtml.push(oHandHtml);
                         }
                         break;
                 }
             });
-            aMyHandHtml.sort(function(v1,v2) {
+            var _fSort = function(v1,v2) {
                 try {
                     if (!v1 || !v1.sort_no) {
                         return -1;
@@ -991,7 +994,9 @@ game_field_reactions = (function () {
                 } catch (e) {
                     return 0;
                 }
-            });
+            };
+            aMyHandHtml.sort(_fSort);
+            aEnemyHandHtml.sort(_fSort);
             $.each(aPosId, function(i, sPosId) {
                 $(sPosId).html('<div class="pict"></div>');
             });
@@ -999,6 +1004,14 @@ game_field_reactions = (function () {
             $.each(aMyHandHtml, function(i,val) {
                 sHtml += val.content;
             });
+
+            if ($('#test_env').size()) {
+                sHtml += '<div style="width:100%; height:20px"></div>';
+                $.each(aEnemyHandHtml, function(i,val) {
+                    sHtml += val.content;
+                });
+            }
+
             $('#hand_card').html(sHtml);
             $('#myPlayersInfo    .stone span').text(g_field_data.my_stone);
             $('#myPlayersInfo    .hand  span').text(nHand['my']);
@@ -2948,11 +2961,10 @@ game_field_reactions = (function () {
             no_alert    : true,
         });
     }
-})();
-
-arts_queue = (function () {
+};
+function createArtsQueue(m) {
     // 変数宣言
-    var g_master_data = master_data.getInfo();
+    var g_master_data = m;
 
     // public メンバ
     return {
@@ -3946,10 +3958,10 @@ arts_queue = (function () {
         }
         throw new Error('_getQueueUnitsFromScriptId Failure.');
     }
-})();
-magic_queue = (function () {
+};
+function createMagicQueue(m) {
     // 変数宣言
-    var g_master_data = master_data.getInfo();
+    var g_master_data = m;
 
     // public メンバ
     return {
@@ -4470,24 +4482,36 @@ magic_queue = (function () {
             case 1140:
                 var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
                 var aRet = [];
-                var aCards = [];
+                var aGameCardId = [];
                 var iHands = 0;
                 $.each(aArgs.field_data.cards, function(iGameCardId, val) {
-                    if (val.owner == mon.owner && val.pos_category == 'hand') {
-                        iHands++;
-                        aRet.push({
-                            queue_type_id   : 1031,
-                            target_id       : iGameCardId,
-                            cost_flg        : true,
-                        });
+                    if (val.owner == mon.owner) {
+                        if (val.pos_category == 'hand') {
+                            iHands++;
+                            aRet.push({
+                                queue_type_id   : 1031,
+                                target_id       : iGameCardId,
+                                cost_flg        : true,
+                            });
+                            aGameCardId.push(iGameCardId);
+                        } else if (val.pos_category == 'deck') {
+                            aGameCardId.push(iGameCardId);
+                        }
                     }
                 });
-                aRet.push({
-                    queue_type_id   : 1012,
-                    target_id       : mon.game_card_id,
-                    param1          : 'shuffle',
-                    param2          : rand_gen.rand(),
+
+                aGameCardId.sort(function() {
+                    return rand_gen.rand(0, 1) - 0.5;
                 });
+                var iSortNo = 1000;
+                $.each(aGameCardId, function(k, iGameCardId) {
+                    aQueue.queue_units.push({
+                        queue_type_id   : 1012,
+                        target_id       : iGameCardId,
+                        param1          : iSortNo++,
+                    });
+                });
+
                 aRet.push({
                     queue_type_id   : 1011,
                     target_id       : mon.game_card_id,
@@ -4777,16 +4801,23 @@ magic_queue = (function () {
         }
         throw new Error('_getQueueUnitsFromMagicId Failure.');
     }
-})();
+};
+// 補助クラス群
+var game_field_reactions = null;
+var game_field_utility = null;
+var arts_queue = null;
+var magic_queue = null;
+
 new function () {
     // グローバル変数宣言
-    var g_master_data = master_data.getInfo();
+    var g_master_data = null;
     var iHandMax = 5;
 
     var g_field_data = {
         turn                : null,
         my_stone            : 0,
         enemy_stone         : 0,
+        no_arrange          : 0,
         lvup_assist         : 0,
         tokugi_fuuji_flg    : false,
         sort_card_flg       : false,
@@ -4806,6 +4837,7 @@ new function () {
         },
     };
 
+
     var g_backup_field_data = null;
 
     var g_base_color = {
@@ -4814,15 +4846,57 @@ new function () {
 
 
 
+    (function() {
+        var df = $.Deferred();
+        try {
+            if (sessionStorage.oMasterData) {
+                var d = JSON.parse(sessionStorage.oMasterData);
+                if (!d.m_card) {
+                    throw new Error('g_master_data is invalid.');
+                }
+                g_master_data = d;
+                df.resolve();
+            } else {
+                throw new Error('g_master_data is not yet loaded.');
+            }
+        } catch (e) {
+            g_master_data = null;
+            sessionStorage.oMasterData = null;
+            $.getJSON('/api/get-master-data/card/', function(json) {
+                g_master_data = json;
+                sessionStorage.oMasterData = JSON.stringify(json);
+                df.resolve();
+            });
+        }
+        return df.promise();
+    })().always(function() {
+        arts_queue              = createArtsQueue(g_master_data);
+        magic_queue             = createMagicQueue(g_master_data);
+        game_field_utility      = createGameFieldUtility(g_master_data);
+        game_field_reactions    = createGameFieldReactions(g_master_data);
+    });
+
+
+
     $(function () {
-        initSetting();
-        initField();
+
+        var _f = function() {
+            if (game_field_reactions) {
+                initSetting();
+                initField();
+
+                setTimeout(function () {
+                    execQueue({ resolve_all : true });
+                }, 333);
+            } else {
+                setTimeout(function() {
+                    _f();
+                }, 100);
+            }
+        };
+        _f();
 
         initSortCardProc();
-
-        setTimeout(function () {
-            execQueue({ resolve_all : true });
-        }, 333);
 
         $(document).on('click', '#game_field td.monster_space', function () {
             var _updateActorInfo = function () {
@@ -5152,12 +5226,13 @@ new function () {
         });
 
         var iGameFieldScrollPos = $('#game_infomation_frame').offset().top;
-        $('html,body').animate({ scrollTop: iGameFieldScrollPos }, 1);
+        $('html,body').animate({ scrollTop: iGameFieldScrollPos }, 200, 'swing');
 
         g_field_data.game_field_id  = Number($('input[name=game_field_id]').val());
         g_field_data.turn           = Number($('div[turn_num]').attr('turn_num'));
         g_field_data.my_stone       = Number($('#myPlayersInfo div.stone span').text());
         g_field_data.enemy_stone    = Number($('#enemyPlayersInfo div.stone span').text());
+        g_field_data.no_arrange     = Number($('div[no_arrange]').attr('no_arrange'));
 
         rand_gen.srand(g_field_data.game_field_id, 100);
 
@@ -5302,6 +5377,11 @@ new function () {
                 pos_id          : 'enemyMaster',
             });
 
+            var iEnemyFirstHand = 4;
+            if (g_field_data.no_arrange) {
+                iEnemyFirstHand = 5;
+            }
+
             g_field_data.queues.push({
                 actor_id        : enemyMasterId,
                 log_message     : '初期手札をドロー',
@@ -5311,7 +5391,7 @@ new function () {
                     queue_type_id   : 1011,
                     target_id       : enemyMasterId,
                     param1          : 'draw',
-                    param2          : 4,
+                    param2          : iEnemyFirstHand,
                 }, {
                     queue_type_id   : 1026,
                     target_id       : enemyMasterId,
@@ -5750,22 +5830,33 @@ new function () {
                     var iHands = 0;
                     var aGameCardId = [];
                     $.each (g_field_data.cards, function (iGameCardId, val) {
-                        if (val.owner == 'my' && val.pos_category == 'hand') {
-                            iHands++;
-                            aQueue.queue_units.push({
-                                queue_type_id   : 1031,
-                                target_id       : iGameCardId,
-                                cost_flg        : true,
-                            });
+                        if (val.owner == 'my') {
+                            if (val.pos_category == 'hand') {
+                                iHands++;
+                                aQueue.queue_units.push({
+                                    queue_type_id   : 1031,
+                                    target_id       : iGameCardId,
+                                    cost_flg        : true,
+                                });
+                                aGameCardId.push(iGameCardId);
+                            } else if (val.pos_category == 'deck') {
+                                aGameCardId.push(iGameCardId);
+                            }
                         }
                     });
 
-                    aQueue.queue_units.push({
-                        queue_type_id   : 1012,
-                        target_id       : actor.game_card_id,
-                        param1          : 'shuffle',
-                        param2          : rand_gen.rand(),
+                    aGameCardId.sort(function() {
+                        return rand_gen.rand(0, 1) - 0.5;
                     });
+                    var iSortNo = 1000;
+                    $.each(aGameCardId, function(k, iGameCardId) {
+                        aQueue.queue_units.push({
+                            queue_type_id   : 1012,
+                            target_id       : iGameCardId,
+                            param1          : iSortNo++,
+                        });
+                    });
+
                     aQueue.queue_units.push({
                         queue_type_id   : 1011,
                         target_id       : actor.game_card_id,
@@ -6527,9 +6618,7 @@ new function () {
                                         rand_gen.restore();
 
                                         var iSortNo = 1000;
-                                        console.log(arr);
                                         $.each(arr, function(i, iGameCardId) {
-                                            console.log(iGameCardId);
                                             g_field_data.cards[iGameCardId].sort_no = iSortNo++;
                                         });
                                     } else {

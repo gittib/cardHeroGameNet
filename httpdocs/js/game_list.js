@@ -1,3 +1,21 @@
+(function() {
+    try {
+        if (sessionStorage.oMasterData) {
+            var g_master_data = JSON.parse(sessionStorage.oMasterData);
+            if (!g_master_data.m_card) {
+                throw new Error('g_master_data is invalid.');
+            }
+        } else {
+            throw new Error('g_master_data is not yet loaded.');
+        }
+    } catch (e) {
+        sessionStorage.oMasterData = null;
+        $.getJSON('/api/get-master-data/card/', function(json) {
+            sessionStorage.oMasterData = JSON.stringify(json);
+        });
+    }
+})();
+
 $(function() {
 
     function _changeDispMode (oSelect) {

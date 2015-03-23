@@ -1,4 +1,4 @@
-game_field_reactions = (function () {
+function createGameFieldReactions() {
     // グローバル変数宣言
     var g_master_data;
     var g_field_data;
@@ -179,6 +179,7 @@ game_field_reactions = (function () {
             };
 
             var aMyHandHtml = [];
+            var aEnemyHandHtml = [];
             $('.lvup_ok').removeClass('lvup_ok');
             $('.lvup_checking').removeClass('lvup_checking');
 
@@ -307,28 +308,30 @@ game_field_reactions = (function () {
                         break;
                     case 'hand':
                         nHand[val.owner]++;
+
+                        var aCardData = g_master_data.m_card[val.card_id];
+                        var sImgSrc = '/images/card/' + g_master_data.m_card[val.card_id].image_file_name;
+                        var sImgAlt = aCardData.card_name;
+                        var sMagicAttr = '';
+                        if (aCardData.category == 'magic') {
+                            g_master_data.m_magic
+                        }
+                        sImgSrc = game_field_utility.getImg(sImgSrc);
+                        var oHandHtml = {
+                            sort_no : Number(val.sort_no),
+                            content : '<div class="hand_card" game_card_id="' + val.game_card_id + '">' +
+                                          '<img src="' + sImgSrc + '" alt="' + sImgAlt + '"/>' +
+                                      '</div>',
+                        };
                         if (val.owner == 'my') {
-                            var aCardData = g_master_data.m_card[val.card_id];
-                            var sImgSrc = '/images/card/' + g_master_data.m_card[val.card_id].image_file_name;
-                            var sImgAlt = aCardData.card_name;
-                            var sMagicAttr = '';
-                            if (aCardData.category == 'magic') {
-                                g_master_data.m_magic
-                            }
-
-                            sImgSrc = game_field_utility.getImg(sImgSrc);
-
-                            aMyHandHtml.push({
-                                sort_no : Number(val.sort_no),
-                                content : '<div class="hand_card" game_card_id="' + val.game_card_id + '">' +
-                                              '<img src="' + sImgSrc + '" alt="' + sImgAlt + '"/>' +
-                                          '</div>',
-                            });
+                            aMyHandHtml.push(oHandHtml);
+                        } else {
+                            aEnemyHandHtml.push(oHandHtml);
                         }
                         break;
                 }
             });
-            aMyHandHtml.sort(function(v1,v2) {
+            var _fSort = function(v1,v2) {
                 try {
                     if (!v1 || !v1.sort_no) {
                         return -1;
@@ -340,7 +343,9 @@ game_field_reactions = (function () {
                 } catch (e) {
                     return 0;
                 }
-            });
+            };
+            aMyHandHtml.sort(_fSort);
+            aEnemyHandHtml.sort(_fSort);
             $.each(aPosId, function(i, sPosId) {
                 $(sPosId).html('<div class="pict"></div>');
             });
@@ -348,6 +353,14 @@ game_field_reactions = (function () {
             $.each(aMyHandHtml, function(i,val) {
                 sHtml += val.content;
             });
+
+            if ($('#test_env').size()) {
+                sHtml += '<div style="width:100%; height:20px"></div>';
+                $.each(aEnemyHandHtml, function(i,val) {
+                    sHtml += val.content;
+                });
+            }
+
             $('#hand_card').html(sHtml);
             $('#myPlayersInfo    .stone span').text(g_field_data.my_stone);
             $('#myPlayersInfo    .hand  span').text(nHand['my']);
@@ -2297,5 +2310,4 @@ game_field_reactions = (function () {
             no_alert    : true,
         });
     }
-})();
-
+};

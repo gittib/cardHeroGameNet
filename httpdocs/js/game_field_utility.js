@@ -1,5 +1,5 @@
-game_field_utility = (function () {
-    var g_master_data = master_data.getInfo();
+function createGameFieldUtility(m) {
+    var g_master_data = m;
     var g_image_data;
     _initImage();
 
@@ -564,4 +564,4 @@ game_field_utility = (function () {
             alert(sGameInfomationMessage);
         }
     }
-})();
+};

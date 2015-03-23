@@ -1,6 +1,6 @@
-arts_queue = (function () {
+function createArtsQueue(m) {
     // 変数宣言
-    var g_master_data = master_data.getInfo();
+    var g_master_data = m;
 
     // public メンバ
     return {
@@ -994,4 +994,4 @@ arts_queue = (function () {
         }
         throw new Error('_getQueueUnitsFromScriptId Failure.');
     }
-})();
+};
