@@ -1398,19 +1398,21 @@ function createGameFieldReactions() {
                                 '</div>';
                         }
                     } else {
-                        // 気合溜めコマンドは禁止
-                        // switch (g_master_data.m_monster[aCardData.monster_id].skill.id) {
-                        //     case 4:
-                        //     case 5:
-                        //         sCommandsHtml +=
-                        //             '<div class="command_row" act_type="charge">' +
-                        //                 '気合だめ' +
-                        //                 '<div class="num_info">' +
-                        //                     sCost +
-                        //                 '</div>' +
-                        //             '</div>';
-                        //         break;
-                        // }
+                        if (g_field_data.no_arrange) {
+                            // 気合溜めコマンド
+                            switch (g_master_data.m_monster[aCardData.monster_id].skill.id) {
+                                case 4:
+                                case 5:
+                                    sCommandsHtml +=
+                                        '<div class="command_row" act_type="charge">' +
+                                            '気合だめ' +
+                                            '<div class="num_info">' +
+                                                sCost +
+                                            '</div>' +
+                                        '</div>';
+                                    break;
+                            }
+                        }
                         sCommandsHtml +=
                             '<div class="command_row" act_type="move">' +
                                 '移動' +
@@ -2965,9 +2967,13 @@ function createGameFieldReactions() {
 function createArtsQueue(m) {
     // 変数宣言
     var g_master_data = m;
+    var bNoArrange = 0;
 
     // public メンバ
     return {
+        'setNoArrangeFlg' : function (f) { bNoArrange = f; },
+        'getNoArrangeFlg' : function () { return bNoArrange; },
+
         /**
          * 特技のキューオブジェクトを生成する
          *
@@ -3605,38 +3611,6 @@ function createArtsQueue(m) {
                         }
 
                         pow += g_master_data.m_monster[val.monster_id].attack.power;
-                        // ドリルブレイクの時はP効果の云々を自前で処理する
-                        $.each(val.status, function(sid, stval) {
-                            switch (Number(sid)) {
-                                case 102:
-                                    aRet.push({
-                                        queue_type_id   : 1006,
-                                        target_id       : val.game_card_id,
-                                        param1          : 1,
-                                    });
-                                    // breakは書かない
-                                case 101:
-                                    pow++;
-                                    break;
-                                case 103:
-                                    pow -= g_master_data.m_monster[val.monster_id].attack.power;
-                                    pow += 2;
-                                    break;
-                                case 104:
-                                    pow--;
-                                    break;
-                                case 105:
-                                    pow += 2;
-                                    return true;
-                                default:
-                                    return true;
-                            }
-                            aRet.push({
-                                queue_type_id   : 1027,
-                                target_id       : val.game_card_id,
-                                param1          : sid,
-                            });
-                        });
                     }
                 });
                 if (lrCnt < 2) {
@@ -3646,6 +3620,7 @@ function createArtsQueue(m) {
                     queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
                     target_id       : aArgs.targets[0].game_card_id,
                     param1          : pow,
+                    param2          : 'drill_break',
                 });
                 return aRet;
                 break;
@@ -3735,6 +3710,14 @@ function createArtsQueue(m) {
                         queue_type_id   : 1019,
                         target_id       : aArgs.targets[0].game_card_id,
                     });
+                }
+                if (bNoArrange) {
+                    for (var i = 0 ; i < 3 ; i++) {
+                        aRet.push({
+                            queue_type_id   : 1024,
+                            target_id       : aArgs.targets[0].game_card_id,
+                        });
+                    }
                 }
                 return aRet;
                 break;
@@ -3944,12 +3927,14 @@ function createArtsQueue(m) {
                     target_id       : aArgs.targets[0].game_card_id,
                     param1          : 111,
                 }];
-                if (aArtInfo.damage_type_flg == 'P' || aArtInfo.damage_type_flg == 'D') {
-                    aRet.push({
-                        queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
-                        target_id       : aArgs.targets[0].game_card_id,
-                        param1          : aArtInfo.power,
-                    });
+                if (!bNoArrange) {
+                    if (aArtInfo.damage_type_flg == 'P' || aArtInfo.damage_type_flg == 'D') {
+                        aRet.push({
+                            queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                            target_id       : aArgs.targets[0].game_card_id,
+                            param1          : aArtInfo.power,
+                        });
+                    }
                 }
                 return aRet;
                 break;
@@ -3962,9 +3947,13 @@ function createArtsQueue(m) {
 function createMagicQueue(m) {
     // 変数宣言
     var g_master_data = m;
+    var bNoArrange = 0;
 
     // public メンバ
     return {
+        'setNoArrangeFlg' : function (f) { bNoArrange = f; },
+        'getNoArrangeFlg' : function () { return bNoArrange; },
+
         /**
          * キューオブジェクトを生成する
          *
@@ -4067,7 +4056,6 @@ function createMagicQueue(m) {
                 550     : 107,
                 590     : 103,
                 600     : 111,
-                620     : 112,
                 630     : 113,
                 860     : 114,
                 880     : 108,
@@ -4239,6 +4227,24 @@ function createMagicQueue(m) {
                 }
                 return aRet;
                 break;
+            case 620:
+                var aRet = [{
+                    queue_type_id   : 1026,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 112,
+                }];
+                if (bNoArrange) {
+                    var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                    var nMaxAct = game_field_utility.getMaxActCount(mon.monster_id);
+                    for (var i = 0 ; i < nMaxAct ; i++) {
+                        aRet.push({
+                            queue_type_id   : 1024,
+                            target_id       : mon.game_card_id,
+                            cost_flg        : true,
+                        });
+                    }
+                }
+                break;
             case 640:
                 var aRet = [];
                 $.each(aArgs.field_data.cards, function(iGameCardId, val) {
@@ -4276,7 +4282,7 @@ function createMagicQueue(m) {
                 break;
             case 650:
                 var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
-                return [{
+                var aRet = [{
                     queue_type_id   : 1009,
                     target_id       : aArgs.targets[0].game_card_id,
                 },{
@@ -4287,6 +4293,15 @@ function createMagicQueue(m) {
                     queue_type_id   : 1010,
                     target_id       : aArgs.targets[1].game_card_id,
                 }];
+                if (bNoArrange) {
+                    for (var i = 0 ; i < 3 ; i++) {
+                        aRet.push({
+                            queue_type_id   : 1024,
+                            target_id       : aArgs.targets[1].game_card_id,
+                        });
+                    }
+                }
+                return aRet;
                 break;
             case 870:
                 var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
@@ -4324,24 +4339,29 @@ function createMagicQueue(m) {
                 var aRet = [];
                 var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
                 var aUsedCards = [];
-                var iHandNum = 0;
                 $.each(aArgs.field_data.cards, function(iGameCardId, val) {
                     if (val.owner != mon.owner) {
                         return true;
                     }
                     if (val.pos_category == 'used') {
                         aUsedCards.push(iGameCardId);
-                    } else if (val.pos_category == 'hand') {
-                        iHandNum++;
                     }
                 });
-                for (var i = 0 ; i < 2 ; i++) {
-                    var j = rand_gen.rand(0, aUsedCards.length-1);
+                if (bNoArrange) {
                     aRet.push({
-                        queue_type_id   : 1015,
-                        target_id       : aUsedCards[j],
+                        queue_type_id   : 1031,
+                        target_id       : aUsedCards[rand_gen.rand(0, aUsedCards.length-1)],
+                        param1          : 'first',
                     });
-                    aUsedCards.splice(j, 1);
+                } else {
+                    for (var i = 0 ; i < 2 ; i++) {
+                        var j = rand_gen.rand(0, aUsedCards.length-1);
+                        aRet.push({
+                            queue_type_id   : 1015,
+                            target_id       : aUsedCards[j],
+                        });
+                        aUsedCards.splice(j, 1);
+                    }
                 }
                 return aRet;
                 break;
@@ -4473,6 +4493,13 @@ function createMagicQueue(m) {
                 ];
                 break;
             case 1130:
+                if (bNoArrange) {
+                    return [{
+                        queue_type_id   : 1004,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : -1 * rand_gen.rand(1, 3),
+                    }];
+                }
                 return [{
                     queue_type_id   : 1006,
                     target_id       : aArgs.targets[0].game_card_id,
@@ -4844,39 +4871,8 @@ new function () {
         background  : '#fff',
     };
 
-
-
-    (function() {
-        var df = $.Deferred();
-        try {
-            if (sessionStorage.oMasterData) {
-                var d = JSON.parse(sessionStorage.oMasterData);
-                if (!d.m_card) {
-                    throw new Error('g_master_data is invalid.');
-                }
-                g_master_data = d;
-                df.resolve();
-            } else {
-                throw new Error('g_master_data is not yet loaded.');
-            }
-        } catch (e) {
-            g_master_data = null;
-            sessionStorage.oMasterData = null;
-            $.getJSON('/api/get-master-data/card/', function(json) {
-                g_master_data = json;
-                sessionStorage.oMasterData = JSON.stringify(json);
-                df.resolve();
-            });
-        }
-        return df.promise();
-    })().always(function() {
-        arts_queue              = createArtsQueue(g_master_data);
-        magic_queue             = createMagicQueue(g_master_data);
-        game_field_utility      = createGameFieldUtility(g_master_data);
-        game_field_reactions    = createGameFieldReactions(g_master_data);
-    });
-
-
+    // ページ描画前に行う初期化処理
+    _preload();
 
     $(function () {
 
@@ -5217,6 +5213,38 @@ new function () {
         });
     });
 
+    function _preload() {
+        (function() {
+            var df = $.Deferred();
+            try {
+                if (sessionStorage.oMasterData) {
+                    var d = JSON.parse(sessionStorage.oMasterData);
+                    if (!d.m_card) {
+                        throw new Error('g_master_data is invalid.');
+                    }
+                    g_master_data = d;
+                    df.resolve();
+                } else {
+                    throw new Error('g_master_data is not yet loaded.');
+                }
+            } catch (e) {
+                g_master_data = null;
+                sessionStorage.oMasterData = null;
+                $.getJSON('/api/get-master-data/card/', function(json) {
+                    g_master_data = json;
+                    sessionStorage.oMasterData = JSON.stringify(json);
+                    df.resolve();
+                });
+            }
+            return df.promise();
+        })().always(function() {
+            arts_queue              = createArtsQueue(g_master_data);
+            magic_queue             = createMagicQueue(g_master_data);
+            game_field_utility      = createGameFieldUtility(g_master_data);
+            game_field_reactions    = createGameFieldReactions(g_master_data);
+        });
+    }
+
     function initField()
     {
         game_field_reactions.initMasterData({
@@ -5232,7 +5260,6 @@ new function () {
         g_field_data.turn           = Number($('div[turn_num]').attr('turn_num'));
         g_field_data.my_stone       = Number($('#myPlayersInfo div.stone span').text());
         g_field_data.enemy_stone    = Number($('#enemyPlayersInfo div.stone span').text());
-        g_field_data.no_arrange     = Number($('div[no_arrange]').attr('no_arrange'));
 
         rand_gen.srand(g_field_data.game_field_id, 100);
 
@@ -5306,6 +5333,10 @@ new function () {
         } catch (e) {
             console.log(e);
         }
+
+        g_field_data.no_arrange = Number($('div[no_arrange]').attr('no_arrange'));
+        arts_queue.setNoArrangeFlg(g_field_data.no_arrange);
+        magic_queue.setNoArrangeFlg(g_field_data.no_arrange);
 
         $(document).on('click', 'input.toggle_setting', function () {
             $('div.settings').toggle();
@@ -6370,7 +6401,25 @@ new function () {
                                         throw new Error('next_game_card_id is not null');
                                     }
 
-                                    var pow = calcPow(aExecAct.actor_id, targetMon.game_card_id, q.param1);
+                                    switch (q.param2) {
+                                        case 'drill_break':
+                                            var p = game_field_utility.getXYFromPosId(g_field_data.cards[aExecAct.actor_id].pos_id);
+                                            if (p.x == 0) {
+                                                p.x = 2;
+                                            } else {
+                                                p.x = 0;
+                                            }
+                                            var sPartnerId = game_field_reactions.getGameCardId({
+                                                'pos_category'  : 'field',
+                                                'pos_id'        : game_field_utility.getPosIdFromXY(p),
+                                            });
+                                            var pow = calcPow(aExecAct.actor_id, targetMon.game_card_id, q.param1);
+                                            pow = calcPow(sPartnerId, null, pow);
+                                            break;
+                                        default:
+                                            pow = calcPow(aExecAct.actor_id, targetMon.game_card_id, q.param1);
+                                            break;
+                                    }
                                     if (0 < pow) {
                                         targetMon.hp -= pow;
                                     }
@@ -6673,8 +6722,11 @@ new function () {
                                     }
 
                                     if (bAssist) {
-                                        //g_field_data.lvup_assist += parseInt(q.param1);
-                                        g_field_data.lvup_assist += 1;
+                                        if (g_field_data.no_arrange) {
+                                            g_field_data.lvup_assist += parseInt(q.param1);
+                                        } else {
+                                            g_field_data.lvup_assist += 1;
+                                        }
                                     } else if (game_field_reactions.isLvupOk(mon)) {
                                         mon.lvup_standby += parseInt(q.param1);
                                     } else {
@@ -7122,6 +7174,7 @@ new function () {
                                         }
                                     });
                                     var aSt = g_master_data.m_status[q.param1];
+                                    var iTurnCount = Number(aSt.turn_count);
                                     switch (aSt.status_type) {
                                         case 'P':
                                         case 'S':
@@ -7136,19 +7189,6 @@ new function () {
                                             break;
                                     }
 
-                                    var iTurnCount = 2;
-                                    switch (q.param1) {
-                                        case 100:
-                                        case 105:
-                                        case 112:
-                                        case 122:
-                                        case 123:
-                                        case 124:
-                                        case 128:
-                                        case 131:
-                                            iTurnCount = 1000;
-                                            break;
-                                    }
                                     mon.status[q.param1] = {
                                         status_id   : q.param1,
                                         turn_count  : iTurnCount,
@@ -7247,9 +7287,6 @@ new function () {
                                     break;
                                 case 1031:
                                     var mon = g_field_data.cards[q.target_id];
-                                    if (mon.pos_category != 'hand') {
-                                        throw new Error('invalid_target');
-                                    }
                                     var st = 'last';
                                     if (q.param1 == 'first') {
                                         st = 'first';
@@ -7525,37 +7562,26 @@ new function () {
                 throw new Error('minus_power');
             }
             var act = g_field_data.cards[actorId];
-            var target = g_field_data.cards[targetId];
-            if (target == null) {
-                throw new Error('no_target');
-            }
 
-            // 仮死ゼスまたは水晶の壁持ちはダメージ無効
-            if (g_master_data.m_monster[target.monster_id].skill.id == 32) {
-                return 0;
-            }
-            if (target.status) {
-                if (target.status[112]) {
+            if (targetId) {
+                var target = g_field_data.cards[targetId];
+                if (target == null) {
+                    throw new Error('no_target');
+                }
+
+                // 仮死ゼスまたは水晶の壁持ちはダメージ無効
+                if (g_master_data.m_monster[target.monster_id].skill.id == 32) {
                     return 0;
+                }
+                if (target.status) {
+                    if (target.status[112]) {
+                        return 0;
+                    }
                 }
             }
 
             // パワーアップ系効果の適用
             if (act && act.status) {
-                if (typeof act.status[100] != 'undefined') {
-                    g_field_data.queues.push({
-                        actor_id            : targetId,
-                        log_message         : '気合溜め解除',
-                        resolved_flg        : 0,
-                        priority            : 'same_time',
-                        actor_anime_disable : true,
-                        queue_units : [{
-                            queue_type_id   : 1027,
-                            param1          : 100,
-                            target_id       : targetId,
-                        }],
-                    });
-                }
                 if (act.status[101] != null) {
                     pow++;
                     g_field_data.queues.push({
@@ -7643,6 +7669,9 @@ new function () {
                         }],
                     });
                 }
+            }
+            if (!targetId) {
+                return pow;
             }
 
             // シールド系効果の適用

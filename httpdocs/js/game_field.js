@@ -40,39 +40,8 @@ new function () {
         background  : '#fff',
     };
 
-
-
-    (function() {
-        var df = $.Deferred();
-        try {
-            if (sessionStorage.oMasterData) {
-                var d = JSON.parse(sessionStorage.oMasterData);
-                if (!d.m_card) {
-                    throw new Error('g_master_data is invalid.');
-                }
-                g_master_data = d;
-                df.resolve();
-            } else {
-                throw new Error('g_master_data is not yet loaded.');
-            }
-        } catch (e) {
-            g_master_data = null;
-            sessionStorage.oMasterData = null;
-            $.getJSON('/api/get-master-data/card/', function(json) {
-                g_master_data = json;
-                sessionStorage.oMasterData = JSON.stringify(json);
-                df.resolve();
-            });
-        }
-        return df.promise();
-    })().always(function() {
-        arts_queue              = createArtsQueue(g_master_data);
-        magic_queue             = createMagicQueue(g_master_data);
-        game_field_utility      = createGameFieldUtility(g_master_data);
-        game_field_reactions    = createGameFieldReactions(g_master_data);
-    });
-
-
+    // ページ描画前に行う初期化処理
+    _preload();
 
     $(function () {
 
@@ -413,6 +382,38 @@ new function () {
         });
     });
 
+    function _preload() {
+        (function() {
+            var df = $.Deferred();
+            try {
+                if (sessionStorage.oMasterData) {
+                    var d = JSON.parse(sessionStorage.oMasterData);
+                    if (!d.m_card) {
+                        throw new Error('g_master_data is invalid.');
+                    }
+                    g_master_data = d;
+                    df.resolve();
+                } else {
+                    throw new Error('g_master_data is not yet loaded.');
+                }
+            } catch (e) {
+                g_master_data = null;
+                sessionStorage.oMasterData = null;
+                $.getJSON('/api/get-master-data/card/', function(json) {
+                    g_master_data = json;
+                    sessionStorage.oMasterData = JSON.stringify(json);
+                    df.resolve();
+                });
+            }
+            return df.promise();
+        })().always(function() {
+            arts_queue              = createArtsQueue(g_master_data);
+            magic_queue             = createMagicQueue(g_master_data);
+            game_field_utility      = createGameFieldUtility(g_master_data);
+            game_field_reactions    = createGameFieldReactions(g_master_data);
+        });
+    }
+
     function initField()
     {
         game_field_reactions.initMasterData({
@@ -428,7 +429,6 @@ new function () {
         g_field_data.turn           = Number($('div[turn_num]').attr('turn_num'));
         g_field_data.my_stone       = Number($('#myPlayersInfo div.stone span').text());
         g_field_data.enemy_stone    = Number($('#enemyPlayersInfo div.stone span').text());
-        g_field_data.no_arrange     = Number($('div[no_arrange]').attr('no_arrange'));
 
         rand_gen.srand(g_field_data.game_field_id, 100);
 
@@ -502,6 +502,10 @@ new function () {
         } catch (e) {
             console.log(e);
         }
+
+        g_field_data.no_arrange = Number($('div[no_arrange]').attr('no_arrange'));
+        arts_queue.setNoArrangeFlg(g_field_data.no_arrange);
+        magic_queue.setNoArrangeFlg(g_field_data.no_arrange);
 
         $(document).on('click', 'input.toggle_setting', function () {
             $('div.settings').toggle();
@@ -1566,7 +1570,25 @@ new function () {
                                         throw new Error('next_game_card_id is not null');
                                     }
 
-                                    var pow = calcPow(aExecAct.actor_id, targetMon.game_card_id, q.param1);
+                                    switch (q.param2) {
+                                        case 'drill_break':
+                                            var p = game_field_utility.getXYFromPosId(g_field_data.cards[aExecAct.actor_id].pos_id);
+                                            if (p.x == 0) {
+                                                p.x = 2;
+                                            } else {
+                                                p.x = 0;
+                                            }
+                                            var sPartnerId = game_field_reactions.getGameCardId({
+                                                'pos_category'  : 'field',
+                                                'pos_id'        : game_field_utility.getPosIdFromXY(p),
+                                            });
+                                            var pow = calcPow(aExecAct.actor_id, targetMon.game_card_id, q.param1);
+                                            pow = calcPow(sPartnerId, null, pow);
+                                            break;
+                                        default:
+                                            pow = calcPow(aExecAct.actor_id, targetMon.game_card_id, q.param1);
+                                            break;
+                                    }
                                     if (0 < pow) {
                                         targetMon.hp -= pow;
                                     }
@@ -1869,8 +1891,11 @@ new function () {
                                     }
 
                                     if (bAssist) {
-                                        //g_field_data.lvup_assist += parseInt(q.param1);
-                                        g_field_data.lvup_assist += 1;
+                                        if (g_field_data.no_arrange) {
+                                            g_field_data.lvup_assist += parseInt(q.param1);
+                                        } else {
+                                            g_field_data.lvup_assist += 1;
+                                        }
                                     } else if (game_field_reactions.isLvupOk(mon)) {
                                         mon.lvup_standby += parseInt(q.param1);
                                     } else {
@@ -2318,6 +2343,7 @@ new function () {
                                         }
                                     });
                                     var aSt = g_master_data.m_status[q.param1];
+                                    var iTurnCount = Number(aSt.turn_count);
                                     switch (aSt.status_type) {
                                         case 'P':
                                         case 'S':
@@ -2332,19 +2358,6 @@ new function () {
                                             break;
                                     }
 
-                                    var iTurnCount = 2;
-                                    switch (q.param1) {
-                                        case 100:
-                                        case 105:
-                                        case 112:
-                                        case 122:
-                                        case 123:
-                                        case 124:
-                                        case 128:
-                                        case 131:
-                                            iTurnCount = 1000;
-                                            break;
-                                    }
                                     mon.status[q.param1] = {
                                         status_id   : q.param1,
                                         turn_count  : iTurnCount,
@@ -2443,9 +2456,6 @@ new function () {
                                     break;
                                 case 1031:
                                     var mon = g_field_data.cards[q.target_id];
-                                    if (mon.pos_category != 'hand') {
-                                        throw new Error('invalid_target');
-                                    }
                                     var st = 'last';
                                     if (q.param1 == 'first') {
                                         st = 'first';
@@ -2721,37 +2731,26 @@ new function () {
                 throw new Error('minus_power');
             }
             var act = g_field_data.cards[actorId];
-            var target = g_field_data.cards[targetId];
-            if (target == null) {
-                throw new Error('no_target');
-            }
 
-            // 仮死ゼスまたは水晶の壁持ちはダメージ無効
-            if (g_master_data.m_monster[target.monster_id].skill.id == 32) {
-                return 0;
-            }
-            if (target.status) {
-                if (target.status[112]) {
+            if (targetId) {
+                var target = g_field_data.cards[targetId];
+                if (target == null) {
+                    throw new Error('no_target');
+                }
+
+                // 仮死ゼスまたは水晶の壁持ちはダメージ無効
+                if (g_master_data.m_monster[target.monster_id].skill.id == 32) {
                     return 0;
+                }
+                if (target.status) {
+                    if (target.status[112]) {
+                        return 0;
+                    }
                 }
             }
 
             // パワーアップ系効果の適用
             if (act && act.status) {
-                if (typeof act.status[100] != 'undefined') {
-                    g_field_data.queues.push({
-                        actor_id            : targetId,
-                        log_message         : '気合溜め解除',
-                        resolved_flg        : 0,
-                        priority            : 'same_time',
-                        actor_anime_disable : true,
-                        queue_units : [{
-                            queue_type_id   : 1027,
-                            param1          : 100,
-                            target_id       : targetId,
-                        }],
-                    });
-                }
                 if (act.status[101] != null) {
                     pow++;
                     g_field_data.queues.push({
@@ -2839,6 +2838,9 @@ new function () {
                         }],
                     });
                 }
+            }
+            if (!targetId) {
+                return pow;
             }
 
             // シールド系効果の適用

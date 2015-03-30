@@ -1,9 +1,13 @@
 function createMagicQueue(m) {
     // 変数宣言
     var g_master_data = m;
+    var bNoArrange = 0;
 
     // public メンバ
     return {
+        'setNoArrangeFlg' : function (f) { bNoArrange = f; },
+        'getNoArrangeFlg' : function () { return bNoArrange; },
+
         /**
          * キューオブジェクトを生成する
          *
@@ -106,7 +110,6 @@ function createMagicQueue(m) {
                 550     : 107,
                 590     : 103,
                 600     : 111,
-                620     : 112,
                 630     : 113,
                 860     : 114,
                 880     : 108,
@@ -278,6 +281,24 @@ function createMagicQueue(m) {
                 }
                 return aRet;
                 break;
+            case 620:
+                var aRet = [{
+                    queue_type_id   : 1026,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 112,
+                }];
+                if (bNoArrange) {
+                    var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                    var nMaxAct = game_field_utility.getMaxActCount(mon.monster_id);
+                    for (var i = 0 ; i < nMaxAct ; i++) {
+                        aRet.push({
+                            queue_type_id   : 1024,
+                            target_id       : mon.game_card_id,
+                            cost_flg        : true,
+                        });
+                    }
+                }
+                break;
             case 640:
                 var aRet = [];
                 $.each(aArgs.field_data.cards, function(iGameCardId, val) {
@@ -315,7 +336,7 @@ function createMagicQueue(m) {
                 break;
             case 650:
                 var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
-                return [{
+                var aRet = [{
                     queue_type_id   : 1009,
                     target_id       : aArgs.targets[0].game_card_id,
                 },{
@@ -326,6 +347,15 @@ function createMagicQueue(m) {
                     queue_type_id   : 1010,
                     target_id       : aArgs.targets[1].game_card_id,
                 }];
+                if (bNoArrange) {
+                    for (var i = 0 ; i < 3 ; i++) {
+                        aRet.push({
+                            queue_type_id   : 1024,
+                            target_id       : aArgs.targets[1].game_card_id,
+                        });
+                    }
+                }
+                return aRet;
                 break;
             case 870:
                 var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
@@ -363,24 +393,29 @@ function createMagicQueue(m) {
                 var aRet = [];
                 var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
                 var aUsedCards = [];
-                var iHandNum = 0;
                 $.each(aArgs.field_data.cards, function(iGameCardId, val) {
                     if (val.owner != mon.owner) {
                         return true;
                     }
                     if (val.pos_category == 'used') {
                         aUsedCards.push(iGameCardId);
-                    } else if (val.pos_category == 'hand') {
-                        iHandNum++;
                     }
                 });
-                for (var i = 0 ; i < 2 ; i++) {
-                    var j = rand_gen.rand(0, aUsedCards.length-1);
+                if (bNoArrange) {
                     aRet.push({
-                        queue_type_id   : 1015,
-                        target_id       : aUsedCards[j],
+                        queue_type_id   : 1031,
+                        target_id       : aUsedCards[rand_gen.rand(0, aUsedCards.length-1)],
+                        param1          : 'first',
                     });
-                    aUsedCards.splice(j, 1);
+                } else {
+                    for (var i = 0 ; i < 2 ; i++) {
+                        var j = rand_gen.rand(0, aUsedCards.length-1);
+                        aRet.push({
+                            queue_type_id   : 1015,
+                            target_id       : aUsedCards[j],
+                        });
+                        aUsedCards.splice(j, 1);
+                    }
                 }
                 return aRet;
                 break;
@@ -512,6 +547,13 @@ function createMagicQueue(m) {
                 ];
                 break;
             case 1130:
+                if (bNoArrange) {
+                    return [{
+                        queue_type_id   : 1004,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : -1 * rand_gen.rand(1, 3),
+                    }];
+                }
                 return [{
                     queue_type_id   : 1006,
                     target_id       : aArgs.targets[0].game_card_id,

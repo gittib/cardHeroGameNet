@@ -747,19 +747,21 @@ function createGameFieldReactions() {
                                 '</div>';
                         }
                     } else {
-                        // 気合溜めコマンドは禁止
-                        // switch (g_master_data.m_monster[aCardData.monster_id].skill.id) {
-                        //     case 4:
-                        //     case 5:
-                        //         sCommandsHtml +=
-                        //             '<div class="command_row" act_type="charge">' +
-                        //                 '気合だめ' +
-                        //                 '<div class="num_info">' +
-                        //                     sCost +
-                        //                 '</div>' +
-                        //             '</div>';
-                        //         break;
-                        // }
+                        if (g_field_data.no_arrange) {
+                            // 気合溜めコマンド
+                            switch (g_master_data.m_monster[aCardData.monster_id].skill.id) {
+                                case 4:
+                                case 5:
+                                    sCommandsHtml +=
+                                        '<div class="command_row" act_type="charge">' +
+                                            '気合だめ' +
+                                            '<div class="num_info">' +
+                                                sCost +
+                                            '</div>' +
+                                        '</div>';
+                                    break;
+                            }
+                        }
                         sCommandsHtml +=
                             '<div class="command_row" act_type="move">' +
                                 '移動' +

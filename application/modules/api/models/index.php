@@ -271,6 +271,7 @@ class model_Api_Index {
                     'status_type',
                     'status_name',
                     'status_caption',
+                    'turn_count',
                 )
             );
         $rslt = $this->_db->fetchAll($sel);
@@ -336,30 +337,81 @@ class model_Api_Index {
                 'loc'   => 'http://' . $_SERVER['SERVER_NAME'] . '/game/',
                 'priority'  => 0.9,
             ),
+            array(
+                'loc'   => 'http://' . $_SERVER['SERVER_NAME'] . '/game/last/',
+                'priority'  => 0.9,
+            ),
         );
+
+        $subFinish = $this->_db->select()
+            ->distinct()
+            ->from(
+                array('tgm' => 't_game_monster'),
+                array(
+                    'game_field_id',
+                )
+            )
+            ->where('tgm.position = ?', 'Master')
+            ->group(array(
+                'game_field_id',
+            ))
+            ->having('count(*) <= 1');
+
+        $subRecommend = $this->_db->select()
+            ->from(
+                array('tgf' => 't_game_field'),
+                array(
+                    'game_field_id',
+                )
+            )
+            ->join(
+                array('vlf' => 'v_last_field'),
+                'vlf.game_field_id = tgf.game_field_id',
+                array()
+            )
+            ->where('tgf.game_field_id in(?)', $subFinish)
+            ->where("tgf.field_id_path like '%-%-%'");
 
         $sel = $this->_db->select()
             ->from(
-                't_game_field',
+                array('tgf' => 't_game_field'),
                 array(
                     'game_field_id',
                     'field_id_path',
-                    'upd_date'  => new Zend_Db_Expr("to_char(upd_date, 'yyyy-mm-dd')"),
+                    'upd_date'  => new Zend_Db_Expr("to_char(tgf.upd_date, 'yyyy-mm-dd')"),
                 )
             )
-            ->where('del_flg != 1')
-            ->where('open_flg = 1');
+            ->joinLeft(
+                array('rec' => $subRecommend),
+                'rec.game_field_id = tgf.game_field_id',
+                array(
+                    'rec' => 'game_field_id',
+                )
+            )
+            ->where('tgf.del_flg != 1')
+            ->where('tgf.open_flg = 1');
         $rslt = $this->_db->fetchAll($sel);
         foreach ($rslt as $val) {
+            $iTurnCount = substr_count($val['field_id_path'], '-') + 1;
+            if ($iTurnCount < 7) {
+                continue;
+            }
+
             $aTmp = array(
                 'loc'       => 'http://' . $_SERVER['SERVER_NAME'] . '/game/field/' . $val['game_field_id'] . '/',
                 'lastmod'   => $val['upd_date'],
+                'priority'  => 0.1,
             );
-            $iTurnCount = substr_count($val['field_id_path'], '-') + 1;
-            if ($iTurnCount < 7) {
-                $aTmp['priority'] = 0.1;
-            }
+
             $aUrls[] = $aTmp;
+            if (isset($val['rec'])) {
+                $aTmp = array(
+                    'loc'       => 'http://' . $_SERVER['SERVER_NAME'] . '/game/kifu/' . $val['game_field_id'] . '/',
+                    'lastmod'   => $val['upd_date'],
+                    'priority'  => 0.6,
+                );
+                $aUrls[] = $aTmp;
+            }
         }
 
         $sel = $this->_db->select()

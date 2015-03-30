@@ -11,6 +11,10 @@ if (APPLICATION_ENV == 'evaluate') {
 
 $sEnv = '';
 switch (APPLICATION_ENV) {
+    case 'test_ds_original':
+    case 'ds_original':
+        $sEnv = 'DSオリジナル';
+        break;
     case 'evaluate':
         $sEnv = '評価環境';
         break;
@@ -21,11 +25,13 @@ switch (APPLICATION_ENV) {
 ?>
 <div id='header'>
     <div class="title clearfix">
-        <h1>
-            <img src="/images/cardhero-game.net.jpg" alt="カードヒーロー@スマホ" />
-        </h1>
-        <div class="env_echo">
-            <?php echo $sEnv; ?>
+        <div class="h1wrap">
+            <h1>
+                <img src="/images/cardhero-game.net.jpg" alt="カードヒーロー@スマホ" />
+            </h1>
+            <div class="env_echo">
+                <?php echo $sEnv; ?>
+            </div>
         </div>
     </div>
     <div class="links clearfix">

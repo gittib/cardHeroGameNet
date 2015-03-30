@@ -1,9 +1,13 @@
 function createArtsQueue(m) {
     // 変数宣言
     var g_master_data = m;
+    var bNoArrange = 0;
 
     // public メンバ
     return {
+        'setNoArrangeFlg' : function (f) { bNoArrange = f; },
+        'getNoArrangeFlg' : function () { return bNoArrange; },
+
         /**
          * 特技のキューオブジェクトを生成する
          *
@@ -641,38 +645,6 @@ function createArtsQueue(m) {
                         }
 
                         pow += g_master_data.m_monster[val.monster_id].attack.power;
-                        // ドリルブレイクの時はP効果の云々を自前で処理する
-                        $.each(val.status, function(sid, stval) {
-                            switch (Number(sid)) {
-                                case 102:
-                                    aRet.push({
-                                        queue_type_id   : 1006,
-                                        target_id       : val.game_card_id,
-                                        param1          : 1,
-                                    });
-                                    // breakは書かない
-                                case 101:
-                                    pow++;
-                                    break;
-                                case 103:
-                                    pow -= g_master_data.m_monster[val.monster_id].attack.power;
-                                    pow += 2;
-                                    break;
-                                case 104:
-                                    pow--;
-                                    break;
-                                case 105:
-                                    pow += 2;
-                                    return true;
-                                default:
-                                    return true;
-                            }
-                            aRet.push({
-                                queue_type_id   : 1027,
-                                target_id       : val.game_card_id,
-                                param1          : sid,
-                            });
-                        });
                     }
                 });
                 if (lrCnt < 2) {
@@ -682,6 +654,7 @@ function createArtsQueue(m) {
                     queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
                     target_id       : aArgs.targets[0].game_card_id,
                     param1          : pow,
+                    param2          : 'drill_break',
                 });
                 return aRet;
                 break;
@@ -771,6 +744,14 @@ function createArtsQueue(m) {
                         queue_type_id   : 1019,
                         target_id       : aArgs.targets[0].game_card_id,
                     });
+                }
+                if (bNoArrange) {
+                    for (var i = 0 ; i < 3 ; i++) {
+                        aRet.push({
+                            queue_type_id   : 1024,
+                            target_id       : aArgs.targets[0].game_card_id,
+                        });
+                    }
                 }
                 return aRet;
                 break;
@@ -980,12 +961,14 @@ function createArtsQueue(m) {
                     target_id       : aArgs.targets[0].game_card_id,
                     param1          : 111,
                 }];
-                if (aArtInfo.damage_type_flg == 'P' || aArtInfo.damage_type_flg == 'D') {
-                    aRet.push({
-                        queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
-                        target_id       : aArgs.targets[0].game_card_id,
-                        param1          : aArtInfo.power,
-                    });
+                if (!bNoArrange) {
+                    if (aArtInfo.damage_type_flg == 'P' || aArtInfo.damage_type_flg == 'D') {
+                        aRet.push({
+                            queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
+                            target_id       : aArgs.targets[0].game_card_id,
+                            param1          : aArtInfo.power,
+                        });
+                    }
                 }
                 return aRet;
                 break;
