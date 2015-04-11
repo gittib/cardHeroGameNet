@@ -1220,6 +1220,11 @@ function createGameFieldReactions() {
                                             '</div>' +
                                         '</div>';
                                     break;
+                                case 'ドロー５':
+                                    if (!no_arrange) {
+                                        iStone = '?';
+                                    }
+                                    //breakは書かない
                                 default:
                                     g_field_data.actor.magic_id = mid;
                                     g_field_data.actor.act_type = 'magic';
@@ -4532,7 +4537,7 @@ function createMagicQueue(m) {
                 });
                 var iSortNo = 1000;
                 $.each(aGameCardId, function(k, iGameCardId) {
-                    aQueue.queue_units.push({
+                    aRet.push({
                         queue_type_id   : 1012,
                         target_id       : iGameCardId,
                         param1          : iSortNo++,
@@ -4621,18 +4626,23 @@ function createMagicQueue(m) {
             case 1200:
                 var aRet = [];
                 var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
-                var nHand = 0;
+                var nHand = -1; // ドロー５自体が手札にいるからその分を除く
                 $.each(aArgs.field_data.cards, function(iGameCardId, val) {
                     if (val.owner == mon.owner && val.pos_category == 'hand') {
                         nHand++;
                     }
                 });
-                if (nHand < 6) {
+                if (nHand < 5) {
                     return [{
                         queue_type_id   : 1011,
                         target_id       : mon.game_card_id,
                         param1          : 'draw',
-                        param2          : 6-nHand,
+                        param2          : 5-nHand,
+                    }, {
+                        queue_type_id   : 1004,
+                        target_id       : mon.game_card_id,
+                        param1          : nHand-5,
+                        cost_flg        : true,
                     }];
                 }
                 break;
@@ -6534,6 +6544,9 @@ new function () {
                                     break;
                                 case 1008:
                                     var targetMon = g_field_data.cards[q.target_id];
+                                    if (targetMon.pos_category != 'field') {
+                                        throw new Error('既にフィールドにいない');
+                                    }
 
                                     // スーパーとかが乙る時はその下の進化元も墓地に行くので、eachで繰り返し判定する
                                     $.each(g_field_data.cards, function(ii, vv) {

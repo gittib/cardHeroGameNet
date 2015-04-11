@@ -1703,6 +1703,9 @@ new function () {
                                     break;
                                 case 1008:
                                     var targetMon = g_field_data.cards[q.target_id];
+                                    if (targetMon.pos_category != 'field') {
+                                        throw new Error('既にフィールドにいない');
+                                    }
 
                                     // スーパーとかが乙る時はその下の進化元も墓地に行くので、eachで繰り返し判定する
                                     $.each(g_field_data.cards, function(ii, vv) {

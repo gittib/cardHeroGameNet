@@ -266,7 +266,7 @@ class GameController extends Zend_Controller_Action
 
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/js_debug.js';
-            //*
+            /*
             $this->_javascript[] = '/js/game_field.min.js';
             /*/
             $this->_javascript[] = '/js/rand_gen.js';

@@ -1,36 +1,38 @@
 <?php
 $conf = Zend_Registry::get('config');
 
+$l = $this->layout();
+
 // title
 $sTitle = '';
-if (isSet($this->layout()->title)) {
-    $sTitle = $this->layout()->title . ' - ';
+if (isSet($l->title)) {
+    $sTitle = $l->title . ' - ';
 }
 $sTitle = $conf->web->title->prefix . $sTitle;
 
 // description
 $sDescription = '';
-if (isset($this->layout()->description)) {
-    $sDescription = $this->layout()->description;
+if (isset($l->description)) {
+    $sDescription = $l->description;
 }
 
 // canonical
 $sDefaultCanonical = preg_replace('/\?.*$/', '', $_SERVER['REQUEST_URI']);
 $sCanonical = "<link rel='canonical' href='{$sDefaultCanonical}' />\n";
-if (isSet($this->layout()->canonical)) {
-    $sCanonical = "<link rel='canonical' href='{$this->layout()->canonical}' />\n";
+if (isSet($l->canonical)) {
+    $sCanonical = "<link rel='canonical' href='{$l->canonical}' />\n";
 }
 
 // noindex
 $sNoIndex = '';
-if ($conf->web->noindex || isSet($this->layout()->noindex)) {
+if ($conf->web->noindex || isSet($l->noindex)) {
     $sNoIndex = '<meta name="robots" content="noindex,nofollow" />' . "\n";
 }
 
 // stylesheet
 $sStylesheet = '';
-if (isSet($this->layout()->stylesheet)) {
-    foreach ($this->layout()->stylesheet as $key => $val) {
+if (isSet($l->stylesheet)) {
+    foreach ($l->stylesheet as $key => $val) {
         if ($val != '') {
             $sStylesheet .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"{$val}\" media=\"all\" />\n";
         }
@@ -40,18 +42,18 @@ if (isSet($this->layout()->stylesheet)) {
 // javascript
 $sJavascript = '';
 
-if (isSet($this->layout()->javascript)) {
-    foreach ($this->layout()->javascript as $key => $val) {
+if (isSet($l->javascript)) {
+    foreach ($l->javascript as $key => $val) {
         if ($val != '') {
             $sJavascript .= "<script type=\"text/javascript\" src=\"{$val}\"></script>\n";
         }
     }
 }
-if (isSet($this->layout()->javascriptCode)) {
+if (isSet($l->javascriptCode)) {
     $sJavascript .= <<<_eos_
 <script type="text/javascript">
 <!--
-{$this->layout()->javascriptCode}
+{$l->javascriptCode}
 -->
 </script>
 

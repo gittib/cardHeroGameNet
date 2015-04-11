@@ -569,6 +569,11 @@ function createGameFieldReactions() {
                                             '</div>' +
                                         '</div>';
                                     break;
+                                case 'ドロー５':
+                                    if (!g_field_data.no_arrange) {
+                                        iStone = '?';
+                                    }
+                                    //breakは書かない
                                 default:
                                     g_field_data.actor.magic_id = mid;
                                     g_field_data.actor.act_type = 'magic';

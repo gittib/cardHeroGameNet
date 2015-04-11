@@ -1,8 +1,10 @@
-<?php if (APPLICATION_ENV == 'no_arrange') : ?>
+<?php
+$conf = Zend_Registry::get('config');
+?>
+<?php if ($conf->web->no_arrange) : ?>
 <p class="explain">
     当サイトで使う事ができるカードのリストです。<br />
-    DS版カードヒーローのカードをベースにしていますが、効果や性能をアレンジしているカードもあります。<br />
-    アレンジされているカードには、右上に「Arranged」と表示されます。
+    こちらのカードリストは、DS版カードヒーローの物と同一のものになっています。
 </p>
 <?php else: ?>
 <p class="explain">

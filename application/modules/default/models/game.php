@@ -442,6 +442,7 @@ class model_Game {
             case 124:
             case 129:
             case 130:
+            case 133:
                 return "{$sPos}{$row['monster_name']}に{$row['status_name']}";
             case 132:
                 return "{$sPos}{$row['monster_name']}は{$row['status_name']}";
