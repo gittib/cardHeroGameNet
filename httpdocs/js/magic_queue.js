@@ -696,10 +696,14 @@ function createMagicQueue(m) {
                 }
                 break;
             case 1210:
+                var iMin = 2;
+                if (bNoArrange) {
+                    iMin = 1;
+                }
                 return [{
                     queue_type_id   : 1004,
                     target_id       : aArgs.targets[0].game_card_id,
-                    param1          : rand_gen.rand(2, 3),
+                    param1          : rand_gen.rand(iMin, 3),
                 }];
                 break;
             case 1220:
