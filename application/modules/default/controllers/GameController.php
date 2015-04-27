@@ -77,9 +77,7 @@ class GameController extends Zend_Controller_Action
 
     public function lastAction()
     {
-        $request = $this->getRequest();
-        $request->setParam('bLast', true);
-
+        $this->getRequest()->setParam('bLast', true);
         $this->forward('index');
     }
 
@@ -262,11 +260,11 @@ class GameController extends Zend_Controller_Action
         $request = $this->getRequest();
         $iGameFieldId = $request->getParam('game_field_id');
         $sReferer = $request->getParam('referer');
-        $this->_stylesheet[] = '/css/game_field.css?ver=20150118';
+        $this->_stylesheet[] = '/css/game_field.css?ver=20150416';
 
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/js_debug.js';
-            /*
+            //*
             $this->_javascript[] = '/js/game_field.min.js';
             /*/
             $this->_javascript[] = '/js/rand_gen.js';
@@ -277,10 +275,13 @@ class GameController extends Zend_Controller_Action
             $this->_javascript[] = '/js/game_field.js';
             //*/
         } else {
-            $this->_javascript[] = '/js/game_field.min.js?ver=20150330';
+            $this->_javascript[] = '/js/game_field.min.js?ver=20150428';
         }
 
-        $iBeforeFieldId = $this->_model->getBeforeFieldId($iGameFieldId);
+        $iBeforeFieldId = $this->_model->getBeforeFieldId(array(
+            'game_field_id' => $iGameFieldId,
+            'prime'         => $request->getParam('replay_flg', false),
+        ));
         $aSelectCond = array(
             'game_field_id' => $iBeforeFieldId,
         );
@@ -290,6 +291,7 @@ class GameController extends Zend_Controller_Action
         if ($iBeforeFieldId != $iGameFieldId) {
             $aQueue = $this->_model->getQueueInfo($iGameFieldId, array(
                 'swap_pos_id'   => true,
+                'all_fields'    => $request->getParam('replay_flg', false),
             ));
             //$this->_model->getQueueText($iGameFieldId);
         }
@@ -300,6 +302,12 @@ class GameController extends Zend_Controller_Action
         $this->view->assign('bBefore', ($iGameFieldId != $iBeforeFieldId));
         $this->view->assign('sReferer', $sReferer);
         $this->view->assign('aQueue', $aQueue);
+    }
+
+    public function replayAction()
+    {
+        $this->getRequest()->setParam('replay_flg', true);
+        $this->forward('field');
     }
 
     public function turnEndAction()

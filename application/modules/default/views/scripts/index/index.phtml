@@ -1,3 +1,23 @@
+<?php
+$aSisterSite = array(
+    'production' => array(
+        'url'   => '//cardhero-game.net/',
+        'title' => 'カードヒーロー＠スマホ カードセット',
+    ),
+    'ds_original' => array(
+        'url'   => '//ds-original.cardhero-game.net/',
+        'title' => 'DS版オリジナルカードセット',
+    ),
+);
+$sSisterSite = '';
+foreach ($aSisterSite as $key => $val) {
+    if ($key == APPLICATION_ENV) {
+        $sSisterSite .= "<li>{$val['title']}</li>\n";
+    } else {
+        $sSisterSite .= "<li><a href='{$val['url']}' class='blank_link' target='_blank'>{$val['title']}</a></li>\n";
+    }
+}
+?>
 <div id="welcome">
     <h1>カードヒーロー＠スマホ へようこそ！</h1>
     <div id="what_is_this">
@@ -9,33 +29,25 @@
         <a href='/card/'>
           <div class="card_list">
               <img src="/images/card_list_icon.png" alt="カードリスト" />
-              <span>
-                  カードリスト
-              </span>
+              <span>カードリスト</span>
           </div>
         </a>
         <a href='/game/'>
           <div class="field_list">
               <img src="/images/field_list_icon.png" alt="フィールドリスト" />
-              <span>
-                  フィールド一覧
-              </span>
+              <span>フィールド一覧</span>
           </div>
         </a>
         <a href='/deck/'>
           <div class="deck_list">
               <img src="/images/deck_icon.png" alt="デッキ一覧" />
-              <span>
-                  デッキ一覧
-              </span>
+              <span>デッキ一覧</span>
           </div>
         </a>
         <a href='/game/new/'>
           <div class="new_game">
               <img src="/images/new_game_icon.png" alt="新規ゲーム開始" />
-              <span>
-                  新規ゲーム開始
-              </span>
+              <span>新規ゲーム開始</span>
           </div>
         </a>
     </div>
@@ -43,6 +55,8 @@
         <h2>更新履歴・お知らせ</h2>
         <div>
             <ul>
+                <li>[2015/04/28]墓地確認機能を追加。マスター及びドロー系マジックを選択時に確認できます。</li>
+                <li class="important">[2015/04/25]<a target="_blank" href="//ds-original.cardhero-game.net/">DSオリジナル版カードセット</a>をリリース。アレンジや修正されていないカードを使用できます。</li>
                 <li>[2015/03/08]デッキ編集にて非公開機能を追加。ログインした状態でのみ利用できます。</li>
                 <li>[2015/03/01]マリガン機能を追加。これに伴い、ゲーム開始手順が一部変更されます。</li>
                 <li class="important">[2015/03/01]<a target="_blank" href="/card/detail/108/">レオン</a>・<a target="_blank" href="/card/detail/107/">ラオン</a>・<a target="_blank" href="/card/detail/47/">ダイン</a>・<a target="_blank" href="/card/detail/16/">シグマ</a>・<a target="_blank" href="/card/detail/132/">オクトロス</a>のカード性能を下方修正</li>
@@ -69,6 +83,10 @@
             <li><a class="blank_link" target="_blank" href="http://www.nintendo.co.jp/n02/dmg/ahhj/">カードヒーローBGC版　公式サイト</a></li>
             <li><a class="blank_link" target="_blank" href="http://www.nintendo.co.jp/ds/ychj/">カードヒーローDS版　公式サイト</a></li>
             <li><a class="blank_link" target="_blank" href="http://www.cardhero-bu.com/">カードヒーロー部.com</a></li>
+        </ul>
+        <h2>カードヒーロー＠スマホ カードセットバリエーション</h2>
+        <ul>
+        <?php echo $sSisterSite; ?>
         </ul>
     </div>
 </div>

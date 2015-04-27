@@ -1,6 +1,6 @@
 <?php
 
-class Ranking_IndexController extends Zend_Controller_Action
+class Ranking_FinisherController extends Zend_Controller_Action
 {
     private $_model;
     private $_layout;
@@ -26,6 +26,9 @@ class Ranking_IndexController extends Zend_Controller_Action
 
     public function indexAction()
     {
-        $this->_layout->title = 'ランキング';
+        require_once APPLICATION_PATH . '/modules/ranking/models/GetList.php';
+        $this->_model = new Model_Ranking_GetList();
+        $aFinisherList = $this->_model->getFinisherRanking();
+        $this->view->assign('aFinisherList', $aFinisherList);
     }
 }

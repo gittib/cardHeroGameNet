@@ -391,7 +391,9 @@ function createGameFieldReactions() {
                 $.each(aMonsterData.arts, function(i, val) {
                     var sPower = '';
                     var iPow = Number(val.power);
-                    var sRange = '<img src="/images/range/' + val.range_type_id + '.png" alt="" />';
+                    var sImgSrc = '/images/range/' + val.range_type_id + '.png';
+                    sImgSrc = game_field_utility.getImg(sImgSrc);
+                    var sRange = '<img src="' + sImgSrc + '" alt="" />';
                     var iStone = val.stone;
                     if (val.damage_type_flg == 'P' && typeof mon.status != 'undefined') {
                         $.each(mon.status, function(sid, aSt) {
@@ -455,14 +457,15 @@ function createGameFieldReactions() {
 
             var aCard = g_field_data.cards[g_field_data.actor.game_card_id];
             var aCardData = g_master_data.m_card[aCard.card_id];
-            var sImageFileName = aCardData.image_file_name;
+            var sImgSrc = '/images/card/' + aCardData.image_file_name;
+            sImgSrc = game_field_utility.getImg(sImgSrc);
             var sImageAlt = aCardData.card_name;
             if (aCard.monster_id) {
                 sImageFileName = g_master_data.m_monster[aCard.monster_id].image_file_name;
                 sImageAlt = g_master_data.m_monster[aCard.monster_id].monster_name;
             }
 
-            var sImg        = '<img src="/images/card/' + sImageFileName + '" alt="' + sImageAlt + '" />';
+            var sImg        = '<img src="' + sImgSrc + '" alt="' + sImageAlt + '" />';
             var sProposer   = '';
             if (aCardData.proposer) {
                 sProposer   = '<div class="proposer"> Arranged&nbsp; </div>';
@@ -473,11 +476,61 @@ function createGameFieldReactions() {
 
             console.log('updateActorDom aCard.pos_category:'+aCard.pos_category);
             console.log('updateActorDom aArgs.game_state:'+aArgs.game_state);
+            var _buildUsedCardsRow = function (selectedOwner) {
+
+                var aUsedCards = [];
+                var iDeck = 0;
+                var iUsed = 0;
+                $.each(g_field_data.cards, function(iGameCardId, val) {
+                    if (val.owner != selectedOwner) {
+                        return true;
+                    }
+                    if (val.pos_category == 'deck') {
+                        iDeck++;
+                    }
+                    if (val.pos_category != 'used') {
+                        return true;
+                    }
+                    iUsed++;
+                    var ac = g_master_data.m_card[val.card_id];
+                    var sImgSrc = game_field_utility.getImg('/images/card/'+ ac.image_file_name);
+                    aUsedCards.push({
+                        'sort_no' : val.sort_no,
+                        'sHtml' :
+                            '<div>' +
+                                '<img src="'+sImgSrc+'" />' +
+                                ac.card_name +
+                                '<div class="num_info">' +
+                                    '<a class="blank_link" href="/card/detail/'+ac.card_id+'/" target="_blank">詳細</a>' +
+                                    '&nbsp;' +
+                                '</div>' +
+                            '</div>'
+                    });
+                });
+                aUsedCards.sort(function(v1, v2) {
+                    return v2.sort_no - v1.sort_no;
+                });
+                var sUsedCards = '';
+                for (var i = 0 ; i < aUsedCards.length ; i++) {
+                    sUsedCards += aUsedCards[i].sHtml;
+                }
+                var sUsedHtml =
+                    '<div class="around_card_info">' +
+                        '山札：' + iDeck + '枚&nbsp;&nbsp;' +
+                        '墓地：'+iUsed+'枚<br />' +
+                        '<a href="javascript:$(\'.used_cards_div\').toggle();" class="check_used">墓地確認↓</a>' +
+                        '<div class="used_cards_div" style="display:none;">' +
+                            sUsedCards +
+                        '</div>' +
+                    '</div>';
+                return sUsedHtml;
+            };
+
             if (aCard.pos_category == 'hand') {
                 if (aArgs.game_state == 'tokugi_fuuji') {
                     aCard = g_field_data.cards[g_field_data.actor.aTargets[0].game_card_id];
                     var mon = g_master_data.m_monster[aCard.monster_id];
-                    sImg = '<img src="/images/card/' + mon.image_file_name + '" alt="' + sImageAlt + '" />';
+                    sImg = '<img src="' + sImgSrc + '" alt="' + sImageAlt + '" />';
 
                     if (aCard.owner == 'enemy' && aCard.standby_flg) {
                         throw new Error('standby monster');
@@ -587,6 +640,9 @@ function createGameFieldReactions() {
                                                 '</span>' +
                                             '</div>' +
                                         '</div>';
+                                    if (g_master_data.m_magic[aCardData.magic_id].magic_type == 'D') {
+                                        sCommandsHtml += _buildUsedCardsRow(aCard.owner);
+                                    }
                                     break;
                             }
                             break;
@@ -607,23 +663,22 @@ function createGameFieldReactions() {
                     if (0 < aCard.lvup_standby || 0 < g_field_data.lvup_assist) {
                         if (aMonsterData.next_monster_id) {
                             sCommandName = 'レベルアップ';
-                        } else {
-                            try {
-                                $.each(g_field_data.cards, function(i, val) {
-                                    var bSuper = game_field_utility.isValidSuper({
-                                        aBefore : aCard,
-                                        aAfter  : val,
-                                    });
-                                    if (bSuper) {
-                                        throw 'super_ok';
-                                    }
+                        }
+                        try {
+                            $.each(g_field_data.cards, function(i, val) {
+                                var bSuper = game_field_utility.isValidSuper({
+                                    aBefore : aCard,
+                                    aAfter  : val,
                                 });
-                            } catch (e) {
-                                if (e == 'super_ok') {
-                                    sCommandName = 'スーパーに進化';
-                                } else {
-                                    throw e;
+                                if (bSuper) {
+                                    throw 'super_ok';
                                 }
+                            });
+                        } catch (e) {
+                            if (e == 'super_ok') {
+                                sCommandName = 'スーパーに進化';
+                            } else {
+                                throw e;
                             }
                         }
                     }
@@ -636,7 +691,9 @@ function createGameFieldReactions() {
                 } else if (aArgs.game_state == 'tokugi_fuuji') {
                     aCard = g_field_data.cards[g_field_data.actor.aTargets[0].game_card_id];
                     var mon = g_master_data.m_monster[aCard.monster_id];
-                    sImg = '<img src="/images/card/' + mon.image_file_name + '" alt="' + sImageAlt + '" />';
+                    var sImgSrc = '/images/card/' + mon.image_file_name;
+                    sImgSrc = game_field_utility.getImg(sImgSrc);
+                    sImg = '<img src="' + sImgSrc + '" alt="' + sImageAlt + '" />';
 
                     if (aCard.owner == 'enemy' && aCard.standby_flg) {
                         throw new Error('standby monster');
@@ -681,7 +738,7 @@ function createGameFieldReactions() {
                                     aNumbers.iPow += 2;
                                     break;
                                 case 131:
-                                    aNumbers.iPow += aSt.param1;
+                                    aNumbers.iPow += Number(aSt.param1);
                                     break;
                                 default:
                                     break;
@@ -751,6 +808,7 @@ function createGameFieldReactions() {
                                     '</div>' +
                                 '</div>';
                         }
+                        sCommandsHtml += _buildUsedCardsRow(aCard.owner);
                     } else {
                         if (g_field_data.no_arrange) {
                             // 気合溜めコマンド
@@ -807,8 +865,7 @@ function createGameFieldReactions() {
             );
         } catch (e) {
             // 選択情報を正しく処理できなかった場合、選択されてないと見なす
-            console.log('updateActorDom Failure.');
-            console.log(e.stack);
+            console.log('updateActorDom Failure.\n' + JSON.stringify(e.stack));
             $('.actor').removeClass('actor');
             $('#card_info_frame').html(
                 '<div class="card_info_title">' +
@@ -862,7 +919,6 @@ function createGameFieldReactions() {
                     aAfter  : vval,
                 });
                 if (bSuper) {
-                    console.log('super_ok ktkr');
                     throw 'super_ok';
                 }
             });
@@ -1146,8 +1202,8 @@ function createGameFieldReactions() {
             }
         }
         if (target.hp <= 0) {
+            var targetMonsterData = g_master_data.m_monster[target.monster_id];
             if (!target.skill_disable_flg) {
-                var targetMonsterData = g_master_data.m_monster[target.monster_id];
                 var bReactionPushed = false;
                 switch (targetMonsterData.skill.id) {
                     case 19:
@@ -1180,10 +1236,19 @@ function createGameFieldReactions() {
                 switch (targetMonsterData.skill.id) {
                     case 6:
                     case 14:
+                        var sLog = (function(i) {
+                            switch (i) {
+                                case 6:
+                                    return '転生 発動';
+                                case 14:
+                                    return '復活 発動';
+                            }
+                            return '';
+                        })(targetMonsterData.skill.id);
                         var iNextMonsterId = game_field_utility.getModifyMonsterId(target.monster_id);
                         g_field_data.queues.push({
                             actor_id            : act.game_card_id,
-                            log_message         : '',
+                            log_message         : sLog,
                             resolved_flg        : 0,
                             actor_anime_disable : true,
                             priority            : 'reaction',
@@ -1200,7 +1265,7 @@ function createGameFieldReactions() {
                     default:
                         g_field_data.queues.push({
                             actor_id            : act.game_card_id,
-                            log_message         : '',
+                            log_message         : targetMonsterData.name + 'は倒れた',
                             resolved_flg        : 0,
                             actor_anime_disable : true,
                             priority            : 'react_system',
@@ -1216,7 +1281,7 @@ function createGameFieldReactions() {
             } else {
                 g_field_data.queues.push({
                     actor_id            : act.game_card_id,
-                    log_message         : '',
+                    log_message         : targetMonsterData.name + 'は倒れた',
                     resolved_flg        : 0,
                     actor_anime_disable : true,
                     priority            : 'react_system',
@@ -1230,12 +1295,12 @@ function createGameFieldReactions() {
             }
 
             if (aArgs.priority == 'command') {
-                // 優先度commandの場合はレベルアップ権利を与える
+                // 優先度commandの場合はペナルティorレベルアップ権利を与える
                 if (act.owner == target.owner) {
                     if (act.game_card_id != target.game_card_id) {
                         g_field_data.queues.push({
                             actor_id            : act.game_card_id,
-                            log_message         : '',
+                            log_message         : '味方を倒したのでペナルティ',
                             resolved_flg        : 0,
                             actor_anime_disable : true,
                             priority            : 'react_system',
@@ -1815,6 +1880,8 @@ function createGameFieldReactions() {
     {
         try {
             if (typeof aArgs.target_order != 'undefined') {
+                // target_orderがある場合は別のrange_type_idでの判定を行う
+
                 switch (aArgs.range_type_id) {
                     case 35:
                         break;
@@ -1826,7 +1893,6 @@ function createGameFieldReactions() {
                         break;
                 }
 
-                // target_orderがある場合は別のrange_type_idでの判定を行う
                 switch (aArgs.range_type_id) {
                     case 16:
                         if (aArgs.target_order == 0) {

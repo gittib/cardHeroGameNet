@@ -11,7 +11,8 @@ function createMagicQueue(m) {
         /**
          * キューオブジェクトを生成する
          *
-         * @param aArgs.field_data  結局必要だった
+         * @param aArgs.field_data  結局必要だったお
+         * @param aArgs.master_data 結局ry
          * @param aArgs.actor_id    魔法カードのgame_card_id
          * @param aArgs.magic_id    魔法ID
          * @param aArgs.targets     対象情報の配列
@@ -291,13 +292,14 @@ function createMagicQueue(m) {
                     var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
                     var nMaxAct = game_field_utility.getMaxActCount(mon.monster_id);
                     for (var i = 0 ; i < nMaxAct ; i++) {
-                        aRet.push({
+                        aRet.unshift({
                             queue_type_id   : 1024,
                             target_id       : mon.game_card_id,
                             cost_flg        : true,
                         });
                     }
                 }
+                return aRet;
                 break;
             case 640:
                 var aRet = [];
@@ -397,19 +399,28 @@ function createMagicQueue(m) {
                     if (val.owner != mon.owner) {
                         return true;
                     }
-                    if (val.pos_category == 'used') {
-                        aUsedCards.push(iGameCardId);
+                    if (val.pos_category != 'used') {
+                        return true;
                     }
+                    switch (g_master_data.m_card[val.card_id].category) {
+                        case 'monster_front':
+                        case 'monster_back':
+                            break;
+                        default:
+                            // 種モンスター以外は対象外
+                            return true;
+                    }
+                    aUsedCards.push(iGameCardId);
                 });
                 if (bNoArrange) {
                     aRet.push({
                         queue_type_id   : 1031,
-                        target_id       : aUsedCards[rand_gen.rand(0, aUsedCards.length-1)],
+                        target_id       : aUsedCards[rand_gen.rand()%aUsedCards.length],
                         param1          : 'first',
                     });
                 } else {
                     for (var i = 0 ; i < 2 ; i++) {
-                        var j = rand_gen.rand(0, aUsedCards.length-1);
+                        var j = rand_gen.rand() % aUsedCards.length;
                         aRet.push({
                             queue_type_id   : 1015,
                             target_id       : aUsedCards[j],
@@ -551,7 +562,7 @@ function createMagicQueue(m) {
                     return [{
                         queue_type_id   : 1004,
                         target_id       : aArgs.targets[0].game_card_id,
-                        param1          : -1 * rand_gen.rand(1, 3),
+                        param1          : 'harf',
                     }];
                 }
                 return [{
@@ -675,24 +686,32 @@ function createMagicQueue(m) {
             case 1200:
                 var aRet = [];
                 var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
-                var nHand = -1; // ドロー５自体が手札にいるからその分を除く
+                var nHand = 0;
                 $.each(aArgs.field_data.cards, function(iGameCardId, val) {
+                    if (val.game_card_id == aArgs.actor_id) {
+                        // 使用されるドロー５自身は手札にカウントしない
+                        return true;
+                    }
                     if (val.owner == mon.owner && val.pos_category == 'hand') {
                         nHand++;
                     }
                 });
                 if (nHand < 5) {
-                    return [{
+                    aRet = [{
                         queue_type_id   : 1011,
                         target_id       : mon.game_card_id,
                         param1          : 'draw',
                         param2          : 5-nHand,
-                    }, {
-                        queue_type_id   : 1004,
-                        target_id       : mon.game_card_id,
-                        param1          : nHand-5,
-                        cost_flg        : true,
                     }];
+                    if (!bNoArrange) {
+                        aRet.push({
+                            queue_type_id   : 1004,
+                            target_id       : mon.game_card_id,
+                            param1          : nHand-5,
+                            cost_flg        : true,
+                        });
+                    }
+                    return aRet;
                 }
                 break;
             case 1210:
@@ -860,8 +879,15 @@ function createMagicQueue(m) {
                 }];
                 break;
             case 1480:
-                if (aArgs.field_data.cards[aArgs.targets[0].game_card_id].owner == aArgs.field_data.cards[aArgs.targets[1].game_card_id].owner) {
+                var mon0 = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var mon1 = aArgs.field_data.cards[aArgs.targets[1].game_card_id];
+                if (mon0.owner == mon1.owner) {
                     throw new Error('invalid_target');
+                }
+                if (!bNoArrange) {
+                    if (aArgs.master_data.m_monster[mon0.monster_id].lv != aArgs.master_data.m_monster[mon1.monster_id].lv) {
+                        throw new Error('invalid_target');
+                    }
                 }
                 return [{
                     queue_type_id   : 1026,

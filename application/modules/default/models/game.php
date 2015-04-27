@@ -547,24 +547,33 @@ class model_Game {
     }
 
     /**
-     *  @param iGameFieldId :   今のフィールドID
+     *  @param game_field_id :   今のフィールドID
+     *  @param prime         :   trueなら最初のID
      *
      *  @return int １ターン前のフィールドID
      */
-    public function getBeforeFieldId ($iGameFieldId)
+    public function getBeforeFieldId ($aOption)
     {
         $sel = $this->_db->select()
             ->from(
                 array('tgf' => 't_game_field'),
                 array(
-                    'fid'   => new Zend_Db_Expr("regexp_replace(field_id_path, '^.*-', '')::int"),
+                    'last'  => new Zend_Db_Expr("regexp_replace(field_id_path, '^.*-', '')::int"),
+                    'prime' => new Zend_Db_Expr("regexp_replace(field_id_path, '-.*$', '')::int"),
                 )
             )
             ->where('field_id_path like ?', '%-%')
-            ->where('game_field_id = ?', $iGameFieldId);
-        $iBeforeFieldId = $this->_db->fetchOne($sel);
+            ->where('game_field_id = ?', $aOption['game_field_id']);
+        $aRow = $this->_db->fetchRow($sel);
+
+        if (isset($aOption['prime']) && $aOption['prime']) {
+            $iBeforeFieldId = $aRow['prime'];
+        } else {
+            $iBeforeFieldId = $aRow['last'];
+        }
+
         if (!$iBeforeFieldId) {
-            return $iGameFieldId;
+            return $aOption['game_field_id'];
         } else {
             return $iBeforeFieldId;
         }
@@ -574,11 +583,35 @@ class model_Game {
      *  @param iGameFieldId :   キュー情報を抽出する対象フィールドID
      *  @param aOption:
      *      swap_pos_id : trueならpos_idの敵味方を入れ替える
+     *      all_fields  : trueなら再起して最初のターンから行動を取得する
      *
      *  @return array キュー情報配列
      */
     public function getQueueInfo ($iGameFieldId, $aOption = array())
     {
+        $aRet = array();
+
+        if ($aOption['all_fields']) {
+            $sel = $this->_db->select()
+                ->from(
+                    't_game_field',
+                    array(
+                        new Zend_Db_Expr("regexp_replace(field_id_path, '^.*-', '')::int"),
+                    )
+                )
+                ->where('game_field_id = ?', $iGameFieldId);
+            $iBeforeFieldId = $this->_db->fetchOne($sel);
+            if (isset($iBeforeFieldId) && $iBeforeFieldId) {
+                $aRet = $this->getQueueInfo(
+                    $iBeforeFieldId,
+                    array(
+                        'swap_pos_id'   => !$aOption['swap_pos_id'],
+                        'all_fields'    => true,
+                    )
+                );
+            }
+        }
+
         $sel = $this->_db->select()
             ->from(
                 array('tq' => 't_queue'),
@@ -610,7 +643,6 @@ class model_Game {
                 'tqu.queue_unit_id',
             ));
         $rslt = $this->_db->fetchAll($sel);
-        $aRet = array();
         $iQueueId = null;
         $aTmp = null;
         foreach ($rslt as $val) {

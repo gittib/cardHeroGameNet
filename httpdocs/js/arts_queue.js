@@ -12,6 +12,7 @@ function createArtsQueue(m) {
          * 特技のキューオブジェクトを生成する
          *
          * @param aArgs.field_data  結局必要だったお
+         * @param aArgs.master_data 結局ry
          * @param aArgs.art_id      技ID
          * @param aArgs.actor_id    行動者ID
          * @param aArgs.targets     対象情報の配列
@@ -33,7 +34,6 @@ function createArtsQueue(m) {
             var bSealed = (function(){
                 // 特技封じの判定
                 try {
-                    console.log('特技封じ判定');
                     if (mon.status[110].param1 == aArgs.art_id) {
                        game_field_utility.myAlertInField({
                            message  : '特技を封じられています！',

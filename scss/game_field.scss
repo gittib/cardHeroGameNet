@@ -324,11 +324,7 @@ div.close_button {
             div.act_commands {
                 border-top:solid 1px;
 
-                div.command_row {
-                    border-top:solid 1px;
-                    padding: 12px 3px;
-                    font-size: $cmd_font_size;
-
+                div {
                     div.num_info {
                         float: right;
                         font-size: $cmd_font_size;
@@ -345,8 +341,34 @@ div.close_button {
                     }
                 }
 
+                div.command_row {
+                    border-top:solid 1px;
+                    padding: 12px 3px;
+                    font-size: $cmd_font_size;
+                }
+
                 div.command_row.selected_act {
                     background-color: #ffff00;
+                }
+
+                div.around_card_info {
+                    border-top:solid 1px;
+                    padding: 12px 3px;
+                    font-size: $cmd_font_size;
+                    background-color: #ddeeff;
+
+                    div.used_cards_div {
+                        border:dotted 1px;
+
+                        >div {
+                            margin: 1px;
+                            border:dotted 1px;
+
+                            img {
+                                border: solid 1px black;
+                            }
+                        }
+                    }
                 }
             }
         }
