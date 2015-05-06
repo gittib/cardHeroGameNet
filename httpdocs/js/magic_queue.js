@@ -253,6 +253,7 @@ function createMagicQueue(m) {
                 break;
             case 580:
                 if (aArgs.param2) {
+                    clear_my_console_log('clear log.');
                     return [
                         {
                             queue_type_id   : 1026,

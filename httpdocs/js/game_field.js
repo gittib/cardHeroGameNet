@@ -351,11 +351,9 @@ new function () {
                                 log_message     : '',
                                 resolved_flg    : 0,
                                 priority        : 'same_time',
-                                queue_units : [
-                                    {
-                                        queue_type_id   : 1018,
-                                    }
-                                ],
+                                queue_units : [{
+                                    queue_type_id   : 1018,
+                                }],
                             });
                             $('.lvup_ok').removeClass('lvup_ok');
                             $('.lvup_checking').removeClass('lvup_checking');
@@ -796,6 +794,19 @@ new function () {
                     }
                 } catch (e) {}
             };
+            var _updateFieldToSelectTargetArts = function () {
+                // 特技封じとかバイストーンは対象の特技を選ばないといけないので、その準備のために画面更新する
+                if (g_field_data.tokugi_fuuji_flg) {
+                    try {
+                        game_field_reactions.updateActorDom({
+                            field_data  : g_field_data,
+                            game_state  : 'tokugi_fuuji',
+                        });
+                        var sPosId = '#' + g_field_data.cards[actor.aTargets[0].game_card_id].pos_id;
+                        $(sPosId).addClass('selected');
+                    } catch (e) {}
+                }
+            };
 
             switch (actor.act_type) {
                 case 'into_field':
@@ -892,18 +903,13 @@ new function () {
                         actor_id    : actor.game_card_id,
                         targets     : actor.aTargets,
                     });
+                    _updateFieldToSelectTargetArts();
                     aQueue.log_message = (function () {
                         var sName = g_master_data.m_arts[actor.art_id].name;
                         return sName + 'を発動';
                     })();
                     console.log('arts q set sita');
                     console.log(aQueue);
-                    if (g_field_data.tokugi_fuuji_flg) {
-                        game_field_reactions.updateActorDom({
-                            field_data  : g_field_data,
-                            game_state  : 'tokugi_fuuji',
-                        });
-                    }
                     _addStoneNoroiCost(g_field_data.cards[aQueue.actor_id]);
                     break;
                 case 'magic':
@@ -915,6 +921,7 @@ new function () {
                         param1      : actor.param1,
                         targets     : actor.aTargets,
                     });
+                    _updateFieldToSelectTargetArts();
                     aQueue.log_message = (function () {
                         try {
                             var sName = g_master_data.m_card[g_master_data.m_magic[actor.magic_id].card_id].card_name;
@@ -924,12 +931,6 @@ new function () {
                     })();
                     console.log('magic q set sita');
                     console.log(aQueue);
-                    if (g_field_data.tokugi_fuuji_flg) {
-                        game_field_reactions.updateActorDom({
-                            field_data  : g_field_data,
-                            game_state  : 'tokugi_fuuji',
-                        });
-                    }
                     var iMasterId = game_field_reactions.getGameCardId({
                         pos_category    : 'field',
                         pos_id          : 'myMaster',
@@ -1257,7 +1258,7 @@ new function () {
                     break;
             }
         } catch (e) {
-            console.log(e.stack);
+            console.error(e.stack);
         }
         return bRangeOk;
     }
@@ -2631,8 +2632,8 @@ new function () {
                             if (q.cost_flg) {
                                 throw e;
                             }
-                            console.log(e);
-                            console.log(e.stack);
+                            console.error(e);
+                            console.error(e.stack);
                             g_field_data = backupFieldWhileSingleQueueProcessing;
                         }
                     }
@@ -2651,7 +2652,6 @@ new function () {
                     }
                     delete aExecAct.failure_flg;
                 } catch (e) {
-                    console.log(e);
                     console.log(e.stack);
                     g_field_data = backupFieldWhileSingleActionProcessing;
 

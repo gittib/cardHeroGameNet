@@ -443,8 +443,6 @@ function createGameFieldUtility(m) {
                 throw new Error('not_super');
             }
         } catch (e) {
-            console.log('isValidSuper Failure.');
-            console.log(e.stack);
             return false;
         }
 
@@ -453,8 +451,6 @@ function createGameFieldUtility(m) {
 
     function loadMonsterInfo (aArgs)
     {
-        console.log('game_field_utility.loadMonsterInfo started.');
-        console.log(aArgs);
         // 引数バリデーションチェック
         if (!aArgs) {
             throw new Error('argument_error');

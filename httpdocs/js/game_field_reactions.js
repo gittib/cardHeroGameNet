@@ -455,6 +455,9 @@ function createGameFieldReactions() {
                 });
             };
 
+            if (!g_field_data.actor.game_card_id) {
+                throw 'no_actor';
+            }
             var aCard = g_field_data.cards[g_field_data.actor.game_card_id];
             var aCardData = g_master_data.m_card[aCard.card_id];
             var sImgSrc = '/images/card/' + aCardData.image_file_name;
@@ -865,7 +868,9 @@ function createGameFieldReactions() {
             );
         } catch (e) {
             // 選択情報を正しく処理できなかった場合、選択されてないと見なす
-            console.log('updateActorDom Failure.\n' + JSON.stringify(e.stack));
+            if (e != 'no_actor') {
+                console.log('updateActorDom Failure.\n' + JSON.stringify(e.stack));
+            }
             $('.actor').removeClass('actor');
             $('#card_info_frame').html(
                 '<div class="card_info_title">' +
@@ -1795,7 +1800,6 @@ function createGameFieldReactions() {
         } catch (e) {
             console.log('unexpected in getGameCardId');
             console.log(e.stack);
-            console.log(e);
             return null;
         }
     }
@@ -2276,63 +2280,61 @@ function createGameFieldReactions() {
 
     function checkGameState()
     {
-        console.log('checkGameState started.');
-
-        // 特技封じの対象特技選択とか、特殊な状態の判定
-        if (g_field_data.sort_card_flg) {
-            console.log('sort_card');
-            return 'sort_card';
-        }
-        if (g_field_data.tokugi_fuuji_flg) {
-            console.log('tokugi_fuuji');
-            return 'tokugi_fuuji';
-        }
-
-        // ターン終了時
-        if (g_field_data.end_phase_flg) {
-            console.log('end_phase');
-            return 'end_phase';
-        }
-
-        try {
-            $.each(g_field_data.cards, function (i, val) {
-                if (val.status) {
-                    if (val.status[111]) {
-                        return true;
-                    }
-                    if (val.status[127]) {
-                        return true;
-                    }
-                    if (val.status[128]) {
-                        return true;
-                    }
-                }
-                if (0 < val.lvup_standby) {
-                    throw 'lvup_standby';
-                }
-                if (0 < g_field_data.lvup_assist) {
-                    throw 'lvup_standby';
-                }
-            });
-        } catch (e) {
-            if (e == 'lvup_standby') {
-                console.log('lvup_standby');
-                return 'lvup_standby';
-            } else {
-                console.log(e);
-                throw e;
+        var sState = (function () {
+            // 特技封じの対象特技選択とか、特殊な状態の判定
+            if (g_field_data.sort_card_flg) {
+                return 'sort_card';
             }
-        }
+            if (g_field_data.tokugi_fuuji_flg) {
+                return 'tokugi_fuuji';
+            }
 
-        // 特殊なのが無かったら通常の状態判定
-        if (g_field_data.actor.act_type) {
-            console.log('select_target');
-            return 'select_target';
-        } else if (g_field_data.actor.game_card_id) {
-            console.log('select_action');
-            return 'select_action';
+            // ターン終了時
+            if (g_field_data.end_phase_flg) {
+                return 'end_phase';
+            }
+
+            try {
+                $.each(g_field_data.cards, function (i, val) {
+                    if (val.status) {
+                        if (val.status[111]) {
+                            return true;
+                        }
+                        if (val.status[127]) {
+                            return true;
+                        }
+                        if (val.status[128]) {
+                            return true;
+                        }
+                    }
+                    if (0 < val.lvup_standby) {
+                        throw 'lvup_standby';
+                    }
+                    if (0 < g_field_data.lvup_assist) {
+                        throw 'lvup_standby';
+                    }
+                });
+            } catch (e) {
+                if (e == 'lvup_standby') {
+                    return 'lvup_standby';
+                } else {
+                    throw e;
+                }
+            }
+
+            // 特殊なのが無かったら通常の状態判定
+            if (g_field_data.actor.act_type) {
+                return 'select_target';
+            } else if (g_field_data.actor.game_card_id) {
+                return 'select_action';
+            }
+            return 'select_actor';
+        })();
+
+        if (sState != 'select_actor') {
+            console.log('checkGameState : ' + sState);
         }
-        return 'select_actor';
+        return sState;
     }
 
     function updateGameInfoMessage() {

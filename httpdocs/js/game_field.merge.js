@@ -1106,6 +1106,9 @@ function createGameFieldReactions() {
                 });
             };
 
+            if (!g_field_data.actor.game_card_id) {
+                throw 'no_actor';
+            }
             var aCard = g_field_data.cards[g_field_data.actor.game_card_id];
             var aCardData = g_master_data.m_card[aCard.card_id];
             var sImgSrc = '/images/card/' + aCardData.image_file_name;
@@ -1516,7 +1519,9 @@ function createGameFieldReactions() {
             );
         } catch (e) {
             // 選択情報を正しく処理できなかった場合、選択されてないと見なす
-            console.log('updateActorDom Failure.\n' + JSON.stringify(e.stack));
+            if (e != 'no_actor') {
+                console.log('updateActorDom Failure.\n' + JSON.stringify(e.stack));
+            }
             $('.actor').removeClass('actor');
             $('#card_info_frame').html(
                 '<div class="card_info_title">' +
@@ -2927,63 +2932,61 @@ function createGameFieldReactions() {
 
     function checkGameState()
     {
-        console.log('checkGameState started.');
-
-        // 特技封じの対象特技選択とか、特殊な状態の判定
-        if (g_field_data.sort_card_flg) {
-            console.log('sort_card');
-            return 'sort_card';
-        }
-        if (g_field_data.tokugi_fuuji_flg) {
-            console.log('tokugi_fuuji');
-            return 'tokugi_fuuji';
-        }
-
-        // ターン終了時
-        if (g_field_data.end_phase_flg) {
-            console.log('end_phase');
-            return 'end_phase';
-        }
-
-        try {
-            $.each(g_field_data.cards, function (i, val) {
-                if (val.status) {
-                    if (val.status[111]) {
-                        return true;
-                    }
-                    if (val.status[127]) {
-                        return true;
-                    }
-                    if (val.status[128]) {
-                        return true;
-                    }
-                }
-                if (0 < val.lvup_standby) {
-                    throw 'lvup_standby';
-                }
-                if (0 < g_field_data.lvup_assist) {
-                    throw 'lvup_standby';
-                }
-            });
-        } catch (e) {
-            if (e == 'lvup_standby') {
-                console.log('lvup_standby');
-                return 'lvup_standby';
-            } else {
-                console.log(e);
-                throw e;
+        var sState = (function () {
+            // 特技封じの対象特技選択とか、特殊な状態の判定
+            if (g_field_data.sort_card_flg) {
+                return 'sort_card';
             }
-        }
+            if (g_field_data.tokugi_fuuji_flg) {
+                return 'tokugi_fuuji';
+            }
 
-        // 特殊なのが無かったら通常の状態判定
-        if (g_field_data.actor.act_type) {
-            console.log('select_target');
-            return 'select_target';
-        } else if (g_field_data.actor.game_card_id) {
-            console.log('select_action');
-            return 'select_action';
+            // ターン終了時
+            if (g_field_data.end_phase_flg) {
+                return 'end_phase';
+            }
+
+            try {
+                $.each(g_field_data.cards, function (i, val) {
+                    if (val.status) {
+                        if (val.status[111]) {
+                            return true;
+                        }
+                        if (val.status[127]) {
+                            return true;
+                        }
+                        if (val.status[128]) {
+                            return true;
+                        }
+                    }
+                    if (0 < val.lvup_standby) {
+                        throw 'lvup_standby';
+                    }
+                    if (0 < g_field_data.lvup_assist) {
+                        throw 'lvup_standby';
+                    }
+                });
+            } catch (e) {
+                if (e == 'lvup_standby') {
+                    return 'lvup_standby';
+                } else {
+                    throw e;
+                }
+            }
+
+            // 特殊なのが無かったら通常の状態判定
+            if (g_field_data.actor.act_type) {
+                return 'select_target';
+            } else if (g_field_data.actor.game_card_id) {
+                return 'select_action';
+            }
+            return 'select_actor';
+        })();
+
+        if (sState != 'select_actor') {
+            console.log('checkGameState : ' + sState);
         }
-        return 'select_actor';
+        return sState;
     }
 
     function updateGameInfoMessage() {
@@ -3116,7 +3119,9 @@ function createArtsQueue(m) {
                 cost_flg        : true,
             });
         } catch (e) {
-            console.log(e.stack);
+            if (e != 'tokugi_fuuji_flg set.') {
+                console.log(e.stack);
+            }
             return null;
         }
         return aQueue;
@@ -3750,7 +3755,7 @@ function createArtsQueue(m) {
                     ];
                 } else {
                     aArgs.field_data.tokugi_fuuji_flg = true;
-                    return null;
+                    throw 'tokugi_fuuji_flg set.';
                 }
                 break;
             case 1032:
@@ -4270,6 +4275,7 @@ function createMagicQueue(m) {
                 break;
             case 580:
                 if (aArgs.param2) {
+                    clear_my_console_log('clear log.');
                     return [
                         {
                             queue_type_id   : 1026,
@@ -5288,11 +5294,9 @@ new function () {
                                 log_message     : '',
                                 resolved_flg    : 0,
                                 priority        : 'same_time',
-                                queue_units : [
-                                    {
-                                        queue_type_id   : 1018,
-                                    }
-                                ],
+                                queue_units : [{
+                                    queue_type_id   : 1018,
+                                }],
                             });
                             $('.lvup_ok').removeClass('lvup_ok');
                             $('.lvup_checking').removeClass('lvup_checking');
@@ -5733,6 +5737,19 @@ new function () {
                     }
                 } catch (e) {}
             };
+            var _updateFieldToSelectTargetArts = function () {
+                // 特技封じとかバイストーンは対象の特技を選ばないといけないので、その準備のために画面更新する
+                if (g_field_data.tokugi_fuuji_flg) {
+                    try {
+                        game_field_reactions.updateActorDom({
+                            field_data  : g_field_data,
+                            game_state  : 'tokugi_fuuji',
+                        });
+                        var sPosId = '#' + g_field_data.cards[actor.aTargets[0].game_card_id].pos_id;
+                        $(sPosId).addClass('selected');
+                    } catch (e) {}
+                }
+            };
 
             switch (actor.act_type) {
                 case 'into_field':
@@ -5829,18 +5846,13 @@ new function () {
                         actor_id    : actor.game_card_id,
                         targets     : actor.aTargets,
                     });
+                    _updateFieldToSelectTargetArts();
                     aQueue.log_message = (function () {
                         var sName = g_master_data.m_arts[actor.art_id].name;
                         return sName + 'を発動';
                     })();
                     console.log('arts q set sita');
                     console.log(aQueue);
-                    if (g_field_data.tokugi_fuuji_flg) {
-                        game_field_reactions.updateActorDom({
-                            field_data  : g_field_data,
-                            game_state  : 'tokugi_fuuji',
-                        });
-                    }
                     _addStoneNoroiCost(g_field_data.cards[aQueue.actor_id]);
                     break;
                 case 'magic':
@@ -5852,6 +5864,7 @@ new function () {
                         param1      : actor.param1,
                         targets     : actor.aTargets,
                     });
+                    _updateFieldToSelectTargetArts();
                     aQueue.log_message = (function () {
                         try {
                             var sName = g_master_data.m_card[g_master_data.m_magic[actor.magic_id].card_id].card_name;
@@ -5861,12 +5874,6 @@ new function () {
                     })();
                     console.log('magic q set sita');
                     console.log(aQueue);
-                    if (g_field_data.tokugi_fuuji_flg) {
-                        game_field_reactions.updateActorDom({
-                            field_data  : g_field_data,
-                            game_state  : 'tokugi_fuuji',
-                        });
-                    }
                     var iMasterId = game_field_reactions.getGameCardId({
                         pos_category    : 'field',
                         pos_id          : 'myMaster',

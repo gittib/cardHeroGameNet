@@ -79,7 +79,9 @@ function createArtsQueue(m) {
                 cost_flg        : true,
             });
         } catch (e) {
-            console.log(e.stack);
+            if (e != 'tokugi_fuuji_flg set.') {
+                console.error(e.stack);
+            }
             return null;
         }
         return aQueue;
@@ -713,7 +715,7 @@ function createArtsQueue(m) {
                     ];
                 } else {
                     aArgs.field_data.tokugi_fuuji_flg = true;
-                    return null;
+                    throw 'tokugi_fuuji_flg set.';
                 }
                 break;
             case 1032:
