@@ -28,7 +28,6 @@ class Model_Ranking_GetList
         }
 
         $sSubSelFieldMasterDead = $this->_db->select()
-            ->distinct()
             ->from(
                 array('tqu' => 't_queue_unit'),
                 array()
@@ -36,10 +35,16 @@ class Model_Ranking_GetList
             ->join(
                 array('tq' => 't_queue'),
                 'tq.queue_id = tqu.queue_id',
+                array()
+            )
+            ->join(
+                array('tgf' => 't_game_field'),
+                'tgf.game_field_id = tq.game_field_id',
                 array(
                     'game_field_id',
                 )
             )
+            ->where('tgf.del_flg = 0')
             ->where('tqu.queue_type_id = ?', 1008)
             ->where('tqu.target_card_id in(?)', $sSubSelMaster);
 
@@ -90,6 +95,7 @@ class Model_Ranking_GetList
                 array(
                     'card_id',
                     'card_name',
+                    'image_file_name',
                     'cnt' => new Zend_Db_Expr("count(*)"),
                 )
             )
@@ -101,6 +107,7 @@ class Model_Ranking_GetList
             ->group(array(
                 'mc.card_id',
                 'mc.card_name',
+                'image_file_name',
             ))
             ->order(array(
                 'cnt desc',
@@ -110,5 +117,58 @@ class Model_Ranking_GetList
         $rslt = $this->_db->fetchAll($sel);
 
         return $rslt;
+    }
+
+    public function getDeckCardRanking ($aParams = array()) {
+
+        $sel = $this->_db->select()
+            ->from(
+                array('mc' => 'm_card'),
+                array(
+                    'card_id',
+                    'card_name',
+                    'image_file_name',
+                )
+            )
+            ->join(
+                array('tdc' => 't_deck_card'),
+                'tdc.card_id = mc.card_id',
+                array(
+                    'cnt'   => new Zend_Db_Expr("sum(tdc.num)"),
+                    'decks' => new Zend_Db_Expr("count(tdc.num)"),
+                )
+            )
+            ->join(
+                array('td' => 't_deck'),
+                'td.deck_id = tdc.deck_id',
+                array()
+            )
+            ->where('td.del_flg = 0')
+            ->group(array(
+                'mc.card_id',
+                'mc.card_name',
+                'mc.image_file_name',
+            ))
+            ->order(array(
+                'cnt desc',
+                'card_id',
+            ));
+
+        $rslt = $this->_db->fetchAll($sel);
+
+        return $rslt;
+    }
+
+    public function getDecks ($aParams = array()) {
+        $sel = $this->_db->select()
+            ->from(
+                array('td' => 't_deck'),
+                array(
+                    'cnt' => new Zend_Db_Expr("count(*)"),
+                )
+            )
+            ->where('td.del_flg = 0');
+
+        return $this->_db->fetchOne($sel);
     }
 }

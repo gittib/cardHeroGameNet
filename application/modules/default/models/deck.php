@@ -205,6 +205,8 @@ class model_Deck {
                     'rare',
                     'proposer',
                     'image_file_name',
+                    'monster_id'        => new Zend_Db_Expr("array(select mmon.monster_id from m_monster as mmon where mmon.card_id = mc.card_id)"),
+                    'magic_id'          => new Zend_Db_Expr("array(select mmag.magic_id from m_magic as mmag where mmag.card_id = mc.card_id)"),
                 )
             )
             ->order(array(

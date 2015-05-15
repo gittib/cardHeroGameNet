@@ -43,9 +43,39 @@ function addLineHeadClass () {
 }
 
 $(function() {
+    (function() {
+        var df = $.Deferred();
+        try {
+            if (sessionStorage.oMasterData) {
+                var d = JSON.parse(sessionStorage.oMasterData);
+                if (!d.m_card) {
+                    throw new Error('g_master_data is invalid.');
+                }
+                df.resolve(d);
+            } else {
+                throw new Error('g_master_data is not yet loaded.');
+            }
+        } catch (e) {
+            g_master_data = null;
+            sessionStorage.oMasterData = null;
+            $.getJSON('/api/get-master-data/card/', function(json) {
+                sessionStorage.oMasterData = JSON.stringify(json);
+                df.resolve(json);
+            });
+        }
+        return df.promise();
+    })().done(function(d) {
+        $('.catalog .card_info.detail [monster_id]').each(function() {
+            var monster_id = $(this).attr('monster_id');
+            var m = d.m_monster[monster_id];
+        });
+        $('.catalog .card_info.detail [magic_id]').each(function() {
+        });
+        $('.catalog .card_info.summary').show();
+    });
+
     var master_card_id = $('div.master_select select[name=master]').val();
     $('div.master_select a.blank_link').attr('href', '/card/detail/' + master_card_id + '/');
-    $('div.master_image div').hide();
     $('div.master_image div[cardid=' + master_card_id + ']').show();
     addLineHeadClass();
     refreshDeckCardNum();
@@ -60,8 +90,8 @@ $(function() {
         }, 200);
     });
 
-    $('.catalog img').on('click', function() {
-        var oThis = $(this);
+    $('.catalog').on('click', function() {
+        var oThis = $(this).children('img[cardid]');
         var num = oThis.attr('cardid');
         var category_name = '';
         if (oThis.parent().hasClass('monster_front')) {

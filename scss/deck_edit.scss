@@ -26,10 +26,14 @@ $deck_super_back_color : unquote('#ffff' + $deck_card_back_color);
         div.master_image {
             padding: 3px;
 
-            img {
-                border: solid 1px;
-                width: $img_size;
-                height: $img_size;
+            div {
+                display: none;
+
+                img {
+                    border: solid 1px;
+                    width: $img_size;
+                    height: $img_size;
+                }
             }
         }
 
@@ -132,6 +136,8 @@ div.submit {
         padding: 2px;
         float: left;
         border: solid 1px;
+        box-sizing: border-box;
+        width: 150px;
     }
 
     .monster_front {
@@ -158,6 +164,17 @@ div.submit {
         width: $img_size;
         height: $img_size;
         border: solid 1px;
+        float: left;
+    }
+
+    .card_info.summary {
+        display: none;
+        float: left;
+    }
+
+    .card_info.detail {
+        display: none;
+        width: 100%;
     }
 
     .selected_card {

@@ -27,5 +27,7 @@ class Ranking_IndexController extends Zend_Controller_Action
     public function indexAction()
     {
         $this->_layout->title = 'ランキング';
+        $this->_layout->description = 'カードヒーロー＠スマホにおける、様々なデータをランキング化しています。';
+        $this->_stylesheet[] = '/css/ranking.css';
     }
 }

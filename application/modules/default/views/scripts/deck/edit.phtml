@@ -54,6 +54,18 @@ _eos_;
         if (isset($val['proposer']) && $val['proposer'] != '') {
             $val['proposer'] = 'Arranged';
         }
+        $sDetailHtml = '';
+        if (isset($val['monster_id']) && $val['monster_id'] != '') {
+            $val['monster_id'] = explode(',', preg_replace('/[{}]/', '', $val['monster_id']));
+            foreach ($val['monster_id'] as $vmon) {
+                $sDetailHtml .= "<div monster_id='{$vmon}'>&nbsp;</div>";
+            }
+        } else if (isset($val['magic_id']) && $val['magic_id'] != '') {
+            $val['magic_id'] = explode(',', preg_replace('/[{}]/', '', $val['magic_id']));
+            foreach ($val['magic_id'] as $vmon) {
+                $sDetailHtml .= "<div magic_id='{$vmon}'>&nbsp;</div>";
+            }
+        }
         $sCardCatalog .= <<<_eos_
     <div class="catalog {$val['category']}">
         <img
@@ -64,6 +76,13 @@ _eos_;
             original-src="/images/card/{$val['image_file_name']}"
             src="/images/card/card.jpg"
         />
+        <div class="card_info summary">
+            ★{$val['rare']}<br />
+            {$val['card_name']}
+        </div>
+        <div class="card_info detail" cardid="{$val['card_id']}">
+            {$sDetailHtml}
+        </div>
     </div>
 
 _eos_;

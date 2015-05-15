@@ -3,7 +3,7 @@ $iRank = 1;
 $sRankingHtml = '';
 $iBeforeCnt = 0;
 $iSumCnt = 0;
-foreach ($this->aFinisherList as $val) {
+foreach ($this->aDeckCardList as $val) {
     $sUrl = "/card/detail/{$val['card_id']}/";
     $sDetailLink ="<a href='{$sUrl}' target='_blank' class='blank_link'>{$val['card_name']}</a>";
     $sImg = "<img src='/images/card/card.jpg' original-src='/images/card/{$val['image_file_name']}' />";
@@ -25,7 +25,8 @@ foreach ($this->aFinisherList as $val) {
         </div>
         <div class="card_summary">
             {$sDetailLink}<br />
-            <strong>{$val['cnt']}回</strong>
+            <strong>{$val['cnt']}枚</strong>
+            ({$val['decks']}デッキにて採用)
         </div>
     </div>
 
@@ -38,8 +39,9 @@ $sRankingHtml .= '<div class="ranking_row"></div>';
 ?>
 <div id="finisher_ranking" class="ranking_frame">
 <div class="description">
-    マスターにトドメを刺したカードの回数ランキングです。<br />
-    これまでに<strong><?php echo $iSumCnt; ?>回</strong>のゲームが決着しています。
+    デッキに積まれたカードの枚数ランキングです。<br />
+    現在、<strong><?php echo $this->iDeck; ?>個</strong>のデッキが登録されています。<br />
+    未だ積まれていないカードは一覧に載っていません。また、マスターも集計対象外です。
 </div>
 <?php echo $sRankingHtml; ?>
 </div>

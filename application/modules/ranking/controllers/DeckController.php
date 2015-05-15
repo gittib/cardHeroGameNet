@@ -1,6 +1,6 @@
 <?php
 
-class Ranking_FinisherController extends Zend_Controller_Action
+class Ranking_DeckController extends Zend_Controller_Action
 {
     private $_model;
     private $_layout;
@@ -26,7 +26,7 @@ class Ranking_FinisherController extends Zend_Controller_Action
 
     public function indexAction()
     {
-        $this->_layout->title = 'フィニッシャーランキング';
+        $this->_layout->title = 'デッキ搭載数ランキング';
 
         $this->_stylesheet[] = '/css/ranking.css';
         $this->_javascript[] = '/js/img_delay_load.min.js';
@@ -34,7 +34,10 @@ class Ranking_FinisherController extends Zend_Controller_Action
 
         require_once APPLICATION_PATH . '/modules/ranking/models/GetList.php';
         $this->_model = new Model_Ranking_GetList();
-        $aFinisherList = $this->_model->getFinisherRanking();
-        $this->view->assign('aFinisherList', $aFinisherList);
+        $aDeckCardList = $this->_model->getDeckCardRanking();
+        $iDeck = $this->_model->getDecks();
+
+        $this->view->assign('aDeckCardList', $aDeckCardList);
+        $this->view->assign('iDeck', $iDeck);
     }
 }
