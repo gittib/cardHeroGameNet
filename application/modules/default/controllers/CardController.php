@@ -66,6 +66,7 @@ class CardController extends Zend_Controller_Action
         $this->_stylesheet[] = '/css/card_list.css';
         $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_javascript[] = '/js/card_list.js?ver=20150207';
+        $this->_javascript[] = '/js/scroll_to_top.js';
     }
 
     public function rankingAction()

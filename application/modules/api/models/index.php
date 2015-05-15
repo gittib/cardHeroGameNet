@@ -341,6 +341,18 @@ class model_Api_Index {
                 'loc'   => 'http://' . $_SERVER['SERVER_NAME'] . '/game/last/',
                 'priority'  => 0.9,
             ),
+            array(
+                'loc'   => 'http://' . $_SERVER['SERVER_NAME'] . '/ranking/',
+                'priority'  => 0.9,
+            ),
+            array(
+                'loc'   => 'http://' . $_SERVER['SERVER_NAME'] . '/ranking/finisher/',
+                'priority'  => 0.8,
+            ),
+            array(
+                'loc'   => 'http://' . $_SERVER['SERVER_NAME'] . '/ranking/deck/',
+                'priority'  => 0.8,
+            ),
         );
 
         $subFinish = $this->_db->select()
