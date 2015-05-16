@@ -33,7 +33,7 @@ input.wide {
     width:100%;
 }
 
-.clearfix>div {
+form[name=login_form] .clearfix>div {
     float:left;
 }
 
