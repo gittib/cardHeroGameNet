@@ -1,71 +1,76 @@
 @charset "utf-8";
 
-.explain {
-    margin: 6px;
-    font-size: 12px;
-}
+#card_list_wrapper {
+    max-width: 582px;
+    margin: 0 auto;
 
-div.narrow_area {
-    max-width: 300px;
-    border: 3px double darkblue;
-    margin: 5px auto;
-    font-size: 12px;
-    text-align: center;
-    line-height: 28px;
-
-    select {
+    .explain {
+        margin: 6px auto;
         font-size: 12px;
     }
-}
 
-div.line_width_adjust {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 0px;
-    border-top:solid 1px;
-}
+    div.narrow_area {
+        max-width: 300px;
+        border: 3px double darkblue;
+        margin: 5px auto;
+        font-size: 12px;
+        text-align: center;
+        line-height: 28px;
 
-.card_list_row {
-    border-top:solid 1px;
-    border-bottom:solid 1px;
-
-    > .card_image {
-        background-image:url("/images/card/card.jpg");
-        background-position:center;
-        background-repeat:no-repeat;
-        background-size:100%;
+        select {
+            font-size: 12px;
+        }
     }
-}
 
-.card_list_row.master {
-    background-color:#ffffff;
-}
+    $border_style : solid 2px;
 
-.card_list_row.monster_front {
-    background-color:#ffeeee;
-}
+    .line_width_adjust {
+        border-bottom: $border_style;
+        height: 0;
+        width: 100%;
+    }
 
-.card_list_row.monster_back {
-    background-color:#eeeeff;
-}
+    .card_list_row {
+        border:$border_style;
+        border-top: none;
 
-$super_back_color : #ffffee;
-.card_list_row.super_front {
-    background-color:$super_back_color;
-}
+        > .card_image {
+            background-image:url("/images/card/card.jpg");
+            background-position:center;
+            background-repeat:no-repeat;
+            background-size:100%;
+        }
+    }
 
-.card_list_row.super_back {
-    background-color:$super_back_color;
-}
+    .card_list_row.master {
+        background-color:#ffffff;
+    }
 
-.card_list_row.magic {
-    background-color:#eeffee;
-}
+    .card_list_row.monster_front {
+        background-color:#ffeeee;
+    }
 
-div.card_data {
-    > div.proposer {
-        float:right;
-        padding-right:2px;
+    .card_list_row.monster_back {
+        background-color:#eeeeff;
+    }
+
+    $super_back_color : #ffffee;
+    .card_list_row.super_front {
+        background-color:$super_back_color;
+    }
+
+    .card_list_row.super_back {
+        background-color:$super_back_color;
+    }
+
+    .card_list_row.magic {
+        background-color:#eeffee;
+    }
+
+    div.card_data {
+        > div.proposer {
+            float:right;
+            padding-right:2px;
+        }
     }
 }

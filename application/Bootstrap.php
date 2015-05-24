@@ -119,7 +119,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         // ゲームプレイ
         $route = new Zend_Controller_Router_Route_Regex(
-            'game/(field|kifu)/(\d+)',
+            'game/(field|kifu|movie)/(\d+)',
             array(
                 'controller'    =>  'game',
                 'action'        =>  'field',

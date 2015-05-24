@@ -410,11 +410,20 @@ function createGameFieldUtility(m) {
             if (!aBefore || !aAfter) {
                 throw new Error('no_target');
             }
-            if (aBefore.pos_category != 'field' || aAfter.pos_category != 'hand' || aAfter.owner != aBefore.owner) {
+            if (aBefore.pos_category != 'field' || aAfter.owner != aBefore.owner) {
                 throw new Error('invalid_target');
             }
             if (typeof aBefore.status[111] != 'undefined' || typeof aBefore.status[127] != 'undefined' || typeof aBefore.status[128] != 'undefined') {
                 throw new Error('invalid_target');
+            }
+            switch (aAfter.pos_category) {
+                case 'hand':
+                    // レベルアップ先が手札にあればOK
+                    break;
+                default:
+                    // 上記以外の場所のレベルアップ先は不許可
+                    throw new Error('invalid_target');
+                    break;
             }
             var cate = g_master_data.m_card[aAfter.card_id].category;
             if (cate != 'super_front' && cate != 'super_back') {

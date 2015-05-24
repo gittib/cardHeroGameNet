@@ -26,6 +26,7 @@ class UserController extends Zend_Controller_Action
     public function preDispatch()
     {
         $this->_layout->noindex = true;
+        $this->view->assign('no_ad', true);
     }
 
     public function postDispatch()

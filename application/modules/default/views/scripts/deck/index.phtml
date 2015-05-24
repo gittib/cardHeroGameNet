@@ -1,3 +1,10 @@
+<h1><?php
+if (isset($this->sH1Text) && $this->sH1Text) {
+    echo $this->sH1Text;
+} else {
+    echo 'デッキ一覧';
+}
+?></h1>
 <?php
 $aUserInfo = Common::checkLogin();
 if (!isset($this->sExplain)) {

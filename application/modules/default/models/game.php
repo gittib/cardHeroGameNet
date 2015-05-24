@@ -550,7 +550,7 @@ class model_Game {
      *  @param game_field_id :   今のフィールドID
      *  @param prime         :   trueなら最初のID
      *
-     *  @return int １ターン前のフィールドID
+     *  @return int １ターン前またはゲーム開始時のフィールドID
      */
     public function getBeforeFieldId ($aOption)
     {
@@ -558,8 +558,8 @@ class model_Game {
             ->from(
                 array('tgf' => 't_game_field'),
                 array(
-                    'last'  => new Zend_Db_Expr("regexp_replace(field_id_path, '^.*-', '')::int"),
-                    'prime' => new Zend_Db_Expr("regexp_replace(field_id_path, '-.*$', '')::int"),
+                    'last'  => new Zend_Db_Expr("regexp_replace(field_id_path, '^.*-', '')"),
+                    'prime' => new Zend_Db_Expr("regexp_replace(field_id_path, '^([[:digit:]]+)-([[:digit:]]+)-.*$', '\\\\2')"),
                 )
             )
             ->where('field_id_path like ?', '%-%')
@@ -567,9 +567,9 @@ class model_Game {
         $aRow = $this->_db->fetchRow($sel);
 
         if (isset($aOption['prime']) && $aOption['prime']) {
-            $iBeforeFieldId = $aRow['prime'];
+            $iBeforeFieldId = (int)$aRow['prime'];
         } else {
-            $iBeforeFieldId = $aRow['last'];
+            $iBeforeFieldId = (int)$aRow['last'];
         }
 
         if (!$iBeforeFieldId) {
@@ -582,8 +582,9 @@ class model_Game {
     /**
      *  @param iGameFieldId :   キュー情報を抽出する対象フィールドID
      *  @param aOption:
-     *      swap_pos_id : trueならpos_idの敵味方を入れ替える
-     *      all_fields  : trueなら再起して最初のターンから行動を取得する
+     *      base_field_turn : 読み込むフィールドのturnの値
+     *      swap_pos_id     : trueならpos_idの敵味方を入れ替える
+     *      all_fields      : trueなら再帰して最初のターンから行動を取得する
      *
      *  @return array キュー情報配列
      */
@@ -596,11 +597,17 @@ class model_Game {
                 ->from(
                     't_game_field',
                     array(
-                        new Zend_Db_Expr("regexp_replace(field_id_path, '^.*-', '')::int"),
+                        'game_field_id' => new Zend_Db_Expr("regexp_replace(field_id_path, '^.*-', '')"),
+                        'turn',
                     )
                 )
+                ->where('field_id_path like ?', '%-%-%')
                 ->where('game_field_id = ?', $iGameFieldId);
-            $iBeforeFieldId = $this->_db->fetchOne($sel);
+            $aRow = $this->_db->fetchRow($sel);
+            $iBeforeFieldId = (int)($aRow['game_field_id']);
+            if (isset($aOption['base_field_turn']) && $aOption['base_field_turn']) {
+                $aOption['swap_pos_id'] = ($aOption['base_field_turn'] != $aRow['turn']);
+            }
             if (isset($iBeforeFieldId) && $iBeforeFieldId) {
                 $aRet = $this->getQueueInfo(
                     $iBeforeFieldId,
@@ -1184,6 +1191,9 @@ class model_Game {
                     } else {
                         $val['standby_flg'] = 0;
                     }
+                    if (!isset($val['act_count']) || !$val['act_count']) {
+                        $val['act_count'] = 0;
+                    }
                     $set = array(
                         'game_card_id'  => $iGameCardId,
                         'game_field_id' => $iGameFieldId,
@@ -1219,14 +1229,17 @@ class model_Game {
             foreach ($aFieldData['resolved_queues'] as $val) {
                 $sql = "select nextval('t_queue_queue_id_seq')";
                 $iQueueId = $this->_db->fetchOne($sql);
+                if (!isset($val['actor_anime_disable'])) {
+                    $val['actor_anime_disable'] = 0;
+                }
                 $set = array(
                     'queue_id'              => $iQueueId,
                     'game_field_id'         => $iGameFieldId,
-                    'act_card_id'           => $val['actor_id'],
+                    'act_card_id'           => (int)$val['actor_id'],
                     'pri_str_id'            => $val['priority'],
-                    'resolved_flg'          => $val['resolved_flg'],
+                    'resolved_flg'          => (int)$val['resolved_flg'],
                     'log_message'           => $val['log_message'],
-                    'actor_anime_disable'   => $val['actor_anime_disable'],
+                    'actor_anime_disable'   => (int)$val['actor_anime_disable'],
                 );
                 $this->_db->insert('t_queue', $set);
                 foreach ($val['queue_units'] as $q) {

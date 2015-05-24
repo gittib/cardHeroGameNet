@@ -7,14 +7,14 @@
         background-color: #ffffff;
         border: 1px solid;
 
-        .h1wrap {
+        .img_wrap {
 
             max-width: 420px;
             height: 42px;
             position: relative;
             margin: auto;
 
-            h1 {
+            img {
                 position: absolute;
                 margin: auto;
                 top: 5px;
@@ -22,13 +22,10 @@
                 right: 0;
                 bottom: 0;
                 text-align:center;
-
-                img {
-                    width: 100%;
-                    max-width: 350px;
-                    padding: 0;
-                    margin: 0;
-                }
+                width: 100%;
+                max-width: 350px;
+                padding: 0;
+                margin: 0;
             }
 
             .env_echo {
@@ -61,6 +58,7 @@
 
 #footer {
     margin-top: 35px;
+    padding-bottom: 10px;
     width: 100%;
     min-height: 100%;
     background-color: #eeffee;
@@ -68,6 +66,7 @@
     .footer_tweet {
         margin: 0 20px;
         padding: 5px;
+        padding-bottom: 30px;
 
         span {
             display: inherit;
@@ -75,23 +74,25 @@
         }
     }
 
-    $iAdHeight : 66px;
-    $iAdWidth  : 1280px;
+    $iAdHeight : 60px;
     .footer_ad {
         display: block;
-        padding-top: 20px;
         width: 100%;
         height: $iAdHeight + 20px;
         overflow: hidden;
-
+        position: relative;
         background: #eeffff;
 
         div.slide {
-            height: $iAdHeight + 20px;
-            overflow-x: scroll;
+            height: $iAdHeight + 20px !important;
+            width: 100%;
 
             div.ad_frame {
-                width: $iAdWidth;
+                width: 5000px;
+
+                div {
+                    height: $iAdHeight;
+                }
 
                 div {
                     display: block;

@@ -71,6 +71,7 @@ $sPageLinkTag .= "</div>\n";
 
 $sSelectOldFieldDispray = '';
 $sBackgroundStyle = '';
+$sH1Text = '未返信フィールド一覧';
 $sDescription = '返信の無いフィールドの一覧です。';
 $sLastLink = "<a href='/game/'>全フィールド一覧はこちら</a>";
 if (isset($this->bLast) && $this->bLast) {
@@ -87,6 +88,7 @@ if (isset($this->bLast) && $this->bLast) {
 </div>
 
 _eos_;
+    $sH1Text = 'フィールド一覧';
     $sDescription = '投稿されたフィールドの一覧です。';
     if (isset($this->bNewFieldCommited) && $this->bNewFieldCommited) {
         $sDescription = '新規ゲームの投稿が完了しました。';
@@ -101,6 +103,7 @@ echo $sBackgroundStyle;
 if (empty($this->aCardInfoArray)) {
     echo '<div class="no-fields">まだフィールドが投稿されていません。</div>' . "\n";
 } else {
+    echo "<h1>{$sH1Text}</h1>";
     echo "<div class='page_description'>";
     echo $sDescription;
     echo "</div>";

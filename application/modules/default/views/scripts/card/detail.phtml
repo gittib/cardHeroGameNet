@@ -1,3 +1,4 @@
+<div id="card_detail_wrapper">
 <div class="card_data clearfix">
 <?php
     foreach ($this->aCardInfo['image_info'] as $val) {
@@ -10,11 +11,9 @@ _eos_;
     }
 ?>
     <div class="card_text">
-        <div class="card_name"><?php
-            echo $this->aCardInfo['card_name'];
-            echo '　★' . $this->aCardInfo['rare'];
-        ?></div>
+        <h1><?php echo $this->aCardInfo['card_name']; ?></h1>
         <div class="card_type"><?php
+            echo '★' . $this->aCardInfo['rare'] . '　';
             echo $this->aCardInfo['category_name'];
             if (isset($this->aCardInfo['before_monster_name'])) {
                 echo "　<span class='before_monsters'>{$this->aCardInfo['before_monster_name']}</span>から進化";
@@ -41,3 +40,4 @@ if (trim($sDescription) != '') {
 _eos_;
 }
 ?>
+</div>

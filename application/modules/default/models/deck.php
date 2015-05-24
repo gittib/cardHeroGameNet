@@ -4,9 +4,11 @@ Class newDeckInsertException extends Exception {};
 
 class model_Deck {
     private $_db;
+    private $_view;
 
     public function __construct() {
         $this->_db = Zend_Registry::get('db');
+        $this->_view = new Zend_View();
     }
 
     /**
@@ -135,6 +137,11 @@ class model_Deck {
             if (!isset($aDeck[$deckId])) {
                 if (!isset($val['nick_name']) || $val['nick_name'] == '') {
                     $val['nick_name'] = 'Guest';
+                } else {
+                    $val['nick_name'] = $this->_view->escape($val['nick_name']);
+                }
+                if (isset($val['deck_name']) && $val['deck_name']) {
+                    $val['deck_name'] = $this->_view->escape($val['deck_name']);
                 }
                 $aDeck[$deckId] = array(
                     'deck_id'           => $val['deck_id'],

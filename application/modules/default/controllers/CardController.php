@@ -69,21 +69,6 @@ class CardController extends Zend_Controller_Action
         $this->_javascript[] = '/js/scroll_to_top.js';
     }
 
-    public function rankingAction()
-    {
-        $request = $this->getRequest();
-
-        $this->_getModel();
-        $aCardInfo = $this->_model->getCardRanking(array(
-            'type'      => $request->getParam('x', ''),
-        ));
-        $this->view->assign('aCardInfo', $aCardInfo);
-        $this->_layout->title = 'カードランキング';
-        $this->_stylesheet[] = '/css/card_list.css';
-        $this->_javascript[] = '/js/img_delay_load.min.js';
-        $this->_javascript[] = '/js/card_list.js?ver=20150207';
-    }
-
     private function _getModel() {
         require_once APPLICATION_PATH . '/modules/default/models/card.php';
         $this->_model = new model_Card();

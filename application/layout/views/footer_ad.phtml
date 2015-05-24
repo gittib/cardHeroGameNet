@@ -1,0 +1,107 @@
+<?php
+    $conf = Zend_Registry::get('config');
+    if (!isset($this->no_ad)) {
+        $aFurunabi = array();
+        $aFurunabi[] = <<<_eos_
+                    <!-- ふるなび三重県明和町 -->
+                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=16173&psid=10158" target="_blank" >
+                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=16173" border="0" width="468" height="60" alt="" ></a>
+                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=16173&psid=10158" alt="" border="0" width="1" height="1" >
+
+_eos_;
+        $aFurunabi[] = <<<_eos_
+                    <!-- ふるなび山梨県甲州市 -->
+                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=17532&psid=10158" target="_blank" >
+                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=17532" border="0" width="468" height="60" alt="" ></a>
+                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=17532&psid=10158" alt="" border="0" width="1" height="1" >
+
+_eos_;
+        $aFurunabi[] = <<<_eos_
+                    <!-- ふるなび愛知県碧南市 -->
+                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=17293&psid=10158" target="_blank" >
+                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=17293" border="0" width="468" height="60" alt="" ></a>
+                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=17293&psid=10158" alt="" border="0" width="1" height="1" >
+
+_eos_;
+
+        $aAd = array($aFurunabi[rand() % count($aFurunabi)]);
+        $aAd[] = <<<_eos_
+                    <!-- アプリヒルズ -->
+                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=4539&psid=10158" target="_blank" >
+                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=4539" border="0" width="320" height="50" alt="" ></a>
+                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=4539&psid=10158" alt="" border="0" width="1" height="1" >
+
+_eos_;
+        $aAd[] = <<<_eos_
+                    <!-- スマおん -->
+                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=607&psid=10158" target="_blank" >
+                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=607" border="0" width="320" height="50" alt="" ></a>
+                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=607&psid=10158" alt="" border="0" width="1" height="1" >
+
+_eos_;
+        $aAd[] = <<<_eos_
+                    <!-- TSUTAYA -->
+                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=16454&psid=10158" target="_blank" >
+                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=16454" border="0" width="320" height="50" alt="" ></a>
+                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=16454&psid=10158" alt="" border="0" width="1" height="1" >
+
+_eos_;
+        $aAd[] = <<<_eos_
+                    <!-- DMM英会話 -->
+                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=2955&psid=10158" target="_blank" >
+                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=2955" border="0" width="320" height="50" alt="" ></a>
+                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=2955&psid=10158" alt="" border="0" width="1" height="1" >
+
+_eos_;
+        shuffle($aAd);
+        $sAd = '';
+        for ($i = 0 ; $i < 4 ; $i++) {
+            $sAd .= '<div>' . $aAd[$i] . '</div>';
+        }
+
+
+        $aAdHtml = array();
+        $aAdHtml[] = <<<_eos_
+    <div class="footer_ad">
+        <div class="slide">
+            <div class="ad_frame">
+                {$sAd}
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="/js/jquery.mousewheel.min.js"></script>
+    <script type="text/javascript" src="/js/perfect-scrollbar.jquery.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            var iWidth = 10;
+            var iYet = $('.footer_ad img').length;
+            $('.footer_ad img').each(function() {
+                $(this).on('load', function () {
+                    var that = this;
+                    setTimeout(function () {
+                        iWidth += $(that).width() + 10;
+                        iYet--;
+                        if (iYet == 0) {
+                            $('.ad_frame').css('width', iWidth+'px');
+                            $('.footer_ad').perfectScrollbar();
+                        }
+                    }, 500);
+                });
+            });
+        })();
+    </script>
+
+_eos_;
+
+        $aAdHtml[] = <<<_eos_
+    <!-- nend -->
+    <script type="text/javascript">
+    var nend_params = {"media":24587,"site":126385,"spot":332992,"type":1,"oriented":1};
+    </script>
+    <script type="text/javascript" src="http://js1.nend.net/js/nendAdLoader.js"></script>
+
+_eos_;
+
+        $idx = rand() % count($aAdHtml);
+        echo $aAdHtml[$idx];
+    }

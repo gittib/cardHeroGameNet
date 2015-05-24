@@ -38,10 +38,11 @@ _eos_;
 $sRankingHtml .= '<div class="ranking_row"></div>';
 ?>
 <div id="finisher_ranking" class="ranking_frame">
-<div class="description">
-    デッキに積まれたカードの枚数ランキングです。<br />
-    現在、<strong><?php echo $this->iDeck; ?>個</strong>のデッキが登録されています。<br />
-    未だ積まれていないカードは一覧に載っていません。また、マスターも集計対象外です。
-</div>
-<?php echo $sRankingHtml; ?>
+    <h1>デッキ搭載枚数　ランキング</h1>
+    <div class="description">
+        デッキに積まれたカードの枚数ランキングです。<br />
+        現在、<strong><?php echo $this->iDeck; ?>個</strong>のデッキが登録されています。<br />
+        未だ積まれていないカードは一覧に載っていません。また、マスターも集計対象外です。
+    </div>
+    <?php echo $sRankingHtml; ?>
 </div>

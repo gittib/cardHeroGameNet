@@ -75,6 +75,12 @@ class GameController extends Zend_Controller_Action
         }
     }
 
+    public function movieAction()
+    {
+        $this->getRequest()->setParam('replay_flg', true);
+        $this->forward('field');
+    }
+
     public function lastAction()
     {
         $this->getRequest()->setParam('bLast', true);
@@ -138,6 +144,7 @@ class GameController extends Zend_Controller_Action
         $this->view->assign('bGameStandby', true);
         $this->view->assign('bMine', $bMine);
         $this->view->assign('sDispMessage', $sExp);
+        $this->view->assign('sH1Text', '新規ゲーム開始');
         $this->render('deck/index', null, true);
     }
 
@@ -219,6 +226,7 @@ class GameController extends Zend_Controller_Action
         $this->view->assign('sReferer', $sReferer);
         $this->view->assign('bMine', $bMine);
         $this->view->assign('sDispMessage', $sExp);
+        $this->view->assign('sH1Text', 'デッキ選択');
         $this->render('deck/index', null, true);
     }
 
@@ -275,7 +283,7 @@ class GameController extends Zend_Controller_Action
             $this->_javascript[] = '/js/game_field.js';
             //*/
         } else {
-            $this->_javascript[] = '/js/game_field.min.js?ver=20150504';
+            $this->_javascript[] = '/js/game_field.min.js?ver=20150520';
         }
 
         $iBeforeFieldId = $this->_model->getBeforeFieldId(array(
@@ -290,8 +298,9 @@ class GameController extends Zend_Controller_Action
         $aQueue = array('');
         if ($iBeforeFieldId != $iGameFieldId) {
             $aQueue = $this->_model->getQueueInfo($iGameFieldId, array(
-                'swap_pos_id'   => true,
-                'all_fields'    => $request->getParam('replay_flg', false),
+                'swap_pos_id'       => true,
+                'all_fields'        => $request->getParam('replay_flg', false),
+                'base_field_turn'   => $aCardInfo['field_info']['turn'],
             ));
             //$this->_model->getQueueText($iGameFieldId);
         }

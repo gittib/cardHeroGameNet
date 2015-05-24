@@ -94,6 +94,39 @@ class Common {
         return null;
     }
 
+    public static function checkUA ()
+    {
+        $ua = mb_strtolower($_SERVER['HTTP_USER_AGENT']);
+        if(strpos($ua,'iphone') !== false){
+            $device = 'mobile';
+        }elseif(strpos($ua,'ipod') !== false){
+            $device = 'mobile';
+        }elseif((strpos($ua,'android') !== false) && (strpos($ua, 'mobile') !== false)){
+            $device = 'mobile';
+        }elseif((strpos($ua,'windows') !== false) && (strpos($ua, 'phone') !== false)){
+            $device = 'mobile';
+        }elseif((strpos($ua,'firefox') !== false) && (strpos($ua, 'mobile') !== false)){
+            $device = 'mobile';
+        }elseif(strpos($ua,'blackberry') !== false){
+            $device = 'mobile';
+        }elseif(strpos($ua,'ipad') !== false){
+            $device = 'tablet';
+        }elseif((strpos($ua,'windows') !== false) && (strpos($ua, 'touch') !== false)){
+            $device = 'tablet';
+        }elseif((strpos($ua,'android') !== false) && (strpos($ua, 'mobile') === false)){
+            $device = 'tablet';
+        }elseif((strpos($ua,'firefox') !== false) && (strpos($ua, 'tablet') !== false)){
+            $device = 'tablet';
+        }elseif((strpos($ua,'kindle') !== false) || (strpos($ua, 'silk') !== false)){
+            $device = 'tablet';
+        }elseif((strpos($ua,'playbook') !== false)){
+            $device = 'tablet';
+        }else{
+            $device = 'pc';
+        }
+        return $device;
+    }
+
     /**
      * 投げてるSQLの確認
      *
@@ -103,9 +136,6 @@ class Common {
     {
         $db = Zend_Registry::get('db');
         $qp = $db->getProfiler()->getQueryProfiles();
-        if (!is_array($qp)) {
-            return '';
-        }
         $sCss = <<<_eos_
 <style type="text/css">
 <!--
@@ -122,6 +152,9 @@ table.sql_debug td {
   background-color: #ffffff;
   font-size: 10px;
 }
+table.sql_debug td .variable {
+  color: red;
+}
 -->
 </style>
 
@@ -129,14 +162,17 @@ _eos_;
         $ret = "<table cellspacing=0 cellpadding=0 border=0 class='sql_debug'>\n";
         $ret .= "    <tr><th>#</th><th>Query</th><th>time[msec]</th></tr>\n";
         $num = 1;
-        foreach ($qp as $query) {
-            $sql = $query->getQuery();
-            $msec = $query->getElapsedSecs() * 1000;
-            foreach ($query->getQueryParams() as $prm) {
-                $sql = preg_replace('/^([^?]*)\?/s', "$1'{$prm}'", $sql);
+        if (is_array($qp)) {
+            foreach ($qp as $query) {
+                $sql = htmlspecialchars($query->getQuery());
+                $msec = $query->getElapsedSecs() * 1000;
+                foreach ($query->getQueryParams() as $prm) {
+                    $prm = '<span class="variable">' . htmlspecialchars($prm) . '</span>';
+                    $sql = preg_replace('/^([^?]*)\?/s', "$1'{$prm}'", $sql);
+                }
+                $ret .= "    <tr><td>{$num}</td><td>{$sql}</td><td>{$msec}</td></tr>\n";
+                $num++;
             }
-            $ret .= "    <tr><td>{$num}</td><td>{$sql}</td><td>{$msec}</td></tr>\n";
-            $num++;
         }
         $msec = $db->getProfiler()->getTotalElapsedSecs() * 1000;
         $ret .= "    <tr><td>#</td><td>Total Time</td><td>{$msec}</td></tr>\n";

@@ -8,7 +8,12 @@ if (isset($this->bFinished) && $this->bFinished) {
 body {
     background-color:#eeffee !important;
 }
+#kifu_message {
+    max-width: 640px;
+    margin: 0 auto;
+}
 </style>
+<h1>対戦棋譜[<?php echo $this->iGameFieldId; ?>]</h1>
 <div id="kifu_message">
     ゲームフィールド[<?php echo $this->iGameFieldId; ?>]までのプレイログ一覧です。<br />
     <?php echo $sFinishedMessage; ?>

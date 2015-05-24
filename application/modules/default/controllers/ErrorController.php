@@ -24,10 +24,15 @@ class ErrorController extends Zend_Controller_Action
                 $this->getResponse()->setHttpResponseCode(404);
                 $priority = Zend_Log::NOTICE;
                 $this->view->message = '指定されたページは存在しないか、削除されました。';
+                $this->view->code = 404;
                 break;
             default:
                 // application error
                 $code = $errors->exception->getCode();
+                if (!isset($code) || !$code) {
+                    $code = 500;
+                }
+                $this->view->code = $code;
                 switch ($code) {
                     case 403:
                         $priority = Zend_Log::NOTICE;
@@ -42,9 +47,6 @@ class ErrorController extends Zend_Controller_Action
                         $this->view->message = 'このページは工事中です。';
                         $code = 500;
                         break;
-                }
-                if (!isset($code) || !$code) {
-                    $code = 500;
                 }
                 $this->getResponse()->setHttpResponseCode($code);
                 break;

@@ -39,6 +39,7 @@ class DeckController extends Zend_Controller_Action
         $this->_layout->description = preg_replace('/%descend%.*$/', '', $sExp);
         $this->_stylesheet[] = '/css/deck_list.css';
         $this->_javascript[] = '/js/img_delay_load.min.js';
+        $this->_javascript[] = '/js/scroll_to_top.js';
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/deck_list.js';
         } else {

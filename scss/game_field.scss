@@ -99,6 +99,8 @@
             border: 1px solid;
             padding-top: 0;
             padding-left: 0;
+            position: relative;
+            overflow: visible;
 
             .pict {
                 float: left;
@@ -145,6 +147,24 @@
                 img {
                     height: 13px;
                 }
+            }
+
+            .fukidasi {
+                position: absolute;
+                z-index: 2;
+                top: -15px;
+                left: 40px;
+                width: 58px;
+
+                $fukidasiHeight: 40px;
+                height: $fukidasiHeight;
+                line-height: $fukidasiHeight;
+                font-size: 16px !important;
+
+                background-image: url('/images/fukidasi.png');
+                background-repeat: no-repeat;
+                text-align: center;
+                vertical-align: middle;
             }
         }
 

@@ -18,7 +18,7 @@ class model_User {
             $aLoginInfo = Common::checkLogin();
             $where = array($this->_db->quoteInto('user_id = ?', $aLoginInfo['user_id']));
             $set = array(
-                'nick_name' => $aInput['nickname'],
+                'nick_name' => htmlspecialchars($aInput['nickname'], ENT_QUOTES | ENT_HTML5),
             );
 
             $this->_db->update('t_user', $set, $where);
@@ -49,7 +49,7 @@ class model_User {
             $set = array(
                 'login_id'  => $aUserInfo['login_id'],
                 'password'  => md5($aUserInfo['password'] . $this->_salt),
-                'nick_name' => $aUserInfo['nickname'],
+                'nick_name' => htmlspecialchars($aUserInfo['nickname'], ENT_QUOTES | ENT_HTML5),
             );
 
             $this->_db->insert('t_user', $set);
