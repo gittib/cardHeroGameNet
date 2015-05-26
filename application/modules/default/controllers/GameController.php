@@ -5,7 +5,6 @@ class GameController extends Zend_Controller_Action
     private $_model;
     private $_config;
     private $_layout;
-    private $_stylesheet;
     private $_javascript;
 
     public function init()
@@ -14,8 +13,6 @@ class GameController extends Zend_Controller_Action
 
         $this->_layout = Zend_Registry::get('layout');
 
-        $this->_stylesheet = array();
-
         $this->_javascript = array();
 
         $this->_config = Zend_Registry::get('config');
@@ -23,7 +20,6 @@ class GameController extends Zend_Controller_Action
 
     public function postDispatch()
     {
-        $this->_layout->stylesheet = $this->_stylesheet;
         $this->_layout->javascript = $this->_javascript;
     }
 
@@ -32,7 +28,6 @@ class GameController extends Zend_Controller_Action
         $this->_getModel();
 
         $request = $this->getRequest();
-        $this->_stylesheet[] = '/css/game_list.css';
         $this->_javascript[] = '/js/game_list.js';
         $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_layout->title       = 'ゲームフィールド一覧';
@@ -93,7 +88,6 @@ class GameController extends Zend_Controller_Action
 
         $request = $this->getRequest();
         $iGameFieldId = $request->getParam('game_field_id');
-        $this->_stylesheet[] = '/css/game_list.css';
         $this->_javascript[] = '/js/game_list.js';
         $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_layout->title       = "対戦棋譜[{$iGameFieldId}]";
@@ -117,8 +111,6 @@ class GameController extends Zend_Controller_Action
 
         require_once APPLICATION_PATH . '/modules/default/models/deck.php';
         $modelDeck = new model_Deck();
-        $this->_stylesheet[] = '/css/game_list.css';
-        $this->_stylesheet[] = '/css/deck_list.css';
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/deck_list.min.js';
         } else {
@@ -191,9 +183,6 @@ class GameController extends Zend_Controller_Action
         $oSession = Zend_Registry::get('session');
         $oSession->bReceive = true;
 
-        $this->_stylesheet[] = '/css/game_list.css';
-        $this->_stylesheet[] = '/css/deck_list.css';
-        $this->_stylesheet[] = '/css/game_receive.css';
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/deck_list.js';
         } else {
@@ -268,7 +257,6 @@ class GameController extends Zend_Controller_Action
         $request = $this->getRequest();
         $iGameFieldId = $request->getParam('game_field_id');
         $sReferer = $request->getParam('referer');
-        $this->_stylesheet[] = '/css/game_field.css?ver=20150416';
 
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/js_debug.js';
@@ -326,7 +314,6 @@ class GameController extends Zend_Controller_Action
         $request = $this->getRequest();
         $iGameFieldId = $request->getParam('game_field_id');
         $sReferer = $request->getParam('referer');
-        $this->_stylesheet[] = '/css/turn_end.css';
         $this->_layout->title = '投稿完了';
         $this->_layout->noindex = true;
 

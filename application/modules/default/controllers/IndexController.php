@@ -13,9 +13,6 @@ class IndexController extends Zend_Controller_Action
     public function indexAction()
     {
         $layout = new Zend_Layout();
-        $layout->stylesheet = array(
-                '/css/top.css?ver=20150207',
-                );
         $layout->javascript = array(
                 '/js/top.js?ver=20150207',
                 );

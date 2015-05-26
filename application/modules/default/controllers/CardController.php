@@ -4,7 +4,6 @@ class CardController extends Zend_Controller_Action
 {
     private $_model;
     private $_layout;
-    private $_stylesheet;
     private $_javascript;
 
     public function init()
@@ -13,15 +12,12 @@ class CardController extends Zend_Controller_Action
 
         $this->_layout = new Zend_Layout();
 
-        $this->_stylesheet = array();
-        $this->_stylesheet[] = '/css/card.css';
 
         $this->_javascript = array();
     }
 
     public function postDispatch()
     {
-        $this->_layout->stylesheet = $this->_stylesheet;
         $this->_layout->javascript = $this->_javascript;
     }
 
@@ -50,7 +46,6 @@ class CardController extends Zend_Controller_Action
             $_template = 'card/detail-monster.phtml';
         }
         $this->view->assign('template', $_template);
-        $this->_stylesheet[] = '/css/card_detail.css';
         $this->_layout->title = $aRet['cardInfo']['card_name'];
         $this->_layout->description = preg_replace('/^.*%descstart%/', '', $aRet['cardInfo']['description']);
         $this->_layout->description = preg_replace('/%descend%.*$/', '', $this->_layout->description);
@@ -63,7 +58,6 @@ class CardController extends Zend_Controller_Action
         $aCardInfo = $this->_model->getCardListInfo();
         $this->view->assign('aCardInfo', $aCardInfo);
         $this->_layout->title = 'カードリスト';
-        $this->_stylesheet[] = '/css/card_list.css';
         $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_javascript[] = '/js/card_list.js?ver=20150207';
         $this->_javascript[] = '/js/scroll_to_top.js';

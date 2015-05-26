@@ -1,11 +1,11 @@
-<h1><?php
-if (isset($this->sH1Text) && $this->sH1Text) {
-    echo $this->sH1Text;
-} else {
-    echo 'デッキ一覧';
-}
-?></h1>
 <?php
+$sH1Text = '';
+if (isset($this->sH1Text) && $this->sH1Text) {
+    $sH1Text = '<h1>' . $this->sH1Text . '</h1>';
+} else {
+    $sH1Text = '<h1>デッキ一覧</h1>';
+}
+
 $aUserInfo = Common::checkLogin();
 if (!isset($this->sExplain)) {
     $this->sExplain = '';
@@ -196,18 +196,26 @@ if (isset($this->bGameStart) && $this->bGameStart) {
 </div>
 
 _eos_;
-    $sGameStartHtml .= '<div id="game_field_list_frame">';
+    $sGameStartHtml .= '<div id="game_field_list_wrapper">';
+    $sGameStartHtml .= '<div class="game_field_info">';
     $sGameStartHtml .= $this->render('game_field_table.phtml');
+    $sGameStartHtml .= '</div>';
     $sGameStartHtml .= '</div>';
 }
 
-echo $this->sExplain;
-echo $sGameStartHtml;
-echo $sMessageHtml;
-echo $sNewLink;
-echo $sMydeckLink;
-echo $sDeckListHtml;
-echo $sMoreDeckList;
-echo $sNewLink;
-echo $sMydeckLink;
-echo $sPageInfoHtml;
+$sHtml = '';
+$sHtml .= $sH1Text;
+$sHtml .= $this->sExplain;
+$sHtml .= $sGameStartHtml;
+$sHtml .= $sMessageHtml;
+$sHtml .= $sNewLink;
+$sHtml .= $sMydeckLink;
+$sHtml .= $sDeckListHtml;
+$sHtml .= $sMoreDeckList;
+$sHtml .= $sNewLink;
+$sHtml .= $sMydeckLink;
+$sHtml .= $sPageInfoHtml;
+?>
+<div id="deck_list_wrapper">
+<?php echo $sHtml; ?>
+</div>

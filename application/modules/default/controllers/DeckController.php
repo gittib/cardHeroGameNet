@@ -5,7 +5,6 @@ class DeckController extends Zend_Controller_Action
     private $_model;
     private $_config;
     private $_layout;
-    private $_stylesheet;
     private $_javascript;
 
     public function init()
@@ -13,8 +12,6 @@ class DeckController extends Zend_Controller_Action
         /* Initialize action controller here */
 
         $this->_layout = new Zend_Layout();
-
-        $this->_stylesheet = array();
 
         $this->_javascript = array();
 
@@ -25,7 +22,6 @@ class DeckController extends Zend_Controller_Action
 
     public function postDispatch()
     {
-        $this->_layout->stylesheet = $this->_stylesheet;
         $this->_layout->javascript = $this->_javascript;
     }
 
@@ -37,7 +33,6 @@ class DeckController extends Zend_Controller_Action
 
         $this->_layout->title = 'デッキ一覧';
         $this->_layout->description = preg_replace('/%descend%.*$/', '', $sExp);
-        $this->_stylesheet[] = '/css/deck_list.css';
         $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_javascript[] = '/js/scroll_to_top.js';
         if ($this->_config->web->js->debug) {
@@ -64,7 +59,6 @@ class DeckController extends Zend_Controller_Action
         $this->_layout->noindex = true;
         $this->_layout->title = 'マイデッキ一覧';
         $this->_layout->description = preg_replace('/%descend%.*$/', '', $sExp);
-        $this->_stylesheet[] = '/css/deck_list.css';
         $this->_javascript[] = '/js/img_delay_load.min.js';
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/deck_list.js';
@@ -92,7 +86,6 @@ class DeckController extends Zend_Controller_Action
         $request = $this->getRequest();
         $deckId = $request->getParam('deck_id', '');
         $this->_layout->title = 'デッキ編集';
-        $this->_stylesheet[] = '/css/deck_edit.css';
         $this->_javascript[] = '/js/deck_edit.js';
         $this->_javascript[] = '/js/img_delay_load.min.js';
 

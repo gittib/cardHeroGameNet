@@ -4,7 +4,6 @@ class Ranking_DeckController extends Zend_Controller_Action
 {
     private $_model;
     private $_layout;
-    private $_stylesheet;
     private $_javascript;
 
     public function init()
@@ -13,14 +12,11 @@ class Ranking_DeckController extends Zend_Controller_Action
 
         $this->_layout = Zend_Registry::get('layout');
 
-        $this->_stylesheet = array();
-
         $this->_javascript = array();
     }
 
     public function postDispatch()
     {
-        $this->_layout->stylesheet = $this->_stylesheet;
         $this->_layout->javascript = $this->_javascript;
     }
 
@@ -28,7 +24,6 @@ class Ranking_DeckController extends Zend_Controller_Action
     {
         $this->_layout->title = 'デッキ搭載数ランキング';
 
-        $this->_stylesheet[] = '/css/ranking.css';
         $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_javascript[] = '/js/scroll_to_top.js';
 

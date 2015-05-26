@@ -16,10 +16,10 @@ foreach ($this->aInput as $key => $val) {
         $sColName = $this->aCols[$key];
     }
     $sDivs .= <<<_eos_
-    <div class="clearfix">
-        <div class="column_name">{$sColName}：</div>
-        <div class="input_box">{$sDispVal}</div>
-    </div>
+        <div class="item_row clearfix">
+            <div class="column_name">{$sColName}：</div>
+            <div class="input_box">{$sDispVal}</div>
+        </div>
 
 _eos_;
 }
@@ -28,14 +28,16 @@ if (isset($this->sConfirmErrorMessage)) {
     $sRegistLink = ''; 
 }
 ?>
-<h2>ユーザー情報更新</h2>
+<div id="update_complete">
+    <h1>ユーザー情報更新</h1>
 <?php echo <<<_eos_
-    <div id="message">{$this->message}</div>
-    {$sDivs}
-    <div class="submit">
-        <a href="/">トップへ戻る</a>
-        {$sRegistLink}
-    </div>
+        <div id="message">{$this->message}</div>
+        {$sDivs}
+        <div class="submit">
+            <a href="/">トップへ戻る</a>
+            {$sRegistLink}
+        </div>
 
 _eos_;
 ?>
+</div>

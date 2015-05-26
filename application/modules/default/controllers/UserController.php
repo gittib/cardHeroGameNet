@@ -4,7 +4,6 @@ class UserController extends Zend_Controller_Action
 {
     private $_model;
     private $_layout;
-    private $_stylesheet;
     private $_javascript;
 
     private $_aCols;
@@ -15,8 +14,6 @@ class UserController extends Zend_Controller_Action
         /* Initialize action controller here */
 
         $this->_layout = new Zend_Layout();
-
-        $this->_stylesheet = array();
 
         $this->_javascript = array();
 
@@ -31,7 +28,6 @@ class UserController extends Zend_Controller_Action
 
     public function postDispatch()
     {
-        $this->_layout->stylesheet = $this->_stylesheet;
         $this->_layout->javascript = $this->_javascript;
 
         // POSTデータをビューに渡す
@@ -47,13 +43,11 @@ class UserController extends Zend_Controller_Action
 
     public function indexAction()
     {
-        $this->_stylesheet[] = '/css/top.css';
         $this->_layout->title = 'ユーザー情報';
     }
 
     public function updateInputAction()
     {
-        $this->_stylesheet[] = '/css/login.css';
         $this->_javascript[] = '/js/update_input.js';
         $this->_layout->title = 'ユーザー情報編集';
 
@@ -66,8 +60,6 @@ class UserController extends Zend_Controller_Action
 
     public function updateConfirmAction()
     {
-        $this->_stylesheet[] = '/css/login.css';
-        $this->_stylesheet[] = '/css/regist.css';
         $this->_javascript[] = '/js/regist_confirm.js';
         $this->_layout->title = 'ユーザー情報編集';
 
@@ -80,8 +72,6 @@ class UserController extends Zend_Controller_Action
 
     public function updateAction()
     {
-        $this->_stylesheet[] = '/css/login.css';
-        $this->_stylesheet[] = '/css/regist.css';
         $this->_layout->title = 'ユーザー情報編集';
 
         $this->_getModel();
@@ -105,7 +95,6 @@ class UserController extends Zend_Controller_Action
 
     public function registInputAction()
     {
-        $this->_stylesheet[] = '/css/login.css';
         $this->_javascript[] = '/js/regist_input.js';
         $this->_layout->title = 'ユーザー登録';
 
@@ -120,8 +109,6 @@ class UserController extends Zend_Controller_Action
 
     public function registConfirmAction()
     {
-        $this->_stylesheet[] = '/css/login.css';
-        $this->_stylesheet[] = '/css/regist.css';
         $this->_javascript[] = '/js/regist_confirm.js';
         $this->_layout->title = 'ユーザー登録';
 
@@ -136,8 +123,6 @@ class UserController extends Zend_Controller_Action
 
     public function registAction()
     {
-        $this->_stylesheet[] = '/css/login.css';
-        $this->_stylesheet[] = '/css/regist.css';
         $this->_layout->title = 'ユーザー登録';
 
         $this->_getModel();
@@ -163,7 +148,6 @@ class UserController extends Zend_Controller_Action
 
     public function loginInputAction()
     {
-        $this->_stylesheet[] = '/css/login.css';
         $this->_layout->title = 'ログイン';
 
         // ビューに渡すPOSTデータの項目を設定
@@ -180,7 +164,6 @@ class UserController extends Zend_Controller_Action
         $request = $this->getRequest();
         $sLoginId = $request->getPost('login_id');
         $sPassword = $request->getPost('password');
-        $this->_stylesheet[] = '/css/login.css';
         $this->_layout->title = 'ログイン';
         list($bRet, $aUserInfo) = $this->_model->login($sLoginId, $sPassword);
         if ($bRet) {
@@ -194,7 +177,6 @@ class UserController extends Zend_Controller_Action
     {
         $this->_getModel();
         $this->_model->logout();
-        $this->_stylesheet[] = '/css/login.css';
         $this->_layout->title = 'ログアウト';
     }
 

@@ -1,10 +1,11 @@
-<h2>新規ユーザー登録</h2>
-<form name="regist_form" action="/user/regist-confirm/" method="post">
-    <div id="message"><?php
-    if (isset($this->message)) {
-        echo $this->message;
-    }
-    ?></div>
+<div id="regist_input">
+    <h1>新規ユーザー登録</h1>
+    <form name="regist_form" action="/user/regist-confirm/" method="post">
+        <div id="message"><?php
+        if (isset($this->message)) {
+            echo $this->message;
+        }
+        ?></div>
 <?php
 
 foreach ($this->aCols as $key => $val) {
@@ -13,15 +14,16 @@ foreach ($this->aCols as $key => $val) {
         $sAttrValue = $this->aInput[$key];
     }
     echo <<<_eos_
-    <div class="clearfix">
-        <div class="column_name">{$val}：</div>
-        <div class="input_box">
-            <input class="wide" type="text" value="{$sAttrValue}" name="{$key}" />
+        <div class="clearfix">
+            <div class="column_name">{$val}：</div>
+            <div class="input_box">
+                <input class="wide" type="text" value="{$sAttrValue}" name="{$key}" />
+            </div>
         </div>
-    </div>
 
 _eos_;
 }
 ?>
-    <div class="submit"><input type="button" value="確認画面へ" /></div>
-</form>
+        <div class="submit"><input type="button" value="確認画面へ" /></div>
+    </form>
+</div>

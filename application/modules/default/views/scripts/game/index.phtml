@@ -75,7 +75,7 @@ $sH1Text = '未返信フィールド一覧';
 $sDescription = '返信の無いフィールドの一覧です。';
 $sLastLink = "<a href='/game/'>全フィールド一覧はこちら</a>";
 if (isset($this->bLast) && $this->bLast) {
-    $sBackgroundStyle = '<style>body { background-color:#ffeeee !important; }</style>';
+    $sBackgroundStyle = '<style>#game_field_list_wrapper { background-color:#ffeeee !important; }</style>';
 } else {
     $sSelectOldFieldDispray = <<<_eos_
 <div class="old_field_disp_select_frame">
@@ -97,7 +97,7 @@ _eos_;
 }
 ?>
 
-<div id="game_field_list_frame">
+<div id="game_field_list_wrapper">
 <?php
 echo $sBackgroundStyle;
 if (empty($this->aCardInfoArray)) {

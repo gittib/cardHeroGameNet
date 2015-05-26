@@ -26,20 +26,22 @@ $sConfirmMessage = '上記内容で更新します。よろしいですか？';
 $sRegistButton = '<input type="button" to_page="/user/update/" value="更新" />'; 
 if (isset($this->sConfirmErrorMessage)) {
     $sConfirmMessage = $this->sConfirmErrorMessage;
-    $sRegistButton = ''; 
+    $sRegistButton = '';
 }
 ?>
-<h2>ユーザー情報更新</h2>
-<form name="regist_form" action="/user/regist/" method="post">
+<div id="update_confirm">
+    <h1>ユーザー情報更新</h1>
+    <form name="regist_form" action="/user/regist/" method="post">
 <?php echo <<<_eos_
-    <div id="message">{$this->message}</div>
-    {$sDivs}
-    <span class="confirm">{$sConfirmMessage}</span>
-    <div class="submit">
-        <input type="button" to_page="/user/update-input/" value="戻る" />
-        {$sRegistButton}
-    </div>
+        <div id="message">{$this->message}</div>
+        {$sDivs}
+        <span class="confirm">{$sConfirmMessage}</span>
+        <div class="submit">
+            <input type="button" to_page="/user/update-input/" value="戻る" />
+            {$sRegistButton}
+        </div>
 
 _eos_;
 ?>
-</form>
+    </form>
+</div>
