@@ -1,0 +1,105 @@
+@charset "utf-8";
+
+#header {
+    width: 100%;
+
+    .title {
+        background-color: #ffffff;
+        border: 1px solid;
+
+        .img_wrap {
+
+            max-width: 420px;
+            height: 42px;
+            position: relative;
+            margin: auto;
+
+            img {
+                position: absolute;
+                margin: auto;
+                top: 5px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                text-align:center;
+                width: 100%;
+                max-width: 350px;
+                padding: 0;
+                margin: 0;
+            }
+
+            .env_echo {
+                position: absolute;
+                transform: rotate(-8deg);
+                color: lightgreen;
+                background-color: blue;
+                font-weight: bold;
+                font-size: 12px;
+            }
+        }
+    }
+
+    div.links {
+        padding: 3px;
+        border: 1px solid;
+        border-bottom: 2px solid;
+        background-color:#eeeeff;
+    }
+
+    div.top_link {
+        float:left;
+    }
+
+    div.user_info {
+        float: right;
+        text-align: right;
+    }
+}
+
+#footer {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    width: 100%;
+    min-height: 100%;
+    background-color: #eeffee;
+
+    .footer_tweet {
+        margin: 0 20px;
+        padding: 5px;
+        padding-bottom: 30px;
+
+        span {
+            display: inherit;
+            text-align: right;
+        }
+    }
+
+    $iAdHeight : 60px;
+    .footer_ad {
+        display: block;
+        width: 100%;
+        height: $iAdHeight + 20px;
+        overflow: hidden;
+        position: relative;
+        background: #eeffff;
+
+        div.slide {
+            height: $iAdHeight + 20px !important;
+            width: 100%;
+
+            div.ad_frame {
+                width: 5000px;
+
+                div {
+                    height: $iAdHeight;
+                }
+
+                div {
+                    display: block;
+                    float: left;
+                    padding: 3px;
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,38 @@
+@charset "utf-8";
+
+#card_list_wrapper, #card_detail_wrapper {
+    * {
+        font-size:10px;
+    }
+
+    table {
+        width:100%;
+    }
+
+    td {
+        margin:0;
+        padding:0;
+    }
+
+    .card_text {
+        max-width:66%;
+    }
+
+    .card_name {
+        padding-top:3px;
+    }
+
+    .before_monsters {
+        color:blue;
+    }
+
+    td.basic {
+        width:20%;
+        padding-left:3px;
+        padding-top:2px;
+    }
+
+    div.card_data>div {
+        float:left;
+    }
+}

@@ -210,6 +210,18 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         );
         $router->addRoute('sitemap', $route);
 
+        // robots.txt
+        $route = new Zend_Controller_Router_Route_Regex(
+            'robots.txt',
+            array(
+                'module'        =>  'api',
+                'controller'    =>  'index',
+                'action'        =>  'robots',
+            ),
+            array()
+        );
+        $router->addRoute('robots', $route);
+
         // apiモジュールのindexコントローラー
         $route = new Zend_Controller_Router_Route_Regex(
             'api/([^/]+)/?',

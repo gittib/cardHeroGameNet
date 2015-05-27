@@ -1,0 +1,36 @@
+@charset "utf-8";
+
+#regist_input, #update_input {
+    border:groove 5px;
+    margin: 10px auto;
+    max-width: 360px;
+    text-align: center;
+
+    input {
+        margin: 12px;
+    }
+}
+
+#regist_confirm, #regist_complete,
+#update_confirm, #update_complete {
+    border:groove 5px;
+    margin: 10px auto;
+    max-width: 360px;
+    text-align: center;
+
+    .item_row {
+        margin: 5px;
+    }
+
+    span.confirm {
+        font-weight: bold;
+    }
+
+    .submit {
+        margin: 5px;
+
+        input {
+            margin: 0 6px;
+        }
+    }
+}

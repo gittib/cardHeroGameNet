@@ -93,7 +93,8 @@ _eos_;
 
 _eos_;
 
-        $aAdHtml[] = <<<_eos_
+        if (Common::checkUA() != 'pc') {
+            $aAdHtml[] = <<<_eos_
     <!-- nend -->
     <script type="text/javascript">
     var nend_params = {"media":24587,"site":126385,"spot":332992,"type":1,"oriented":1};
@@ -101,6 +102,7 @@ _eos_;
     <script type="text/javascript" src="http://js1.nend.net/js/nendAdLoader.js"></script>
 
 _eos_;
+        }
 
         $idx = rand() % count($aAdHtml);
         echo $aAdHtml[$idx];

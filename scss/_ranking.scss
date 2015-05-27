@@ -1,0 +1,79 @@
+@charset "utf-8";
+
+#ranking_index {
+    padding: 3px;
+    margin: auto;
+    max-width: 540px;
+
+    .crowns {
+        padding: 2px;
+        text-align: center;
+
+        img {
+            padding: 0 1px;
+        }
+    }
+
+    .ranking_catalog {
+        max-width: 320px;
+        margin: auto;
+        padding-top: 6px;
+
+        div {
+            padding: 5px;
+            margin: 8px;
+            text-align: center;
+        }
+    }
+}
+
+/* ランキング系はidではなくclass="ranking_wrapper"で指定する */
+.ranking_wrapper[id] {
+    max-width: 560px;
+    margin: 0 auto 10px;
+
+    .description {
+        padding: 3px;
+    }
+
+    .ranking_row {
+        $row_height : 50px;
+
+        border: solid 2px black;
+        border-bottom: none;
+
+        div {
+            float: left;
+        }
+
+        .rank_num {
+            position: relative;
+            width: 25px;
+            height: $row_height;
+
+            img, div {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                margin: auto;
+            }
+            div {
+                width: 20px;
+                height: 1em;
+                text-align: center;
+            }
+        }
+
+        .card_img {
+            img {
+                height: $row_height;
+            }
+        }
+
+        .card_summary {
+            margin: 6px;
+        }
+    }
+}

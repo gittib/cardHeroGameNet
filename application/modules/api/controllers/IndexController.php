@@ -86,6 +86,12 @@ class Api_IndexController extends Zend_Controller_Action
         $this->view->assign('aUrls', $this->_model->getUrl());
     }
 
+    public function robotsAction()
+    {
+        $this->getResponse()->setHeader('Content-Type', 'text/plain');
+        $this->_helper->layout->disableLayout();
+    }
+
     private function _getModel()
     {
         require_once APPLICATION_PATH . '/modules/api/models/index.php';

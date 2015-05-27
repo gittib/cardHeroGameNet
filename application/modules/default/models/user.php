@@ -18,7 +18,7 @@ class model_User {
             $aLoginInfo = Common::checkLogin();
             $where = array($this->_db->quoteInto('user_id = ?', $aLoginInfo['user_id']));
             $set = array(
-                'nick_name' => htmlspecialchars($aInput['nickname'], ENT_QUOTES | ENT_HTML5),
+                'nick_name' => htmlspecialchars($aInput['nickname'], ENT_QUOTES),
             );
 
             $this->_db->update('t_user', $set, $where);
