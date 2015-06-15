@@ -7,6 +7,7 @@ class UserController extends Zend_Controller_Action
     private $_javascript;
 
     private $_aCols;
+    private $_aUpdateCols;
 
 
     public function init()
@@ -18,6 +19,16 @@ class UserController extends Zend_Controller_Action
         $this->_javascript = array();
 
         $this->_getModel();
+
+        $this->_aInput = array();
+        $this->_aRegistCols = array(
+            'login_id'  => 'ログインID',
+            'password'  => 'パスワード',
+            'nick_name' => 'ユーザー名',
+        );
+        $this->_aUpdateCols = array(
+            'nick_name' => 'ユーザー名',
+        );
     }
 
     public function preDispatch()
@@ -32,12 +43,14 @@ class UserController extends Zend_Controller_Action
 
         // POSTデータをビューに渡す
         $request = $this->getRequest();
-        $aInput = array();
         if (isset($this->_aCols)) {
             foreach ($this->_aCols as $key => $val) {
-                $aInput[$key] = $request->getPost($key);
+                $sPostParam = $request->getPost($key, '');
+                if ($sPostParam) {
+                    $this->_aInput[$key] = $sPostParam;
+                }
             }
-            $this->view->assign('aInput', $aInput);
+            $this->view->assign('aInput', $this->_aInput);
         }
     }
 
@@ -48,13 +61,11 @@ class UserController extends Zend_Controller_Action
 
     public function updateInputAction()
     {
-        $this->_javascript[] = '/js/update_input.js';
+        $this->_javascript[] = '/js/update_input.js?ver=20150614';
         $this->_layout->title = 'ユーザー情報編集';
 
-        // ビューに渡すPOSTデータの項目を設定
-        $this->_aCols = array(
-                'nickname'  => 'ユーザー名',
-                );
+        $this->_aCols = $this->_aUpdateCols;
+        $this->_aInput = $this->_model->getUserData($this->_aCols);
         $this->view->assign('aCols', $this->_aCols);
     }
 
@@ -63,10 +74,7 @@ class UserController extends Zend_Controller_Action
         $this->_javascript[] = '/js/regist_confirm.js';
         $this->_layout->title = 'ユーザー情報編集';
 
-        // ビューに渡すPOSTデータの項目を設定
-        $this->_aCols = array(
-                'nickname'  => 'ユーザー名',
-                );
+        $this->_aCols = $this->_aUpdateCols;
         $this->view->assign('aCols', $this->_aCols);
     }
 
@@ -77,33 +85,26 @@ class UserController extends Zend_Controller_Action
         $this->_getModel();
         $request = $this->getRequest();
         $this->_aCols = array(
-                'nickname'  => 'ユーザー名',
+                'nick_name' => 'ユーザー名',
                 );
         $aInput = array();
         foreach ($this->_aCols as $key => $val) {
-            $aInput[$key] = $request->getPost($key);
+            $aInput[$key] = $request->getPost($key, '');
         }
         $ret = $this->_model->updateFrontInfo($aInput);
         $this->view->assign('updateOk', $ret);
 
-        // ビューに渡すPOSTデータの項目を設定
-        $this->_aCols = array(
-                'nickname'  => 'ユーザー名',
-                );
+        $this->_aCols = $this->_aUpdateCols;
         $this->view->assign('aCols', $this->_aCols);
     }
 
     public function registInputAction()
     {
-        $this->_javascript[] = '/js/regist_input.js';
+        $this->_javascript[] = '/js/regist_input.js?ver=20150614';
         $this->_layout->title = 'ユーザー登録';
 
         // ビューに渡すPOSTデータの項目を設定
-        $this->_aCols = array(
-                'login_id'  => 'ログインID',
-                'password'  => 'パスワード',
-                'nickname'  => 'ユーザー名',
-                );
+        $this->_aCols = $this->_aRegistCols;
         $this->view->assign('aCols', $this->_aCols);
     }
 
@@ -113,11 +114,7 @@ class UserController extends Zend_Controller_Action
         $this->_layout->title = 'ユーザー登録';
 
         // ビューに渡すPOSTデータの項目を設定
-        $this->_aCols = array(
-                'login_id'  => 'ログインID',
-                'password'  => 'パスワード',
-                'nickname'  => 'ユーザー名',
-                );
+        $this->_aCols = $this->_aRegistCols;
         $this->view->assign('aCols', $this->_aCols);
     }
 
@@ -138,11 +135,7 @@ class UserController extends Zend_Controller_Action
         $this->view->assign('registOk', $ret);
 
         // ビューに渡すPOSTデータの項目を設定
-        $this->_aCols = array(
-                'login_id'  => 'ログインID',
-                'password'  => 'パスワード',
-                'nickname'  => 'ユーザー名',
-                );
+        $this->_aCols = $this->_aRegistCols;
         $this->view->assign('aCols', $this->_aCols);
     }
 

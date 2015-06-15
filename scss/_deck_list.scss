@@ -41,12 +41,13 @@ $img_size : 46px;
             }
 
             div.card_list_frame {
-                width: 300px;
+                $card_list_width : 320px;
+                width: $card_list_width;
                 text-align: center;
                 margin: 0 auto;
 
                 div.card_list {
-                    max-width: 300px;
+                    max-width: $card_list_width;
                     float: left;
                     border: none;
                     text-align: center;

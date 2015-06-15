@@ -24,20 +24,32 @@ switch (APPLICATION_ENV) {
 }
 ?>
 <div id='header'>
-    <div class="title clearfix">
-        <div class="img_wrap">
-            <img src="/images/cardhero-game.net.jpg" alt="カードヒーロー@スマホ" />
-            <div class="env_echo">
-                <?php echo $sEnv; ?>
+    <div id="floating_wrapper">
+        <div class="links floating_links">
+            <div class="top_link">
+                <a href="/">メインメニュー</a>
+            </div>
+            <div class="user_info">
+                <?php echo $sLoginInfo . "\n"; ?>
             </div>
         </div>
     </div>
-    <div class="links clearfix">
-        <div class="top_link">
-            <a href="/">メインメニュー</a>
+    <div id="static_wrapper">
+        <div class="title clearfix">
+            <div class="img_wrap">
+                <img src="/images/cardhero-game.net.jpg" alt="カードヒーロー@スマホ" />
+                <div class="env_echo">
+                    <?php echo $sEnv; ?>
+                </div>
+            </div>
         </div>
-        <div class="user_info">
-            <?php echo $sLoginInfo . "\n"; ?>
+        <div class="links clearfix">
+            <div class="top_link">
+                <a href="/">メインメニュー</a>
+            </div>
+            <div class="user_info">
+                <?php echo $sLoginInfo . "\n"; ?>
+            </div>
         </div>
     </div>
 </div>

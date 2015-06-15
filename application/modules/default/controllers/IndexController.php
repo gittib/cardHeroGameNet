@@ -28,6 +28,7 @@ class IndexController extends Zend_Controller_Action
         if (APPLICATION_ENV != 'testing') {
             throw new Zend_Controller_Action_Exception('test env only.', 403);
         }
+        $this->_helper->layout->disableLayout();
     }
 
     public function envAction()

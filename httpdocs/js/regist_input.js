@@ -18,7 +18,7 @@ $(function() {
         if (inStr.match(re)) {
             sError += "パスワードには半角英数字しか使用できません。<br />\n";
         }
-        inStr = $("[name=nickname]").val();
+        inStr = $("[name=nick_name]").val();
         if (inStr.length < 1) {
             sError += "ユーザー名は1文字以上にして下さい。<br />\n";
         }

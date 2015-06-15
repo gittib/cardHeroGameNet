@@ -5,6 +5,10 @@ function createGameFieldReactions() {
     var g_base_color;
     var g_sBeforeGameState;
 
+    // その他の変数
+    var iMyMasterId;
+    var iEnemyMasterId;
+
     return {
 
         /**
@@ -283,15 +287,14 @@ function createGameFieldReactions() {
                         } else if (0 < val.lvup_standby) {
                             console.log('lvupできないのでカウントを初期化');
                             g_field_data.queues.push({
-                                actor_id        : val.game_card_id,
-                                log_message     : '',
-                                resolved_flg    : 0,
-                                priority        : 'same_time',
-                                queue_units : [
-                                    {
-                                        queue_type_id   : 1018,
-                                    }
-                                ],
+                                actor_id            : val.game_card_id,
+                                log_message         : '',
+                                resolved_flg        : 0,
+                                priority            : 'same_time',
+                                actor_anime_disable : true,
+                                queue_units : [{
+                                    queue_type_id   : 1018,
+                                }],
                             });
                         }
 
@@ -353,14 +356,28 @@ function createGameFieldReactions() {
                 sHtml += val.content;
             });
 
-            if ($('#test_env').size()) {
-                sHtml += '<style>#eneHand img { height: 16px !important; width: 16px !important; }</style>';
-                sHtml += '<div id="eneHand" style="width:100%; height:20px; top:0; left:0;">';
-                $.each(aEnemyHandHtml, function(i,val) {
-                    sHtml += val.content;
-                });
-                sHtml += '</div>';
-            }
+            (function _dispEnemyHand () {
+                var bDisp = false;
+                if ($('#test_env').size()) {
+                    bDisp = true;
+                }
+
+                if (bDisp) {
+                    var sEneHand = '';
+                    $.each(aEnemyHandHtml, function(i,val) {
+                        sEneHand += val.content;
+                    });
+                    if ($('#eneHand').size()) {
+                        $('#eneHand').html(sEneHand);
+                    } else {
+                        $('#game_field').before(
+                            '<div id="eneHand" class="clearfix">' +
+                                sEneHand +
+                            '</div>'
+                        );
+                    }
+                }
+            })();
 
             $('#hand_card').html(sHtml);
             $('#myPlayersInfo    .stone span').text(g_field_data.my_stone);
@@ -803,7 +820,7 @@ function createGameFieldReactions() {
                                         sCost +
                                     '</div>' +
                                 '</div>';
-                        } else {
+                        } else if (g_field_data.no_arrange) {
                             sCommandsHtml +=
                                 '<div class="command_row" act_type="make_card">' +
                                     'メイクカード' +
@@ -838,13 +855,16 @@ function createGameFieldReactions() {
                                 '<div class="num_info">' +
                                     sCost +
                                 '</div>' +
-                            '</div>' +
-                            '<div class="command_row" act_type="escape">' +
-                                '逃げる' +
-                                '<div class="num_info">' +
-                                    sCost +
-                                '</div>' +
                             '</div>';
+                        if (g_field_data.no_arrange) {
+                            sCommandsHtml +=
+                                '<div class="command_row" act_type="escape">' +
+                                    '逃げる' +
+                                    '<div class="num_info">' +
+                                        sCost +
+                                    '</div>' +
+                                '</div>';
+                        }
                     }
                 }
             }
@@ -963,13 +983,11 @@ function createGameFieldReactions() {
                 log_message     : 'ダメージをストーンに還元',
                 resolved_flg    : 0,
                 priority        : 'same_time',
-                queue_units : [
-                    {
-                        queue_type_id   : 1004,
-                        target_id       : target.game_card_id,
-                        param1          : aArgs.damage,
-                    }
-                ],
+                queue_units : [{
+                    queue_type_id   : 1004,
+                    target_id       : target.game_card_id,
+                    param1          : aArgs.damage,
+                }],
             });
             $('#'+target.pos_id).append('<div class="fukidasi temp_animation" style="display:none;">-'+aArgs.damage+'</div>');
             g_field_data.animation_info.animations.push({
@@ -988,13 +1006,11 @@ function createGameFieldReactions() {
                     log_message     : '竜の盾による反撃',
                     resolved_flg    : 0,
                     priority        : 'follow_damage',
-                    queue_units : [
-                        {
-                            queue_type_id   : 1005,
-                            target_id       : aArgs.actor_id,
-                            param1          : 1,
-                        }
-                    ],
+                    queue_units : [{
+                        queue_type_id   : 1005,
+                        target_id       : aArgs.actor_id,
+                        param1          : 1,
+                    }],
                 });
             }
         }
@@ -1101,10 +1117,11 @@ function createGameFieldReactions() {
                             }],
                         });
                         g_field_data.queues.push({
-                            actor_id        : target.game_card_id,
-                            log_message     : '',
-                            resolved_flg    : 0,
-                            priority        : 'reaction',
+                            actor_id            : target.game_card_id,
+                            log_message         : '',
+                            resolved_flg        : 0,
+                            priority            : 'reaction',
+                            actor_anime_disable : true,
                             queue_units : [{
                                 queue_type_id   : 1029,
                                 target_id       : target.game_card_id,
@@ -1140,13 +1157,11 @@ function createGameFieldReactions() {
                             log_message         : 'ダメージ呪い発動',
                             resolved_flg        : 0,
                             priority            : 'reaction',
-                            queue_units : [
-                                {
-                                    queue_type_id   : 1026,
-                                    target_id       : act.game_card_id,
-                                    param1          : 122,
-                                },
-                            ],
+                            queue_units : [{
+                                queue_type_id   : 1026,
+                                target_id       : act.game_card_id,
+                                param1          : 122,
+                            }],
                         });
                         break;
                     case 22:
@@ -1195,16 +1210,15 @@ function createGameFieldReactions() {
                 if (bReactionPushed) {
                     // リアクションの多重起動を防ぐため、一時的に性格を無効化する
                     g_field_data.queues.push({
-                        actor_id        : target.game_card_id,
-                        log_message     : '',
-                        resolved_flg    : 0,
-                        priority        : 'same_time',
-                        queue_units : [
-                            {
-                                queue_type_id   : 1028,
-                                target_id       : target.game_card_id,
-                            },
-                        ],
+                        actor_id            : target.game_card_id,
+                        log_message         : '',
+                        resolved_flg        : 0,
+                        priority            : 'same_time',
+                        actor_anime_disable : true,
+                        queue_units : [{
+                            queue_type_id   : 1028,
+                            target_id       : target.game_card_id,
+                        }],
                     });
                 }
             }
@@ -1281,14 +1295,12 @@ function createGameFieldReactions() {
                             resolved_flg        : 0,
                             actor_anime_disable : true,
                             priority            : 'reaction',
-                            queue_units : [
-                                {
-                                    queue_type_id   : 1021,
-                                    target_id       : target.game_card_id,
-                                    param1          : iNextMonsterId,
-                                    param2          : true,
-                                },
-                            ],
+                            queue_units : [{
+                                queue_type_id   : 1021,
+                                target_id       : target.game_card_id,
+                                param1          : iNextMonsterId,
+                                param2          : true,
+                            }],
                         });
                         break;
                     default:
@@ -1298,12 +1310,10 @@ function createGameFieldReactions() {
                             resolved_flg        : 0,
                             actor_anime_disable : true,
                             priority            : 'react_system',
-                            queue_units : [
-                                {
-                                    queue_type_id   : 1008,
-                                    target_id       : target.game_card_id,
-                                },
-                            ],
+                            queue_units : [{
+                                queue_type_id   : 1008,
+                                target_id       : target.game_card_id,
+                            }],
                         });
                         break;
                 }
@@ -1314,12 +1324,10 @@ function createGameFieldReactions() {
                     resolved_flg        : 0,
                     actor_anime_disable : true,
                     priority            : 'react_system',
-                    queue_units : [
-                        {
-                            queue_type_id   : 1008,
-                            target_id       : target.game_card_id,
-                        },
-                    ],
+                    queue_units : [{
+                        queue_type_id   : 1008,
+                        target_id       : target.game_card_id,
+                    }],
                 });
             }
 
@@ -1333,13 +1341,11 @@ function createGameFieldReactions() {
                             resolved_flg        : 0,
                             actor_anime_disable : true,
                             priority            : 'react_system',
-                            queue_units : [
-                                {
-                                    queue_type_id   : 1023,
-                                    target_id       : act.game_card_id,
-                                    param1          : 1,
-                                },
-                            ],
+                            queue_units : [{
+                                queue_type_id   : 1023,
+                                target_id       : act.game_card_id,
+                                param1          : 1,
+                            }],
                         });
                     }
                 } else {
@@ -1350,13 +1356,11 @@ function createGameFieldReactions() {
                         resolved_flg        : 0,
                         actor_anime_disable : true,
                         priority            : 'react_system',
-                        queue_units : [
-                            {
-                                queue_type_id   : 1017,
-                                target_id       : act.game_card_id,
-                                param1          : targetMonsterData.lv,
-                            },
-                        ],
+                        queue_units : [{
+                            queue_type_id   : 1017,
+                            target_id       : act.game_card_id,
+                            param1          : targetMonsterData.lv,
+                        }],
                     });
                 }
             }
@@ -1394,13 +1398,11 @@ function createGameFieldReactions() {
                             resolved_flg        : 0,
                             priority            : 'same_time',
                             actor_anime_disable : true,
-                            queue_units : [
-                                {
-                                    queue_type_id   : 1006,
-                                    target_id       : act.game_card_id,
-                                    param1          : dam,
-                                },
-                            ]
+                            queue_units : [{
+                                queue_type_id   : 1006,
+                                target_id       : act.game_card_id,
+                                param1          : dam,
+                            }]
                         });
                     }
                     break;
@@ -1636,16 +1638,15 @@ function createGameFieldReactions() {
             }
             if (bReactionPushed) {
                 g_field_data.queues.push({
-                    actor_id        : aArgs.target_id,
-                    log_message     : '',
-                    resolved_flg    : 0,
-                    priority        : 'same_time',
-                    queue_units : [
-                        {
-                            queue_type_id   : 1028,
-                            target_id       : aArgs.target_id,
-                        },
-                    ],
+                    actor_id            : aArgs.target_id,
+                    log_message         : '',
+                    resolved_flg        : 0,
+                    priority            : 'same_time',
+                    actor_anime_disable : true,
+                    queue_units : [{
+                        queue_type_id   : 1028,
+                        target_id       : aArgs.target_id,
+                    }],
                 });
             }
         }
@@ -1683,20 +1684,6 @@ function createGameFieldReactions() {
                     }],
                 });
             }
-            if (targetMon.status[132]) {
-                g_field_data.queues.push({
-                    actor_id        : aArgs.target_id,
-                    log_message     : 'マリガン無効化',
-                    resolved_flg    : 0,
-                    priority        : 'same_time',
-                    actor_anime_disable : true,
-                    queue_units : [{
-                        queue_type_id   : 1027,
-                        param1          : 132,
-                        target_id       : aArgs.target_id,
-                    }],
-                });
-            }
             if (targetMon.status[122]) {
                 if (1 < targetMon.hp) {
                     g_field_data.queues.push({
@@ -1713,6 +1700,26 @@ function createGameFieldReactions() {
                     });
                 }
             }
+        }
+
+        var iMasterId = getGameCardId({
+            pos_category    : 'field',
+            pos_id          : 'myMaster',
+        });
+        targetMon = g_field_data.cards[iMasterId];
+        if (targetMon && targetMon.status && targetMon.status[132]) {
+            g_field_data.queues.push({
+                actor_id            : iMasterId,
+                log_message         : 'マリガン無効化',
+                resolved_flg        : 0,
+                priority            : 'same_time',
+                actor_anime_disable : true,
+                queue_units : [{
+                    queue_type_id   : 1027,
+                    param1          : 132,
+                    target_id       : iMyMasterId,
+                }],
+            });
         }
     }
 
@@ -1746,6 +1753,12 @@ function createGameFieldReactions() {
     function getGameCardId (aArgs)
     {
         try {
+            if (aArgs.pos_id == 'myMaster' && iMyMasterId) {
+                return iMyMasterId;
+            } else if (aArgs.pos_id == 'enemyMaster' && iEnemyMasterId) {
+                return iEnemyMasterId;
+            }
+
             var iRetGameCardId = null;
             var aFirstInfo  = null;
             var aLastInfo   = null;
@@ -1765,6 +1778,11 @@ function createGameFieldReactions() {
                                 iRetGameCardId = val.next_game_card_id;
                             } else {
                                 iRetGameCardId = iGameCardId;
+                            }
+                            if (aArgs.pos_id == 'myMaster') {
+                                iMyMasterId = iRetGameCardId;
+                            } else if (aArgs.pos_id == 'enemyMaster') {
+                                iEnemyMasterId = iRetGameCardId;
                             }
                             return false;
                         }

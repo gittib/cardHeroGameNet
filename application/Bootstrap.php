@@ -46,7 +46,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             array(
                 'controller'    =>  'deck',
                 'action'        =>  'edit',
-                2               =>  1,
+                'deck_id'       =>  1,
             ),
             array(
                 2   => 'deck_id',
@@ -56,14 +56,15 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         // 返信の無いゲームフィールド一覧
         $route = new Zend_Controller_Router_Route_Regex(
-            'game/last(/(\d+))?',
+            'game/(last)(/(\d+))?',
             array(
                 'controller'    =>  'game',
                 'action'        =>  'last',
-                2               =>  1,
+                'page_no'       =>  1,
             ),
             array(
-                2   => 'page_no',
+                1   => 'action',
+                3   => 'page_no',
             )
         );
         $router->addRoute('game_last', $route);
@@ -74,7 +75,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             array(
                 'controller'    =>  'game',
                 'action'        =>  'index',
-                2               =>  1,
+                'page_no'       =>  1,
             ),
             array(
                 2   => 'page_no',
@@ -119,7 +120,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         // ゲームプレイ
         $route = new Zend_Controller_Router_Route_Regex(
-            'game/(field|kifu|movie)/(\d+)',
+            'game/(field|kifu|replay)/(\d+)',
             array(
                 'controller'    =>  'game',
                 'action'        =>  'field',
@@ -145,6 +146,23 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             )
         );
         $router->addRoute('card_detail', $route);
+
+        // 指定したカードがフィニッシュしたフィールド一覧
+        $route = new Zend_Controller_Router_Route_Regex(
+            'ranking/finisher/fields/(\d+)(/(\d+))?',
+            array(
+                'module'        => 'ranking',
+                'controller'    => 'finisher',
+                'action'        => 'fields',
+                'card_id'       => 1,
+                'page_no'       => 1,
+            ),
+            array(
+                1   => 'card_id',
+                3   => 'page_no',
+            )
+        );
+        $router->addRoute('finished_field_list', $route);
 
         // 画像が無かった時のリダイレクト用
         $route = new Zend_Controller_Router_Route_Regex(
@@ -190,7 +208,6 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
                 'module'        =>  'api',
                 'controller'    =>  'index',
                 'action'        =>  'build-javascript',
-                1               =>  1,
             ),
             array(
                 1   => 'script_name',

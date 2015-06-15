@@ -89,6 +89,23 @@
 
     #primary_part {
 
+        #eneHand {
+            top:0;
+            left:0;
+            box-sizing: border-box;
+            border: solid 1px;
+            border-bottom: none;
+
+            div {
+                float: left;
+
+                img {
+                    border: solid 1px black;
+                    margin: 1px;
+                }
+            }
+        }
+
         #game_field {
             width: 100%;
             border: 1px solid;
@@ -98,10 +115,27 @@
                 width: 30%;
                 height: 51px;
                 border: 1px solid;
+                border-collapse: separate;
+                border-spacing: 1px;
                 padding-top: 0;
                 padding-left: 0;
                 position: relative;
                 overflow: visible;
+
+                &.actor {
+                    background-color: #ffff00;
+                }
+
+                &.target {
+                    background-color: #ffeeee;
+                }
+
+                &.lvup_checking {
+                    background-color: #888;
+                }
+                &.lvup_checking.lvup_ok {
+                    background-color: #fff;
+                }
 
                 .pict {
                     float: left;
@@ -167,21 +201,6 @@
                     text-align: center;
                     vertical-align: middle;
                 }
-            }
-
-            td.actor {
-                background-color: #ffff00;
-            }
-
-            td.target {
-                background-color: #ffeeee;
-            }
-
-            td.lvup_checking {
-                background-color: #888;
-            }
-            td.lvup_checking.lvup_ok {
-                background-color: #fff;
             }
         }
 

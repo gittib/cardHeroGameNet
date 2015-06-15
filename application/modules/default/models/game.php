@@ -15,6 +15,7 @@ class model_Game {
      *      game_field_id   : 抽出対象フィールドのID
      *      open_flg        : t_game_fieldのopen_flgを指定
      *      new_arrival     : 返信されていないフィールドのみ抽出する
+     *      finisher_id     : 対象のカードがフィニッシュしたフィールドのみ抽出する
      */
     public function getFieldCount($aOption = array())
     {
@@ -39,6 +40,16 @@ class model_Game {
                 'vlf.game_field_id = t_game_field.game_field_id',
                 array()
             );
+        }
+        if (isset($aOption['finisher_id']) && $aOption['finisher_id'] != '') {
+            $subSelFinisher = $this->_db->select()
+                ->from(
+                    array('tf' => 't_finisher'),
+                    array('game_field_id')
+                )
+                ->where('tf.card_id = ?', $aOption['finisher_id']);
+
+            $selFieldCnt->where('t_game_field.game_field_id in(?)', $subSelFinisher);
         }
         return $this->_db->fetchOne($selFieldCnt);
     }
@@ -81,6 +92,7 @@ class model_Game {
      *      new_arrival             : 返信されていないフィールドのみ抽出する
      *      allow_no_field          : フィールドが抽出できなくても例外を投げない
      *      select_standby_field    : 対戦相手の存在するフィールドは抽出禁止
+     *      finisher_id             : 対象のカードがフィニッシュしたフィールドのみ抽出する
      *
      *  @return array フィールド詳細の配列
      */
@@ -129,6 +141,16 @@ class model_Game {
                 'vlf.game_field_id = t_game_field.game_field_id',
                 array()
             );
+        }
+        if (isset($aOption['finisher_id']) && $aOption['finisher_id'] != '') {
+            $subSelFinisher = $this->_db->select()
+                ->from(
+                    array('tf' => 't_finisher'),
+                    array('game_field_id')
+                )
+                ->where('tf.card_id = ?', $aOption['finisher_id']);
+
+            $selField->where('t_game_field.game_field_id in(?)', $subSelFinisher);
         }
 
         $selResponced = $this->_db->select()
@@ -181,6 +203,7 @@ class model_Game {
                 'opp.user_id = bf.user_id',
                 array(
                     'opponent_name' => 'nick_name',
+                    'opponent_id'   => 'user_id',
                 )
             )
             ->joinLeft(
@@ -644,6 +667,7 @@ class model_Game {
                 )
             )
             ->where('tq.resolved_flg = ?', 1)
+            ->where('tqu.queue_type_id != ?', 1000)
             ->where('tq.game_field_id = ?', $iGameFieldId)
             ->order(array(
                 'tq.queue_id',
@@ -1177,11 +1201,15 @@ class model_Game {
                         $val['owner'] = 1;
                     }
                 }
+                if (!isset($val['sort_no']) && $val['pos_category'] == 'deck') {
+                    throw new Exception('upload failure.');
+                }
                 $set = array(
                     'game_card_id'      => $iGameCardId,
                     'card_id'           => $val['card_id'],
                     'game_field_id'     => $iGameFieldId,
                     'owner'             => $val['owner'],
+                    'sort_no'           => $val['sort_no'],
                     'position_category' => $val['pos_category'],
                 );
                 $this->_db->insert('t_game_card', $set);
@@ -1229,7 +1257,17 @@ class model_Game {
             foreach ($aFieldData['resolved_queues'] as $val) {
                 $sql = "select nextval('t_queue_queue_id_seq')";
                 $iQueueId = $this->_db->fetchOne($sql);
-                if (!isset($val['actor_anime_disable'])) {
+                if (isset($val['actor_anime_disable']) && $val['actor_anime_disable']) {
+                    switch ($val['actor_anime_disable']) {
+                        case 'false':
+                        case 'null':
+                            $val['actor_anime_disable'] = 0;
+                            break;
+                        default:
+                            $val['actor_anime_disable'] = 1;
+                            break;
+                    }
+                } else {
                     $val['actor_anime_disable'] = 0;
                 }
                 $set = array(
@@ -1239,14 +1277,10 @@ class model_Game {
                     'pri_str_id'            => $val['priority'],
                     'resolved_flg'          => (int)$val['resolved_flg'],
                     'log_message'           => $val['log_message'],
-                    'actor_anime_disable'   => (int)$val['actor_anime_disable'],
+                    'actor_anime_disable'   => $val['actor_anime_disable'],
                 );
                 $this->_db->insert('t_queue', $set);
                 foreach ($val['queue_units'] as $q) {
-                    if ($q['queue_type_id'] == 1000) {
-                        // ターンエンド処理は入れない
-                        continue;
-                    }
                     if (!isset($q['target_id'])) {
                         $q['target_id'] = null;
                     }

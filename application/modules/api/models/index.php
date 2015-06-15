@@ -355,77 +355,6 @@ class model_Api_Index {
             ),
         );
 
-        $subFinish = $this->_db->select()
-            ->distinct()
-            ->from(
-                array('tgm' => 't_game_monster'),
-                array(
-                    'game_field_id',
-                )
-            )
-            ->where('tgm.position = ?', 'Master')
-            ->group(array(
-                'game_field_id',
-            ))
-            ->having('count(*) <= 1');
-
-        $subRecommend = $this->_db->select()
-            ->from(
-                array('tgf' => 't_game_field'),
-                array(
-                    'game_field_id',
-                )
-            )
-            ->join(
-                array('vlf' => 'v_last_field'),
-                'vlf.game_field_id = tgf.game_field_id',
-                array()
-            )
-            ->where('tgf.game_field_id in(?)', $subFinish)
-            ->where("tgf.field_id_path like '%-%-%'");
-
-        $sel = $this->_db->select()
-            ->from(
-                array('tgf' => 't_game_field'),
-                array(
-                    'game_field_id',
-                    'field_id_path',
-                    'upd_date'  => new Zend_Db_Expr("to_char(tgf.upd_date, 'yyyy-mm-dd')"),
-                )
-            )
-            ->joinLeft(
-                array('rec' => $subRecommend),
-                'rec.game_field_id = tgf.game_field_id',
-                array(
-                    'rec' => 'game_field_id',
-                )
-            )
-            ->where('tgf.del_flg != 1')
-            ->where('tgf.open_flg = 1');
-        $rslt = $this->_db->fetchAll($sel);
-        foreach ($rslt as $val) {
-            $iTurnCount = substr_count($val['field_id_path'], '-') + 1;
-            if ($iTurnCount < 7) {
-                continue;
-            }
-
-            $aTmp = array(
-                'loc'       => 'http://' . $_SERVER['SERVER_NAME'] . '/game/field/' . $val['game_field_id'] . '/',
-                'lastmod'   => $val['upd_date'],
-                'priority'  => 0.1,
-            );
-
-            $aUrls[] = $aTmp;
-            if (isset($val['rec'])) {
-                $aTmp = array(
-                    'loc'       => 'http://' . $_SERVER['SERVER_NAME'] . '/game/kifu/' . $val['game_field_id'] . '/',
-                    'lastmod'   => $val['upd_date'],
-                    'priority'  => 0.6,
-                );
-                $aUrls[] = $aTmp;
-            }
-        }
-
         $sel = $this->_db->select()
             ->from(
                 'm_card',
@@ -443,6 +372,142 @@ class model_Api_Index {
         }
 
         return $aUrls;
+    }
+
+    public function checkRefreshed() {
+        $bRefreshed = true;
+        try {
+            $this->_db->beginTransaction();
+
+            $sSql = 'LOCK TABLE ONLY t_finisher NOWAIT';
+            $this->_db->query($sSql);
+
+            $sel = $this->_db->select()
+                ->from(
+                    array('tf' => 't_finisher'),
+                    array(
+                        'upd' => new Zend_Db_Expr("to_char(max(upd_date), 'yyyymmdd')")
+                    )
+                );
+            $d = $this->_db->fetchOne($sel);
+            if ($d == date('Ymd')) {
+                // リフレッシュ済み
+            } else {
+                // 今日はまだ更新してないっぽいので更新処理を行う
+                // 更新した事実を残すためにUPDATEは掛ける
+                $this->_db->insert('t_finisher', array(
+                    'card_id'       => -1,
+                    'game_field_id' => -1,
+                ));
+                $bRefreshed = false;
+            }
+
+            $this->_db->commit();
+        } catch (Zend_Db_Statement_Exception $e) {
+            // 誰かロックしてるからリフレッシュ中なはずなので、済みとして扱う
+            $this->_db->rollBack();
+        } catch (Exception $e) {
+            $this->_db->rollBack();
+            throw $e;
+        }
+
+        return $bRefreshed;
+    }
+
+    public function mvFinisherRefresh() {
+
+        $sSubSelMaster = $this->_db->select()
+            ->distinct()
+            ->from(
+                array('tgm' => 't_game_monster'),
+                array(
+                    'game_card_id',
+                )
+            )
+            ->where('position = ?', 'Master');
+
+        if (isset($aParams['max_date'])) {
+            $sSubSelMaster->where('ins_date <= ?', $aParams['max_date']);
+        }
+        if (isset($aParams['min_date'])) {
+            $sSubSelMaster->where('ins_date >= ?', $aParams['min_date']);
+        }
+
+        $sSubSelFieldMasterDead = $this->_db->select()
+            ->from(
+                array('tqu' => 't_queue_unit'),
+                array()
+            )
+            ->join(
+                array('tq' => 't_queue'),
+                'tq.queue_id = tqu.queue_id',
+                array()
+            )
+            ->join(
+                array('tgf' => 't_game_field'),
+                'tgf.game_field_id = tq.game_field_id',
+                array(
+                    'game_field_id',
+                )
+            )
+            ->where('tgf.del_flg = 0')
+            ->where('tqu.queue_type_id = ?', 1008)
+            ->where('tqu.target_card_id in(?)', $sSubSelMaster);
+
+        $sSubSelFihishQueueId = $this->_db->select()
+            ->from(
+                array('tq' => 't_queue'),
+                array(
+                    'queue_id' => new Zend_Db_Expr("max(tq.queue_id)"),
+                )
+            )
+            ->join(
+                array('tqu' => 't_queue_unit'),
+                'tqu.queue_id = tq.queue_id',
+                array()
+            )
+            ->where('tqu.queue_type_id in(?)', array(1001, 1005, 1006))
+            ->where('tqu.target_card_id in(?)', $sSubSelMaster)
+            ->where('tq.game_field_id in(?)', $sSubSelFieldMasterDead)
+            ->group('tq.game_field_id');
+
+        $sSubSelFinisher = $this->_db->select()
+            ->from(
+                array('tq' => 't_queue'),
+                array(
+                    'act_card_id',
+                    'game_field_id',
+                )
+            )
+            ->where('queue_id in(?)', $sSubSelFihishQueueId);
+
+        $sel = $this->_db->select()
+            ->from(
+                array('tgc' => 't_game_card'),
+                array(
+                    'card_id',
+                    'game_field_id',
+                )
+            )
+            ->join(
+                array('finisher' => $sSubSelFinisher),
+                'finisher.act_card_id = tgc.game_card_id and
+                 finisher.game_field_id = tgc.game_field_id',
+                array()
+            );
+
+        $sSql = "insert into t_finisher(card_id, game_field_id) ({$sel})";
+
+        try {
+            $this->_db->beginTransaction();
+            $this->_db->delete('t_finisher');
+            $this->_db->query($sSql);
+            $this->_db->commit();
+        } catch (Exception $e) {
+            $this->_db->rollBack();
+            echo 'failure!';
+        }
+        return 0;
     }
 }
 

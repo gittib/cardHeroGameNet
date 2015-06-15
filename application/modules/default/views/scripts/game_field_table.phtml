@@ -216,6 +216,9 @@ $aUserInfo = $this->aUserInfo;
 if (isset($aCardInfo['field_info']['user_id']) && $aCardInfo['field_info']['user_id'] == $aUserInfo['user_id']) {
     $sClass .= ' mine';
 }
+if (isset($aCardInfo['field_info']['opponent_id']) && $aCardInfo['field_info']['opponent_id'] == $aUserInfo['user_id']) {
+    $sClass .= ' wait_for_me';
+}
 
 echo <<<_eos_
 <div class="{$sClass}">
@@ -235,6 +238,8 @@ foreach ($aPosId as $i => $aLine) {
         if (!isset($this->bGameStart) || !$this->bGameStart) {
             $sLabel = 'このフィールドで遊ぶ';
             if (isset($this->bKifu) && $this->bKifu) {
+                $sLabel = 'このフィールドを詳しく見る';
+            } else if (isset($this->bFinisher) && $this->bFinisher) {
                 $sLabel = 'このフィールドを詳しく見る';
             }
             $sButtonHtml .= "<div class='button game_play'>{$sLabel}</div>";

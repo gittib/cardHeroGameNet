@@ -98,25 +98,25 @@ class Common {
     {
         $ua = mb_strtolower($_SERVER['HTTP_USER_AGENT']);
         if(strpos($ua,'iphone') !== false){
-            $device = 'mobile';
+            $device = 'iOS';
         }elseif(strpos($ua,'ipod') !== false){
-            $device = 'mobile';
+            $device = 'iOS';
         }elseif((strpos($ua,'android') !== false) && (strpos($ua, 'mobile') !== false)){
-            $device = 'mobile';
+            $device = 'android';
         }elseif((strpos($ua,'windows') !== false) && (strpos($ua, 'phone') !== false)){
             $device = 'mobile';
         }elseif((strpos($ua,'firefox') !== false) && (strpos($ua, 'mobile') !== false)){
-            $device = 'mobile';
+            $device = 'android';
         }elseif(strpos($ua,'blackberry') !== false){
-            $device = 'mobile';
+            $device = 'android';
         }elseif(strpos($ua,'ipad') !== false){
-            $device = 'tablet';
+            $device = 'iOS';
         }elseif((strpos($ua,'windows') !== false) && (strpos($ua, 'touch') !== false)){
             $device = 'tablet';
         }elseif((strpos($ua,'android') !== false) && (strpos($ua, 'mobile') === false)){
-            $device = 'tablet';
+            $device = 'android';
         }elseif((strpos($ua,'firefox') !== false) && (strpos($ua, 'tablet') !== false)){
-            $device = 'tablet';
+            $device = 'android';
         }elseif((strpos($ua,'kindle') !== false) || (strpos($ua, 'silk') !== false)){
             $device = 'tablet';
         }elseif((strpos($ua,'playbook') !== false)){
@@ -162,17 +162,19 @@ _eos_;
         $ret = "<table cellspacing=0 cellpadding=0 border=0 class='sql_debug'>\n";
         $ret .= "    <tr><th>#</th><th>Query</th><th>time[msec]</th></tr>\n";
         $num = 1;
+        $sTmpNeedle = ':::hatena_temp_str:::';
         if (is_array($qp)) {
             foreach ($qp as $query) {
                 $sql = htmlspecialchars($query->getQuery());
                 $msec = $query->getElapsedSecs() * 1000;
                 foreach ($query->getQueryParams() as $prm) {
-                    $prm = '<span class="variable">' . htmlspecialchars($prm) . '</span>';
+                    $prm = '<span class="variable">' . htmlspecialchars(str_replace('?', $sTmpNeedle, $prm)) . '</span>';
                     $sql = preg_replace('/^([^?]*)\?/s', "$1'{$prm}'", $sql);
                 }
                 $ret .= "    <tr><td>{$num}</td><td>{$sql}</td><td>{$msec}</td></tr>\n";
                 $num++;
             }
+            $ret = str_replace($sTmpNeedle, '?', $ret);
         }
         $msec = $db->getProfiler()->getTotalElapsedSecs() * 1000;
         $ret .= "    <tr><td>#</td><td>Total Time</td><td>{$msec}</td></tr>\n";

@@ -3,6 +3,21 @@
 #header {
     width: 100%;
 
+    #static_wrapper {
+        position: relative;
+        z-index: 10;
+    }
+
+    #floating_wrapper {
+        .floating_links {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1;
+        }
+    }
+
     .title {
         background-color: #ffffff;
         border: 1px solid;
@@ -74,6 +89,12 @@
         }
     }
 
+    $footer_ad_bk : #eeffff;
+    .footer_pr {
+        text-align: right;
+        background: $footer_ad_bk;
+    }
+
     $iAdHeight : 60px;
     .footer_ad {
         display: block;
@@ -81,7 +102,7 @@
         height: $iAdHeight + 20px;
         overflow: hidden;
         position: relative;
-        background: #eeffff;
+        background: $footer_ad_bk;
 
         div.slide {
             height: $iAdHeight + 20px !important;

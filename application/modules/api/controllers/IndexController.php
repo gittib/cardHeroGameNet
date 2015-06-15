@@ -69,14 +69,13 @@ class Api_IndexController extends Zend_Controller_Action
 
     public function imageJsonLoadAction()
     {
-        $this->_helper->layout->disableLayout();
+        $this->_helper->viewRenderer->setNoRender(true);
         $request = $this->getRequest();
 
         $json = $this->_model->getImgs();
         $this->getResponse()->setHeader('Content-Type', 'application/json; charset=utf-8');
 
         echo $json;
-        exit;
     }
 
     public function sitemapAction()
@@ -90,6 +89,17 @@ class Api_IndexController extends Zend_Controller_Action
     {
         $this->getResponse()->setHeader('Content-Type', 'text/plain');
         $this->_helper->layout->disableLayout();
+    }
+
+    public function mvRefreshAction()
+    {
+        $this->_helper->viewRenderer->setNoRender(true);
+
+        if ($this->_model->checkRefreshed()) {
+            exit;
+        }
+
+        $this->_model->mvFinisherRefresh();
     }
 
     private function _getModel()

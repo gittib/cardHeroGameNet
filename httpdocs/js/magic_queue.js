@@ -78,6 +78,11 @@ function createMagicQueue(m) {
                 });
             }
             aQueue.queue_units.unshift({
+                queue_type_id   : 1024,
+                target_id       : iMasterId,
+                cost_flg        : true,
+            });
+            aQueue.queue_units.unshift({
                 queue_type_id   : 1014,
                 target_id       : aArgs.actor_id,
                 cost_flg        : true,
@@ -85,11 +90,6 @@ function createMagicQueue(m) {
             aQueue.queue_units.unshift({
                 queue_type_id   : 1003,
                 target_id       : aArgs.actor_id,
-                cost_flg        : true,
-            });
-            aQueue.queue_units.push({
-                queue_type_id   : 1024,
-                target_id       : iMasterId,
                 cost_flg        : true,
             });
         } catch (e) {
@@ -110,7 +110,6 @@ function createMagicQueue(m) {
                 270     : 104,
                 550     : 107,
                 590     : 103,
-                600     : 111,
                 630     : 113,
                 860     : 114,
                 880     : 108,
@@ -246,10 +245,17 @@ function createMagicQueue(m) {
                 return aRet;
                 break;
             case 570:
-                return [{
+                var aRet = [{
                     queue_type_id   : 1008,
                     target_id       : aArgs.targets[0].game_card_id,
                 }];
+                if (!bNoArrange) {
+                    aRet.push({
+                        queue_type_id   : 1004,
+                        target_id       : aArgs.actor_id,
+                        param1          : 1,
+                    });
+                }
                 break;
             case 580:
                 if (aArgs.param2) {
@@ -266,6 +272,21 @@ function createMagicQueue(m) {
                     aArgs.field_data.tokugi_fuuji_flg = true;
                     return null;
                 }
+                break;
+            case 600:
+                var aRet = [{
+                    queue_type_id   : 1026,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 111,
+                }];
+                if (!bNoArrange) {
+                    aRet.push({
+                        queue_type_id   : 1026,
+                        target_id       : aArgs.targets[1].game_card_id,
+                        param1          : 111,
+                    });
+                }
+                return aRet;
                 break;
             case 610:
                 if (!aArgs.targets[1].game_card_id) {
@@ -577,6 +598,20 @@ function createMagicQueue(m) {
                 var aRet = [];
                 var aGameCardId = [];
                 var iHands = 0;
+
+                if (!bNoArrange) {
+                    return [{
+                        queue_type_id   : 1011,
+                        target_id       : mon.game_card_id,
+                        param1          : 'draw',
+                        param2          : 2,
+                    },{
+                        queue_type_id   : 1026,
+                        target_id       : mon.game_card_id,
+                        param1          : 132,
+                    }];
+                }
+
                 $.each(aArgs.field_data.cards, function(iGameCardId, val) {
                     if (val.owner == mon.owner) {
                         if (val.pos_category == 'hand') {

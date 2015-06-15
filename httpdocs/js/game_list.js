@@ -1,3 +1,5 @@
+$.get('/api/mv-refresh/');
+
 (function() {
     try {
         if (sessionStorage.oMasterData) {
@@ -39,7 +41,7 @@ $(function() {
                 break;
         }
         try {
-            sessionStorage.setItem('old_field_disp_mode', sSelect);
+            localStorage.setItem('old_field_disp_mode', sSelect);
         } catch (e) {}
     }
 
@@ -52,10 +54,10 @@ $(function() {
     (function _initSelect() {
         var sSelect = 'normal';
         try {
-            sSelect = sessionStorage.old_field_disp_mode;
+            sSelect = localStorage.old_field_disp_mode;
         } catch (e) {
             sSelect = 'normal';
-            sessionStorage.setItem('old_field_disp_mode', sSelect);
+            localStorage.setItem('old_field_disp_mode', sSelect);
         }
         sSelect = sSelect || 'normal';
 

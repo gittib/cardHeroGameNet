@@ -71,6 +71,7 @@ function createArtsQueue(m) {
             aQueue.queue_units.unshift({
                 queue_type_id   : 1002,
                 target_id       : aArgs.actor_id,
+                param1          : aArgs.art_id,
                 cost_flg        : true,
             });
             aQueue.queue_units.push({

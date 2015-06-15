@@ -18,7 +18,7 @@ class model_User {
             $aLoginInfo = Common::checkLogin();
             $where = array($this->_db->quoteInto('user_id = ?', $aLoginInfo['user_id']));
             $set = array(
-                'nick_name' => htmlspecialchars($aInput['nickname'], ENT_QUOTES),
+                'nick_name' => htmlspecialchars($aInput['nick_name'], ENT_QUOTES),
             );
 
             $this->_db->update('t_user', $set, $where);
@@ -49,7 +49,7 @@ class model_User {
             $set = array(
                 'login_id'  => $aUserInfo['login_id'],
                 'password'  => md5($aUserInfo['password'] . $this->_salt),
-                'nick_name' => htmlspecialchars($aUserInfo['nickname'], ENT_QUOTES | ENT_HTML5),
+                'nick_name' => htmlspecialchars($aUserInfo['nick_name'], ENT_QUOTES),
             );
 
             $this->_db->insert('t_user', $set);
@@ -112,5 +112,23 @@ class model_User {
         $this->_db->delete('t_login_key', $where);
         setcookie('login_key', '', time() - 1800, '/');
         Common::checkLogin(Common::$logoutMessage);
+    }
+
+    public function getUserData ($aCols)
+    {
+        $aUserInfo = Common::checkLogin();
+        $aSelectCols = array();
+        foreach ($aCols as $key => $val) {
+            $aSelectCols[] = $key;
+        }
+
+        $sel = $this->_db->select()
+            ->from(
+                array('tu' => 't_user'),
+                $aSelectCols
+            )
+            ->where('tu.user_id = ?', $aUserInfo['user_id']);
+
+        return $this->_db->fetchRow($sel);
     }
 }

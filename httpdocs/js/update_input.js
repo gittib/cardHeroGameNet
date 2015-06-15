@@ -4,7 +4,7 @@ $(function() {
         var re = /[^a-zA-Z0-9]/;
         var sError = "";
 
-        inStr = $("[name=nickname]").val();
+        inStr = $("[name=nick_name]").val();
         if (inStr.length < 1) {
             sError += "ユーザー名は1文字以上にして下さい。<br />\n";
         }

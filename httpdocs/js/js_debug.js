@@ -21,6 +21,7 @@ $(function () {
         '}' +
         '#my_console_log_cnt {' +
           'position : fixed;' +
+          'z-index : 10000;' +
           'top: 0;' +
           'right: 0;' +
           'padding: 2px;' +

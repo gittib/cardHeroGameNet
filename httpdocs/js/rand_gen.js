@@ -1,4 +1,4 @@
-rand_gen = (function (a,b) {
+rand_gen = (function (a,b,undefined) {
     var s = 1026764286;
     var _s = [];
 
@@ -66,7 +66,7 @@ rand_gen = (function (a,b) {
     }
 
     function rand (min, max) {
-        if (!max) {
+        if (max === undefined) {
             return _rand();
         }
         if (!min) {
