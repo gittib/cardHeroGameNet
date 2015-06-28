@@ -12,6 +12,10 @@ class IndexController extends Zend_Controller_Action
 
     public function indexAction()
     {
+        Common::setLoginLP(array(
+            'reset' => true,
+        ));
+
         $layout = new Zend_Layout();
         $layout->javascript = array(
                 '/js/top.js?ver=20150207',
@@ -29,15 +33,6 @@ class IndexController extends Zend_Controller_Action
             throw new Zend_Controller_Action_Exception('test env only.', 403);
         }
         $this->_helper->layout->disableLayout();
-    }
-
-    public function envAction()
-    {
-        if (APPLICATION_ENV != 'testing') {
-            throw new Zend_Controller_Action_Exception('test env only.', 403);
-        }
-        phpinfo();
-        exit;
     }
 
 }

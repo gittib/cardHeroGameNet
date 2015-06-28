@@ -1,0 +1,9 @@
+<?php
+$sMessage = 'お問い合わせを受け付けました。';
+if (isset($this->bSendError) && $this->bSendError) {
+    $sMessage = 'メール送信に失敗しました。twitterとかから再度連絡して頂けると助かります。';
+}
+?>
+<div style="padding: 12px;">
+    <?php echo $sMessage; ?>
+</div>

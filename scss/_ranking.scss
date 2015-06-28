@@ -74,6 +74,19 @@
 
         .card_summary {
             margin: 6px;
+            min-width: 50%;
+        }
+
+        .detail_link {
+            min-width: 50%;
+            float: right;
+            text-align: right;
+            margin-right: 2px;
+
+            > span {
+                text-align: right;
+                vertical-align: bottom;
+            }
         }
     }
 }

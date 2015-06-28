@@ -425,10 +425,12 @@ new function () {
         var iGameFieldScrollPos = $('#game_infomation_frame').offset().top;
         $('html,body').animate({ scrollTop: iGameFieldScrollPos }, 200, 'swing');
 
+        g_field_data.no_arrange     = Number($('div[no_arrange]').attr('no_arrange'));
         g_field_data.game_field_id  = Number($('input[name=game_field_id]').val());
         g_field_data.turn           = Number($('div[turn_num]').attr('turn_num'));
         g_field_data.my_stone       = Number($('#myPlayersInfo div.stone span').text());
         g_field_data.enemy_stone    = Number($('#enemyPlayersInfo div.stone span').text());
+        g_field_data.replay_flg     = Number($('div[replay_flg]').attr('resolved_flg'));
 
         rand_gen.srand(g_field_data.game_field_id, 100);
 
@@ -502,7 +504,6 @@ new function () {
             console.log(e);
         }
 
-        g_field_data.no_arrange = Number($('div[no_arrange]').attr('no_arrange'));
         arts_queue.setNoArrangeFlg(g_field_data.no_arrange);
         magic_queue.setNoArrangeFlg(g_field_data.no_arrange);
 
@@ -1567,6 +1568,10 @@ new function () {
                                     var targetMon = g_field_data.cards[q.target_id];
                                     targetMon = _checkScapeGoat(targetMon);
 
+                                    if (targetMon.hp <= 0) {
+                                        throw new Error('target already dead');
+                                    }
+
                                     var pow = Number(aMonsterData.attack.power);
                                     if (actorMon.status[131]) {
                                         // マッドホールによるパワーアップ
@@ -1696,6 +1701,9 @@ new function () {
                                     if (targetMon.next_game_card_id) {
                                         throw new Error('next_game_card_id is not null');
                                     }
+                                    if (targetMon.hp <= 0) {
+                                        throw new Error('target already dead');
+                                    }
 
                                     switch (q.param2) {
                                         case 'drill_break':
@@ -1743,6 +1751,9 @@ new function () {
 
                                     if (targetMon.next_game_card_id) {
                                         throw new Error('next_game_card_id is not null');
+                                    }
+                                    if (targetMon.hp <= 0) {
+                                        throw new Error('target already dead');
                                     }
 
                                     var dam = q.param1;

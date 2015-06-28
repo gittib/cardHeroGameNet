@@ -1483,11 +1483,14 @@ function createGameFieldReactions() {
                                     '<div class="num_info">' +
                                         sCost +
                                     '</div>' +
-                                '</div>' +
-                                '<div class="command_row" act_type="surrender">' +
-                                    '降参' +
                                 '</div>';
                         }
+
+                        sCommandsHtml +=
+                            '<div class="command_row" act_type="surrender">' +
+                                '降参' +
+                            '</div>';
+
                         sCommandsHtml += _buildUsedCardsRow(aCard.owner);
                     } else {
                         if (g_field_data.no_arrange) {
@@ -4316,6 +4319,7 @@ function createMagicQueue(m) {
                         param1          : 1,
                     });
                 }
+                return aRet;
                 break;
             case 580:
                 if (aArgs.param2) {

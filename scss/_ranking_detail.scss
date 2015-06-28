@@ -1,0 +1,47 @@
+@charset "utf-8";
+
+#ranking_deck_detail {
+    width: 100%;
+    max-width: 640px;
+    margin: auto;
+
+    .header {
+        text-align: center;
+
+        div {
+            $img_height : 32px;
+            > * {
+                display: inline;
+            }
+
+            h1 {
+                line-height: $img_height;
+                vertical-align: top;
+            }
+
+            > img {
+                height: $img_height;
+            }
+        }
+    }
+
+    .description {
+        padding: 3px;
+    }
+
+    table.deck_detaii_info {
+        $border_style : solid 1px black;
+
+        margin: auto;
+        border: $border_style;
+
+        th, td {
+            border-bottom: $border_style;
+            border-right: $border_style;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background-color: rgb(255, 200, 200);
+        }
+    }
+}

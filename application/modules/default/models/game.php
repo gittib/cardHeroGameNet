@@ -16,6 +16,7 @@ class model_Game {
      *      open_flg        : t_game_fieldのopen_flgを指定
      *      new_arrival     : 返信されていないフィールドのみ抽出する
      *      finisher_id     : 対象のカードがフィニッシュしたフィールドのみ抽出する
+     *      opponent_id     : 指定したIDのユーザーが対戦相手となっているフィールドのみ抽出する
      */
     public function getFieldCount($aOption = array())
     {
@@ -50,6 +51,20 @@ class model_Game {
                 ->where('tf.card_id = ?', $aOption['finisher_id']);
 
             $selFieldCnt->where('t_game_field.game_field_id in(?)', $subSelFinisher);
+        }
+        if (isset($aOption['opponent_id']) && $aOption['opponent_id']) {
+            $subSelOpponent = $this->_db->select()
+                ->from(
+                    array('tgf' => 't_game_field'),
+                    array(
+                        'game_field_id',
+                    )
+                )
+                ->where('tgf.user_id = ?', $aOption['opponent_id']);
+            $selFieldCnt
+                ->where('t_game_field.field_id_path is not null')
+                ->where('t_game_field.field_id_path != ?', '')
+                ->where("regexp_replace(t_game_field.field_id_path, '^.*-', '')::int in(?)", $subSelOpponent);
         }
         return $this->_db->fetchOne($selFieldCnt);
     }
@@ -93,6 +108,7 @@ class model_Game {
      *      allow_no_field          : フィールドが抽出できなくても例外を投げない
      *      select_standby_field    : 対戦相手の存在するフィールドは抽出禁止
      *      finisher_id             : 対象のカードがフィニッシュしたフィールドのみ抽出する
+     *      opponent_id             : 指定したIDのユーザーが対戦相手となっているフィールドのみ抽出する
      *
      *  @return array フィールド詳細の配列
      */
@@ -151,6 +167,20 @@ class model_Game {
                 ->where('tf.card_id = ?', $aOption['finisher_id']);
 
             $selField->where('t_game_field.game_field_id in(?)', $subSelFinisher);
+        }
+        if (isset($aOption['opponent_id']) && $aOption['opponent_id']) {
+            $subSelOpponent = $this->_db->select()
+                ->from(
+                    array('tgf' => 't_game_field'),
+                    array(
+                        'game_field_id',
+                    )
+                )
+                ->where('tgf.user_id = ?', $aOption['opponent_id']);
+            $selField
+                ->where('t_game_field.field_id_path is not null')
+                ->where('t_game_field.field_id_path != ?', '')
+                ->where("regexp_replace(t_game_field.field_id_path, '^.*-', '')::int in(?)", $subSelOpponent);
         }
 
         $selResponced = $this->_db->select()
@@ -223,6 +253,7 @@ class model_Game {
             ->where('field.del_flg = 0')
             ->where('field.game_field_id in(?)', $selField)
             ->order($aOrder);
+
         $rslt = $this->_db->fetchAll($sel);
         if (count($rslt) <= 0 && !isset($aOption['allow_no_field'])) {
             throw new Zend_Controller_Action_Exception('Field data not found', 404);

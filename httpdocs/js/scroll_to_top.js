@@ -8,7 +8,7 @@ $(function() {
                 $('body').append(
                     '<style>' +
                         '#scroll_to_top_button {' +
-                            'position: fixed; right: 10px; bottom: 5px; width: 52px; height: 52px; background-color: black; color: white; font-size: 44px; text-align: center; opacity: 0; z-index: 2;' +
+                            'position: fixed; right: 10px; bottom: 5px; width: 52px; height: 52px; background-color: black; color: white; font-size: 44px; text-align: center; opacity: 0; z-index: 100;' +
                         '}' +
                         '#footer {' +
                             'margin-bottom: 65px;' +

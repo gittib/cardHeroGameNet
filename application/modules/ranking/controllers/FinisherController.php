@@ -41,7 +41,8 @@ class Ranking_FinisherController extends Zend_Controller_Action
 
         require_once APPLICATION_PATH . '/modules/ranking/models/GetList.php';
         $this->_model = new Model_Ranking_GetList();
-        $sCardName = $this->_model->getCardName($iFinisherId);
+        $aCardInfo = $this->_model->getCardInfo($iFinisherId);
+        $sCardName = $aCardInfo['card_name'];
         $this->_layout->title = $sCardName . 'がフィニッシュしたフィールド一覧';
 
         require_once APPLICATION_PATH . '/modules/default/models/game.php';

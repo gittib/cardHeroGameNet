@@ -128,6 +128,29 @@ class Common {
     }
 
     /**
+     * ログイン後に現在のページに戻ってこれるよう、飛び先を記録する
+     *
+     * @param aOption['reset']  trueなら飛び先情報のセッションをクリアする
+     * @param aOption['url']    ログイン後の飛び先URL。未指定だったら現在のURIを使う
+     *
+     * @return 無し
+     */
+    public static function setLoginLP ($aOption = array())
+    {
+        $oSession = Zend_Registry::get('session');
+        if (isset($aOption['reset']) && $aOption['reset']) {
+            unset($oSession->sLastPageBeforeLogin);
+        } else {
+            if (isset($aOption['url']) && $aOption['url']) {
+                $sUrl = $aOption['url'];
+            } else {
+                $sUrl = $_SERVER['REQUEST_URI'];
+            }
+            $oSession->sLastPageBeforeLogin = $sUrl;
+        }
+    }
+
+    /**
      * 投げてるSQLの確認
      *
      * @return 投げてるSQL一覧のHTML

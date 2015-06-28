@@ -31,16 +31,9 @@
         width: 180px;
 
         a {
-            $light_color : #ffeeee;
-            $dark_color  : #880000;
-
             display: block;
-            margin: 3px 8px;
+            margin: 6px 8px;
             padding: 2px;
-            border: solid 3px $dark_color;
-            border-top-color: $light_color;
-            border-left-color: $light_color;
-            background-color: #ffcccc;
             text-decoration: none;
             text-shadow: $myTextShadow;
 
@@ -173,6 +166,7 @@
                         margin: 32px 5px;
                         padding: 3px 0;
                         cursor: pointer;
+                        z-index: 0;
 
                         &.game_play {
                             $border_width: 3px;
@@ -261,7 +255,7 @@
                         text-shadow: $myTextShadow;
 
                         * {
-                            z-index: 100;
+                            z-index: 50;
                             position: relative;
                         }
 

@@ -355,13 +355,35 @@ class model_Api_Index {
             ),
         );
 
+        $subSelDeck = $this->_db->select()
+            ->from(
+                array('tdc' => 't_deck_card'),
+                array(
+                    'deck_card_id' => 'card_id',
+                )
+            )
+            ->join(
+                array('td' => 't_deck'),
+                'td.deck_id = tdc.deck_id',
+                array(
+                    'deck_upd_date' => new Zend_Db_Expr("to_char(max(td.upd_date), 'yyyy-mm-dd')"),
+                )
+            )
+            ->group(array(
+                'tdc.card_id',
+            ))
+            ->where('td.del_flg = 0');
         $sel = $this->_db->select()
             ->from(
-                'm_card',
+                array('mc' => 'm_card'),
                 array(
                     'card_id',
                     'upd_date'  => new Zend_Db_Expr("to_char(upd_date, 'yyyy-mm-dd')"),
                 )
+            )
+            ->joinLeft(
+                array('sub_deck' => $subSelDeck),
+                'sub_deck.deck_card_id = mc.card_id'
             );
         $rslt = $this->_db->fetchAll($sel);
         foreach ($rslt as $val) {
@@ -369,6 +391,12 @@ class model_Api_Index {
                 'loc'       => 'http://' . $_SERVER['SERVER_NAME'] . '/card/detail/' . $val['card_id'] . '/',
                 'lastmod'   => $val['upd_date'],
             );
+            if (isset($val['deck_card_id'])) {
+                $aUrls[] = array(
+                    'loc'       => 'http://' . $_SERVER['SERVER_NAME'] . '/ranking/deck/detail/' . $val['deck_card_id'] . '/',
+                    'lastmod'   => $val['deck_upd_date'],
+                );
+            }
         }
 
         return $aUrls;
@@ -416,6 +444,15 @@ class model_Api_Index {
 
     public function mvFinisherRefresh() {
 
+        $sSubSelDead = $this->_db->select()
+            ->from(
+                't_queue_unit',
+                array(
+                    'target_card_id',
+                )
+            )
+            ->where('queue_type_id = ?', 1008);
+
         $sSubSelMaster = $this->_db->select()
             ->distinct()
             ->from(
@@ -424,12 +461,14 @@ class model_Api_Index {
                     'game_card_id',
                 )
             )
-            ->where('position = ?', 'Master');
+            ->where('position = ?', 'Master')
+            ->where('game_card_id in ?', $sSubSelDead)
+            ;
 
-        if (isset($aParams['max_date'])) {
+        if (isset($aParams['max_date']) && $aParams['max_date']) {
             $sSubSelMaster->where('ins_date <= ?', $aParams['max_date']);
         }
-        if (isset($aParams['min_date'])) {
+        if (isset($aParams['min_date']) && $aParams['min_date']) {
             $sSubSelMaster->where('ins_date >= ?', $aParams['min_date']);
         }
 

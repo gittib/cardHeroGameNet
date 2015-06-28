@@ -5,6 +5,7 @@ $iBeforeCnt = 0;
 $iSumCnt = 0;
 foreach ($this->aDeckCardList as $val) {
     $sUrl = "/card/detail/{$val['card_id']}/";
+    $sDeckInfoUrl = "/ranking/deck/detail/{$val['card_id']}/";
     $sDetailLink ="<a href='{$sUrl}' target='_blank' class='blank_link'>{$val['card_name']}</a>";
     $sImg = "<img src='/images/card/card.jpg' original-src='/images/card/{$val['image_file_name']}' />";
     if ($val['cnt'] != $iBeforeCnt) {
@@ -27,6 +28,11 @@ foreach ($this->aDeckCardList as $val) {
             {$sDetailLink}<br />
             <span class="b">{$val['cnt']}枚</span>
             ({$val['decks']}デッキにて採用)
+        </div>
+        <div class="detail_link">
+            <span>
+                <a href="{$sDeckInfoUrl}">{$val['card_name']}の搭載状況詳細</a>
+            </span>
         </div>
     </div>
 

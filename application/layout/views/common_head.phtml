@@ -26,7 +26,7 @@ if (isSet($l->canonical)) {
 // noindex
 $sNoIndex = '';
 if ($conf->web->noindex || isSet($l->noindex)) {
-    $sNoIndex = '<meta name="robots" content="noindex,nofollow" />' . "\n";
+    $sNoIndex = '<meta name="robots" content="noindex,follow" />' . "\n";
 }
 
 // stylesheet
@@ -45,7 +45,7 @@ $sJavascript = '';
 if (isSet($l->javascript)) {
     foreach ($l->javascript as $key => $val) {
         if ($val != '') {
-            $sJavascript .= "<script type=\"text/javascript\" src=\"{$val}\"></script>\n";
+            $sJavascript .= "<script type=\"text/javascript\" src=\"{$val}\" charset=\"UTF-8\"></script>\n";
         }
     }
 }
@@ -80,6 +80,7 @@ _eos_;
     $sJavascript .= "<!-- Google Analytics -->\n";
 }
 ?>
+<meta charset="UTF-8" />
 <title><?php echo $sTitle; ?>カードヒーロー@スマホ</title>
 <meta name="keywords" content="カードヒーロー,スマホ" />
 <meta name="description" content="<?php echo $sDescription; ?>" />
@@ -87,7 +88,7 @@ _eos_;
 <link rel="shortcut icon" href="/images/favicon.ico" />
 <?php echo $sNoIndex; ?>
 <?php echo $sCanonical; ?>
-<link rel="stylesheet" type="text/css" href="/css/screen.css?ver=20150526" media="all" />
+<link rel="stylesheet" type="text/css" href="/css/screen.css?ver=20150628" media="all" />
 <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
 <script type="text/javascript" src="/js/jquery.color-2.1.2.min.js"></script>
 <script type="text/javascript" src="/js/to_kana_zenkaku.js"></script>

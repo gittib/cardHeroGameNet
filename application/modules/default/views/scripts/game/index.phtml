@@ -1,83 +1,74 @@
 <?php
-//
-// ページングリンク生成処理
-//
-$iFieldsInPage = 10;    // 1ページ当たりに表示されるフィールドの数
-$iDispLinkRange = 2;    // 前後何ページまでページングするか
+$self = $this;
+$fnPaging = function ($sUrlBase, $bDispBeforePage, $bDispLastPage) use ($self) {
+    // ページングリンク生成処理
 
-// 合計で何ページ存在してるか計算
-$iPages = (int)(($this->nFields - 1) / $iFieldsInPage) + 1;
+    $iFieldsInPage = 10;    // 1ページ当たりに表示されるフィールドの数
+    $iDispLinkRange = 2;    // 前後何ページまでページングするか
 
-// ページング対象のページ番号の最大値・最小値を計算
-$aDispPageNum = array(
-    'min'   => max($this->nPage - $iDispLinkRange, 1),  // 1未満だったら1にする
-    'max'   => min($this->nPage + $iDispLinkRange, $iPages),    // 全ページ数を超えるならそれに合わせる
-);
+    $sUrlBase = preg_replace(';/$;', '', $sUrlBase);
 
-$sPageLinkTag = "<div class='page_link'>\n";
-$sUrlBase = '/game/';
-if (isset($this->bLast) && $this->bLast) {
-    $sUrlBase = '/game/last/';
-}
+    // 合計で何ページ存在してるか計算
+    $iPages = ceil((float)$self->nFields / (float)$iFieldsInPage);
 
-//if (1 < $this->nPage) {
-//    $iBeforePage = $this->nPage - 1;
-//    $sPageLinkTag .= <<<_eos_
-//    <span><a href="{$sUrlBase}{$iBeforePage}/">前へ</a></span>
-//
-//_eos_;
-//}
+    // ページング対象のページ番号の最大値・最小値を計算
+    $aDispPageNum = array(
+        'min'   => max($self->nPage - $iDispLinkRange, 1),  // 1未満だったら1にする
+        'max'   => min($self->nPage + $iDispLinkRange, $iPages),    // 全ページ数を超えるならそれに合わせる
+    );
 
-if (1 < $aDispPageNum['min']) {
-    $sPageLinkTag .= <<<_eos_
-    <a href="{$sUrlBase}"><span class="first_page_link">1</span></a>...
+    $sPageLinkTag = "<div class='page_link'>\n";
 
-_eos_;
-}
-
-for ($i = $aDispPageNum['min'] ; $i <= $aDispPageNum['max'] ; $i++) {
-    if ($i == $this->nPage) {
-        $sPageLinkText = "<span><strong>{$i}</strong></span>";
-    } else {
-        if ($i == 1) {
-            $sUrl = $sUrlBase;
-        } else {
-            $sUrl = $sUrlBase . $i . '/';
-        }
-        $sPageLinkText = "<a href='{$sUrl}'><span>{$i}</span></a>";
+    if ($bDispBeforePage && 1 < $self->nPage) {
+        $iBeforePage = $self->nPage - 1;
+        $sPageLinkTag .= "<span><a href='{$sUrlBase}/{$iBeforePage}/'>前へ</a></span>\n";
     }
-    $sPageLinkTag .= "{$sPageLinkText}\n";
+
+    if (1 < $aDispPageNum['min']) {
+        $sPageLinkTag .= "<a href='{$sUrlBase}/'><span class='first_page_link'>1</span></a>...\n";
+    }
+
+    for ($i = $aDispPageNum['min'] ; $i <= $aDispPageNum['max'] ; $i++) {
+        if ($i == $self->nPage) {
+            $sPageLinkText = "<span><strong>{$i}</strong></span>";
+        } else {
+            if ($i == 1) {
+                $sUrl = $sUrlBase . '/';
+            } else {
+                $sUrl = $sUrlBase . '/' . $i . '/';
+            }
+            $sPageLinkText = "<a href='{$sUrl}'><span>{$i}</span></a>\n";
+        }
+        $sPageLinkTag .= "{$sPageLinkText}\n";
+    }
+
+    if ($bDispLastPage && $aDispPageNum['max'] < $iPages) {
+        $sPageLinkTag .= "...<a href='{$sUrlBase}/{$iPages}/'><span>{$iPages}</span></a>\n";
+    }
+
+    if ($self->nPage < $iPages) {
+        $iNextPage = $self->nPage + 1;
+        $sPageLinkTag .= "<a href='{$sUrlBase}/{$iNextPage}/'><span class='next_page_link'>次へ</span></a>\n";
+    }
+
+    $sPageLinkTag .= "</div>\n";
+
+    return $sPageLinkTag;
+};
+
+// ページングリンク生成処理
+if (isset($this->bMine) && $this->bMine) {
+    $sPageLinkTag = $fnPaging('/game/my-turn/', false, false);
+} else if (isset($this->bLast) && $this->bLast) {
+    $sPageLinkTag = $fnPaging('/game/last/', false, false);
+} else {
+    $sPageLinkTag = $fnPaging('/game/', false, false);
 }
-
-//if ($aDispPageNum['max'] < $iPages) {
-//    $sPageLinkTag .= <<<_eos_
-//    ...<a href="{$sUrlBase}{$iPages}/"><span>{$iPages}</span></a>
-//
-//_eos_;
-//}
-
-if ($this->nPage < $iPages) {
-    $iNextPage = $this->nPage + 1;
-    $sPageLinkTag .= <<<_eos_
-    <a href="{$sUrlBase}{$iNextPage}/"><span class="next_page_link">次へ</span></a>
-
-_eos_;
-}
-
-$sPageLinkTag .= "</div>\n";
-//
-// ページングリンク生成処理終了
-//
 
 $sSelectOldFieldDispray = '';
 $sBackgroundStyle = '';
-$sH1Text = '未返信フィールド一覧';
 $sDescription = '返信の無いフィールドの一覧です。';
-$sLastLink = "<a href='/game/'>全フィールド一覧はこちら</a>";
-if (isset($this->bLast) && $this->bLast) {
-    $sBackgroundStyle = '<style>#game_field_list_wrapper { background-color:#ffeeee !important; }</style>';
-} else {
-    $sSelectOldFieldDispray = <<<_eos_
+$sSelectOldFieldDispray = <<<_eos_
 <div class="old_field_disp_select_frame">
     返信済みフィールド：
     <select class="old_field_disp_select">
@@ -88,12 +79,30 @@ if (isset($this->bLast) && $this->bLast) {
 </div>
 
 _eos_;
+if (isset($this->bMine) && $this->bMine) {
+    $aUserInfo = Common::checkLogin();
+    if (!$aUserInfo) {
+        $sUserName = '????????';
+    } else {
+        $sUserName = $aUserInfo['nick_name'];
+    }
+    $sBackgroundStyle = '<style>#game_field_list_wrapper { background-color:#eeffee !important; }</style>';
+    $sH1Text = 'あなたへの返信一覧';
+    $sDescription = $sUserName . 'さんの投稿に対して返信されたフィールドの一覧です。<br />さらにフィールドを返信して、対戦の続きをお楽しみ下さい。';
+    $sLastLink = "<a class='zabuton_blue' href='/game/'>全フィールド一覧はこちら</a>";
+} else if (isset($this->bLast) && $this->bLast) {
+    $sBackgroundStyle = '<style>#game_field_list_wrapper { background-color:#ffeeee !important; }</style>';
+    $sH1Text = '未返信フィールド一覧';
+    $sLastLink = "<a class='zabuton_blue' href='/game/'>全フィールド一覧はこちら</a>";
+    $sSelectOldFieldDispray = '';
+} else {
     $sH1Text = 'フィールド一覧';
     $sDescription = '投稿されたフィールドの一覧です。';
     if (isset($this->bNewFieldCommited) && $this->bNewFieldCommited) {
         $sDescription = '新規ゲームの投稿が完了しました。';
     }
-    $sLastLink = "<a href='/game/last/'>未返信フィールドの一覧へ</a>";
+    $sLastLink = "<a class='zabuton_red' href='/game/last/'>未返信フィールドの一覧へ</a>";
+    $sLastLink .= "<a class='zabuton_green' href='/game/my-turn/'>あなたへの返信一覧へ</a>";
 }
 ?>
 
@@ -120,7 +129,9 @@ if (empty($this->aCardInfoArray)) {
         if (isset($aFieldInfo['started_flg']) && $aFieldInfo['started_flg']) {
             $sHref = "/game/field/{$aFieldInfo['game_field_id']}/";
         }
-        if ($this->bLast) {
+        if (isset($this->bMine) && $this->bMine) {
+            $sHref .= '?referer=mytrun';
+        } else if ($this->bLast) {
             $sHref .= '?referer=last';
         }
         echo <<<_eos_

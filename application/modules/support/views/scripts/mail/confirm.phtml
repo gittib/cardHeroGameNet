@@ -1,0 +1,47 @@
+<?php
+$sSelectDomain      = $this->aDomains[$this->iDomainId]['mail_domain'];
+$sSelectRequestType = $this->aRequestType[$this->iRequestType];
+$sUserName          = $this->escape($this->sUserName);
+$sMail              = $this->escape($this->sMail);
+$sMessage           = $this->escape($this->sMessage);
+
+$sDispMail = $sMail . '@' . $sSelectDomain;
+if (!$sMail) {
+    $sDispMail = '----';
+}
+
+$sSubmitButton = '<input type="submit" value="送信" />';
+$sErrorHtml = '';
+if (isset($this->aErrorMessage) && is_array($this->aErrorMessage) && 0 < count($this->aErrorMessage)) {
+    $sSubmitButton = '';
+
+    $sErrorHtml = 'エラー<ul>';
+    foreach ($this->aErrorMessage as $val) {
+        $sErrorHtml .= '<li>' . $val . '</li>';
+    }
+    $sErrorHtml .= '</ul>';
+}
+?>
+<div id="support_mail_input">
+<h1>お問い合わせ</h1>
+<form id="input_form" name="support_mail_input_form" action="/support/mail/submit/" method="POST">
+    <p><span class="column_name">お名前：</span> <span class="column_data"><?php echo $sUserName; ?></span></p>
+    <p><span class="column_name">メールアドレス：</span> <span class="column_data"><?php echo $sDispMail; ?></span></p>
+    <p><span class="column_name">お問い合わせ種別：</span> <span class="column_data"><?php echo $sSelectRequestType; ?></span></p>
+    <p><span class="column_name">お問い合わせ内容：</span><br /><span class="column_data"><?php echo nl2br($sMessage); ?></span></p>
+    <div class="error_message">
+        <?php echo $sErrorHtml; ?>
+    </div>
+    <p class="submit">
+        <a href="javascript:history.back();">入力画面に戻る</a>
+        &nbsp;&nbsp;&nbsp;
+        <?php echo $sSubmitButton; ?>
+    </p>
+
+    <input type="hidden" name="user_name"       value="<?php echo $sUserName; ?>" />
+    <input type="hidden" name="mail"            value="<?php echo $sMail; ?>" />
+    <input type="hidden" name="domain_id"       value="<?php echo $this->iDomainId; ?>" />
+    <input type="hidden" name="request_type"    value="<?php echo $this->iRequestType; ?>" />
+    <input type="hidden" name="message"         value="<?php echo $sMessage; ?>" />
+</form>
+</div>

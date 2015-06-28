@@ -25,6 +25,17 @@ class GameController extends Zend_Controller_Action
         );
     }
 
+    public function preDispatch()
+    {
+        if ($this->getRequest()->getActionName() == 'index') {
+            Common::setLoginLP(array(
+                'reset' => true,
+            ));
+        } else {
+            Common::setLoginLP();
+        }
+    }
+
     public function postDispatch()
     {
         $this->_layout->javascript = $this->_javascript;
@@ -40,21 +51,24 @@ class GameController extends Zend_Controller_Action
         $this->_javascript[] = '/js/scroll_to_top.js';
         $this->_layout->title       = 'ゲームフィールド一覧';
         $this->_layout->description = 'カードヒーローを実際に遊んで、1ターン分の結果を投稿できます。投稿されたフィールドに返信する形で遊ぶこともできます。';
-        $nPage = $request->getParam('page_no');
-        $bLast = $request->getParam('bLast');
-        $aCardInfoArray = $this->_model->getFieldDetail(array(
+        $nPage = $request->getParam('page_no', 1);
+        $bLast = $request->getParam('bLast', false);
+        $bMine = $request->getParam('bMine', false);
+        $iOpponentId = $request->getParam('myId', 0);
+        $aParamsToSelectField = array(
             'page_no'           => $nPage,
             'open_flg'          => 1,
             'new_arrival'       => $bLast,
             'allow_no_field'    => 1,
-        ));
-        $nFields = $this->_model->getFieldCount(array(
-            'page_no'           => $nPage,
-            'open_flg'          => 1,
-            'new_arrival'       => $bLast,
-        ));
+            'opponent_id'       => $iOpponentId,
+        );
+        $aCardInfoArray = $this->_model->getFieldDetail($aParamsToSelectField);
+        $nFields = $this->_model->getFieldCount($aParamsToSelectField);
 
-        if ($bLast) {
+        if ($bMine) {
+            $this->_layout->title = 'あなたへの返信一覧';
+            $this->_layout->description = '対戦相手が投稿した、あなた宛てのフィールド一覧です。あなたの返信を待っています！';
+        } else if ($bLast) {
             $this->_layout->title = '未返信フィールド一覧';
             $this->_layout->description = '中断しているフィールド一覧です。あなたの返信を待っています！';
         }
@@ -70,6 +84,8 @@ class GameController extends Zend_Controller_Action
         $this->view->assign('nFields', $nFields);
         $this->view->assign('nPage', $nPage);
         $this->view->assign('bLast', $bLast);
+        $this->view->assign('bMine', $bMine);
+        $this->view->assign('iOpponentId', $iOpponentId);
         $this->view->assign('bNewFieldCommited', $bNewFieldCommited);
 
         $bFieldSended = $request->getParam('field_sended');
@@ -81,6 +97,24 @@ class GameController extends Zend_Controller_Action
     public function lastAction()
     {
         $this->getRequest()->setParam('bLast', true);
+        $this->forward('index');
+    }
+
+    public function myTurnAction()
+    {
+        $aUserInfo = Common::checkLogin();
+        if (!$aUserInfo) {
+            $this->_redirect(
+                '/user/login-input/',
+                array(
+                    'exit' => true,
+                    'code' => 301
+                )
+            );
+        }
+        $this->getRequest()->setParam('myId', $aUserInfo['user_id']);
+        $this->getRequest()->setParam('bMine', true);
+        //$this->getRequest()->setParam('bLast', true);
         $this->forward('index');
     }
 
@@ -304,11 +338,11 @@ class GameController extends Zend_Controller_Action
         $this->view->assign('aQueue', $aQueue);
     }
 
-    // public function replayAction()
-    // {
-    //     $this->getRequest()->setParam('replay_flg', true);
-    //     $this->forward('field');
-    // }
+    public function replayAction()
+    {
+        $this->getRequest()->setParam('replay_flg', true);
+        $this->forward('field');
+    }
 
     public function turnEndAction()
     {
@@ -327,10 +361,15 @@ class GameController extends Zend_Controller_Action
             'field_data'    => $aFieldData,
         ));
 
-        $sUrl = '/game/';
         switch ($sReferer) {
             case 'last':
                 $sUrl = '/game/last/';
+                break;
+            case 'myturn':
+                $sUrl = '/game/my-turn/';
+                break;
+            default:
+                $sUrl = '/game/';
                 break;
         }
 

@@ -81,23 +81,6 @@ class Model_Ranking_GetList
         return $rslt;
     }
 
-    public function getCardName ($cardId) {
-        $sel = $this->_db->select()
-            ->from(
-                array('mc' => 'm_card'),
-                array(
-                    'card_name',
-                )
-            )
-            ->where('mc.card_id = ?', $cardId);
-
-        $ret = $this->_db->fetchOne($sel);
-        if (!$ret) {
-            return '';
-        }
-        return $ret;
-    }
-
     public function getDecks ($aParams = array()) {
         $sel = $this->_db->select()
             ->from(
@@ -109,5 +92,78 @@ class Model_Ranking_GetList
             ->where('td.del_flg = 0');
 
         return $this->_db->fetchOne($sel);
+    }
+
+    public function getCardInfo ($iCardId) {
+        $sel = $this->_db->select()
+            ->from(
+                array('mc' => 'm_card'),
+                array(
+                    'card_name',
+                    'image_file_name',
+                )
+            )
+            ->where('mc.card_id = ?', $iCardId);
+        return $this->_db->fetchRow($sel);
+    }
+
+    public function getDeckCardDetail ($iCardId) {
+        $sub = $this->_db->select()
+            ->from(
+                array('tdc' => 't_deck_card'),
+                array(
+                    'num',
+                    'decks' => new Zend_Db_Expr('count(*)'),
+                )
+            )
+            ->join(
+                array('td' => 't_deck'),
+                'td.deck_id = tdc.deck_id',
+                array(
+                    'master_card_id',
+                )
+            )
+            ->where('td.del_flg = 0')
+            ->where('tdc.num <= 3')
+            ->where('tdc.card_id = ?', $iCardId)
+            ->group(array(
+                'tdc.num',
+                'td.master_card_id',
+            ));
+        $sel = $this->_db->select()
+            ->from(
+                array('mc' => 'm_card'),
+                array(
+                    'master_id'     => 'card_id',
+                    'master_name'   => 'card_name',
+                )
+            )
+            ->joinLeft(
+                array('sub' => $sub),
+                'sub.master_card_id = mc.card_id'
+            )
+            ->where('mc.category = ?', 'master')
+            ->order(array(
+                'master_id',
+            ));
+        $rslt = $this->_db->fetchAll($sel);
+        $aRet = array();
+        foreach ($rslt as $val) {
+            if (!isset($aRet[$val['master_id']])) {
+                $aRet[$val['master_id']] = array(
+                    'master_id'     => $val['master_id'],
+                    'master_name'   => $val['master_name'],
+                    'detail' => array(
+                        1 => 0,
+                        2 => 0,
+                        3 => 0,
+                    ),
+                );
+            }
+            if (isset($val['num'])) {
+                $aRet[$val['master_card_id']]['detail'][$val['num']] = $val['decks'];
+            }
+        }
+        return $aRet;
     }
 }

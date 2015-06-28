@@ -256,6 +256,7 @@ function createMagicQueue(m) {
                         param1          : 1,
                     });
                 }
+                return aRet;
                 break;
             case 580:
                 if (aArgs.param2) {

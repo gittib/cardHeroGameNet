@@ -29,6 +29,16 @@
             'myBack2',
         ),
     );
+
+    // 手札やセットモンスターなど、自分だけが見れる情報を公開するかどうか
+    $bDispMyHiddenInfo = false;
+    if (isset($this->bKifu, $this->bFinished) && $this->bKifu && $this->bFinished) {
+        $bDispMyHiddenInfo = true;
+    }
+    if (isset($this->bMine) && $this->bMine) {
+        $bDispMyHiddenInfo = true;
+    }
+
     foreach ($aCardInfo['field'] as $val) {
         if (isset($val['next_game_card_id'])) {
             continue;
@@ -63,13 +73,7 @@
         if ($val['standby_flg']) {
             $sLv = '?';
             $sHp = '?';
-            if (!isset($this->bKifu)) {
-                $this->bKifu = false;
-            }
-            if (!isset($this->bFinished)) {
-                $this->bFinished = false;
-            }
-            if ($this->bKifu && $this->bFinished && $aCardInfo['field_info']['turn'] == $val['owner']) {
+            if ($bDispMyHiddenInfo && $aCardInfo['field_info']['turn'] == $val['owner']) {
                 $sStandbyClass = 'standby';
                 $sCardBack = "<img src='/images/card/card.jpg' style='display:none;'/>";
             } else {
@@ -150,7 +154,7 @@ _eos_;
         if ($aCardInfo['field_info']['turn'] == $val['owner']) {
             $aHandCount['my']++;
             $sOriginalSource = '';
-            if (isset($this->bFinished) && $this->bFinished) {
+            if ($bDispMyHiddenInfo) {
                 $sOriginalSource = " original-src='/images/card/{$val['image_file_name']}'";
             }
             $sMyHandHtml .= <<<_eos_

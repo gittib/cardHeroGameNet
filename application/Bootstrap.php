@@ -56,7 +56,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         // 返信の無いゲームフィールド一覧
         $route = new Zend_Controller_Router_Route_Regex(
-            'game/(last)(/(\d+))?',
+            'game/(last|my-turn)(/(\d+))?',
             array(
                 'controller'    =>  'game',
                 'action'        =>  'last',
@@ -163,6 +163,21 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             )
         );
         $router->addRoute('finished_field_list', $route);
+
+        // 指定したカードの採用状況詳細
+        $route = new Zend_Controller_Router_Route_Regex(
+            'ranking/deck/detail/(\d+)',
+            array(
+                'module'        => 'ranking',
+                'controller'    => 'deck',
+                'action'        => 'detail',
+                'card_id'       => 1,
+            ),
+            array(
+                1   => 'card_id',
+            )
+        );
+        $router->addRoute('deck_ranking_detail', $route);
 
         // 画像が無かった時のリダイレクト用
         $route = new Zend_Controller_Router_Route_Regex(

@@ -1,0 +1,67 @@
+<?php
+$sH1 = $this->aCardInfo['card_name'] . 'の搭載状況';
+$sImg = "<img src='/images/card/{$this->aCardInfo['image_file_name']}' alt='{$this->aCardInfo['card_name']}' />";
+
+$sTable = '<table class="deck_detaii_info">';
+$sTable .= <<<_eos_
+        <tr>
+            <th>マスター</th>
+            <th>１枚積み</th>
+            <th>２枚積み</th>
+            <th>３枚積み</th>
+            <th>合計</th>
+        </tr>
+
+_eos_;
+$aSum = array(1 => 0, 2 => 0, 3 => 0, );
+$iAllSum = $iAllCardSum = 0;
+foreach ($this->aDeckInfo as $iMasterId => $val) {
+    $sum = 0;
+    for ($i = 1 ; $i <= 3 ; $i++) {
+        $sum += $val['detail'][$i];
+        $aSum[$i] += $val['detail'][$i];
+        $iAllSum += $val['detail'][$i];
+        $iAllCardSum += $val['detail'][$i] * $i;
+    }
+    $sTable .= <<<_eos_
+        <tr>
+            <td class="master_name">{$val['master_name']}</td>
+            <td>{$val['detail'][1]}</td>
+            <td>{$val['detail'][2]}</td>
+            <td>{$val['detail'][3]}</td>
+            <td>{$sum}</td>
+        </tr>
+
+_eos_;
+}
+$sTable .= <<<_eos_
+        <tr>
+            <td>合計</td>
+            <td>{$aSum[1]}</td>
+            <td>{$aSum[2]}</td>
+            <td>{$aSum[3]}</td>
+            <td><strong>{$iAllSum}</strong></td>
+        </tr>
+
+_eos_;
+$sTable .= '</table>';
+
+$sDescription = <<<_eos_
+        {$this->aCardInfo['card_name']}が積まれているデッキを、使用マスター・搭載枚数ごとにまとめた集計結果です。
+        現在、<strong>{$iAllSum}個</strong>のデッキに合計<strong>{$iAllCardSum}枚</strong>搭載されています。
+
+_eos_;
+?>
+<div id="ranking_deck_detail">
+    <div class="header clearfix">
+        <div>
+            <?php echo $sImg; ?>
+            <h1><?php echo $sH1; ?></h1>
+            <?php echo $sImg; ?>
+        </div>
+    </div>
+    <div class="description">
+        <?php echo $sDescription; ?>
+    </div>
+    <?php echo $sTable; ?>
+</div>

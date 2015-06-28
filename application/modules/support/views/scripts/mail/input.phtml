@@ -1,0 +1,39 @@
+<?php
+$sSelectDomain = '<select name="domain_id">';
+foreach ($this->aDomains as $key => $val) {
+    if ($this->iDomainId == $key) {
+        $sSelected = ' selected="selected"';
+    } else {
+        $sSelected = '';
+    }
+    $sOption = "<option value='{$key}'{$sSelected}>{$val['mail_domain']}</option>";
+    $sSelectDomain .= $sOption;
+}
+$sSelectDomain .= '</select>';
+
+$sSelectRequestType = '<select name="request_type">';
+foreach ($this->aRequestType as $key => $val) {
+    if ($this->iRequestType == $key) {
+        $sSelected = ' selected="selected"';
+    } else {
+        $sSelected = '';
+    }
+    $sOption = "<option value='{$key}'{$sSelected}>{$val}</option>";
+    $sSelectRequestType .= $sOption;
+}
+$sSelectRequestType .= '</select>';
+
+$sUserName  = $this->escape($this->sUserName);
+$sMail      = $this->escape($this->sMail);
+$sMessage   = $this->escape($this->sMessage);
+?>
+<div id="support_mail_input">
+<h1>お問い合わせ</h1>
+<form id="input_form" name="support_mail_input_form" action="/support/mail/confirm/" method="POST">
+    <p><span class="column_name">お名前：</span><br /><input type="text" name="user_name" value="<?php echo $sUserName; ?>" /></p>
+    <p><span class="column_name">メールアドレス：</span><br /><input type="text" name="mail" value="<?php echo $sMail; ?>" />@<?php echo $sSelectDomain; ?></p>
+    <p><span class="column_name">お問い合わせ種別：</span><br /><?php echo $sSelectRequestType; ?></p>
+    <p><span class="column_name">お問い合わせ内容：</span><br /><textarea name="message"><?php echo $sMessage; ?></textarea></p>
+    <p class="submit"><input type="submit" value="確認画面へ" /></p>
+</form>
+</div>

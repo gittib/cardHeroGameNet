@@ -160,7 +160,13 @@ class UserController extends Zend_Controller_Action
         $this->_layout->title = 'ログイン';
         list($bRet, $aUserInfo) = $this->_model->login($sLoginId, $sPassword);
         if ($bRet) {
-            $this->_redirect('/', array('code' => 301));
+            $oSession = Zend_Registry::get('session');
+            $sUrl = '/';
+            if (isset($oSession->sLastPageBeforeLogin) && $oSession->sLastPageBeforeLogin) {
+                $sUrl = $oSession->sLastPageBeforeLogin;
+            }
+            $oSession->sLastPageBeforeLogin;
+            $this->_redirect($sUrl, array('code' => 301, 'exit' => true));
         } else {
             $this->view->assign('message', 'ログインに失敗しました');
         }

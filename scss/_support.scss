@@ -1,0 +1,41 @@
+@charset "utf-8";
+
+#support_mail_input {
+    margin: 5px auto;
+    max-width: 640px;
+    box-sizing: border-box;
+    border-width: 3px;
+    border-style: inset;
+    padding: 3px;
+    padding-left: 8px;
+
+    p {
+        .column_data {
+            font-weight: bold;
+        }
+
+        input {
+            max-width: 50%;
+        }
+
+        textarea {
+            width: 90%;
+            min-height: 4em;
+        }
+
+        &.submit {
+            margin: 5px auto;
+            text-align: center;
+        }
+    }
+
+    .error_message {
+        color: red;
+        ul {
+            li {
+                color: red;
+            }
+        }
+    }
+
+}
