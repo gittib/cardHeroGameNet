@@ -173,7 +173,7 @@ class GameController extends Zend_Controller_Action
             $aUserInfo = Common::checkLogin();
             if (empty($aUserInfo)) {
                 Common::setLoginLP();
-                $this->_redirect('/user\login-input/', array(
+                $this->_redirect('/user/login-input/', array(
                     'code'  => 307,
                     'exit'  => true,
                 ));
@@ -247,7 +247,7 @@ class GameController extends Zend_Controller_Action
             $aUserInfo = Common::checkLogin();
             if (empty($aUserInfo)) {
                 Common::setLoginLP();
-                $this->_redirect('/user\login-input/', array(
+                $this->_redirect('/user/login-input/', array(
                     'code'  => 307,
                     'exit'  => true,
                 ));
