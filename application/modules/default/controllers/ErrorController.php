@@ -8,7 +8,6 @@ class ErrorController extends Zend_Controller_Action
     {
         $this->_layout = new Zend_Layout();
         $this->_layout->title = 'エラーページ';
-        $this->_layout->stylesheet = array('/css/error.css');
         $errors = $this->_getParam('error_handler');
 
         if (!$errors || !$errors instanceof ArrayObject) {

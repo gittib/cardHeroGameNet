@@ -1,0 +1,77 @@
+@charset "utf-8";
+
+#admin_ad {
+    .scroll_frame {
+        overflow: scroll;
+
+        table#ad_list {
+            $border_style : 1px solid black;
+
+            margin: 0 auto;
+            padding: 0;
+            border-left: $border_style;
+            border-top: $border_style;
+
+            tr {
+                th, td {
+                    margin: 0;
+                    padding: 0 2px;
+                    border-right: $border_style;
+                    border-bottom: $border_style;
+                    text-align: center;
+                    word-break: break-all;
+                }
+
+                td.comment {
+                    text-align: left;
+                }
+
+                &.hide {
+                    th, td {
+                        background-color: gray;
+                    }
+                }
+            }
+        }
+    }
+}
+
+#admin_ad_edit {
+    .scroll_frame {
+        overflow: scroll;
+
+        table#ad_list {
+            $border_style : 1px solid black;
+
+            margin: 0 auto;
+            padding: 0;
+            border-left: $border_style;
+            border-top: $border_style;
+
+            tr {
+                th, td {
+                    margin: 0;
+                    padding: 0 2px;
+                    border-right: $border_style;
+                    border-bottom: $border_style;
+                    word-break: break-all;
+                }
+
+                td {
+                    min-width: 300px;
+                    padding: 5px;
+
+                    input[type=text] {
+                        padding: 5px;
+                        width: 80%;
+                        min-width: 300px;
+                    }
+
+                    textarea {
+                        width: 400px;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -22,7 +22,7 @@ new function () {
         // すでに終了しているフィールドでは一切の行動が処理されない
         already_finished    : false,
 
-        // 決着したフィールドではcommand優先度の行動が処理されない
+        // 決着したフィールドでは優先度:commandの行動が処理されない
         now_finished        : false,
 
         cards               : {},

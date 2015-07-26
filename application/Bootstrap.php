@@ -5,6 +5,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     protected function _initDB()
     {
         $conf = Zend_Registry::get('config');
+
         $db = Zend_Db::factory( 'PDO_PGSQL', array(
                     'host'      => $conf->database->host,
                     'username'  => $conf->database->username,
@@ -56,7 +57,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         // 返信の無いゲームフィールド一覧
         $route = new Zend_Controller_Router_Route_Regex(
-            'game/(last|my-turn)(/(\d+))?',
+            'game/(last|lobby|my-turn)(/(\d+))?',
             array(
                 'controller'    =>  'game',
                 'action'        =>  'last',

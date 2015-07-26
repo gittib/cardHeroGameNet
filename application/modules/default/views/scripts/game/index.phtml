@@ -59,8 +59,12 @@ $fnPaging = function ($sUrlBase, $bDispBeforePage, $bDispLastPage) use ($self) {
 // ページングリンク生成処理
 if (isset($this->bMine) && $this->bMine) {
     $sPageLinkTag = $fnPaging('/game/my-turn/', false, false);
+} else if (isset($this->bStandby) && $this->bStandby) {
+    $sPageLinkTag = $fnPaging('/game/lobby/', false, false);
 } else if (isset($this->bLast) && $this->bLast) {
     $sPageLinkTag = $fnPaging('/game/last/', false, false);
+} else if (isset($this->bMovie) && $this->bMovie) {
+    $sPageLinkTag = $fnPaging('/game/movie/', false, false);
 } else {
     $sPageLinkTag = $fnPaging('/game/', false, false);
 }
@@ -80,6 +84,7 @@ $sSelectOldFieldDispray = <<<_eos_
 
 _eos_;
 if (isset($this->bMine) && $this->bMine) {
+    // 自分宛てフィールド一覧
     $aUserInfo = Common::checkLogin();
     if (!$aUserInfo) {
         $sUserName = '????????';
@@ -90,51 +95,53 @@ if (isset($this->bMine) && $this->bMine) {
     $sH1Text = 'あなたへの返信一覧';
     $sDescription = $sUserName . 'さんの投稿に対して返信されたフィールドの一覧です。<br />さらにフィールドを返信して、対戦の続きをお楽しみ下さい。';
     $sLastLink = "<a class='zabuton_blue' href='/game/'>全フィールド一覧はこちら</a>";
+} else if (isset($this->bLobby) && $this->bLobby) {
+    // 開始前フィールド一覧
+    $sBackgroundStyle = '<style>#game_field_list_wrapper { background-color:#ffddff !important; }</style>';
+    $sH1Text = '開始前フィールド一覧';
+    $sLastLink = "<a class='zabuton_red' href='/game/new/'>新規ゲームを立てる場合はこちら</a>";
+    $sLastLink .= "<a class='zabuton_blue' href='/game/'>全フィールド一覧はこちら</a>";
+    $sDescription = '現在、対戦相手受付中のフィールド一覧です。<br />こちらから返信する事でゲームを開始できます。';
+    $sSelectOldFieldDispray = '';
 } else if (isset($this->bLast) && $this->bLast) {
+    // 未返信フィールド一覧
     $sBackgroundStyle = '<style>#game_field_list_wrapper { background-color:#ffeeee !important; }</style>';
     $sH1Text = '未返信フィールド一覧';
     $sLastLink = "<a class='zabuton_blue' href='/game/'>全フィールド一覧はこちら</a>";
     $sSelectOldFieldDispray = '';
+} else if (isset($this->bMovie) && $this->bMovie) {
+    // リプレイ
+    $sBackgroundStyle = '<style>#game_field_list_wrapper { background-color:#ffffee !important; }</style>';
+    $sH1Text = 'リプレイ鑑賞';
+    $sLastLink = "<a class='zabuton_blue' href='/game/'>通常のフィールド一覧はこちら</a>";
+    $sSelectOldFieldDispray = '決着のついた対戦を、ゲーム開始時から動画風に再現する事ができます。';
 } else {
+    // 通常の一覧
     $sH1Text = 'フィールド一覧';
     $sDescription = '投稿されたフィールドの一覧です。';
     if (isset($this->bNewFieldCommited) && $this->bNewFieldCommited) {
         $sDescription = '新規ゲームの投稿が完了しました。';
     }
     $sLastLink = "<a class='zabuton_red' href='/game/last/'>未返信フィールドの一覧へ</a>";
+    $sLastLink .= "<a class='zabuton_pink' href='/game/lobby/'>開始前フィールドの一覧へ</a>";
     $sLastLink .= "<a class='zabuton_green' href='/game/my-turn/'>あなたへの返信一覧へ</a>";
 }
-?>
 
-<div id="game_field_list_wrapper">
-<?php
-echo $sBackgroundStyle;
-if (empty($this->aCardInfoArray)) {
-    echo '<div class="no-fields">まだフィールドが投稿されていません。</div>' . "\n";
-} else {
-    echo "<h1>{$sH1Text}</h1>";
-    echo "<div class='page_description'>";
-    echo $sDescription;
-    echo "</div>";
-    echo "<div class='game_list_link'>";
-    echo $sLastLink;
-    echo "</div>";
-    echo $sSelectOldFieldDispray;
-    echo $sPageLinkTag;
-    foreach ($this->aCardInfoArray as $aCardInfo) {
-        $this->aCardInfoInField = $aCardInfo;
-        $aFieldInfo = $aCardInfo['field_info'];
-        $sLinkTitle = "{$aFieldInfo['title_str']} [{$aFieldInfo['upd_date']}]";
-        $sHref = "/game/receive/{$aFieldInfo['game_field_id']}/";
-        if (isset($aFieldInfo['started_flg']) && $aFieldInfo['started_flg']) {
-            $sHref = "/game/field/{$aFieldInfo['game_field_id']}/";
-        }
-        if (isset($this->bMine) && $this->bMine) {
-            $sHref .= '?referer=mytrun';
-        } else if ($this->bLast) {
-            $sHref .= '?referer=last';
-        }
-        echo <<<_eos_
+$sFields = '';
+foreach ($this->aCardInfoArray as $aCardInfo) {
+    $this->aCardInfoInField = $aCardInfo;
+    $aFieldInfo = $aCardInfo['field_info'];
+    $sLinkTitle = "{$aFieldInfo['title_str']} [{$aFieldInfo['upd_date']}]";
+    $sHref = "/game/receive/{$aFieldInfo['game_field_id']}/";
+    if (isset($aFieldInfo['started_flg']) && $aFieldInfo['started_flg']) {
+        $sHref = "/game/field/{$aFieldInfo['game_field_id']}/";
+    }
+    if (isset($this->bMine) && $this->bMine) {
+        $sHref .= '?referer=mytrun';
+    } else if ($this->bLast) {
+        $sHref .= '?referer=last';
+    }
+    $sFields .= <<<_eos_
 <div class="game_field_info">
     <div class="field_title">
         <a href="{$sHref}">{$sLinkTitle}</a>
@@ -143,10 +150,28 @@ if (empty($this->aCardInfoArray)) {
 </div>
 
 _eos_;
-    }
+}
+?>
+
+<div id="game_field_list_wrapper">
+<?php
+echo $sBackgroundStyle;
+echo "<h1>{$sH1Text}</h1>";
+echo "<div class='page_description'>";
+echo $sDescription;
+echo "</div>";
+echo "<div class='game_list_link clearfix'>";
+echo $sLastLink;
+echo "</div>";
+if (empty($this->aCardInfoArray)) {
+    echo '<div class="no-fields">まだフィールドが投稿されていません。</div>' . "\n";
+} else {
+    echo $sSelectOldFieldDispray;
+    echo $sPageLinkTag;
+    echo $sFields;
     echo $sPageLinkTag;
     echo $sSelectOldFieldDispray;
-    echo "<div class='game_list_link'>";
+    echo "<div class='game_list_link clearfix'>";
     echo $sLastLink;
     echo "</div>";
 }

@@ -1339,7 +1339,7 @@ function createGameFieldReactions() {
             if (aArgs.priority == 'command') {
                 // 優先度commandの場合はペナルティorレベルアップ権利を与える
                 if (act.owner == target.owner) {
-                    if (act.game_card_id != target.game_card_id) {
+                    if (0 < aArgs.damage && act.game_card_id != target.game_card_id) {
                         g_field_data.queues.push({
                             actor_id            : act.game_card_id,
                             log_message         : '味方を倒したのでペナルティ',

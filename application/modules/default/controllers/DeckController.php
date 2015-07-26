@@ -51,9 +51,26 @@ class DeckController extends Zend_Controller_Action
         $this->view->assign('aUserInfo', Common::checkLogin());
     }
 
+    public function listAction()
+    {
+        $this->_redirect('/deck/', array(
+            'code'  => 301,
+            'exit'  => true,
+        ));
+    }
+
     public function mineAction()
     {
         $request = $this->getRequest();
+        $aUserInfo = Common::checkLogin();
+        if (empty($aUserInfo)) {
+            Common::setLoginLP();
+            $this->_redirect('/user/login-input/', array(
+                'code'  => 303,
+                'exit'  => true,
+            ));
+        }
+
         $sExp = 'あなたが投稿したデッキ一覧です。';
 
         $this->_layout->noindex = true;

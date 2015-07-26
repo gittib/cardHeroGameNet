@@ -6,10 +6,9 @@ class GameController extends Zend_Controller_Action
     private $_config;
     private $_layout;
     private $_javascript;
-    private $_updDate;
+    private $_jsUpdDate;
 
-    public function init()
-    {
+    public function init() {
         /* Initialize action controller here */
 
         $this->_layout = Zend_Registry::get('layout');
@@ -18,35 +17,26 @@ class GameController extends Zend_Controller_Action
 
         $this->_config = Zend_Registry::get('config');
 
-        $this->_updDate = array(
+        $this->_jsUpdDate = array(
             'game_list'     => '20150614',
             'deck_list'     => '20150215',
-            'game_field'    => '20150614',
+            'game_field'    => '20150715',
         );
     }
 
-    public function preDispatch()
-    {
-        if ($this->getRequest()->getActionName() == 'index') {
-            Common::setLoginLP(array(
-                'reset' => true,
-            ));
-        } else {
-            Common::setLoginLP();
-        }
+    public function preDispatch() {
+        Common::setLoginLP();
     }
 
-    public function postDispatch()
-    {
+    public function postDispatch() {
         $this->_layout->javascript = $this->_javascript;
     }
 
-    public function indexAction()
-    {
+    public function indexAction() {
         $this->_getModel();
 
         $request = $this->getRequest();
-        $this->_javascript[] = '/js/game_list.js?ver=' . $this->_updDate['game_list'];
+        $this->_javascript[] = '/js/game_list.js?ver=' . $this->_jsUpdDate['game_list'];
         $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_javascript[] = '/js/scroll_to_top.js';
         $this->_layout->title       = 'ゲームフィールド一覧';
@@ -54,18 +44,31 @@ class GameController extends Zend_Controller_Action
         $nPage = $request->getParam('page_no', 1);
         $bLast = $request->getParam('bLast', false);
         $bMine = $request->getParam('bMine', false);
+        $bLobby = $request->getParam('bLobby', false);
+        $bMovie = $request->getParam('bMovie', false);
         $iOpponentId = $request->getParam('myId', 0);
         $aParamsToSelectField = array(
-            'page_no'           => $nPage,
-            'open_flg'          => 1,
-            'new_arrival'       => $bLast,
-            'allow_no_field'    => 1,
-            'opponent_id'       => $iOpponentId,
+            'page_no'               => $nPage,
+            'open_flg'              => 1,
+            'allow_no_field'        => 1,
+            'new_arrival'           => $bLast,
+            'select_standby_field'  => $bLobby,
+            'select_finished'       => $bMovie,
+            'opponent_id'           => $iOpponentId,
         );
+        if ($bMovie) {
+            $aParamsToSelectField['min_start_date'] = '2015-06-15';
+        }
         $aCardInfoArray = $this->_model->getFieldDetail($aParamsToSelectField);
         $nFields = $this->_model->getFieldCount($aParamsToSelectField);
 
-        if ($bMine) {
+        if ($bLobby) {
+            $this->_layout->title = '開始前フィールド一覧';
+            $this->_layout->description = 'ゲーム開始前のフィールド一覧です。あなたの返信を待っています！';
+        } else if ($bMovie) {
+            $this->_layout->title = 'プレイムービー鑑賞';
+            $this->_layout->description = 'ゲーム';
+        } else if ($bMine) {
             $this->_layout->title = 'あなたへの返信一覧';
             $this->_layout->description = '対戦相手が投稿した、あなた宛てのフィールド一覧です。あなたの返信を待っています！';
         } else if ($bLast) {
@@ -85,6 +88,8 @@ class GameController extends Zend_Controller_Action
         $this->view->assign('nPage', $nPage);
         $this->view->assign('bLast', $bLast);
         $this->view->assign('bMine', $bMine);
+        $this->view->assign('bLobby', $bLobby);
+        $this->view->assign('bMovie', $bMovie);
         $this->view->assign('iOpponentId', $iOpponentId);
         $this->view->assign('bNewFieldCommited', $bNewFieldCommited);
 
@@ -94,23 +99,30 @@ class GameController extends Zend_Controller_Action
         }
     }
 
-    public function lastAction()
-    {
+    public function listAction() {
+        $this->_redirect('/game/', array(
+            'code'  => 301,
+            'exit'  => true,
+        ));
+    }
+
+    public function lastAction() {
         $this->getRequest()->setParam('bLast', true);
         $this->forward('index');
     }
 
-    public function myTurnAction()
-    {
+    public function lobbyAction() {
+        $this->getRequest()->setParam('bLobby', true);
+        $this->forward('index');
+    }
+
+    public function myTurnAction() {
         $aUserInfo = Common::checkLogin();
         if (!$aUserInfo) {
-            $this->_redirect(
-                '/user/login-input/',
-                array(
-                    'exit' => true,
-                    'code' => 301
-                )
-            );
+            $this->_redirect('/user/login-input/', array(
+                'exit' => true,
+                'code' => 303
+            ));
         }
         $this->getRequest()->setParam('myId', $aUserInfo['user_id']);
         $this->getRequest()->setParam('bMine', true);
@@ -118,8 +130,7 @@ class GameController extends Zend_Controller_Action
         $this->forward('index');
     }
 
-    public function kifuAction()
-    {
+    public function kifuAction() {
         $this->_getModel();
 
         $request = $this->getRequest();
@@ -140,8 +151,7 @@ class GameController extends Zend_Controller_Action
         $this->view->assign('bFinished', $bFinished);
     }
 
-    public function newAction()
-    {
+    public function newAction() {
         // ゲームを始めるため、初期デッキ選択
         $request = $this->getRequest();
 
@@ -150,7 +160,7 @@ class GameController extends Zend_Controller_Action
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/deck_list.min.js';
         } else {
-            $this->_javascript[] = '/js/deck_list.min.js?ver=' . $this->_updDate['deck_list'];
+            $this->_javascript[] = '/js/deck_list.min.js?ver=' . $this->_jsUpdDate['deck_list'];
         }
         $this->_javascript[] = '/js/game_list.js';
         $this->_javascript[] = '/js/img_delay_load.min.js';
@@ -160,6 +170,14 @@ class GameController extends Zend_Controller_Action
         $sExp = '新しくゲームを開始します。<br />使用するデッキを選んでください。';
         $bMine = false;
         if ($request->getParam('deck', '') == 'mine') {
+            $aUserInfo = Common::checkLogin();
+            if (empty($aUserInfo)) {
+                Common::setLoginLP();
+                $this->_redirect('/user\login-input/', array(
+                    'code'  => 307,
+                    'exit'  => true,
+                ));
+            }
             $bMine = true;
             $sExp = 'あなたが投稿したデッキを使って、新しくゲームを開始します。<br />使用するデッキを選んでください。';
         }
@@ -176,8 +194,7 @@ class GameController extends Zend_Controller_Action
         $this->render('deck/index', null, true);
     }
 
-    public function standbyAction()
-    {
+    public function standbyAction() {
         $request = $this->getRequest();
         $deckId = $request->getParam('deck_id');
         if (!isset($deckId) || $deckId == '') {
@@ -192,17 +209,13 @@ class GameController extends Zend_Controller_Action
         $oSession = Zend_Registry::get('session');
         $oSession->bNewFieldCommited = true;
 
-        $this->_redirect(
-            '/game/',
-            array(
-                'exit' => true,
-                'code' => 301
-            )
-        );
+        $this->_redirect('/game/', array(
+            'exit' => true,
+            'code' => 303
+        ));
     }
 
-    public function receiveAction()
-    {
+    public function receiveAction() {
         $this->_getModel();
         require_once APPLICATION_PATH . '/modules/default/models/deck.php';
         $modelDeck = new model_Deck();
@@ -222,7 +235,7 @@ class GameController extends Zend_Controller_Action
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/deck_list.js';
         } else {
-            $this->_javascript[] = '/js/deck_list.min.js?ver=' . $this->_updDate['deck_list'];
+            $this->_javascript[] = '/js/deck_list.min.js?ver=' . $this->_jsUpdDate['deck_list'];
         }
         $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_layout->title = 'ゲーム開始';
@@ -231,6 +244,14 @@ class GameController extends Zend_Controller_Action
         $sExp = '使用するデッキを選んでください。';
         $bMine = false;
         if ($request->getParam('deck', '') == 'mine') {
+            $aUserInfo = Common::checkLogin();
+            if (empty($aUserInfo)) {
+                Common::setLoginLP();
+                $this->_redirect('/user\login-input/', array(
+                    'code'  => 307,
+                    'exit'  => true,
+                ));
+            }
             $bMine = true;
             $sExp = 'あなたが投稿したデッキを使って、対戦を受けます。<br />使用するデッキを選んでください。';
         }
@@ -255,8 +276,7 @@ class GameController extends Zend_Controller_Action
         $this->render('deck/index', null, true);
     }
 
-    public function startAction()
-    {
+    public function startAction() {
         $request = $this->getRequest();
         $deckId = $request->getParam('deck_id');
         if (!isset($deckId) || $deckId == '') {
@@ -286,17 +306,17 @@ class GameController extends Zend_Controller_Action
         $this->forward('field');
     }
 
-    public function fieldAction()
-    {
+    public function fieldAction() {
         $this->_getModel();
 
         $request = $this->getRequest();
-        $iGameFieldId = $request->getParam('game_field_id');
-        $sReferer = $request->getParam('referer');
+        $iGameFieldId   = $request->getParam('game_field_id');
+        $sReferer       = $request->getParam('referer', '');
+        $bReplayFlg     = $request->getParam('replay_flg', false);
 
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/js_debug.js';
-            /*
+            //*
             $this->_javascript[] = '/js/game_field.min.js';
             /*/
             $this->_javascript[] = '/js/rand_gen.js';
@@ -307,12 +327,27 @@ class GameController extends Zend_Controller_Action
             $this->_javascript[] = '/js/game_field.js';
             //*/
         } else {
-            $this->_javascript[] = '/js/game_field.min.js?ver=' . $this->_updDate['game_field'];
+            $this->_javascript[] = '/js/game_field.min.js?ver=' . $this->_jsUpdDate['game_field'];
+        }
+
+        $bReceived = $this->_model->isGameReceived(array(
+            'game_field_id' => $iGameFieldId,
+        ));
+        if (!$bReceived) {
+            // まだ開始してないフィールドなのでリダイレクトをかける
+            $sUrl = "/game/receive/{$iGameFieldId}/";
+            if ($sReferer) {
+                $sUrl .= '?referer=' . $sReferer;
+            }
+            $this->_redirect($sUrl, array(
+                'code'  => 307,
+                'exit'  => true,
+            ));
         }
 
         $iBeforeFieldId = $this->_model->getBeforeFieldId(array(
             'game_field_id' => $iGameFieldId,
-            'prime'         => $request->getParam('replay_flg', false),
+            'prime'         => $bReplayFlg,
         ));
         $aSelectCond = array(
             'game_field_id' => $iBeforeFieldId,
@@ -322,9 +357,9 @@ class GameController extends Zend_Controller_Action
         $aQueue = array('');
         if ($iBeforeFieldId != $iGameFieldId) {
             $aQueue = $this->_model->getQueueInfo($iGameFieldId, array(
-                'swap_pos_id'       => true,
-                'all_fields'        => $request->getParam('replay_flg', false),
+                'all_fields'        => $bReplayFlg,
                 'base_field_turn'   => $aCardInfo['field_info']['turn'],
+                'prime_field_id'    => $iBeforeFieldId,
             ));
             //$this->_model->getQueueText($iGameFieldId);
         }
@@ -332,20 +367,26 @@ class GameController extends Zend_Controller_Action
         $this->view->assign('aCardInfo', $aCardInfo);
         $this->view->assign('aUserInfo', Common::checkLogin());
         $this->view->assign('iGameFieldId', $iGameFieldId);
-        $this->view->assign('bReplayFlg', $request->getParam('replay_flg', false));
+        $this->view->assign('bReplayFlg', $bReplayFlg);
         $this->view->assign('bBefore', ($iGameFieldId != $iBeforeFieldId));
         $this->view->assign('sReferer', $sReferer);
         $this->view->assign('aQueue', $aQueue);
     }
 
-    public function replayAction()
-    {
-        $this->getRequest()->setParam('replay_flg', true);
+    public function replayAction() {
+        $request = $this->getRequest();
+        $this->_getModel()->isFinished($request->getParam('game_field_id', 0));
+        $request->setParam('replay_flg', true);
         $this->forward('field');
     }
 
-    public function turnEndAction()
-    {
+    public function movieAction() {
+        $request = $this->getRequest();
+        $request->setParam('bMovie', true);
+        $this->forward('index');
+    }
+
+    public function turnEndAction() {
         $this->_getModel();
 
         $request = $this->getRequest();
@@ -361,6 +402,10 @@ class GameController extends Zend_Controller_Action
             'field_data'    => $aFieldData,
         ));
 
+        $this->_turnEndRedirect($sReferer);
+    }
+
+    private function _turnEndRedirect($sReferer) {
         switch ($sReferer) {
             case 'last':
                 $sUrl = '/game/last/';
@@ -373,18 +418,16 @@ class GameController extends Zend_Controller_Action
                 break;
         }
 
-        $this->_redirect(
-            $sUrl,
-            array(
-                'exit' => true,
-                'code' => 301
-            )
-        );
+        $this->_redirect($sUrl, array(
+            'exit' => true,
+            'code' => 303
+        ));
     }
 
     private function _getModel() {
         require_once APPLICATION_PATH . '/modules/default/models/game.php';
         $this->_model = new model_Game();
+        return $this->_model;
     }
 }
 

@@ -2,6 +2,8 @@
 
 #game_field_list_wrapper {
 
+    $game_field_max_width : 640px;
+
     background-color: #eeeeff;
     padding-bottom: 12px;
 
@@ -27,13 +29,16 @@
 
     div.game_list_link {
         margin: 8px auto;
+        padding: 0;
         text-align: center;
-        width: 180px;
+        width: 95%;
+        max-width: $game_field_max_width;
 
         a {
             display: block;
             margin: 6px 8px;
             padding: 2px;
+            float: left;
             text-decoration: none;
             text-shadow: $myTextShadow;
 
@@ -44,7 +49,10 @@
     }
 
     .old_field_disp_select_frame {
-        margin: 15px;
+        margin: 0 auto;
+        padding: 15px 5px;
+        width: 95%;
+        max-width: $game_field_max_width;
     }
 
     .page_link {
@@ -55,15 +63,17 @@
         padding-top: $vert_padding;
         padding-bottom: $vert_padding;
         padding-right: 5px;
-        overflow: visible;
-        height: 30px;
-        margin-top: 20px;
+        min-height: 30px;
+        margin: 20px auto 0;
+        width: 95%;
+        max-width: $game_field_max_width;
 
         span {
             margin: 0 3px;
             border: solid 2px;
             padding:3px 5px;
             background-color: white;
+            line-height: 32px;
 
             &.next_page_link {
                 border-color: white;
@@ -73,7 +83,7 @@
 
     .game_field_info {
         width: 100%;
-        max-width: 640px;
+        max-width: $game_field_max_width;
         margin-left: auto;
         margin-right: auto;
 

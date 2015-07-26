@@ -249,6 +249,22 @@ _eos_;
             );
         }
     }
+
+    $layout = Zend_Registry::get('layout');
+    if (!isset($layout->javascriptCode)) {
+        $layout->javascriptCode = '';
+    }
+    $sCardsInfoJson = json_encode($aCards);
+    $sQueueInfoJson = json_encode($this->aQueue);
+    $layout->javascriptCode .= <<<_eos_
+function getCardsJson() {
+    return JSON.parse('{$sCardsInfoJson}');
+}
+function getQueueJson() {
+    return JSON.parse('{$sQueueInfoJson}');
+}
+
+_eos_;
 ?>
     <div id="game_infomation_frame">
         <div class="label">
@@ -347,14 +363,6 @@ _eos_;
 _eos_;
 ?>
     </div>
-    <script type="text/javascript">
-    function getCardsJson() {
-        return JSON.parse('<?php echo json_encode($aCards); ?>');
-    }
-    function getQueueJson() {
-        return JSON.parse('<?php echo json_encode($this->aQueue); ?>');
-    }
-    </script>
     <form name="form_current_field" method="post" action="/game/turn-end/">
         <input type="hidden" name="game_field_id" value="<?php echo $this->iGameFieldId; ?>" />
         <input type="hidden" name="referer" value="<?php echo $this->sReferer; ?>" />

@@ -1016,6 +1016,8 @@ function createGameFieldReactions() {
                 var bDisp = false;
                 if ($('#test_env').size()) {
                     bDisp = true;
+                } else if (g_field_data.replay_flg) {
+                    bDisp = true;
                 }
 
                 if (bDisp) {
@@ -1993,7 +1995,7 @@ function createGameFieldReactions() {
             if (aArgs.priority == 'command') {
                 // 優先度commandの場合はペナルティorレベルアップ権利を与える
                 if (act.owner == target.owner) {
-                    if (act.game_card_id != target.game_card_id) {
+                    if (0 < aArgs.damage && act.game_card_id != target.game_card_id) {
                         g_field_data.queues.push({
                             actor_id            : act.game_card_id,
                             log_message         : '味方を倒したのでペナルティ',
@@ -5042,7 +5044,7 @@ new function () {
         // すでに終了しているフィールドでは一切の行動が処理されない
         already_finished    : false,
 
-        // 決着したフィールドではcommand優先度の行動が処理されない
+        // 決着したフィールドでは優先度:commandの行動が処理されない
         now_finished        : false,
 
         cards               : {},
@@ -5445,10 +5447,12 @@ new function () {
         var iGameFieldScrollPos = $('#game_infomation_frame').offset().top;
         $('html,body').animate({ scrollTop: iGameFieldScrollPos }, 200, 'swing');
 
+        g_field_data.no_arrange     = Number($('div[no_arrange]').attr('no_arrange'));
         g_field_data.game_field_id  = Number($('input[name=game_field_id]').val());
         g_field_data.turn           = Number($('div[turn_num]').attr('turn_num'));
         g_field_data.my_stone       = Number($('#myPlayersInfo div.stone span').text());
         g_field_data.enemy_stone    = Number($('#enemyPlayersInfo div.stone span').text());
+        g_field_data.replay_flg     = Number($('div[replay_flg]').attr('resolved_flg'));
 
         rand_gen.srand(g_field_data.game_field_id, 100);
 
@@ -5522,7 +5526,6 @@ new function () {
             console.log(e);
         }
 
-        g_field_data.no_arrange = Number($('div[no_arrange]').attr('no_arrange'));
         arts_queue.setNoArrangeFlg(g_field_data.no_arrange);
         magic_queue.setNoArrangeFlg(g_field_data.no_arrange);
 
@@ -6587,6 +6590,10 @@ new function () {
                                     var targetMon = g_field_data.cards[q.target_id];
                                     targetMon = _checkScapeGoat(targetMon);
 
+                                    if (targetMon.hp <= 0) {
+                                        throw new Error('target already dead');
+                                    }
+
                                     var pow = Number(aMonsterData.attack.power);
                                     if (actorMon.status[131]) {
                                         // マッドホールによるパワーアップ
@@ -6716,6 +6723,9 @@ new function () {
                                     if (targetMon.next_game_card_id) {
                                         throw new Error('next_game_card_id is not null');
                                     }
+                                    if (targetMon.hp <= 0) {
+                                        throw new Error('target already dead');
+                                    }
 
                                     switch (q.param2) {
                                         case 'drill_break':
@@ -6763,6 +6773,9 @@ new function () {
 
                                     if (targetMon.next_game_card_id) {
                                         throw new Error('next_game_card_id is not null');
+                                    }
+                                    if (targetMon.hp <= 0) {
+                                        throw new Error('target already dead');
                                     }
 
                                     var dam = q.param1;

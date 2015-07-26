@@ -1,300 +1,41 @@
 <?php
     $conf = Zend_Registry::get('config');
     if (!isset($this->no_ad)) {
-        $aAdPc = array();
-        $aAdSmt = array();
-
-        $aFurunabi = array();
-        // ふるなび三重県明和町
-        $aFurunabi[] = <<<_eos_
-                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=16173&psid=10158" target="_blank" >
-                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=16173" border="0" width="468" height="60" alt="" ></a>
-                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=16173&psid=10158" alt="" border="0" width="1" height="1" >
-
-_eos_;
-        // ふるなび山梨県甲州市
-        $aFurunabi[] = <<<_eos_
-                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=17532&psid=10158" target="_blank" >
-                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=17532" border="0" width="468" height="60" alt="" ></a>
-                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=17532&psid=10158" alt="" border="0" width="1" height="1" >
-
-_eos_;
-        // ふるなび愛知県碧南市
-        $aFurunabi[] = <<<_eos_
-                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=17293&psid=10158" target="_blank" >
-                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=17293" border="0" width="468" height="60" alt="" ></a>
-                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=17293&psid=10158" alt="" border="0" width="1" height="1" >
-
-_eos_;
-
-        $idx = rand() % count($aFurunabi);
-        $aAdPc[] = $aFurunabi[$idx];
-
-        $aDMM = array();
-        // DMM アイギス
-        $aDMM[] = <<<_eos_
-                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=15732&psid=10158" target="_blank" >
-                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=15732" border="0" width="468" height="60" alt="" ></a>
-                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=15732&psid=10158" alt="" border="0" width="1" height="1" >
-
-_eos_;
-        // DMM ラストサマナー
-        $aDMM[] = <<<_eos_
-                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=15737&psid=10158" target="_blank" >
-                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=15737" border="0" width="468" height="60" alt="" ></a>
-                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=15737&psid=10158" alt="" border="0" width="1" height="1" >
-
-_eos_;
-        // DMM 九十九姫
-        $aDMM[] = <<<_eos_
-                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=17695&psid=10158" target="_blank" >
-                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=17695" border="0" width="468" height="60" alt="" ></a>
-                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=17695&psid=10158" alt="" border="0" width="1" height="1" >
-
-_eos_;
-        // DMM 天頂
-        $aDMM[] = <<<_eos_
-                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=17713&psid=10158" target="_blank" >
-                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=17713" border="0" width="468" height="60" alt="" ></a>
-                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=17713&psid=10158" alt="" border="0" width="1" height="1" >
-
-_eos_;
-        // DMM FLOWER KNITE GIRL
-        $aDMM[] = <<<_eos_
-                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=17691&psid=10158" target="_blank" >
-                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=17691" border="0" width="468" height="60" alt="" ></a>
-                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=17691&psid=10158" alt="" border="0" width="1" height="1" >
-
-_eos_;
-        $idx = rand() % count($aDMM);
-        $aAdPc[] = $aDMM[$idx];
-
-
-        $aOnamae = array();
-
-        // お名前　普通の
-        $aOnamae[] = <<<_eos_
-                    <a href="http://px.a8.net/svt/ejp?a8mat=2HO0NX+CTEYLU+50+2HN0U9" target="_blank">
-                    <img border="0" width="468" height="60" alt="" src="http://www26.a8.net/svt/bgt?aid=150606429775&wid=001&eno=01&mid=s00000000018015056000&mc=1"></a>
-                    <img border="0" width="1" height="1" src="http://www14.a8.net/0.gif?a8mat=2HO0NX+CTEYLU+50+2HN0U9" alt="">
-
-_eos_;
-
-        if (date('YmdH') < '2015080719') {
-
-            // ラブライブキャンペーンは８月７日１９時まで
-
-            // お名前　ラブライブ小泉花陽
-            $aOnamae[] = <<<_eos_
-                    <a href="http://px.a8.net/svt/ejp?a8mat=2HO0NX+CTEYLU+50+2HZVSX" target="_blank">
-                    <img border="0" width="468" height="60" alt="" src="http://www22.a8.net/svt/bgt?aid=150606429775&wid=001&eno=01&mid=s00000000018015116000&mc=1"></a>
-                    <img border="0" width="1" height="1" src="http://www16.a8.net/0.gif?a8mat=2HO0NX+CTEYLU+50+2HZVSX" alt="">
-
-_eos_;
-            // お名前　ラブライブ園田海未
-            $aOnamae[] = <<<_eos_
-                    <a href="http://px.a8.net/svt/ejp?a8mat=2HO0NX+CTEYLU+50+2I1DTD" target="_blank">
-                    <img border="0" width="468" height="60" alt="" src="http://www21.a8.net/svt/bgt?aid=150606429775&wid=001&eno=01&mid=s00000000018015123000&mc=1"></a>
-                    <img border="0" width="1" height="1" src="http://www12.a8.net/0.gif?a8mat=2HO0NX+CTEYLU+50+2I1DTD" alt="">
-
-_eos_;
-            // お名前　ラブライブ西木野真姫
-            $aOnamae[] = <<<_eos_
-                    <a href="http://px.a8.net/svt/ejp?a8mat=2HO0NX+CTEYLU+50+2I0IY9" target="_blank">
-                    <img border="0" width="468" height="60" alt="" src="http://www20.a8.net/svt/bgt?aid=150606429775&wid=001&eno=01&mid=s00000000018015119000&mc=1"></a>
-                    <img border="0" width="1" height="1" src="http://www17.a8.net/0.gif?a8mat=2HO0NX+CTEYLU+50+2I0IY9" alt="">
-
-_eos_;
-            // お名前　ラブライブ東條希
-            $aOnamae[] = <<<_eos_
-                    <a href="http://px.a8.net/svt/ejp?a8mat=2HO0NX+CTEYLU+50+2I0YDT" target="_blank">
-                    <img border="0" width="468" height="60" alt="" src="http://www20.a8.net/svt/bgt?aid=150606429775&wid=001&eno=01&mid=s00000000018015121000&mc=1"></a>
-                    <img border="0" width="1" height="1" src="http://www19.a8.net/0.gif?a8mat=2HO0NX+CTEYLU+50+2I0YDT" alt="">
-
-_eos_;
-            // お名前　ラブライブ矢澤にこ
-            $aOnamae[] = <<<_eos_
-                    <a href="http://px.a8.net/svt/ejp?a8mat=2HO0NX+CTEYLU+50+2I0QO1" target="_blank">
-                    <img border="0" width="468" height="60" alt="" src="http://www28.a8.net/svt/bgt?aid=150606429775&wid=001&eno=01&mid=s00000000018015120000&mc=1"></a>
-                    <img border="0" width="1" height="1" src="http://www11.a8.net/0.gif?a8mat=2HO0NX+CTEYLU+50+2I0QO1" alt="">
-
-_eos_;
-            // お名前　ラブライブ南ことり
-            $aOnamae[] = <<<_eos_
-                    <a href="http://px.a8.net/svt/ejp?a8mat=2HO0NX+CTEYLU+50+2I0B8H" target="_blank">
-                    <img border="0" width="468" height="60" alt="" src="http://www25.a8.net/svt/bgt?aid=150606429775&wid=001&eno=01&mid=s00000000018015118000&mc=1"></a>
-                    <img border="0" width="1" height="1" src="http://www17.a8.net/0.gif?a8mat=2HO0NX+CTEYLU+50+2I0B8H" alt="">
-
-_eos_;
-            // お名前　ラブライブ絢瀬絵里
-            $aOnamae[] = <<<_eos_
-                    <a href="http://px.a8.net/svt/ejp?a8mat=2HO0NX+CTEYLU+50+2HZO35" target="_blank">
-                    <img border="0" width="468" height="60" alt="" src="http://www25.a8.net/svt/bgt?aid=150606429775&wid=001&eno=01&mid=s00000000018015115000&mc=1"></a>
-                    <img border="0" width="1" height="1" src="http://www16.a8.net/0.gif?a8mat=2HO0NX+CTEYLU+50+2HZO35" alt="">
-
-_eos_;
-            // お名前　ラブライブ高坂穂乃果
-            $aOnamae[] = <<<_eos_
-                    <a href="http://px.a8.net/svt/ejp?a8mat=2HO0NX+CTEYLU+50+2I03IP" target="_blank">
-                    <img border="0" width="468" height="60" alt="" src="http://www23.a8.net/svt/bgt?aid=150606429775&wid=001&eno=01&mid=s00000000018015117000&mc=1"></a>
-                    <img border="0" width="1" height="1" src="http://www18.a8.net/0.gif?a8mat=2HO0NX+CTEYLU+50+2I03IP" alt="">
-
-_eos_;
-            // お名前　ラブライブ星空凛
-            $aOnamae[] = <<<_eos_
-                    <a href="http://px.a8.net/svt/ejp?a8mat=2HO0NX+CTEYLU+50+2I163L" target="_blank">
-                    <img border="0" width="468" height="60" alt="" src="http://www20.a8.net/svt/bgt?aid=150606429775&wid=001&eno=01&mid=s00000000018015122000&mc=1"></a>
-                    <img border="0" width="1" height="1" src="http://www16.a8.net/0.gif?a8mat=2HO0NX+CTEYLU+50+2I163L" alt="">
-
-_eos_;
-        }
-
-        $idx = rand() % count($aOnamae);
-        $aAdPc[] = $aOnamae[$idx];
-
-
-        $aUD = array();
-        // UD PREMIUM 東方Projectケース
-        $aUD[] = <<<_eos_
-                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=13007&psid=10158" target="_blank" >
-                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=13007" border="0" width="320" height="50" alt="" ></a>
-                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=13007&psid=10158" alt="" border="0" width="1" height="1" >
-
-_eos_;
-        // UD PREMIUM 魔法使いの夜xギルドデザイン
-        $aUD[] = <<<_eos_
-                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=13008&psid=10158" target="_blank" >
-                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=13008" border="0" width="320" height="50" alt="" ></a>
-                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=13008&psid=10158" alt="" border="0" width="1" height="1" >
-
-_eos_;
-        // UD PREMIUM リトバス
-        $aUD[] = <<<_eos_
-                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=13009&psid=10158" target="_blank" >
-                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=13009" border="0" width="320" height="50" alt="" ></a>
-                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=13009&psid=10158" alt="" border="0" width="1" height="1" >
-
-_eos_;
-        $idx = rand() % count($aUD);
-        $aAdPc[] = $aUD[$idx];
-        $aAdSmt[] = $aUD[$idx];
-
-        /*
-        // Mapion
-        $aAdSmt[] = <<<_eos_
-                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=5319&psid=10158" target="_blank" >
-                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=5319" border="0" width="320" height="50" alt="" ></a>
-                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=5319&psid=10158" alt="" border="0" width="1" height="1" >
-
-_eos_;
-        //*/
-
-        // ホビーストック
-        $sAd = <<<_eos_
-                    <a href="http://px.a8.net/svt/ejp?a8mat=2HO28N+AY4Z8Y+2ULW+5Z6WX" target="_blank">
-                    <img border="0" width="320" height="50" alt="" src="http://www20.a8.net/svt/bgt?aid=150608471662&wid=001&eno=01&mid=s00000013298001004000&mc=1"></a>
-                    <img border="0" width="1" height="1" src="http://www15.a8.net/0.gif?a8mat=2HO28N+AY4Z8Y+2ULW+5Z6WX" alt="">
-
-_eos_;
-        $aAdPc[] = $sAd;
-        $aAdSmt[] = $sAd;
-
-        // 山徳 トレトク
-        $sAd = <<<_eos_
-                    <a href="http://px.a8.net/svt/ejp?a8mat=2HO28N+AYQEUQ+2QOI+NV9N5" target="_blank">
-                    <img border="0" width="320" height="50" alt="" src="http://www22.a8.net/svt/bgt?aid=150608471663&wid=001&eno=01&mid=s00000012789004009000&mc=1"></a>
-                    <img border="0" width="1" height="1" src="http://www17.a8.net/0.gif?a8mat=2HO28N+AYQEUQ+2QOI+NV9N5" alt="">
-
-_eos_;
-        $aAdPc[] = $sAd;
-        $aAdSmt[] = $sAd;
-
-
-        // 駿河屋
-        $aSurugaya = array();
-        // 駿河屋CD
-        $aSurugaya[] = <<<_eos_
-                    <a href="http://px.a8.net/svt/ejp?a8mat=2HO28N+ATDIEQ+1XX8+6JC81" target="_blank">
-                    <img border="0" width="468" height="60" alt="" src="http://www27.a8.net/svt/bgt?aid=150608471654&wid=001&eno=01&mid=s00000009062001098000&mc=1"></a>
-                    <img border="0" width="1" height="1" src="http://www14.a8.net/0.gif?a8mat=2HO28N+ATDIEQ+1XX8+6JC81" alt="">
-
-_eos_;
-        // 駿河屋TCG
-        $aSurugaya[] = <<<_eos_
-                    <a href="http://px.a8.net/svt/ejp?a8mat=2HO28N+ATDIEQ+1XX8+6OHEP" target="_blank">
-                    <img border="0" width="468" height="60" alt="" src="http://www21.a8.net/svt/bgt?aid=150608471654&wid=001&eno=01&mid=s00000009062001122000&mc=1"></a>
-                    <img border="0" width="1" height="1" src="http://www15.a8.net/0.gif?a8mat=2HO28N+ATDIEQ+1XX8+6OHEP" alt="">
-
-_eos_;
-        $idx = rand() % count($aSurugaya);
-        $aAdPc[] = $aSurugaya[$idx];
-        $aAdSmt[] = $aSurugaya[$idx];
-
-
-        // アプリヒルズ
-        $aAdSmt[] = <<<_eos_
-                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=4539&psid=10158" target="_blank" >
-                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=4539" border="0" width="320" height="50" alt="" ></a>
-                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=4539&psid=10158" alt="" border="0" width="1" height="1" >
-
-_eos_;
-        // スマおん
-        $aAdSmt[] = <<<_eos_
-                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=607&psid=10158" target="_blank" >
-                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=607" border="0" width="320" height="50" alt="" ></a>
-                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=607&psid=10158" alt="" border="0" width="1" height="1" >
-
-_eos_;
-        // TSUTAYA
-        $sAd = <<<_eos_
-                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=16454&psid=10158" target="_blank" >
-                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=16454" border="0" width="320" height="50" alt="" ></a>
-                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=16454&psid=10158" alt="" border="0" width="1" height="1" >
-
-_eos_;
-        $aAdPc[] = $sAd;
-        $aAdSmt[] = $sAd;
-
-        // 人気コミック全巻セット販売
-        $sAd = <<<_eos_
-                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=5274&psid=10158" target="_blank" >
-                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=5274" border="0" width="468" height="60" alt="" ></a>
-                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=5274&psid=10158" alt="" border="0" width="1" height="1" >
-
-_eos_;
-        $aAdPc[] = $sAd;
-        $aAdSmt[] = $sAd;
-
-        // フィギュア買取ネット
-        $sAd = <<<_eos_
-                    <a href="http://px.a8.net/svt/ejp?a8mat=2HO28N+AVR8TU+2P0S+C2GFL" target="_blank">
-                    <img border="0" width="320" height="50" alt="" src="http://www26.a8.net/svt/bgt?aid=150608471658&wid=001&eno=01&mid=s00000012574002027000&mc=1"></a>
-                    <img border="0" width="1" height="1" src="http://www19.a8.net/0.gif?a8mat=2HO28N+AVR8TU+2P0S+C2GFL" alt="">
-
-_eos_;
-        $aAdPc[] = $sAd;
-        $aAdSmt[] = $sAd;
-
-        // DMM英会話
-        $sAd = <<<_eos_
-                    <a href="http://aff.i-mobile.co.jp/ad_link.ashx?pid=39638&advid=2955&psid=10158" target="_blank" >
-                    <img src="http://aff.i-mobile.co.jp/display_data.ashx?advid=2955" border="0" width="320" height="50" alt="" ></a>
-                    <img src="http://imp.aff.i-mobile.co.jp/empty.ashx?advid=2955&psid=10158" alt="" border="0" width="1" height="1" >
-
-_eos_;
-        $aAdPc[] = $sAd;
-        $aAdSmt[] = $sAd;
-
+        $db = Zend_Registry::get('db');
         if (Common::checkUA() == 'pc') {
-            $aAd = $aAdPc;
+            $sUA = 'pc';
         } else {
-            $aAd = $aAdSmt;
+            $sUA = 'smt';
         }
+        $sub = $db->select()
+            ->from(
+                't_ad',
+                array(
+                    'ad_id',
+                    'code',
+                    'ad_comment',
+                    'rank'  => new Zend_Db_Expr("dense_rank() over(partition by ad_group_id order by random())"),
+                )
+            )
+            ->where('del_flg != 1')
+            ->where('start_date <= now()')
+            ->where('end_date >= now()')
+            ->where('ad_type like ?', '%' . $sUA . '%')
+            ->order(array(
+                'random()',
+            ));
+        $sel = $db->select()
+            ->from(
+                array('sub' => $sub)
+            )
+            ->where('sub.rank = ?', 1)
+            ->limit(5);
 
-        shuffle($aAd);
+        $rslt = $db->fetchAll($sel);
+
         $sAd = '';
-        for ($i = 0 ; $i < 4 ; $i++) {
-            $sAd .= '<div>' . $aAd[$i] . '</div>';
+        foreach ($rslt as $val) {
+            $sAd .= '<div>' . $val['code'] . '</div>';
         }
 
 

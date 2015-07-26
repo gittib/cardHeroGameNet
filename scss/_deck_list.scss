@@ -35,6 +35,7 @@ $img_size : 46px;
             margin: 0 auto;
             border: solid 3px;
             background-color: #fff;
+            box-sizing: border-box;
 
             &.secret {
                 background-color: #cccccc;

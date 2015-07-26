@@ -88,13 +88,15 @@ class Support_MailController extends Zend_Controller_Action
             $this->_redirect('/support/mail/input/', array('exit' => true));
         }
 
-        $ret = $this->_model->sendRequest(array(
+        $aSubmitParam = array(
             'request_type'  => $this->_aRequestType[(int)$request->getPost('request_type', 0)],
             'domain_id'     => (int)$request->getPost('domain_id', 1),
             'sender_mail'   => $request->getPost('mail', ''),
             'user_name'     => $request->getPost('user_name', ''),
             'message'       => $request->getPost('message', ''),
-        ));
+        );
+        $ret = $this->_model->insertRequest($aSubmitParam);
+        $ret = $this->_model->sendRequest($aSubmitParam);
 
         if ($ret) {
             unset($oSession->aMailInput);

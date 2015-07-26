@@ -1,10 +1,11 @@
 @charset "utf-8";
 
+$set_prefix: -webkit-, -moz-, -o-, -ms-, '';
+
 @mixin border-radius($r) {
-  -webkit-border-radius: $r;
-     -moz-border-radius: $r;
-      -ms-border-radius: $r;
-          border-radius: $r;
+  @each $prefix in $set_prefix {
+    #{$prefix}border-radius: $r;
+  }
 }
 
 @font-face {

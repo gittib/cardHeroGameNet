@@ -57,7 +57,7 @@ $sPageInfoHtml .= ' ></div>';
 $sMydeckLink = '';
 switch ($aPageInfo['page_cd']) {
     case 'deck_list':
-        if (isset($aUserInfo['user_id']) && $aUserInfo['user_id'] && !$this->bMine) {
+        if (empty($this->bMine)) {
             $sMydeckLink = <<<_eos_
 <div class="edit_link zabuton_pink" style="width:120px">
     <a href="/deck/mine/">自分のデッキ一覧へ</a>
@@ -65,9 +65,9 @@ switch ($aPageInfo['page_cd']) {
 
 _eos_;
         }
-    break;
+        break;
     case 'game_standby':
-        if (isset($aUserInfo['user_id']) && $aUserInfo['user_id'] && !$this->bMine) {
+        if (empty($this->bMine)) {
             $sMydeckLink = <<<_eos_
 <div class="edit_link zabuton_pink" style="width:120px">
     <a href="/game/new/deck/mine/">自分のデッキで戦う</a>
@@ -75,9 +75,9 @@ _eos_;
 
 _eos_;
         }
-    break;
+        break;
     case 'game_start':
-        if (isset($aUserInfo['user_id']) && $aUserInfo['user_id'] && !$this->bMine) {
+        if (empty($this->bMine)) {
             $sMydeckLink = <<<_eos_
 <div class="edit_link zabuton_pink" style="width:120px">
     <a href="/game/receive/deck/mine/{$aPageInfo['game_field_id']}">自分のデッキで戦う</a>
@@ -85,7 +85,7 @@ _eos_;
 
 _eos_;
         }
-    break;
+        break;
 }
 if ($this->bMine) {
     $sMydeckLink .= '<div style="display:none;" mydeck="t"></div>';

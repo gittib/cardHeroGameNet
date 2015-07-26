@@ -33,8 +33,61 @@ class Model_Support_Mail
         return $this->_aDomains;
     }
 
+    /**
+     * 問い合わせ情報をDBに登録する
+     *
+     *  @param  $aParams['domain_id']       メアドドメインID
+     *  @param  $aParams['sender_mail']     '@'の前のメールアドレス
+     *  @param  $aParams['user_name']       問い合わせ者のお名前
+     *  @param  $aParams['request_type']    問い合わせ種別。日本語文字列を直で飛ばす
+     *  @param  $aParams['message']         問い合わせ本文
+     *
+     *  @return bool    mb_send_mailの戻り値
+     */
+    public function insertRequest ($aParams) {
+        try {
+            $this->_db->beginTransaction();
+            $aDefaults = array(
+                'domain_id'     => 0,
+                'sender_mail'   => '',
+                'user_name'     => '',
+                'request_type'  => '',
+                'message'       => '',
+            );
+            foreach ($aDefaults as $key => $val) {
+                if (!isset($aParams[$key])) {
+                    $aParams[$key] = $val;
+                }
+            }
+            $set = array(
+                'mail_domain_id'    => $aParams['domain_id'],
+                'mail'              => $aParams['sender_mail'],
+                'user_name'         => $aParams['user_name'],
+                'request_type'      => $aParams['request_type'],
+                'message'           => $aParams['message'],
+            );
+            $this->_db->insert('t_mail_request', $set);
+            $this->_db->commit();
+        } catch (Exception $e) {
+            $this->_db->rollBack();
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 問い合わせ情報をメールで送信する
+     *
+     *  @param  $aParams['domain_id']       メアドドメインID
+     *  @param  $aParams['sender_mail']     '@'の前のメールアドレス
+     *  @param  $aParams['user_name']       問い合わせ者のお名前
+     *  @param  $aParams['request_type']    問い合わせ種別。日本語文字列を直で飛ばす
+     *  @param  $aParams['message']         問い合わせ本文
+     *
+     *  @return bool    mb_send_mailの戻り値
+     */
     public function sendRequest ($aParams) {
-        $sMail = '----';
+        $sMail = '未入力';
         if (isset($aParams['domain_id'], $aParams['sender_mail']) && $aParams['domain_id'] && $aParams['sender_mail']) {
             $sel = $this->_db->select()
                 ->from(
@@ -53,7 +106,7 @@ class Model_Support_Mail
         }
         $title = '[CHSMT]問い合わせがありました';
         $body = <<<_eos_
--------------------------------------------------------------
+-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 [名前]
 {$aParams['user_name']}
 
@@ -65,7 +118,7 @@ class Model_Support_Mail
 
 [問い合わせ内容]
 {$aParams['message']}
--------------------------------------------------------------
+-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
 早いとこ対応すれ。
 

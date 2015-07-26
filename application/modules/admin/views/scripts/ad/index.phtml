@@ -1,0 +1,42 @@
+<?php
+$sAdContents = '';
+foreach ($this->aAd as $iAdId => $val) {
+    $sTrClass = '';
+    if ($val['del_flg']) {
+        $sTrClass .= ' hide ';
+    }
+
+    $sCode = $this->escape($val['code']);
+    $sStart = date('Y-m-d H:i', strtotime($val['start_date']));
+    $sEnd = date('Y-m-d H:i', strtotime($val['end_date']));
+    $sAdContents .= <<<_eos_
+        <tr class="{$sTrClass}">
+            <td><a href="/admin/ad/?ad_group_id={$val['ad_group_id']}">{$val['ad_group_id']}</a></td>
+            <td>{$val['ad_id']}</td>
+            <td>{$val['ad_type']}</td>
+            <td class="comment">{$val['ad_comment']}</td>
+            <td>{$sStart}</td>
+            <td>{$sEnd}</td>
+            <td><a href='/admin/ad/edit/?ad_id={$val['ad_id']}'>編集</a></td>
+        </tr>
+
+_eos_;
+}
+?>
+<div id="admin_ad">
+    <h1>広告管理画面</h1>
+    <div class="scroll_frame">
+        <table id="ad_list" cellspacing=0>
+            <tr>
+                <th>GROUP</th>
+                <th>ID</th>
+                <th>タイプ</th>
+                <th>コメント</th>
+                <th>開始日時</th>
+                <th>終了日時</th>
+                <th>編集</th>
+            </tr>
+            <?php echo $sAdContents; ?>
+        </table>
+    </div>
+</div>

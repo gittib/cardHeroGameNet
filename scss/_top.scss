@@ -40,6 +40,16 @@
         margin: 0 auto;
         padding-left: 5px;
 
+        @media screen and (max-width: 350px) {
+            width: 158px;
+        }
+        @media screen and (min-width: 351px) and (max-width: 520px) {
+            width: 312px;
+        }
+        @media screen and (min-width: 521px) and (max-width: 678px) {
+            width: 468px;
+        }
+
         div {
             float: left;
             width: $divSize;

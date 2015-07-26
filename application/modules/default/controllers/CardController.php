@@ -49,6 +49,7 @@ class CardController extends Zend_Controller_Action
         $this->_layout->title = $aRet['cardInfo']['card_name'];
         $this->_layout->description = preg_replace('/^.*%descstart%/', '', $aRet['cardInfo']['description']);
         $this->_layout->description = preg_replace('/%descend%.*$/', '', $this->_layout->description);
+        $this->_layout->javascriptCode = $this->_echoScript();
         $this->render('detail');
     }
 
@@ -63,9 +64,31 @@ class CardController extends Zend_Controller_Action
         $this->_javascript[] = '/js/scroll_to_top.js';
     }
 
+    public function listAction()
+    {
+        $this->_redirect('/card/', array(
+            'code'  => 301,
+            'exit'  => true,
+        ));
+    }
+
     private function _getModel() {
         require_once APPLICATION_PATH . '/modules/default/models/card.php';
         $this->_model = new model_Card();
+    }
+
+
+
+    private function _echoScript() {
+        return <<<_eos_
+    $(function() {
+        $(".art_range").click(function() {
+            $("#explain>.range_name").text($(this).find(".range_type_name").text());
+            $("#explain>.main").text($(this).find(".range_caption").text());
+        })
+    })
+
+_eos_;
     }
 }
 

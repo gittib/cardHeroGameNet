@@ -166,7 +166,10 @@ class UserController extends Zend_Controller_Action
                 $sUrl = $oSession->sLastPageBeforeLogin;
             }
             $oSession->sLastPageBeforeLogin;
-            $this->_redirect($sUrl, array('code' => 301, 'exit' => true));
+            $this->_redirect($sUrl, array(
+                'code' => 301,
+                'exit' => true,
+            ));
         } else {
             $this->view->assign('message', 'ログインに失敗しました');
         }
