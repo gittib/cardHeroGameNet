@@ -1,0 +1,131 @@
+@charset "utf-8";
+
+$set_prefix: -webkit-, -moz-, -o-, -ms-, '';
+
+@mixin vender_prefix($p, $r) {
+  @each $prefix in $set_prefix {
+    #{$prefix}#{$p}: #{$r};
+  }
+}
+
+#support_help {
+    $wrapper_max_width: 720px;
+    $border_style: 3px solid blue;
+
+    width: 100%;
+    max-width: $wrapper_max_width;
+    margin: 10px auto;
+    height: 5000px;
+    position: relative;
+
+    * {
+        font-size: 14px;
+    }
+
+    .parallax_parts.delay {
+        @include vender_prefix('transition', '.3s');
+    }
+
+    .title {
+        position: absolute;
+        font-weight: bold;
+        width: 100%;
+        max-width: $wrapper_max_width;
+        box-sizing: border-box;
+        border-top: $border_style;
+        border-bottom: $border_style;
+        background-color: white;
+        text-align: center;
+        font-size: 26px;
+        line-height: 36px;
+        z-index: 100;
+
+        &.on {
+            position: fixed;
+            top: 0 !important;
+            left: 0;
+            right: 0;
+            padding-top: 0;
+            margin: 0 auto;
+        }
+    }
+
+    p.summary {
+        position: absolute;
+        left: 0;
+        right: 0;
+        width: 95%;
+        max-width: $wrapper_max_width;
+        margin: 0 auto;
+        padding: 5px;
+    }
+
+    #parallax_campas {
+        position: fixed;
+        overflow: hidden;
+        width: 100%;
+        max-width: $wrapper_max_width;
+        height: 0;
+        top: 0;
+        left: 0;
+        right: 0;
+        padding: 0;
+        margin: 0 auto;
+        z-index: 99;
+
+        &.on {
+            height: 3600px;
+        }
+
+        .rule_contents {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 0;
+            overflow: hidden;
+
+            &.on {
+                top: 50px;
+                height: 1000px;
+            }
+
+            ol li {
+                line-height: 44px;
+            }
+        }
+
+        .game_field {
+            position: absolute;
+            left: 0;
+            right: 50%;
+            top: 50px;
+            height: 0;
+            overflow: hidden;
+
+            &.on {
+                height: 1000px;
+            }
+
+            .mass {
+                $mass_height: 80px;
+
+                position: absolute;
+                width: 30%;
+                max-width: $mass_height;
+                height: $mass_height;
+
+                @for $i from 0 through 2 {
+                    &[xpos="#{$i}"] {
+                        left: $i * 33%;
+                    }
+                }
+                @for $i from 0 through 3 {
+                    &[ypos="#{$i}"] {
+                        top: $i * ($mass_height + 3px);
+                    }
+                }
+            }
+        }
+    }
+}

@@ -33,4 +33,26 @@ class Model_Admin
 
         return $aAd;
     }
+
+    public function updateAd ($aParams) {
+        try {
+            $this->_db->beginTransaction();
+
+            if (empty($aParams) || empty($aParams['ad_id'])) {
+                throw new Exception('parameter error.');
+            }
+
+            $aWhere = array(
+                'ad_id' => $aParams['ad_id'],
+            );
+
+            $this->_db->update('t_ad', $aParams, $aWhere);
+
+            $this->_db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->_db->rollBack();
+        }
+        return false;
+    }
 }

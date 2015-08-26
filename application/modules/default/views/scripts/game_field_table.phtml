@@ -35,7 +35,7 @@
     if (isset($this->bKifu, $this->bFinished) && $this->bKifu && $this->bFinished) {
         $bDispMyHiddenInfo = true;
     }
-    if (isset($this->bMine) && $this->bMine) {
+    if (!empty($this->bMine)) {
         $bDispMyHiddenInfo = true;
     }
 
@@ -92,7 +92,7 @@
         $sEffect .= '<span class="magic"></span>';
         $sEffect .= '<span class="charge"></span>';
         $aEffectFlags = array();
-        if (isset($val['status']) && $val['status'] != '') {
+        if (!empty($val['status'])) {
             foreach ($val['status'] as $aStatusVal) {
                 switch ($aStatusVal['type']) {
                     case '!':
@@ -213,7 +213,7 @@ _eos_;
 _eos_;
 
 $sClass = 'game_row';
-if (isset($aCardInfo['field_info']['responced']) && $aCardInfo['field_info']['responced']) {
+if (!empty($aCardInfo['field_info']['responced'])) {
     $sClass .= ' res';
 }
 $aUserInfo = $this->aUserInfo;
@@ -229,6 +229,8 @@ echo <<<_eos_
     <table class="game_field">
 
 _eos_;
+
+$iGameFieldId = $aCardInfo['field_info']['game_field_id'];
 foreach ($aPosId as $i => $aLine) {
     echo "        <tr>\n";
     foreach ($aLine as $posId) {
@@ -239,16 +241,23 @@ foreach ($aPosId as $i => $aLine) {
     }
     if ($i == 0) {
         $sButtonHtml = '';
-        if (!isset($this->bGameStart) || !$this->bGameStart) {
+        if (empty($this->bGameStart)) {
+            $sUrl = "/game/field/{$iGameFieldId}/";
+            if (!empty($this->bLast)) {
+                $sUrl .= '?referer=last';
+            } else if (!empty($this->bMine)) {
+                $sUrl .= '?referer=myturn';
+            }
             $sLabel = 'このフィールドで遊ぶ';
-            if (isset($this->bKifu) && $this->bKifu) {
+            if (!empty($this->bKifu)) {
                 $sLabel = 'このフィールドを詳しく見る';
-            } else if (isset($this->bFinisher) && $this->bFinisher) {
+            } else if (!empty($this->bFinisher)) {
                 $sLabel = 'このフィールドを詳しく見る';
             }
-            $sButtonHtml .= "<div class='button game_play'>{$sLabel}</div>";
-            if (!isset($this->bKifu) || !$this->bKifu) {
-                $sButtonHtml .= "<div class='button view_log' game_field_id='{$aCardInfo['field_info']['game_field_id']}'>プレイログを見る</div>";
+            $sButtonHtml .= "<a href='{$sUrl}'><div class='button game_play'>{$sLabel}</div></a>";
+            if (empty($this->bKifu)) {
+                $sUrl = "/game/kifu/{$iGameFieldId}/";
+                $sButtonHtml .= "<a href='{$sUrl}'><div class='button view_log' game_field_id='{$iGameFieldId}'>プレイログを見る</div></a>";
             }
         }
 

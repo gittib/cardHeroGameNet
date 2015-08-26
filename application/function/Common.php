@@ -96,6 +96,10 @@ class Common {
 
     public static function checkUA ()
     {
+        if (empty($_SERVER['HTTP_USER_AGENT'])) {
+            return 'pc';
+        }
+
         $ua = mb_strtolower($_SERVER['HTTP_USER_AGENT']);
         if(strpos($ua,'iphone') !== false){
             $device = 'iOS';

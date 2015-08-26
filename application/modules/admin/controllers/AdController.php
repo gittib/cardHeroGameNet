@@ -39,16 +39,48 @@ class Admin_AdController extends Zend_Controller_Action
         $iAdId = $request->getParam('ad_id', false);
         if (!$iAdId) {
             $this->_redirect('/admin/ad/', array(
-                'code'  => 307,
+                'code'  => 303,
                 'exit'  => true,
             ));
         }
 
         $this->_layout->title = '管理画面';
-        $aAd = $this->_getModel()->getAdList(array(
+        $rslt = $this->_getModel()->getAdList(array(
             'ad_id'     => $iAdId,
         ));
+        $aAd = reset($rslt);
         $this->view->assign('aAd', $aAd);
+        $this->view->assign('update_error', $request->getParam('update_error', null));
+    }
+
+    public function updateAdAction()
+    {
+        $request = $this->getRequest();
+        $iAdId = $request->getParam('ad_id', '');
+        if ($iAdId == '') {
+            throw new Exception('ad_id is null.');
+        }
+
+        $aPost = array(
+            'ad_id'         => '',
+            'del_flg'       => '',
+            'ad_group_id'   => '',
+            'ad_type'       => '',
+            'ad_comment'    => '',
+            'start_date'    => '',
+            'end_date'      => '',
+            'code'          => '',
+        );
+        foreach ($aPost as $key => $val) {
+            $aPost[$key] = $request->getPost($key, '');
+        }
+        $ret = $this->_model->updateAd($aPost);
+
+        if (!$ret) {
+            $request->setParam('update_error', true);
+        }
+        $request->setParam('ad_id', $iAdId);
+        $this->_forward('edit');
     }
 
     private function _getModel ()

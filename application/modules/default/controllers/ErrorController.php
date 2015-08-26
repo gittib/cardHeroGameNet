@@ -37,6 +37,10 @@ class ErrorController extends Zend_Controller_Action
                         $priority = Zend_Log::NOTICE;
                         $this->view->message = 'このページへのアクセス権限が確認出来ません。';
                         break;
+                    case 404:
+                        $priority = Zend_Log::NOTICE;
+                        $this->view->message = '指定されたページは存在しないか、削除されました。';
+                        break;
                     case 410:
                         $priority = Zend_Log::NOTICE;
                         $this->view->message = '指定されたページは削除されました。';

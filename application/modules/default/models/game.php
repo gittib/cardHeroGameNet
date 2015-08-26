@@ -439,8 +439,8 @@ class model_Game {
             $selField
                 ->limitPage($aOption['page_no'], $this->_nFieldsInPage)
                 ->order(array(
-                    'ins_date desc',
-                    'game_field_id desc',
+                    't_game_field.ins_date desc',
+                    't_game_field.game_field_id desc',
                 ));
         }
         if (isset($aOption['new_arrival']) && $aOption['new_arrival'] != '') {
@@ -451,7 +451,7 @@ class model_Game {
             );
         }
         if (isset($aOption['select_standby_field']) && $aOption['select_standby_field']) {
-            // 未返信フィールドは一ヶ月以内のもののみ抽出する
+            // 開始前フィールドは一ヶ月以内のもののみ抽出する
             $minTime = date('Y-m-d', time()-3600*24*30);
 
             $subSelStarted = $this->_db->select()
@@ -470,23 +470,11 @@ class model_Game {
                 ->where('t_game_field.game_field_id not in(?)', $subSelStarted);
         }
         if (isset($aOption['select_finished']) && $aOption['select_finished'] != '') {
-            $subSelFinished = $this->_db->select()
-                ->distinct()
-                ->from(
-                    array('tgc' => 't_game_card'),
-                    array(
-                        'game_field_id',
-                    )
-                )
-                ->join(
-                    array('mc' => 'm_card'),
-                    'mc.card_id = tgc.card_id',
-                    array()
-                )
-                ->where('tgc.position_category = ?', 'used')
-                ->where('mc.category = ?', 'master');
-
-            $selField->where('t_game_field.game_field_id in(?)', $subSelFinished);
+            $selField->join(
+                array('tf' => 't_finisher'),
+                'tf.game_field_id = t_game_field.game_field_id',
+                array()
+            );
         }
         if (isset($aOption['finisher_id']) && $aOption['finisher_id'] != '') {
             $subSelFinisher = $this->_db->select()
@@ -1253,6 +1241,13 @@ class model_Game {
             $aFieldData['turn'] = 1;
         }
 
+        if (empty($aFieldData['my_stone'])) {
+            $aFieldData['my_stone'] = 0;
+        }
+        if (empty($aFieldData['enemy_stone'])) {
+            $aFieldData['enemy_stone'] = 0;
+        }
+
         if ($aFieldData['turn'] == 2) {
             $aFieldData['stone1'] = $aFieldData['my_stone'];
             $aFieldData['stone2'] = $aFieldData['enemy_stone'];
@@ -1382,6 +1377,9 @@ class model_Game {
                     }
                 } else {
                     $val['actor_anime_disable'] = 0;
+                }
+                if (!isset($val['log_message'])) {
+                    $val['log_message'] = '';
                 }
                 $set = array(
                     'queue_id'              => $iQueueId,

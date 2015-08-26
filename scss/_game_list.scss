@@ -172,10 +172,14 @@
                         text-align: left;
                     }
 
+                    a {
+                        text-decoration: initial;
+                        text-align: center;
+                    }
+
                     div.button {
                         margin: 32px 5px;
                         padding: 3px 0;
-                        cursor: pointer;
                         z-index: 0;
 
                         &.game_play {

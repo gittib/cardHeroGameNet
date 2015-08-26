@@ -537,10 +537,28 @@ class model_Api_Index {
 
         $sSql = "insert into t_finisher(card_id, game_field_id) ({$sel})";
 
+        // 降参されたフィールドは card_id = null で登録する
+        $selSurrender = $this->_db->select()
+            ->from(
+                array('tq' => 't_queue'),
+                array(
+                    'game_field_id',
+                )
+            )
+            ->join(
+                array('tqu' => 't_queue_unit'),
+                'tqu.queue_id = tq.queue_id',
+                array()
+            )
+            ->where('tqu.queue_type_id = ?', 1008)
+            ->where('tqu.param1 = ?', 'surrender');
+        $sSqlSurrender = "insert into t_finisher(game_field_id) ({$selSurrender})";
+
         try {
             $this->_db->beginTransaction();
             $this->_db->delete('t_finisher');
             $this->_db->query($sSql);
+            $this->_db->query($sSqlSurrender);
             $this->_db->commit();
         } catch (Exception $e) {
             $this->_db->rollBack();

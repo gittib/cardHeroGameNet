@@ -659,7 +659,7 @@ new function () {
                 var aMonsterData = g_master_data.m_monster[mon.monster_id];
                 var aQueue = {
                     actor_id            : iGameCardId,
-                    log_message         : game_field_utility.getPosCodeFromPosId(mon.pos_id) + aMonsterData.name + '登場',
+                    log_message         : game_field_utility.getPosCodeFromPosId(mon.pos_id) + aMonsterData.name + 'の行動回数をリセット',
                     resolved_flg        : 0,
                     priority            : 'standby_system',
                     actor_anime_disable : true,
@@ -669,6 +669,7 @@ new function () {
                     }],
                 };
                 if (mon.standby_flg) {
+                    aQueue.log_message = game_field_utility.getPosCodeFromPosId(mon.pos_id) + aMonsterData.name + '登場';
                     aQueue.queue_units[0].queue_type_id = 1010;
                     aQueue.actor_anime_disable = false;
                 }
@@ -1458,6 +1459,8 @@ new function () {
                 })(aExecAct);
 
                 try {
+                    var iAnimes = g_field_data.animation_info.animations.length;
+                    var iActorAnimes = 0;
                     if (!aExecAct.actor_anime_disable) {
                         if (typeof g_field_data.cards[aExecAct.actor_id] != 'undefined') {
                             if (g_field_data.cards[aExecAct.actor_id].pos_category == 'field') {
@@ -1478,6 +1481,8 @@ new function () {
                                         },
                                     });
                                 }
+                                iActorAnimes = g_field_data.animation_info.animations.length - iAnimes;
+                                iAnimes = g_field_data.animation_info.animations.length;
                             }
                         }
                     }
@@ -1959,6 +1964,13 @@ new function () {
                                         actor_id        : aExecAct.actor_id,
                                         target_id       : q.target_id,
                                         system_flg      : (aExecAct.priority.indexOf('system', 0) != -1),
+                                    });
+                                    g_field_data.animation_info.animations.push({
+                                        target_dom : '#' + targetMon.pos_id + ' img',
+                                        animation_param : {
+                                            width   : 0,
+                                            left    : '25px',
+                                        },
                                     });
                                     break;
                                 case 1012:
@@ -2779,6 +2791,11 @@ new function () {
                     }
                     if (bProvoked && !bIgnoreProvoke) {
                         throw new Error('action_prevented_for_provoke');
+                    }
+                    if (iAnimes == g_field_data.animation_info.animations.length) {
+                        for (var i = 0 ; i < iActorAnimes ; i++) {
+                            g_field_data.animation_info.animations.pop();
+                        }
                     }
                     delete aExecAct.failure_flg;
                 } catch (e) {

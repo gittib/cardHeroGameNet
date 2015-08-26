@@ -1758,12 +1758,6 @@ function createGameFieldReactions() {
     function getGameCardId (aArgs)
     {
         try {
-            if (aArgs.pos_id == 'myMaster' && iMyMasterId) {
-                return iMyMasterId;
-            } else if (aArgs.pos_id == 'enemyMaster' && iEnemyMasterId) {
-                return iEnemyMasterId;
-            }
-
             var iRetGameCardId = null;
             var aFirstInfo  = null;
             var aLastInfo   = null;

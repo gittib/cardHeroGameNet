@@ -67,19 +67,6 @@ $(function() {
         _changeDispMode($('.old_field_disp_select:first'));
     })();
 
-    $(".game_field_info div.game_play.button").on("click", function() {
-        if ($(this).find(".game_row").hasClass('mine')) {
-            if (!confirm('あなたが投稿したフィールド図です。\n対戦相手の手札などネタバレになりますが、よろしいですか？')) {
-                return;
-            }
-        }
-        document.location = $(this).closest('div.game_field_info').find('div.field_title').find('a').attr('href');
-    });
-
-    $(".game_field_info div.view_log.button").on("click", function() {
-        document.location = '/game/kifu/' + $(this).attr('game_field_id') + '/';
-    });
-
     $(".old_field_disp_select").on("change", function() {
         _changeDispMode($(this));
     });

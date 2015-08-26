@@ -1,0 +1,65 @@
+<?php
+    $fnEchoStartHeight = function ($iScrollStartHeight) {
+        echo ' start_height="'.$iScrollStartHeight.'" style="top:'.($iScrollStartHeight-80).'px;" ';
+    }
+?>
+<style>
+#floating_wrapper {
+    display: none;
+}
+</style>
+<div id="support_help" class="support_help_parallax">
+
+    <h1 class="title parallax_parts" <?php $fnEchoStartHeight(90); ?> end_height=820>カードヒーローとは</h1>
+    <p class="summary" style="top:280px">
+        カードヒーローとは、プレイヤーの分身であるマスターカードから様々なモンスターを召喚し、相手マスターを倒す事を目指す対戦型トレーディングカードゲームです。<br />
+        2000年に任天堂からゲームボーイカラー版が発売され、完成度の高いゲームシステムやストーリーからコアなファンを多く生み出した、隠れた名作です。<br />
+    </p>
+
+    <div id="how_to_play" class="title parallax_parts" <?php $fnEchoStartHeight(820); ?> end_height=1580>カードヒーローの遊び方</div>
+
+    <div id="game_purpose" class="title parallax_parts" <?php $fnEchoStartHeight(1580); ?>>ゲームの目的</div>
+    <p class="summary" style="top:1680px">
+    </p>
+
+
+
+    <div id="parallax_campas" class="parallax_parts" start_height=90>
+        <div class="rule_contents parallax_parts delay" start_height=820 end_height=1180>
+            <span>見たい項目を選んで下さい。</span>
+            <ol>
+                <li><a href="#game_purpose">ゲームの目的</a></li>
+                <li><a href="">ゲームの進め方</a></li>
+                <li><a href="">カードの種類</a></li>
+                <li><a href="">気合だめ</a></li>
+                <li><a href="">ダメージ攻撃</a></li>
+                <li><a href="">レベルアップ</a></li>
+                <li><a href="">魔法効果について</a></li>
+            </ol>
+        </div>
+        <div class="parallax_parts delay game_field" start_height=1580>
+            <div class="mass" xpos=0 ypos=0>
+            あああ
+            </div>
+            <div class="mass" xpos=2 ypos=0>
+            </div>
+            <div class="mass" xpos=0 ypos=1>
+            </div>
+            <div class="mass" xpos=1 ypos=1>
+            </div>
+            <div class="mass" xpos=2 ypos=1>
+            </div>
+            <div class="mass" xpos=0 ypos=2>
+            </div>
+            <div class="mass" xpos=1 ypos=2>
+            </div>
+            <div class="mass" xpos=2 ypos=2>
+            </div>
+            <div class="mass" xpos=0 ypos=3>
+            </div>
+            <div class="mass" xpos=2 ypos=3>
+            </div>
+        </div>
+    </div>
+
+</div>

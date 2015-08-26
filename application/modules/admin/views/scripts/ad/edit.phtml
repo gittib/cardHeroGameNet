@@ -1,34 +1,46 @@
 <?php
 $sAdContents = '';
-foreach ($this->aAd as $iAdId => $val) {
-    $sCode = $this->escape($val['code']);
-    $sComment = $this->escape($val['ad_comment']);
-    if ($val['del_flg']) {
+if (!empty($this->aAd)) {
+    $sCode = $this->escape($this->aAd['code']);
+    $sComment = $this->escape($this->aAd['ad_comment']);
+    if ($this->aAd['del_flg']) {
         $sOpen  = '<input type="radio" name="del_flg" value="0" />公開 ';
         $sOpen .= '<input type="radio" name="del_flg" value="1" checked="checked" />非公開 ';
     } else {
         $sOpen  = '<input type="radio" name="del_flg" value="0" checked="checked" />公開 ';
         $sOpen .= '<input type="radio" name="del_flg" value="1" />非公開 ';
     }
-    $sStart = date('Y-m-d H:i', strtotime($val['start_date']));
-    $sEnd = date('Y-m-d H:i', strtotime($val['end_date']));
+    $sStart = date('Y-m-d H:i', strtotime($this->aAd['start_date']));
+    $sEnd = date('Y-m-d H:i', strtotime($this->aAd['end_date']));
     $sAdContents .= <<<_eos_
-        <tr><th>GROUP</th><td><input name="ad_group_id" type="text" value="{$val['ad_group_id']}" /></td></tr>
-        <tr><th>公開状態</th><td>{$sOpen}</td></tr>
-        <tr><th>タイプ</th><td><input name="ad_type" type="text" value="{$val['ad_group_id']}" /></td></tr>
-        <tr><th>コメント</th><td><input name="ad_comment" type="text" value="{$sComment}" /></td></tr>
-        <tr><th>開始日時</th><td><input name="start_date" type="text" value="{$sStart}" /></td></tr>
-        <tr><th>終了日時</th><td><input name="end_date" type="text" value="{$sEnd}" /></td></tr>
-        <tr><th>code</th><td><textarea rows=10 name="code">{$sCode}</textarea></td></tr>
+                <tr><th>GROUP</th><td><input name="ad_group_id" type="text" value="{$this->aAd['ad_group_id']}" /></td></tr>
+                <tr><th>公開状態</th><td>{$sOpen}</td></tr>
+                <tr><th>タイプ</th><td><input name="ad_type" type="text" value="{$this->aAd['ad_group_id']}" /></td></tr>
+                <tr><th>コメント</th><td><input name="ad_comment" type="text" value="{$sComment}" /></td></tr>
+                <tr><th>開始日時</th><td><input name="start_date" type="text" value="{$sStart}" /></td></tr>
+                <tr><th>終了日時</th><td><input name="end_date" type="text" value="{$sEnd}" /></td></tr>
+                <tr><th>code</th><td><textarea rows=10 name="code">{$sCode}</textarea></td></tr>
 
 _eos_;
+}
+$sErrorMessage = '';
+if (!empty($this->update_error)) {
+    $sErrorMessage = '<div style="color:red; margin: 10px;">更新に失敗しました。</div>';
 }
 ?>
 <div id="admin_ad_edit">
     <h1>広告編集画面</h1>
+    <?php echo $sErrorMessage; ?>
     <div class="scroll_frame">
-        <table id="ad_list" cellspacing=0>
-            <?php echo $sAdContents; ?>
-        </table>
+        <form name="ad_form" action="/admin/ad/update-ad/" method="post">
+            <table id="ad_list" cellspacing=0>
+                <?php echo ltrim($sAdContents); ?>
+            </table>
+            <input type="hidden" name="ad_id" value="<?php echo $this->aAd['ad_id']; ?>" />
+            <div id="button_area">
+                <input type="submit" id="submit_button" value="更新" />
+                <input type="button" onclick="window.close(); return false;" value="閉じる" />
+            </div>
+        </form>
     </div>
 </div>

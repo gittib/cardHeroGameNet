@@ -7,6 +7,7 @@
         table#ad_list {
             $border_style : 1px solid black;
 
+            width: 1000px;
             margin: 0 auto;
             padding: 0;
             border-left: $border_style;
@@ -39,8 +40,9 @@
 #admin_ad_edit {
     .scroll_frame {
         overflow: scroll;
+        width: 100%;
 
-        table#ad_list {
+        #ad_list {
             $border_style : 1px solid black;
 
             margin: 0 auto;
@@ -72,6 +74,13 @@
                     }
                 }
             }
+        }
+
+        #button_area {
+            display: block;
+            margin: 10px auto;
+            width: 100%;
+            text-align: center;
         }
     }
 }

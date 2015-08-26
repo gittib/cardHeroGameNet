@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
   <head>
+    <meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1,minimum-scale=1" />
     <meta charset="UTF-8">
     <meta name="robots" content="NOINDEX,NOFOLLOW">
     <title>CHSMP アナリティクス除外</title>

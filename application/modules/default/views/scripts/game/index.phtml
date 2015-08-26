@@ -133,10 +133,14 @@ foreach ($this->aCardInfoArray as $aCardInfo) {
     $aFieldInfo = $aCardInfo['field_info'];
     $sLinkTitle = "{$aFieldInfo['title_str']} [{$aFieldInfo['upd_date']}]";
     $sHref = "/game/receive/{$aFieldInfo['game_field_id']}/";
-    if (isset($aFieldInfo['started_flg']) && $aFieldInfo['started_flg']) {
-        $sHref = "/game/field/{$aFieldInfo['game_field_id']}/";
+    if (!empty($aFieldInfo['started_flg'])) {
+        if (!empty($this->bMovie)) {
+            $sHref = "/game/replay/{$aFieldInfo['game_field_id']}/";
+        } else {
+            $sHref = "/game/field/{$aFieldInfo['game_field_id']}/";
+        }
     }
-    if (isset($this->bMine) && $this->bMine) {
+    if (!empty($this->bMine)) {
         $sHref .= '?referer=mytrun';
     } else if ($this->bLast) {
         $sHref .= '?referer=last';
