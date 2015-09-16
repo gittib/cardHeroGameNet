@@ -10,6 +10,9 @@ function loadMoreDeck (iPageNo) {
     if ($('[mydeck]').size()) {
         sUrl += 'mine/t/';
     }
+    if ($('#deck_list_for_edit').size()) {
+        sUrl += 'stab/t/';
+    }
     $.getJSON(sUrl, function(json) {
         try {
             var sHtml = '';

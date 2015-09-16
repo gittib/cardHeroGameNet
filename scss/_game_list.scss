@@ -209,6 +209,20 @@
 
                             text-shadow: $myTextShadow;
                         }
+
+                        &.movie_replay {
+                            $border_width: 3px;
+                            $border_tl: $border_width solid #ffffee;
+                            $border_br: $border_width solid #888800;
+
+                            border-top: $border_tl;
+                            border-left: $border_tl;
+                            border-bottom: $border_br;
+                            border-right: $border_br;
+                            background-color: #ffffcc;
+
+                            text-shadow: $myTextShadow;
+                        }
                     }
                 }
             }

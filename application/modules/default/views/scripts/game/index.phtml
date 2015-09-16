@@ -114,7 +114,8 @@ if (isset($this->bMine) && $this->bMine) {
     $sBackgroundStyle = '<style>#game_field_list_wrapper { background-color:#ffffee !important; }</style>';
     $sH1Text = 'リプレイ鑑賞';
     $sLastLink = "<a class='zabuton_blue' href='/game/'>通常のフィールド一覧はこちら</a>";
-    $sSelectOldFieldDispray = '決着のついた対戦を、ゲーム開始時から動画風に再現する事ができます。';
+    $sDescription = '決着のついた対戦を、ゲーム開始時から動画風に再現する事ができます。';
+    $sSelectOldFieldDispray = '';
 } else {
     // 通常の一覧
     $sH1Text = 'フィールド一覧';
@@ -122,7 +123,8 @@ if (isset($this->bMine) && $this->bMine) {
     if (isset($this->bNewFieldCommited) && $this->bNewFieldCommited) {
         $sDescription = '新規ゲームの投稿が完了しました。';
     }
-    $sLastLink = "<a class='zabuton_red' href='/game/last/'>未返信フィールドの一覧へ</a>";
+    $sLastLink  = "<a class='zabuton_red' href='/game/last/'>未返信フィールドの一覧へ</a>";
+    $sLastLink .= "<a class='zabuton_yellow' href='/game/movie/'>決着した対戦一覧へ</a>";
     $sLastLink .= "<a class='zabuton_pink' href='/game/lobby/'>開始前フィールドの一覧へ</a>";
     $sLastLink .= "<a class='zabuton_green' href='/game/my-turn/'>あなたへの返信一覧へ</a>";
 }

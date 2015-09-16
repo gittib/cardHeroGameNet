@@ -14,6 +14,7 @@ class model_Deck {
     /**
      * @param aArgs['page_no']
      * @param aArgs['mine']
+     * @param aArgs['stab']
      * @param aArgs['max_rare_max']
      * @param aArgs['sum_rare_max']
      *
@@ -48,7 +49,7 @@ class model_Deck {
         if (isset($aArgs['mine']) && $aArgs['mine'] != '') {
             $sub->where('td.user_id = ?', $userId);
         }
-        if (isset($aArgs['max_rare_max']) && $aArgs['max_rare_max'] != '') {
+        if (!empty($aArgs['max_rare_max'])) {
             $sub2 = $this->_db->select()
                 ->distinct()
                 ->from(
@@ -60,7 +61,7 @@ class model_Deck {
                 ->where('vd.max_rare <= ?', $aArgs['max_rare_max']);
             $sub->where('td.deck_id in(?)', $sub2);
         }
-        if (isset($aArgs['sum_rare_max']) && $aArgs['sum_rare_max'] != '') {
+        if (!empty($aArgs['sum_rare_max'])) {
             $sub3 = $this->_db->select()
                 ->distinct()
                 ->from(
@@ -71,6 +72,20 @@ class model_Deck {
                 )
                 ->where('vd.sum_rare <= ?', $aArgs['sum_rare_max']);
             $sub->where('td.deck_id in(?)', $sub3);
+        }
+        if (empty($aArgs['stab'])) {
+            $sub4 = $this->_db->select()
+                ->from(
+                    array('tdc' => 't_deck_card'),
+                    array(
+                        'deck_id',
+                    )
+                )
+                ->group(array(
+                    'tdc.deck_id',
+                ))
+                ->having('sum(tdc.num) = ?', 30);
+            $sub->where('td.deck_id in(?)', $sub4);
         }
 
         $sel = $this->_db->select()

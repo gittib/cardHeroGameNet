@@ -99,3 +99,11 @@ select.rich_design {
     border-bottom-color: $border_rb_color;
     background-color: #ffddff;
 }
+
+.zabuton_yellow {
+    $border_rb_color: #880;
+    border: 3px solid #ffe;
+    border-right-color: $border_rb_color;
+    border-bottom-color: $border_rb_color;
+    background-color: #ffffcc;
+}

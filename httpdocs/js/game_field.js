@@ -25,6 +25,12 @@ new function () {
         // 決着したフィールドでは優先度:commandの行動が処理されない
         now_finished        : false,
 
+        // ポーズしてる間は一切のキューが処理されない
+        // ただし、execQueue()の途中で切り替わるとバグるので、対策用にもう１つフラグを設ける
+        pause_flg           : false,
+        pause_on_push       : false,
+        pause_off_push      : false,
+
         cards               : {},
         queues              : [],
         old_queues          : [],
@@ -367,6 +373,31 @@ new function () {
                 }
             }
         });
+
+        //
+        // リプレイ再生周りのコントロール
+        //
+        $('#movie_controll .pause').on('click', function (e) {
+            // 一時停止ボタン
+            g_field_data.pause_on_push = 1;
+        });
+        $('#movie_controll .play').on('click', function (e) {
+            // 再生ボタン
+            if (g_field_data.pause_flg) {
+                g_field_data.pause_off_push = 1;
+                execQueue({ resolve_all : true });
+            }
+        });
+        $('#movie_controll .toggle_log').on('click', function (e) {
+            // ログ全表示切り替え
+            $('#log_list').toggleClass('show_all');
+            if ($('#log_list').hasClass('show_all')) {
+                $('#movie_controll .toggle_log').val('旧ログ非表示');
+            } else {
+                $('#movie_controll .toggle_log').val('全ログ表示');
+            }
+        });
+
     });
 
     function _preload() {
@@ -430,7 +461,7 @@ new function () {
         g_field_data.turn           = Number($('div[turn_num]').attr('turn_num'));
         g_field_data.my_stone       = Number($('#myPlayersInfo div.stone span').text());
         g_field_data.enemy_stone    = Number($('#enemyPlayersInfo div.stone span').text());
-        g_field_data.replay_flg     = Number($('div[replay_flg]').attr('resolved_flg'));
+        g_field_data.replay_flg     = Number($('div[replay_flg]').attr('replay_flg'));
 
         rand_gen.srand(g_field_data.game_field_id, 100);
 
@@ -467,12 +498,13 @@ new function () {
         });
         g_field_data.old_queues.push({
             actor_id        : null,
-            log_message     : '',
+            log_message     : 'ターン終了',
             resolved_flg    : 0,
             priority        : 'system',
             queue_units : [{
                 queue_type_id   : 9999,
                 param1          : 'old_turn_end',
+                param2          : true,
             }],
         });
 
@@ -806,6 +838,11 @@ new function () {
      * @return  true:適正対象、false:不適正
      */
     function addTarget (aArgs) {
+        if (g_field_data.replay_flg) {
+            // ムービーリプレイではaddTargetは叩かせない
+            return false;
+        }
+
         var bRangeOk = false;
         var _addActionFromActorInfo = function () {
             var actor = g_field_data.actor;
@@ -1356,6 +1393,18 @@ new function () {
         var aExecAct = null;
         var bOldQueue = false;
 
+        // ポーズフラグ処理
+        if (g_field_data.pause_off_push) {
+            g_field_data.pause_flg = 0;
+        } else if (g_field_data.pause_on_push) {
+            g_field_data.pause_flg = 1;
+        }
+        g_field_data.pause_on_push = g_field_data.pause_off_push = 0;
+        if (g_field_data.pause_flg) {
+            // ポーズかかってたらキューを処理しない
+            return;
+        }
+
         // 処理対象キューの選択
         if (0 < g_field_data.old_queues.length) {
             console.log('old_queues proc.');
@@ -1401,7 +1450,7 @@ new function () {
                 }
 
                 var backupQueuesWhileOldQueueProcessing = null;
-                (function(a, undefined) {
+                (function(a) {
                     if (bOldQueue) {
                         // OldQueueを処理した時は誘発処理を発動されると困るので、queuesのバックアップを取る
                         backupQueuesWhileOldQueueProcessing = [];
@@ -2074,6 +2123,7 @@ new function () {
                                     $.each(g_field_data.cards, function (i, vval) {
                                         if (vval.lvup_standby) {
                                             vval.lvup_standby = 0;
+                                            console.log('1018 lvup standby reseted.');
                                         }
                                     });
                                     try {delete g_field_data.lvup_magic_flg;} catch (e) {}
@@ -2750,8 +2800,20 @@ new function () {
                                             }
                                             break;
                                         case 'old_turn_end':
-                                            startingProc();
-                                            bOldQueue = false;
+                                            if (q.param2) {
+                                                startingProc();
+                                                bOldQueue = false;
+                                            }
+                                            (function () {
+                                                $('#game_infomation_frame .info').text('ターン終了');
+                                                g_field_data.animation_info.animations.push({
+                                                    target_dom          : '#myMaster img, #myMaster img',
+                                                    animation_time_rate : 2,
+                                                    animation_param : {
+                                                        'width'         : '52px',
+                                                    },
+                                                });
+                                            })();
                                             break;
                                         case 'game_end_check':
                                             if (isGameEnd()) {
@@ -2792,11 +2854,13 @@ new function () {
                     if (bProvoked && !bIgnoreProvoke) {
                         throw new Error('action_prevented_for_provoke');
                     }
+
+                    // 行動者の行動アニメーションしか出力しない場合はアニメーション自体カットする
                     if (iAnimes == g_field_data.animation_info.animations.length) {
-                        for (var i = 0 ; i < iActorAnimes ; i++) {
-                            g_field_data.animation_info.animations.pop();
-                        }
+                        g_field_data.animation_info.animations = [];
                     }
+
+                    $('#log_list').prepend('<li>'+aExecAct.log_message+'</li>');
                     delete aExecAct.failure_flg;
                 } catch (e) {
                     console.log(e.stack);
@@ -2819,7 +2883,7 @@ new function () {
                 // アニメーションを挟んで完了時のコールバックでexecQueueを再帰呼び出し
                 setTimeout( function () {
                     execAnimation(bRecursive);
-                }, 1);
+                }, 0);
             })();
         } else {
             // 未解決のキューを全て処理したので、後処理をしてreturnする
@@ -2877,7 +2941,7 @@ new function () {
                 } catch(e) {
                     setTimeout( function () {
                         _execAnimationUnit(bRecursive);
-                    }, 1);
+                    }, 0);
                 }
             } else {
                 g_field_data.animation_info.bAnimationProcessing = false;

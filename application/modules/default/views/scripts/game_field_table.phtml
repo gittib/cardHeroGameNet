@@ -261,6 +261,11 @@ foreach ($aPosId as $i => $aLine) {
             }
         }
 
+        if (!empty($aCardInfo['field_info']['finished_flg'])) {
+            $sUrl = "/game/replay/{$iGameFieldId}/";
+            $sButtonHtml .= "<a href='{$sUrl}'><div class='button movie_replay' game_field_id='{$iGameFieldId}'>再現ムービーを見る</div></a>";
+        }
+
         echo <<<_eos_
             <td colspan=3 rowspan=4 class="explain">
                 <div class="player_name">

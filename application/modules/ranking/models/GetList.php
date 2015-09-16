@@ -43,6 +43,18 @@ class Model_Ranking_GetList
 
     public function getDeckCardRanking ($aParams = array()) {
 
+        $subSelCompleteDecks = $this->_db->select()
+            ->from(
+                array('tdc' => 't_deck_card'),
+                array(
+                    'deck_id',
+                )
+            )
+            ->group(array(
+                'deck_id',
+            ))
+            ->having('sum(tdc.num) = ?', 30);
+
         $sel = $this->_db->select()
             ->from(
                 array('mc' => 'm_card'),
@@ -66,6 +78,7 @@ class Model_Ranking_GetList
                 array()
             )
             ->where('td.del_flg = 0')
+            ->where('tdc.deck_id in (?)', $subSelCompleteDecks)
             ->group(array(
                 'mc.card_id',
                 'mc.card_name',

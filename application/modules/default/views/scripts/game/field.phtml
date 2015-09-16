@@ -88,14 +88,14 @@
                         'param2'=>$aStatusVal['param2'],
                 );
                 $sStatusDetail .= <<<_eos_
-                    <div class="status_row"
-                        status_id="{$aStatusVal['id']}"
-                        turn_count="{$aStatusVal['turn']}"
-                        param1="{$aStatusVal['param1']}"
-                        param2="{$aStatusVal['param2']}"></div>
-
+                                <div class="status_row"
+                                    status_id="{$aStatusVal['id']}"
+                                    turn_count="{$aStatusVal['turn']}"
+                                    param1="{$aStatusVal['param1']}"
+                                    param2="{$aStatusVal['param2']}"></div>
 _eos_;
             }
+            $sStatusDetail = preg_replace('/^\s+/', '', $sStatusDetail);
         }
         if (isset($aEffectFlags['charge'])) {
             $sEffect = str_replace('"charge">', '"charge">！', $sEffect);
@@ -110,18 +110,18 @@ _eos_;
             $sEffect = str_replace('"magic">', '"magic">M', $sEffect);
         }
         $aMonsterData[$pos] = <<<_eos_
-        <td id="{$pos}" class="monster_space" monster_id="{$val['monster_id']}" card_id="{$val['card_id']}" game_card_id="{$iGameCardId}">
-            <div class="pict">
-                <img class="card_image" src="/images/card/card.jpg" src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
-            </div>
-            <div class="param">
-                {$sLvHp}<br />
-                {$sEffect}
-                <div class="status_hidden_param" style="display:none;">
-                    {$sStatusDetail}
-                </div>
-            </div>
-        </td>
+                    <td id="{$pos}" class="monster_space" monster_id="{$val['monster_id']}" card_id="{$val['card_id']}" game_card_id="{$iGameCardId}">
+                        <div class="pict">
+                            <img class="card_image" src="/images/card/card.jpg" original-src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
+                        </div>
+                        <div class="param">
+                            {$sLvHp}<br />
+                            {$sEffect}
+                            <div class="status_hidden_param" style="display:none;">
+                                {$sStatusDetail}
+                            </div>
+                        </div>
+                    </td>
 
 _eos_;
         $aCards[$iGameCardId] = array(
@@ -155,9 +155,9 @@ _eos_;
         $sOwner = ($aCardInfo['field_info']['turn'] == $val['owner']) ? 'my' : 'enemy';
         if ($sOwner == 'my') {
             $sMyHandHtml .= <<<_eos_
-    <div class="hand_card" game_card_id="{$iGameCardId}" card_id="{$val['card_id']}">
-        <img src="/images/card/card.jpg" original-src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
-    </div>
+                <div class="hand_card" game_card_id="{$iGameCardId}" card_id="{$val['card_id']}">
+                    <img src="/images/card/card.jpg" original-src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
+                </div>
 
 _eos_;
         }
@@ -177,6 +177,7 @@ _eos_;
             'sort_no'       => $iSortNo++,
         );
     }
+    $sMyHandHtml = preg_replace('/^\s+/', '', $sMyHandHtml);
 
     if ($aCardInfo['field_info']['turn'] == 1) {
         $aStoneCount = array(
@@ -190,37 +191,37 @@ _eos_;
         );
     }
     $aMonsterData['enemyPlayersInfo'] = <<<_eos_
-        <td id="enemyPlayersInfo">
-            <div class="num_info stone">
-                <img src="/images/stone.png" alt="stone" />：
-                <span>{$aStoneCount['enemy']}</span>
-            </div>
-            <div class="num_info hand">
-                <img src="/images/card/card.jpg" alt="hand" />：
-                <span>{$aHandCount['enemy']}</span>
-            </div>
-            <div class="num_info deck">
-            </div>
-            <div class="num_info used">
-            </div>
-        </td>
+                    <td id="enemyPlayersInfo">
+                        <div class="num_info stone">
+                            <img src="/images/stone.png" alt="stone" />：
+                            <span>{$aStoneCount['enemy']}</span>
+                        </div>
+                        <div class="num_info hand">
+                            <img src="/images/card/card.jpg" alt="hand" />：
+                            <span>{$aHandCount['enemy']}</span>
+                        </div>
+                        <div class="num_info deck">
+                        </div>
+                        <div class="num_info used">
+                        </div>
+                    </td>
 
 _eos_;
     $aMonsterData['myPlayersInfo'] = <<<_eos_
-        <td id="myPlayersInfo">
-            <div class="num_info stone">
-                <img src="/images/stone.png" alt="stone" />：
-                <span>{$aStoneCount['my']}</span>
-            </div>
-            <div class="num_info hand">
-                <img src="/images/card/card.jpg" alt="hand" />：
-                <span>{$aHandCount['my']}</span>
-            </div>
-            <div class="num_info deck">
-            </div>
-            <div class="num_info used">
-            </div>
-        </td>
+                    <td id="myPlayersInfo">
+                        <div class="num_info stone">
+                            <img src="/images/stone.png" alt="stone" />：
+                            <span>{$aStoneCount['my']}</span>
+                        </div>
+                        <div class="num_info hand">
+                            <img src="/images/card/card.jpg" alt="hand" />：
+                            <span>{$aHandCount['my']}</span>
+                        </div>
+                        <div class="num_info deck">
+                        </div>
+                        <div class="num_info used">
+                        </div>
+                    </td>
 
 _eos_;
 
@@ -265,6 +266,37 @@ function getQueueJson() {
 }
 
 _eos_;
+
+    $sMovieConsole = '';
+    if ($this->bReplayFlg) {
+        $sMovieConsole = <<<_eos_
+<div id="movie_controll">
+                <div>
+                    <input type="button" class="play" value="▶再生" />
+                    <input type="button" class="pause" value="■一時停止" />
+                    <input type="button" class="toggle_log" value="全ログ表示" />
+                </div>
+                <div>
+                    <ul id="log_list">
+                    </ul>
+                </div>
+            </div>
+
+_eos_;
+    }
+
+    $sFieldHtml = "<table id=\"game_field\">\n";
+    foreach ($aPosId as $aLine) {
+        $sFieldHtml .= "                <tr>\n";
+        foreach ($aLine as $posId) {
+            if (!isset($aMonsterData[$posId])) {
+                $aMonsterData[$posId] = "                    <td id='{$posId}' class='monster_space'><div class='pict'></div></td>\n";
+            }
+            $sFieldHtml .= $aMonsterData[$posId];
+        }
+        $sFieldHtml .= "                </tr>\n";
+    }
+    $sFieldHtml .= "            </table>\n";
 ?>
     <div id="game_infomation_frame">
         <div class="label">
@@ -275,23 +307,11 @@ _eos_;
     </div>
     <div id="responcive_frame" class="clearfix">
         <div id="primary_part">
-            <table id="game_field">
-<?php
-    foreach ($aPosId as $aLine) {
-        echo "                <tr>\n";
-        foreach ($aLine as $posId) {
-            if (!isset($aMonsterData[$posId])) {
-                $aMonsterData[$posId] = "                    <td id='{$posId}' class='monster_space'><div class='pict'></div></td>\n";
-            }
-            echo $aMonsterData[$posId];
-        }
-        echo "                </tr>\n";
-    }
-?>
-            </table>
+            <?php echo $sFieldHtml; ?>
             <div id="hand_card" class="clearfix">
-<?php echo $sMyHandHtml; ?>
+                <?php echo $sMyHandHtml; ?>
             </div>
+            <?php echo $sMovieConsole; ?>
         </div>
         <div id="secondary_part">
             <div id="card_info">

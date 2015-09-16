@@ -19,8 +19,8 @@ class GameController extends Zend_Controller_Action
 
         $this->_jsUpdDate = array(
             'game_list'     => '20150818',
-            'deck_list'     => '20150215',
-            'game_field'    => '20150821',
+            'deck_list'     => '20150901',
+            'game_field'    => '20150916',
         );
     }
 
@@ -67,7 +67,7 @@ class GameController extends Zend_Controller_Action
             $this->_layout->description = 'ゲーム開始前のフィールド一覧です。あなたの返信を待っています！';
         } else if ($bMovie) {
             $this->_layout->title = 'プレイムービー鑑賞';
-            $this->_layout->description = 'ゲーム';
+            $this->_layout->description = '決着したゲームの一覧から、対戦のリプレイを鑑賞できます。';
         } else if ($bMine) {
             $this->_layout->title = 'あなたへの返信一覧';
             $this->_layout->description = '対戦相手が投稿した、あなた宛てのフィールド一覧です。あなたの返信を待っています！';

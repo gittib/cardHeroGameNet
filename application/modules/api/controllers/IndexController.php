@@ -95,11 +95,13 @@ class Api_IndexController extends Zend_Controller_Action
     {
         $this->_helper->viewRenderer->setNoRender(true);
 
-        if ($this->_model->checkRefreshed()) {
-            exit;
+        if ($this->_model->checkRefreshed() == false) {
+            $this->_model->mvFinisherRefresh();
         }
 
-        $this->_model->mvFinisherRefresh();
+        if (APPLICATION_ENV != 'production') {
+            echo Common::checkSQL();
+        }
     }
 
     private function _getModel()

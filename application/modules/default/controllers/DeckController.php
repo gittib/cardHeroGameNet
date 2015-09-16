@@ -38,11 +38,12 @@ class DeckController extends Zend_Controller_Action
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/deck_list.js';
         } else {
-            $this->_javascript[] = '/js/deck_list.min.js?ver=20150215';
+            $this->_javascript[] = '/js/deck_list.min.js?ver=20150901';
         }
         $nPage = $request->getParam('page_no');
         $ret = $this->_model->getDeckList(array(
             'page_no'   => $nPage,
+            'stab'      => true,
         ));
 
         $this->view->assign('sExplain', str_replace('%descend%', '', $sExp));
@@ -80,7 +81,7 @@ class DeckController extends Zend_Controller_Action
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/deck_list.js';
         } else {
-            $this->_javascript[] = '/js/deck_list.min.js?ver=20150215';
+            $this->_javascript[] = '/js/deck_list.min.js?ver=20150901';
         }
         $nPage = $request->getParam('page_no');
         $ret = $this->_model->getDeckList(array(

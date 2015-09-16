@@ -57,7 +57,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         // 返信の無いゲームフィールド一覧
         $route = new Zend_Controller_Router_Route_Regex(
-            'game/(last|lobby|my-turn)(/(\d+))?',
+            'game/(last|lobby|my-turn|movie)(/(\d+))?',
             array(
                 'controller'    =>  'game',
                 'action'        =>  'last',

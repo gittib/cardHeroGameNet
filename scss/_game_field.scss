@@ -233,6 +233,36 @@
                 }
             }
         }
+
+        #movie_controll {
+            box-sizing: border-box;
+            border: solid 1px;
+            border-top: none 0;
+            padding: 10px;
+
+            > div {
+                box-sizing: border-box;
+                padding: 6px;
+                border: 3px inset;
+                background-color: lightgray;
+
+                #log_list {
+                    padding: 0;
+
+                    li {
+                        display: none;
+
+                        &:first-child {
+                            display: block;
+                        }
+                    }
+
+                    &.show_all li {
+                        display: block;
+                    }
+                }
+            }
+        }
     }
 
     div.card_name {

@@ -358,9 +358,7 @@ function createGameFieldReactions() {
 
             (function _dispEnemyHand () {
                 var bDisp = false;
-                if ($('#test_env').size()) {
-                    bDisp = true;
-                } else if (g_field_data.replay_flg) {
+                if (g_field_data.replay_flg) {
                     bDisp = true;
                 }
 
@@ -915,7 +913,7 @@ function createGameFieldReactions() {
             );
         }
 
-        if (g_field_data.queues.length <= 0) {
+        if (g_field_data.queues.length <= 0 && g_field_data.old_queues.length <= 0) {
             updateGameInfoMessage();
         }
     }

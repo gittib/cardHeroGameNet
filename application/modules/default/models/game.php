@@ -140,6 +140,13 @@ class model_Game {
                     'responced' => 'game_field_id',
                 )
             )
+            ->joinLeft(
+                array('tf' => 't_finisher'),
+                'tf.game_field_id = field.game_field_id',
+                array(
+                    'finished_flg'  => new Zend_Db_Expr("case when tf.game_field_id is not null then 1 else 0 end"),
+                )
+            )
             ->where('field.del_flg = 0')
             ->where('field.game_field_id in(?)', $selField)
             ->order($aOrder);
@@ -205,7 +212,6 @@ class model_Game {
                     'card_id',
                     'owner',
                     'position_category',
-                    'finished_flg'      => new Zend_Db_Expr("case when card.position_category = 'used' and mc.category = 'master' then 1 else 0 end"),
                 )
             )
             ->join(
@@ -284,9 +290,6 @@ class model_Game {
                     $aRet[$iGameFieldId][$sPosCategory][$iGameCardId] = $aTmpRow;
                     if ($val['owner'] != 1) {
                         $aRet[$iGameFieldId]['field_info']['started_flg'] = true;
-                    }
-                    if ($val['finished_flg']) {
-                        $aRet[$iGameFieldId]['field_info']['finished_flg'] = true;
                     }
                 }
                 $aTmpRow = array(
@@ -698,7 +701,7 @@ class model_Game {
                 $aFields = explode('-', $sFields);
                 $aFields[] = $iGameFieldId;
             }
-            if (isset($aOption['prime_field_id']) && $aOption['prime_field_id']) {
+            if (!empty($aOption['prime_field_id'])) {
                 foreach ($aFields as $key => $val) {
                     if ((int)$val <= (int)$aOption['prime_field_id']) {
                         unset($aFields[$key]);
@@ -754,11 +757,30 @@ class model_Game {
             $baseFieldTurn = $aOption['base_field_turn'];
         }
 
+        $fst = reset($rslt);
+        $iGameFieldId = $fst['game_field_id'];
         foreach ($rslt as $val) {
             if ($val['queue_id'] != $iQueueId) {
+                // キューIDが変化する場合、直前に前のキューを配列に投げ込む
                 if (isset($aTmp)) {
                     $aRet[] = $aTmp;
                 }
+
+                if ($val['game_field_id'] != $iGameFieldId) {
+                    $aRet[] = array(
+                        'game_field_id' => $aTmp['game_field_id'],
+                        'actor_id'      => null,
+                        'log_message'   => 'ターン終了',
+                        'priority'      => 'system',
+                        'queue_units' => array(array(
+                            'queue_type_id' => 9999,
+                            'param1'        => 'old_turn_end',
+                            'param2'        => false,
+                        )),
+                    );
+                    $iGameFieldId = $val['game_field_id'];
+                }
+
                 $aTmp = array(
                     'queue_id'              => $val['queue_id'],
                     'game_field_id'         => $val['game_field_id'],
@@ -766,7 +788,7 @@ class model_Game {
                     'log_message'           => $val['log_message'],
                     'priority'              => $val['priority'],
                     'actor_anime_disable'   => $val['actor_anime_disable'],
-                    'queue_units'   => array(),
+                    'queue_units' => array(),
                 );
                 $iQueueId = $val['queue_id'];
             }

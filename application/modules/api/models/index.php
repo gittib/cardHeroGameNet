@@ -402,6 +402,10 @@ class model_Api_Index {
         return $aUrls;
     }
 
+    /**
+     *  マテビュー扱いのテーブルのリフレッシュが必要かどうか判定する
+     *
+     */
     public function checkRefreshed() {
         $bRefreshed = true;
         try {
@@ -423,6 +427,7 @@ class model_Api_Index {
             } else {
                 // 今日はまだ更新してないっぽいので更新処理を行う
                 // 更新した事実を残すためにUPDATEは掛ける
+                $this->_db->delete('t_finisher', 'game_field_id = -1');
                 $this->_db->insert('t_finisher', array(
                     'card_id'       => -1,
                     'game_field_id' => -1,
@@ -464,13 +469,6 @@ class model_Api_Index {
             ->where('position = ?', 'Master')
             ->where('game_card_id in ?', $sSubSelDead)
             ;
-
-        if (isset($aParams['max_date']) && $aParams['max_date']) {
-            $sSubSelMaster->where('ins_date <= ?', $aParams['max_date']);
-        }
-        if (isset($aParams['min_date']) && $aParams['min_date']) {
-            $sSubSelMaster->where('ins_date >= ?', $aParams['min_date']);
-        }
 
         $sSubSelFieldMasterDead = $this->_db->select()
             ->from(
@@ -539,6 +537,7 @@ class model_Api_Index {
 
         // 降参されたフィールドは card_id = null で登録する
         $selSurrender = $this->_db->select()
+            ->distinct()
             ->from(
                 array('tq' => 't_queue'),
                 array(
@@ -550,18 +549,26 @@ class model_Api_Index {
                 'tqu.queue_id = tq.queue_id',
                 array()
             )
+            ->joinLeft(
+                array('tf' => 't_finisher'),
+                'tf.game_field_id = tq.game_field_id',
+                array()
+            )
+            ->where('tf.game_field_id is null')
             ->where('tqu.queue_type_id = ?', 1008)
             ->where('tqu.param1 = ?', 'surrender');
         $sSqlSurrender = "insert into t_finisher(game_field_id) ({$selSurrender})";
 
         try {
             $this->_db->beginTransaction();
+            $this->_db->query('LOCK TABLE ONLY t_finisher IN EXCLUSIVE MODE');
             $this->_db->delete('t_finisher');
             $this->_db->query($sSql);
             $this->_db->query($sSqlSurrender);
             $this->_db->commit();
         } catch (Exception $e) {
             $this->_db->rollBack();
+            $this->_db->delete('t_finisher', 'game_field_id = -1');
             echo 'failure!';
         }
         return 0;
