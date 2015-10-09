@@ -150,6 +150,9 @@ _eos_;
     } else {
         $sSecretDeckClass = ' secret ';
     }
+    if (empty($val['deck_name'])) {
+        $val['deck_name'] = 'デッキ名未設定';
+    }
     $sDeckListHtml .= <<<_eos_
 <div class="deck_frame{$sSecretDeckClass}">
     <div class="deck_header clearfix">

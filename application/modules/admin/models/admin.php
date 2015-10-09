@@ -55,4 +55,37 @@ class Model_Admin
         }
         return false;
     }
+
+
+    public function getMailRequests ($aParams = array()) {
+        $sel = $this->_db->select()
+            ->from(
+                array('tmr' => 't_mail_request')
+            )
+            ->joinLeft(
+                array('mmd' => 'm_mail_domain'),
+                'mmd.domain_id = tmr.mail_domain_id',
+                array(
+                    'mail_domain',
+                )
+            )
+            ->where('tmr.del_flg = ?', 0)
+            ->order(array(
+                'tmr.ins_date desc',
+            ));
+        $rslt = $this->_db->fetchAll($sel);
+
+        $aRet = array();
+        foreach ($rslt as $val) {
+            $aTmp = $val;
+            if (empty($val['user_name'])) {
+                $aTmp['user_name'] = '----';
+            }
+            if (!empty($val['mail'])) {
+                $aTmp['mail_address'] = $val['mail'] . '@' . $val['mail_domain'];
+            }
+            $aRet[$val['request_id']] = $aTmp;
+        }
+        return $aRet;
+    }
 }

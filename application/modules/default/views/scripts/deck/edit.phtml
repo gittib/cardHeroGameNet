@@ -104,9 +104,9 @@ if ($aUserInfo) {
 _eos_;
 }
 ?>
-<form name="deck_edit_form" method="post">
-<?php echo $deckIdHtml; ?>
-    <div id="deck_frame">
+<div id="deck_frame">
+    <form name="deck_edit_form" method="post">
+        <?php echo $deckIdHtml; ?>
         <div class="deck_header clearfix">
             <div class="master_image">
                 <?php echo $sMasterImages; ?>
@@ -148,13 +148,16 @@ _eos_;
                 <?php echo $aDeckCardImages['super']; ?>
             </div>
         </div>
-    </div>
-    <div class="submit">
-        <div>
-            <input type="button" value="デッキ登録" />
+        <div class="submit">
+            <div>
+                <input type="button" value="デッキ登録" />
+            </div>
         </div>
-    </div>
-</form>
-<div class="card_catalog clearfix">
-<?php echo $sCardCatalog; ?>
+        <label class="controlls">
+            <input type="checkbox" class="switchSummary" />カード名を表示
+        </label>
+        <div class="card_catalog clearfix">
+            <?php echo $sCardCatalog; ?>
+        </div>
+    </form>
 </div>

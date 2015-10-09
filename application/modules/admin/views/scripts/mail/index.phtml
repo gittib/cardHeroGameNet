@@ -1,0 +1,50 @@
+<div id="admin_mail">
+<style>
+.request {
+    border: 2px solid;
+    border-bottom: none;
+    box-sizing: border-box;
+}
+.request:last-child {
+    border-bottom: 2px solid;
+}
+.request > div {
+    float: left;
+    padding: 2px;
+    box-sizing: border-box;
+}
+.request > .username {
+    clear: both;
+}
+.request > .message {
+    clear: both;
+    width: 100%;
+}
+</style>
+<?php
+$sRequests = '';
+foreach ($this->aMailInfo as $requestId => $val) {
+    if (!empty($val['mail_address'])) {
+        $sMail = "<div class='mail_address'><a href=\"mailto:{$val['mail_address']}\">{$val['mail_address']}</a></div>";
+    } else {
+        $sMail = '';
+    }
+    $sDate = date('Y-m-d H:i:s', strtotime($val['ins_date']));
+    $sRequests .= <<<_eos_
+    <div class="request clearfix">
+        <div class="request_id">{$val['request_id']}</div>
+        <div class="request_type">{$val['request_type']}</div>
+        <div class="username">{$this->escape($val['user_name'])}</div>
+        {$sMail}
+        <div class="ins_date">[{$sDate}]</div>
+        <div class="message">
+            {$this->escape($val['message'])}
+        </div>
+    </div>
+
+_eos_;
+}
+?>
+    <h1>メール管理画面</h1>
+    <?php echo $sRequests; ?>
+</div>

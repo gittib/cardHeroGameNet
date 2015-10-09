@@ -19,8 +19,8 @@ class GameController extends Zend_Controller_Action
 
         $this->_jsUpdDate = array(
             'game_list'     => '20150818',
-            'deck_list'     => '20150901',
-            'game_field'    => '20150916',
+            'deck_list'     => '20150926',
+            'game_field'    => '20150926',
         );
     }
 
@@ -157,13 +157,14 @@ class GameController extends Zend_Controller_Action
 
         require_once APPLICATION_PATH . '/modules/default/models/deck.php';
         $modelDeck = new model_Deck();
+        $this->_javascript[] = '/js/game_list.js';
+        $this->_javascript[] = '/js/img_delay_load.min.js';
+        $this->_javascript[] = '/js/perfect-scrollbar.jquery.min.js';
         if ($this->_config->web->js->debug) {
-            $this->_javascript[] = '/js/deck_list.min.js';
+            $this->_javascript[] = '/js/deck_list.js';
         } else {
             $this->_javascript[] = '/js/deck_list.min.js?ver=' . $this->_jsUpdDate['deck_list'];
         }
-        $this->_javascript[] = '/js/game_list.js';
-        $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_layout->title = 'ゲーム開始';
 
         $iPage = $request->getParam('page_no');
@@ -232,12 +233,13 @@ class GameController extends Zend_Controller_Action
         $oSession = Zend_Registry::get('session');
         $oSession->bReceive = true;
 
+        $this->_javascript[] = '/js/img_delay_load.min.js';
+        $this->_javascript[] = '/js/perfect-scrollbar.jquery.min.js';
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/deck_list.js';
         } else {
             $this->_javascript[] = '/js/deck_list.min.js?ver=' . $this->_jsUpdDate['deck_list'];
         }
-        $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_layout->title = 'ゲーム開始';
         $this->_layout->noindex = true;
 
@@ -363,7 +365,11 @@ class GameController extends Zend_Controller_Action
             ));
             //$this->_model->getQueueText($iGameFieldId);
         }
-        $this->_layout->title = "ゲーム[{$iGameFieldId}]";
+        if ($bReplayFlg) {
+            $this->_layout->title = "リプレイ[{$iGameFieldId}]";
+        } else {
+            $this->_layout->title = "ゲーム[{$iGameFieldId}]";
+        }
         $this->view->assign('aCardInfo', $aCardInfo);
         $this->view->assign('aUserInfo', Common::checkLogin());
         $this->view->assign('iGameFieldId', $iGameFieldId);

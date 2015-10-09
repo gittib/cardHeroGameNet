@@ -17,6 +17,8 @@ foreach ($aSisterSite as $key => $val) {
         $sSisterSite .= "<li><a href='{$val['url']}' class='blank_link' target='_blank'>{$val['title']}</a></li>\n";
     }
 }
+
+$aUserInfo = Common::checkLogin();
 ?>
 <div id="welcome">
     <h1 class="top_page">カードヒーロー＠スマホ へようこそ！</h1>
@@ -68,11 +70,20 @@ foreach ($aSisterSite as $key => $val) {
               <span>お問い合わせ</span>
           </div>
         </a>
+        <?php if (!empty($aUserInfo) && $aUserInfo['user_id'] == 1): ?>
+        <a href='/admin/'>
+          <div class="support" style="background-color: pink;">
+              <img src="/images/field_list_icon0.png" alt="管理画面" />
+              <span>管理画面</span>
+          </div>
+        </a>
+        <?php endif; ?>
     </div>
     <div id="update_history">
         <h2>更新履歴・お知らせ</h2>
         <div>
             <ul>
+                <li>[2015/09/26]デッキ一覧・デッキ編集ページのデザインを改修。PC向けに、横並びのレイアウトに対応しました。</li>
                 <li>[2015/09/05]リプレイ鑑賞機能を追加。決着がついたフィールドにて、対戦のリプレイをムービー風に鑑賞できます。</li>
                 <li>[2015/07/23]新規ゲーム開始方法を変更。開始前フィールド一覧を追加し、こちらからマッチングすることもできます。</li>
                 <li>[2015/06/28]フィールド一覧にて、自身が対戦相手となっているフィールドのみを表示する一覧を追加。自分が対戦中のフィールドを効率良く探し出せます。</li>

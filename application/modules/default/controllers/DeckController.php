@@ -35,6 +35,8 @@ class DeckController extends Zend_Controller_Action
         $this->_layout->description = preg_replace('/%descend%.*$/', '', $sExp);
         $this->_javascript[] = '/js/img_delay_load.min.js';
         $this->_javascript[] = '/js/scroll_to_top.js';
+        $this->_javascript[] = '/js/perfect-scrollbar.jquery.min.js';
+
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/deck_list.js';
         } else {
@@ -78,6 +80,8 @@ class DeckController extends Zend_Controller_Action
         $this->_layout->title = 'マイデッキ一覧';
         $this->_layout->description = preg_replace('/%descend%.*$/', '', $sExp);
         $this->_javascript[] = '/js/img_delay_load.min.js';
+        $this->_javascript[] = '/js/scroll_to_top.js';
+        $this->_javascript[] = '/js/perfect-scrollbar.jquery.min.js';
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/deck_list.js';
         } else {
@@ -87,6 +91,7 @@ class DeckController extends Zend_Controller_Action
         $ret = $this->_model->getDeckList(array(
             'page_no'   => $nPage,
             'mine'      => true,
+            'stab'      => true,
         ));
 
         $this->view->assign('sExplain', str_replace('%descend%', '', $sExp));
@@ -104,7 +109,7 @@ class DeckController extends Zend_Controller_Action
         $request = $this->getRequest();
         $deckId = $request->getParam('deck_id', '');
         $this->_layout->title = 'デッキ編集';
-        $this->_javascript[] = '/js/deck_edit.js';
+        $this->_javascript[] = '/js/deck_edit.js?var=20150926';
         $this->_javascript[] = '/js/img_delay_load.min.js';
 
         $aDeckInfo = $this->_model->initDeckCard($deckId);

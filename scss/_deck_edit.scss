@@ -114,91 +114,101 @@ $deck_super_back_color : unquote('#ffff' + $deck_card_back_color);
             }
         }
     }
-}
 
-div.submit {
-    width: 100%;
-    margin-bottom: 2px;
-
-    div {
-        $submit_border_style : solid 2px;
-
-        padding: 12px 0;
-        text-align: center;
-        border-left: $submit_border_style;
-        border-right: $submit_border_style;
-        border-bottom: $submit_border_style;
-    }
-}
-
-.card_catalog {
-    .catalog {
-        padding: 2px;
-        float: left;
-        border: solid 1px;
-        box-sizing: border-box;
-        width: 150px;
-    }
-
-    .monster_front {
-        background-color: $list_front_back_color;
-    }
-
-    .monster_back {
-        background-color: $list_back_back_color;
-    }
-
-    .magic {
-        background-color: $list_magic_back_color;
-    }
-
-    .super_front {
-        background-color: $list_super_back_color;
-    }
-
-    .super_back {
-        background-color: $list_super_back_color;
-    }
-
-    img {
-        width: $img_size;
-        height: $img_size;
-        border: solid 1px;
-        float: left;
-    }
-
-    .card_info.summary {
-        display: none;
-        float: left;
-    }
-
-    .card_info.detail {
-        display: none;
+    .submit {
         width: 100%;
-    }
-
-    .selected_card {
-        clear:both;
-        max-width: 350px;
+        margin-bottom: 2px;
 
         div {
-            float:left;
-            margin-top: 9px;
-        }
+            $submit_border_style : solid 2px;
 
-        div.card_image_frame {
-            margin: 2px;
-        }
-
-        div.card_detail {
-            float: right;
-            margin-top: 12px;
-            padding-right: 15px;
-
-            a {
-                font-size: 16px;
-            }
+            padding: 12px 0;
+            text-align: center;
+            border-left: $submit_border_style;
+            border-right: $submit_border_style;
+            border-bottom: $submit_border_style;
         }
     }
 
+    .controlls {
+        display: block;
+        margin: 6px auto;
+        width: 120px;
+        text-align: center;
+    }
+
+    .card_catalog {
+        .catalog {
+            padding: 2px;
+            float: left;
+            border: solid 1px;
+            box-sizing: border-box;
+        }
+
+        .monster_front {
+            background-color: $list_front_back_color;
+        }
+
+        .monster_back {
+            background-color: $list_back_back_color;
+        }
+
+        .magic {
+            background-color: $list_magic_back_color;
+        }
+
+        .super_front {
+            background-color: $list_super_back_color;
+        }
+
+        .super_back {
+            background-color: $list_super_back_color;
+        }
+
+        img {
+            width: $img_size;
+            height: $img_size;
+            border: solid 1px;
+            float: left;
+        }
+
+        .card_info {
+            &.summary {
+                display: none;
+                float: left;
+                width: 100px;
+            }
+
+            &.detail {
+                display: none;
+                width: 100%;
+            }
+        }
+
+        .selected_card {
+            clear:both;
+            max-width: 350px;
+            margin: 8px auto;
+
+            div {
+                float:left;
+                margin-top: 9px;
+            }
+
+            div.card_image_frame {
+                margin: 2px;
+            }
+
+            div.card_detail {
+                float: right;
+                margin-top: 12px;
+                padding-right: 15px;
+
+                a {
+                    font-size: 16px;
+                }
+            }
+        }
+
+    }
 }

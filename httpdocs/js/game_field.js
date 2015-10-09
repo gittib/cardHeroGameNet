@@ -1752,6 +1752,9 @@ new function () {
                                     var targetMon = g_field_data.cards[q.target_id];
                                     targetMon = _checkScapeGoat(targetMon);
 
+                                    if (targetMon.standby_flg) {
+                                        throw new Error('target is standby');
+                                    }
                                     if (targetMon.next_game_card_id) {
                                         throw new Error('next_game_card_id is not null');
                                     }
@@ -1803,6 +1806,9 @@ new function () {
                                     var targetMon = g_field_data.cards[q.target_id];
                                     targetMon = _checkScapeGoat(targetMon);
 
+                                    if (targetMon.standby_flg) {
+                                        throw new Error('target is standby');
+                                    }
                                     if (targetMon.next_game_card_id) {
                                         throw new Error('next_game_card_id is not null');
                                     }

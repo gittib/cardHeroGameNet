@@ -71,7 +71,6 @@ $(function() {
         });
         $('.catalog .card_info.detail [magic_id]').each(function() {
         });
-        $('.catalog .card_info.summary').show();
     });
 
     var master_card_id = $('div.master_select select[name=master]').val();
@@ -88,6 +87,16 @@ $(function() {
         oResizeTimer = setTimeout(function() {
             addLineHeadClass();
         }, 200);
+    });
+
+    $('.switchSummary').change(function () {
+        var sDom = '.catalog .card_info.summary';
+        if ($(this).prop('checked')) {
+            $(sDom).show();
+        } else {
+            $(sDom).hide();
+        }
+        addLineHeadClass();
     });
 
     $('.catalog').on('click', function() {

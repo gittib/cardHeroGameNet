@@ -76,6 +76,9 @@ function loadMoreDeck (iPageNo) {
                     if (val['open_flg'] == 0) {
                         sSecretDeckClass = ' secret ';
                     }
+                    if (!val['deck_name']) {
+                        val['deck_name'] = 'デッキ名未設定';
+                    }
 
                     sHtml +=
                     '<div class="deck_frame' + sSecretDeckClass + '">' +
@@ -106,6 +109,7 @@ function loadMoreDeck (iPageNo) {
                 });
                 $('#deck_list_frame').append(sHtml);
             }
+            $('.card_list_frame').perfectScrollbar();
         } catch (e) {
             console.log(e.stack);
         }
@@ -113,6 +117,7 @@ function loadMoreDeck (iPageNo) {
 }
 
 $(function() {
+    $('.card_list_frame').perfectScrollbar();
     $(document).on('click', '#more_deck_list[page]', function (e) {
         e.preventDefault();
 

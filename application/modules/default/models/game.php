@@ -1442,5 +1442,31 @@ class model_Game {
             $this->_db->rollBack();
             throw $e;
         }
+
+        $subSelMaster = $this->_db->select()
+            ->from(
+                array('mc' => 'm_card'),
+                array(
+                    'card_id',
+                )
+            )
+            ->where('mc.category = ?', 'master');
+        $sel = $this->_db->select()
+            ->from(
+                array('tgc' => 't_game_card'),
+                array(
+                    'cnt'   => new Zend_Db_Expr("count(*)"),
+                )
+            )
+            ->where('tgc.game_field_id = ?', $$iGameFieldId)
+            ->where('tgc.position_category = ?', 'used')
+            ->where('tgc.card_id in (?)', $subSelMaster);
+        $cnt = $this->_db->fetchOne($sel);
+        if (0 < $cnt) {
+            // 決着したのでt_finisherを更新する
+            require_once APPLICATION_PATH . '/modules/api/models/index.php';
+            $mdl = new model_Api_Index();
+            $mdl->mvFinisherRefresh();
+        }
     }
 }

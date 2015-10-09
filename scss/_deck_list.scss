@@ -42,13 +42,13 @@ $img_size : 46px;
             }
 
             div.card_list_frame {
-                $card_list_width : 320px;
-                width: $card_list_width;
+                max-width: 320px;
+                height: 290px;
+                overflow-y: scroll;
                 text-align: center;
                 margin: 0 auto;
 
                 div.card_list {
-                    max-width: $card_list_width;
                     float: left;
                     border: none;
                     text-align: center;
@@ -78,6 +78,59 @@ $img_size : 46px;
                 border: solid 1px;
                 width: $img_size;
                 height: $img_size;
+            }
+        }
+    }
+
+    @media screen and (min-width: 380px) {
+        #deck_list_frame {
+            max-width: 100%;
+
+            @media screen and (max-width: 740px) {
+                // 1カラムレイアウト
+                width: 362px;
+            }
+            @media screen and (min-width: 741px) and (max-width: 1102px) {
+                // 2カラムレイアウト
+                width: 724px;
+
+                .deck_frame:nth-child(2n+1) {
+                    clear: both;
+                }
+            }
+            @media screen and (min-width: 1103px) and (max-width: 1465px) {
+                // 3カラムレイアウト
+                width: 1086px;
+
+                .deck_frame:nth-child(3n+1) {
+                    clear: both;
+                }
+            }
+            @media screen and (min-width: 1466px) {
+                // 4カラムレイアウト
+                width: 1448px;
+
+                .deck_frame:nth-child(4n+1) {
+                    clear: both;
+                }
+            }
+
+            .deck_frame {
+                margin: 3px;
+                float: left;
+
+                div.card_list_frame {
+                    $card_list_width : 320px;
+                    width: $card_list_width;
+
+                    div.card_list {
+                        max-width: $card_list_width;
+                    }
+                }
+
+                div.deck_header {
+                    width: 350px;
+                }
             }
         }
     }
