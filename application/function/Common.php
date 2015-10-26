@@ -58,7 +58,7 @@ class Common {
         }
 
         $userId = $aUserInfo['user_id'];
-        for ($i = 0 ; $i < 1000 ; $i++) {
+        for ($i = 0 ; $i < 100 ; $i++) {
             $sNewKey = md5(rand(1, 10000) . date('YmdHis') . rand(1,10000));
             $sel = "select count(*) from t_login_key where temp_key = '{$sNewKey}'";
             $cnt = $db->fetchOne($sel);
@@ -66,10 +66,14 @@ class Common {
                 try {
                     $db->beginTransaction();
                     $set = array(
-                            'temp_key'      => $sNewKey,
-                            'limit_time'    => date('Y-m-d H:i:s', time() + $nCookieLimitSec),
-                            );
-                    $where = array($db->quoteInto('user_id = ?', $userId));
+                        'temp_key'      => $sNewKey,
+                        'limit_time'    => date('Y-m-d H:i:s', time() + $nCookieLimitSec),
+                        'user_agent'    => $_SERVER['HTTP_USER_AGENT'],
+                        'device_type'   => Common::checkUA(),
+                    );
+                    $where = array(
+                        $db->quoteInto('temp_key = ?', (string)$sLoginKey),
+                    );
                     $db->update('t_login_key', $set, $where);
                     $db->commit();
                 } catch (Exception $e) {
@@ -179,6 +183,9 @@ table.sql_debug td {
   background-color: #ffffff;
   font-size: 10px;
 }
+table.sql_debug td.sql {
+  word-break: break-all;
+}
 table.sql_debug td .variable {
   color: red;
 }
@@ -198,7 +205,7 @@ _eos_;
                     $prm = '<span class="variable">' . htmlspecialchars(str_replace('?', $sTmpNeedle, $prm)) . '</span>';
                     $sql = preg_replace('/^([^?]*)\?/s', "$1'{$prm}'", $sql);
                 }
-                $ret .= "    <tr><td>{$num}</td><td>{$sql}</td><td>{$msec}</td></tr>\n";
+                $ret .= "    <tr><td>{$num}</td><td class=\"sql\">{$sql}</td><td>{$msec}</td></tr>\n";
                 $num++;
             }
             $ret = str_replace($sTmpNeedle, '?', $ret);

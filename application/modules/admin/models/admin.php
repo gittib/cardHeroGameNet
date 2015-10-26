@@ -19,10 +19,10 @@ class Model_Admin
                 'ins_date desc',
                 'ad_id',
             ));
-        if (isset($aOptions['ad_id']) && $aOptions['ad_id']) {
+        if (!empty($aOptions['ad_id'])) {
             $sel->where('ad_id = ?', $aOptions['ad_id']);
         }
-        if (isset($aOptions['ad_group_id']) && $aOptions['ad_group_id']) {
+        if (!empty($aOptions['ad_group_id'])) {
             $sel->where('ad_group_id = ?', $aOptions['ad_group_id']);
         }
         $rslt = $this->_db->fetchAll($sel);
@@ -43,7 +43,7 @@ class Model_Admin
             }
 
             $aWhere = array(
-                'ad_id' => $aParams['ad_id'],
+                $this->_db->quoteInto('ad_id = ?', $aParams['ad_id']),
             );
 
             $this->_db->update('t_ad', $aParams, $aWhere);
@@ -52,8 +52,55 @@ class Model_Admin
             return true;
         } catch (Exception $e) {
             $this->_db->rollBack();
+            echo '<pre>';var_dump($e);exit;
         }
         return false;
+    }
+
+    public function insertAd () {
+        $sel = $this->_db->select()
+            ->from(
+                array('ad' => 't_ad'),
+                array(
+                    'ad_id' => "min(ad.ad_id)",
+                )
+            )
+            ->where('ad.code is null or ad.code = ?', '');
+        $rslt = $this->_db->fetchOne($sel);
+        if (!empty($rslt)) {
+            return $rslt;
+        }
+
+        try {
+            $this->_db->beginTransaction();
+
+            $sel = "select nextval('t_ad_ad_id_seq')";
+            $iAdId = $this->_db->fetchOne($sel);
+
+            $sel = $this->_db->select()
+                ->from(
+                    array('ad' => 't_ad'),
+                    array(
+                        'max_group_id'  => new Zend_Db_Expr("max(ad_group_id)"),
+                    )
+                );
+            $iNextGroupId = $this->_db->fetchOne($sel) + 1;
+
+            $aParams = array(
+                'ad_id'         => $iAdId,
+                'ad_group_id'   => $iNextGroupId,
+                'ad_type'       => 'pc,smt',
+                'del_flg'       => 1,
+            );
+
+            $this->_db->insert('t_ad', $aParams);
+
+            $this->_db->commit();
+        } catch (Exception $e) {
+            $this->_db->rollBack();
+            return null;
+        }
+        return $iAdId;
     }
 
 

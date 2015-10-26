@@ -323,4 +323,17 @@
             }
         }
     }
+
+    .click_ad {
+        a {
+            display: block;
+            max-width: $game_field_max_width !important;
+            margin: auto;
+
+            > img {
+                width: 100% !important;
+                height: auto !important;
+            }
+        }
+    }
 }

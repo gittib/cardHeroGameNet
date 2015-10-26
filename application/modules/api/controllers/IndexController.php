@@ -95,6 +95,8 @@ class Api_IndexController extends Zend_Controller_Action
     {
         $this->_helper->viewRenderer->setNoRender(true);
 
+        $this->_model->mvGameFieldRefresh();
+
         if ($this->_model->checkRefreshed() == false) {
             $this->_model->mvFinisherRefresh();
         }

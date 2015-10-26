@@ -1797,13 +1797,15 @@ function createGameFieldReactions() {
                                 game_card_id    : iGameCardId,
                             };
                         } else {
-                            if (val.sort_no < aFirstInfo.sort_no) {
+                            if (parseInt(val.sort_no) < parseInt(aFirstInfo.sort_no)) {
+                                console.log('first info upd');
+                                console.log(aFirstInfo);
                                 aFirstInfo = {
                                     sort_no         : val.sort_no,
                                     game_card_id    : iGameCardId,
                                 };
                             }
-                            if (aLastInfo.sort_no < val.sort_no) {
+                            if (parseInt(aLastInfo.sort_no) < parseInt(val.sort_no)) {
                                 aLastInfo = {
                                     sort_no         : val.sort_no,
                                     game_card_id    : iGameCardId,

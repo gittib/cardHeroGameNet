@@ -1,4 +1,4 @@
-$.get('/api/mv-refresh/');
+$.get("/api/mv-refresh/");
 
 (function() {
     try {

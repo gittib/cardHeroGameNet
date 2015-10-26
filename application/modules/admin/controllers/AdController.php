@@ -26,10 +26,26 @@ class Admin_AdController extends Zend_Controller_Action
         $request = $this->getRequest();
 
         $this->_layout->title = '管理画面';
+        $this->_layout->javascriptCode = $this->_indexJs();
         $aAd = $this->_getModel()->getAdList(array(
             'ad_group_id'   => $request->getParam('ad_group_id', false),
         ));
         $this->view->assign('aAd', $aAd);
+    }
+    private function _indexJs()
+    {
+        return <<<_eos_
+$('#hide_old_ad').on('change', function () {
+    if ($(this).prop('checked')) {
+        $('.hide').hide();
+        $('.term_over').hide();
+    } else {
+        $('.hide').show();
+        $('.term_over').show();
+    }
+});
+
+_eos_;
     }
 
     public function editAction()
@@ -74,11 +90,19 @@ class Admin_AdController extends Zend_Controller_Action
         foreach ($aPost as $key => $val) {
             $aPost[$key] = $request->getPost($key, '');
         }
-        $ret = $this->_model->updateAd($aPost);
+        $ret = $this->_getModel()->updateAd($aPost);
 
         if (!$ret) {
             $request->setParam('update_error', true);
         }
+        $request->setParam('ad_id', $iAdId);
+        $this->_forward('edit');
+    }
+
+    public function addAdAction()
+    {
+        $request = $this->getRequest();
+        $iAdId = $this->_getModel()->insertAd();
         $request->setParam('ad_id', $iAdId);
         $this->_forward('edit');
     }

@@ -83,7 +83,7 @@ $sSelectOldFieldDispray = <<<_eos_
 </div>
 
 _eos_;
-if (isset($this->bMine) && $this->bMine) {
+if (!empty($this->bMine)) {
     // 自分宛てフィールド一覧
     $aUserInfo = Common::checkLogin();
     if (!$aUserInfo) {
@@ -95,7 +95,7 @@ if (isset($this->bMine) && $this->bMine) {
     $sH1Text = 'あなたへの返信一覧';
     $sDescription = $sUserName . 'さんの投稿に対して返信されたフィールドの一覧です。<br />さらにフィールドを返信して、対戦の続きをお楽しみ下さい。';
     $sLastLink = "<a class='zabuton_blue' href='/game/'>全フィールド一覧はこちら</a>";
-} else if (isset($this->bLobby) && $this->bLobby) {
+} else if (!empty($this->bLobby)) {
     // 開始前フィールド一覧
     $sBackgroundStyle = '<style>#game_field_list_wrapper { background-color:#ffddff !important; }</style>';
     $sH1Text = '開始前フィールド一覧';
@@ -103,13 +103,13 @@ if (isset($this->bMine) && $this->bMine) {
     $sLastLink .= "<a class='zabuton_blue' href='/game/'>全フィールド一覧はこちら</a>";
     $sDescription = '現在、対戦相手受付中のフィールド一覧です。<br />こちらから返信する事でゲームを開始できます。';
     $sSelectOldFieldDispray = '';
-} else if (isset($this->bLast) && $this->bLast) {
+} else if (!empty($this->bLast)) {
     // 未返信フィールド一覧
     $sBackgroundStyle = '<style>#game_field_list_wrapper { background-color:#ffeeee !important; }</style>';
     $sH1Text = '未返信フィールド一覧';
     $sLastLink = "<a class='zabuton_blue' href='/game/'>全フィールド一覧はこちら</a>";
     $sSelectOldFieldDispray = '';
-} else if (isset($this->bMovie) && $this->bMovie) {
+} else if (!empty($this->bMovie)) {
     // リプレイ
     $sBackgroundStyle = '<style>#game_field_list_wrapper { background-color:#ffffee !important; }</style>';
     $sH1Text = 'リプレイ鑑賞';
@@ -130,6 +130,7 @@ if (isset($this->bMine) && $this->bMine) {
 }
 
 $sFields = '';
+$i = 0;
 foreach ($this->aCardInfoArray as $aCardInfo) {
     $this->aCardInfoInField = $aCardInfo;
     $aFieldInfo = $aCardInfo['field_info'];
@@ -156,6 +157,17 @@ foreach ($this->aCardInfoArray as $aCardInfo) {
 </div>
 
 _eos_;
+    if ($i % 3 == 0 && !empty($this->aAd)) {
+        // 広告追加
+        $ad = array_pop($this->aAd);
+        $sFields .= <<<_eos_
+<div class="click_ad" style="width:100%;">
+    {$ad}
+</div>
+
+_eos_;
+    }
+    $i++;
 }
 ?>
 

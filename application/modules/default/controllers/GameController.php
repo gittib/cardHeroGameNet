@@ -20,7 +20,7 @@ class GameController extends Zend_Controller_Action
         $this->_jsUpdDate = array(
             'game_list'     => '20150818',
             'deck_list'     => '20150926',
-            'game_field'    => '20150926',
+            'game_field'    => '20151022',
         );
     }
 
@@ -83,6 +83,13 @@ class GameController extends Zend_Controller_Action
         }
         $oSession->bNewFieldCommited = false;
 
+        $aUserInfo = Common::checkLogin();
+        if (empty($aUserInfo)) {
+            $aAd = $this->_model->getAdData();
+        } else {
+            $aAd = array();
+        }
+
         $this->view->assign('aCardInfoArray', $aCardInfoArray);
         $this->view->assign('nFields', $nFields);
         $this->view->assign('nPage', $nPage);
@@ -92,6 +99,7 @@ class GameController extends Zend_Controller_Action
         $this->view->assign('bMovie', $bMovie);
         $this->view->assign('iOpponentId', $iOpponentId);
         $this->view->assign('bNewFieldCommited', $bNewFieldCommited);
+        $this->view->assign('aAd', $aAd);
 
         $bFieldSended = $request->getParam('field_sended');
         if (isset($bFieldSended) && $bFieldSended) {
@@ -364,19 +372,36 @@ class GameController extends Zend_Controller_Action
                 'prime_field_id'    => $iBeforeFieldId,
             ));
             //$this->_model->getQueueText($iGameFieldId);
+
+            if ($aCardInfo['field_info']['turn'] == 1) {
+                $aCardInfo['field_info']['turn'] = 2;
+            } else {
+                $aCardInfo['field_info']['turn'] = 1;
+            }
         }
+
         if ($bReplayFlg) {
             $this->_layout->title = "リプレイ[{$iGameFieldId}]";
         } else {
             $this->_layout->title = "ゲーム[{$iGameFieldId}]";
         }
+
+        $aUserInfo = Common::checkLogin();
+        if (empty($aUserInfo)) {
+            $aAd = $this->_model->getAdData(array(
+                'limit' => 1,
+            ));
+            $this->view->assign('sAd', reset($aAd));
+        } else {
+            $this->view->assign('sAd', '');
+        }
+
         $this->view->assign('aCardInfo', $aCardInfo);
-        $this->view->assign('aUserInfo', Common::checkLogin());
+        $this->view->assign('aQueue', $aQueue);
+        $this->view->assign('aUserInfo', $aUserInfo);
         $this->view->assign('iGameFieldId', $iGameFieldId);
         $this->view->assign('bReplayFlg', $bReplayFlg);
-        $this->view->assign('bBefore', ($iGameFieldId != $iBeforeFieldId));
         $this->view->assign('sReferer', $sReferer);
-        $this->view->assign('aQueue', $aQueue);
     }
 
     public function replayAction() {

@@ -3,6 +3,7 @@
 #admin_ad {
     .scroll_frame {
         overflow: scroll;
+        text-align: center;
 
         table#ad_list {
             $border_style : 1px solid black;
@@ -32,8 +33,21 @@
                         background-color: gray;
                     }
                 }
+
+                &.term_over {
+                    .term {
+                        background-color: gray;
+                    }
+                }
             }
         }
+    }
+
+    #add_new_ad {
+        display: block;
+        margin: 12px auto;
+        width: 80px;
+        text-align: center;
     }
 }
 

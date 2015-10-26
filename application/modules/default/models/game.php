@@ -72,27 +72,16 @@ class model_Game {
         $aRet = array();
 
         $selField = $this->_getFieldIdSelectSql($aOption);
-
-        $selResponced = $this->_db->select()
-            ->from(
-                array('res' => 't_game_field'),
-                array(
-                    'game_field_id',
-                )
-            )
-            ->joinLeft(
-                array('vlf' => 'v_last_field'),
-                "vlf.game_field_id = res.game_field_id",
-                array()
-            )
-            ->where('vlf.game_field_id is null')
-            ;
+        $aFieldIds = $this->_db->fetchCol($selField);
+        if (empty($aFieldIds)) {
+            $aFieldIds = array(-9999);
+        }
 
         $aOrder = array(
             'field.ins_date desc',
             'game_field_id desc',
         );
-        if (isset($aOption['last_game_field_id']) && $aOption['last_game_field_id'] != '') {
+        if (!empty($aOption['last_game_field_id'])) {
             $aOrder = array(
                 'field.ins_date',
                 'game_field_id',
@@ -108,22 +97,17 @@ class model_Game {
                     'turn_count' => new Zend_Db_Expr("case when field.field_id_path = '' then 0 else length(regexp_replace(field.field_id_path, '[^-]', '', 'g')) + 1 end"),
                     'turn',
                     'user_id',
+                    'opponent_id',
                     'stone1',
                     'stone2',
                     'upd_date' => new Zend_Db_Expr("to_char(field.upd_date,'yyyy/mm/dd HH24:MI')"),
                 )
             )
             ->joinLeft(
-                array('bf' => 't_game_field'),
-                "bf.game_field_id::varchar = regexp_replace(field.field_id_path, '^.*-', '')::varchar",
-                array()
-            )
-            ->joinLeft(
                 array('opp' => 't_user'),
-                'opp.user_id = bf.user_id',
+                'opp.user_id = field.opponent_id',
                 array(
                     'opponent_name' => 'nick_name',
-                    'opponent_id'   => 'user_id',
                 )
             )
             ->joinLeft(
@@ -134,8 +118,8 @@ class model_Game {
                 )
             )
             ->joinLeft(
-                array('sub_res' => $selResponced),
-                'sub_res.game_field_id = field.game_field_id',
+                array('sub_res' => 't_game_field'),
+                'sub_res.before_field_id = field.game_field_id',
                 array(
                     'responced' => 'game_field_id',
                 )
@@ -147,8 +131,7 @@ class model_Game {
                     'finished_flg'  => new Zend_Db_Expr("case when tf.game_field_id is not null then 1 else 0 end"),
                 )
             )
-            ->where('field.del_flg = 0')
-            ->where('field.game_field_id in(?)', $selField)
+            ->where('field.game_field_id in(?)', $aFieldIds)
             ->order($aOrder);
 
         $rslt = $this->_db->fetchAll($sel);
@@ -188,7 +171,7 @@ class model_Game {
                     'max_rare'  => new Zend_Db_Expr("max(rare)"),
                 )
             )
-            ->where('tgc.game_field_id in(?)', $selField)
+            ->where('tgc.game_field_id in(?)', $aFieldIds)
             ->group(array(
                 'tgc.game_field_id',
                 'tgc.owner',
@@ -239,7 +222,7 @@ class model_Game {
                 'mmon.monster_id = monster.monster_id',
                 array(
                     'monster_name',
-                    'monster_image'     => 'image_file_name',
+                    'monster_image' => 'image_file_name',
                     'lv',
                 )
             )
@@ -264,7 +247,7 @@ class model_Game {
                     'status_type',
                 )
             )
-            ->where('card.game_field_id in(?)', $selField)
+            ->where('card.game_field_id in(?)', $aFieldIds)
             ->order(array(
                 'game_field_id',
                 'position_category',
@@ -280,13 +263,13 @@ class model_Game {
         foreach ($rslt as $val) {
             if ($iGameCardId != $val['game_card_id']) {
 
-                if (isset($aOption['select_standby_field']) && $aOption['select_standby_field']) {
+                if (!empty($aOption['select_standby_field'])) {
                     if ($val['owner'] == 2) {
                         throw new Zend_Controller_Action_Exception('This field is already started.', 404);
                     }
                 }
 
-                if (isset($aTmpRow) && $aTmpRow) {
+                if (!empty($aTmpRow)) {
                     $aRet[$iGameFieldId][$sPosCategory][$iGameCardId] = $aTmpRow;
                     if ($val['owner'] != 1) {
                         $aRet[$iGameFieldId]['field_info']['started_flg'] = true;
@@ -299,7 +282,7 @@ class model_Game {
                     'card_name'         => $val['card_name'],
                     'category'          => $val['category'],
                 );
-                if (isset($val['monster_id']) && $val['monster_id'] != '') {
+                if (!empty($val['monster_id'])) {
                     $aTmpRow['monster_id']      = $val['monster_id'];
                     $aTmpRow['position']        = $val['field_position'];
                     $aTmpRow['monster_name']    = $val['monster_name'];
@@ -308,7 +291,7 @@ class model_Game {
                     $aTmpRow['lv']              = $val['lv'];
                     $aTmpRow['hp']              = $val['hp'];
                     $aTmpRow['status']          = array();
-                    if (isset($val['next_game_card_id']) && $val['next_game_card_id'] != '') {
+                    if (!empty($val['next_game_card_id'])) {
                         $aTmpRow['next_game_card_id'] = $val['next_game_card_id'];
                     }
                 }
@@ -340,7 +323,7 @@ class model_Game {
             $iGameFieldId = $val['game_field_id'];
             $sPosCategory = $val['position_category'];
             $iGameCardId  = $val['game_card_id'];
-            if (isset($val['status_id']) && $val['status_id'] != '') {
+            if (!empty($val['status_id'])) {
                 $aTmpRow['status'][] = array(
                     'id'        => $val['status_id'],
                     'type'      => $val['status_type'],
@@ -401,17 +384,17 @@ class model_Game {
             )
             ->where('t_game_field.del_flg = ?', 0);
 
-        if (isset($aOption['open_flg']) && $aOption['open_flg'] != '') {
-            $selField->where('t_game_field.open_flg = ?', $aOption['open_flg']);
-        }
-        if (isset($aOption['game_field_id']) && $aOption['game_field_id'] != '') {
+        if (!empty($aOption['game_field_id'])) {
             if (is_array($aOption['game_field_id'])) {
                 $selField->where('t_game_field.game_field_id in(?)', $aOption['game_field_id']);
             } else {
                 $selField->where('t_game_field.game_field_id = ?', $aOption['game_field_id']);
             }
         }
-        if (isset($aOption['min_start_date']) && $aOption['min_start_date'] != '') {
+        if (!empty($aOption['open_flg'])) {
+            $selField->where('t_game_field.open_flg = ?', $aOption['open_flg']);
+        }
+        if (!empty($aOption['min_start_date'])) {
             $subSelPrimeFields = $this->_db->select()
                 ->from(
                     array('tgf' => 't_game_field'),
@@ -424,7 +407,7 @@ class model_Game {
             $selField->where("regexp_replace(field_id_path, '-.*$', '') in (?)", $subSelPrimeFields);
         }
 
-        if (isset($aOption['last_game_field_id']) && $aOption['last_game_field_id'] != '') {
+        if (!empty($aOption['last_game_field_id'])) {
             $sub = $this->_db->select()
                 ->from(
                     't_game_field',
@@ -438,7 +421,7 @@ class model_Game {
 
             $selField->where('t_game_field.game_field_id in(?)', $aFieldIds);
         }
-        if (isset($aOption['page_no']) && $aOption['page_no'] != '') {
+        if (!empty($aOption['page_no'])) {
             $selField
                 ->limitPage($aOption['page_no'], $this->_nFieldsInPage)
                 ->order(array(
@@ -446,14 +429,14 @@ class model_Game {
                     't_game_field.game_field_id desc',
                 ));
         }
-        if (isset($aOption['new_arrival']) && $aOption['new_arrival'] != '') {
+        if (!empty($aOption['new_arrival'])) {
             $selField->join(
                 array('vlf' => 'v_last_field'),
                 'vlf.game_field_id = t_game_field.game_field_id',
                 array()
             );
         }
-        if (isset($aOption['select_standby_field']) && $aOption['select_standby_field']) {
+        if (!empty($aOption['select_standby_field'])) {
             // 開始前フィールドは一ヶ月以内のもののみ抽出する
             $minTime = date('Y-m-d', time()-3600*24*30);
 
@@ -472,14 +455,14 @@ class model_Game {
                 ->where('t_game_field.ins_date > ?', $minTime)
                 ->where('t_game_field.game_field_id not in(?)', $subSelStarted);
         }
-        if (isset($aOption['select_finished']) && $aOption['select_finished'] != '') {
+        if (!empty($aOption['select_finished'])) {
             $selField->join(
                 array('tf' => 't_finisher'),
                 'tf.game_field_id = t_game_field.game_field_id',
                 array()
             );
         }
-        if (isset($aOption['finisher_id']) && $aOption['finisher_id'] != '') {
+        if (!empty($aOption['finisher_id'])) {
             $subSelFinisher = $this->_db->select()
                 ->from(
                     array('tf' => 't_finisher'),
@@ -489,19 +472,8 @@ class model_Game {
 
             $selField->where('t_game_field.game_field_id in(?)', $subSelFinisher);
         }
-        if (isset($aOption['opponent_id']) && $aOption['opponent_id']) {
-            $subSelOpponent = $this->_db->select()
-                ->from(
-                    array('tgf' => 't_game_field'),
-                    array(
-                        'game_field_id',
-                    )
-                )
-                ->where('tgf.user_id = ?', $aOption['opponent_id']);
-            $selField
-                ->where('t_game_field.field_id_path is not null')
-                ->where('t_game_field.field_id_path != ?', '')
-                ->where("regexp_replace(t_game_field.field_id_path, '^.*-', '')::int in(?)", $subSelOpponent);
+        if (!empty($aOption['opponent_id'])) {
+            $selField->where('t_game_field.opponent_id = ?', $aOption['opponent_id']);
         }
 
         return $selField;
@@ -651,7 +623,7 @@ class model_Game {
             ->from(
                 array('tgf' => 't_game_field'),
                 array(
-                    'last'  => new Zend_Db_Expr("regexp_replace(field_id_path, '^.*-', '')"),
+                    'last'  => 'before_field_id',
                     'prime' => new Zend_Db_Expr("regexp_replace(field_id_path, '^([[:digit:]]+)-([[:digit:]]+)-.*$', '\\\\2')"),
                 )
             )
@@ -659,7 +631,7 @@ class model_Game {
             ->where('game_field_id = ?', $aOption['game_field_id']);
         $aRow = $this->_db->fetchRow($sel);
 
-        if (isset($aOption['prime']) && $aOption['prime']) {
+        if (!empty($aOption['prime'])) {
             $iBeforeFieldId = (int)$aRow['prime'];
         } else {
             $iBeforeFieldId = (int)$aRow['last'];
@@ -753,7 +725,7 @@ class model_Game {
         $iQueueId = null;
         $aTmp = null;
         $baseFieldTurn = 1; // 2値だけど1か2なんで注意
-        if (isset($aOption['base_field_turn']) && $aOption['base_field_turn']) {
+        if (!empty($aOption['base_field_turn'])) {
             $baseFieldTurn = $aOption['base_field_turn'];
         }
 
@@ -988,7 +960,7 @@ class model_Game {
     {
         $aUserInfo = Common::checkLogin();
         $userId = -1;
-        if (isset($aUserInfo) && $aUserInfo != '') {
+        if (!empty($aUserInfo)) {
             $userId = $aUserInfo['user_id'];
         }
 
@@ -1092,7 +1064,7 @@ class model_Game {
     {
         $aUserInfo = Common::checkLogin();
         $userId = -1;
-        if (isset($aUserInfo) && $aUserInfo != '') {
+        if (!empty($aUserInfo)) {
             $userId = $aUserInfo['user_id'];
         }
 
@@ -1198,10 +1170,10 @@ class model_Game {
             'owner'             => 1,
             'position_category' => $row['position_category'],
         );
-        if (isset($row['owner']) && $row['owner'] != '') {
+        if (!empty($row['owner'])) {
             $set['owner'] = $row['owner'];
         }
-        if (isset($row['sort_no']) && $row['sort_no'] != '') {
+        if (!empty($row['sort_no'])) {
             $set['sort_no'] = $row['sort_no'];
         }
         $this->_db->insert('t_game_card', $set);
@@ -1285,6 +1257,7 @@ class model_Game {
                     'game_field_id',
                     'turn',
                     'field_id_path',
+                    'user_id',
                 )
             )
             ->where('game_field_id = ?', $aArgs['field_id0']);
@@ -1309,14 +1282,16 @@ class model_Game {
             $sql = "select nextval('t_game_field_game_field_id_seq')";
             $iGameFieldId = $this->_db->fetchOne($sql);
             $set = array(
-                'game_field_id' => $iGameFieldId,
-                'field_id_path' => $sFieldIdPath,
-                'user_id'       => $aLoginInfo['user_id'],
-                'turn'          => $aFieldData['turn'],
-                'stone1'        => $aFieldData['stone1'],
-                'stone2'        => $aFieldData['stone2'],
-                'open_flg'      => 1,
-                'del_flg'       => 0,
+                'game_field_id'     => $iGameFieldId,
+                'field_id_path'     => $sFieldIdPath,
+                'before_field_id'   => $aField0['game_field_id'],
+                'user_id'           => $aLoginInfo['user_id'],
+                'opponent_id'       => $aField0['user_id'],
+                'turn'              => $aFieldData['turn'],
+                'stone1'            => $aFieldData['stone1'],
+                'stone2'            => $aFieldData['stone2'],
+                'open_flg'          => 1,
+                'del_flg'           => 0,
             );
             $this->_db->insert('t_game_field', $set);
             foreach ($aFieldData['cards'] as $val) {
@@ -1344,12 +1319,12 @@ class model_Game {
                 );
                 $this->_db->insert('t_game_card', $set);
                 if ($val['pos_category'] == 'field') {
-                    if (isset($val['standby_flg']) && $val['standby_flg']) {
+                    if (!empty($val['standby_flg'])) {
                         $val['standby_flg'] = 1;
                     } else {
                         $val['standby_flg'] = 0;
                     }
-                    if (!isset($val['act_count']) || !$val['act_count']) {
+                    if (empty($val['act_count'])) {
                         $val['act_count'] = 0;
                     }
                     $set = array(
@@ -1361,7 +1336,7 @@ class model_Game {
                         'standby_flg'   => $val['standby_flg'],
                         'act_count'     => $val['act_count'],
                     );
-                    if (isset($val['next_game_card_id']) && $val['next_game_card_id'] != '') {
+                    if (!empty($val['next_game_card_id'])) {
                         $set['next_game_card_id'] = $val['next_game_card_id'];
                     }
                     $this->_db->insert('t_game_monster', $set);
@@ -1458,7 +1433,7 @@ class model_Game {
                     'cnt'   => new Zend_Db_Expr("count(*)"),
                 )
             )
-            ->where('tgc.game_field_id = ?', $$iGameFieldId)
+            ->where('tgc.game_field_id = ?', $iGameFieldId)
             ->where('tgc.position_category = ?', 'used')
             ->where('tgc.card_id in (?)', $subSelMaster);
         $cnt = $this->_db->fetchOne($sel);
@@ -1468,5 +1443,49 @@ class model_Game {
             $mdl = new model_Api_Index();
             $mdl->mvFinisherRefresh();
         }
+    }
+
+    /**
+     *  @param aArgs:
+     *      limit   : 広告取得上限数
+     *
+     *  @return array 広告コードの配列
+     */
+    public function getAdData ($aArgs = array())
+    {
+        if (empty($aArgs)) {
+            $aArgs = array();
+        }
+        if (empty($aArgs['limit'])) {
+            $aArgs['limit'] = 4;
+        }
+
+        $sub = $this->_db->select()
+            ->from(
+                't_ad',
+                array(
+                    'ad_id',
+                    'code',
+                    'ad_comment',
+                    'rank'  => new Zend_Db_Expr("dense_rank() over(partition by ad_group_id order by random())"),
+                )
+            )
+            ->where('del_flg != 1')
+            ->where('start_date <= now()')
+            ->where('end_date >= now()')
+            ->where('ad_type like ?', '%click%')
+            ->order(array(
+                'random()',
+            ));
+        $sel = $this->_db->select()
+            ->from(
+                array('ad' => $sub),
+                array(
+                    'code',
+                )
+            )
+            ->where('ad.rank = 1')
+            ->limit($aArgs['limit']);
+        return $this->_db->fetchCol($sel);
     }
 }

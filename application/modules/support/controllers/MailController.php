@@ -19,6 +19,7 @@ class Support_MailController extends Zend_Controller_Action
             2   => 'サイト改善要望',
             3   => 'カード性能調整要望',
             4   => '疑問・質問',
+            5   => 'パスワードを忘れた',
             98  => 'gittiへの連絡',
             99  => 'その他',
         );

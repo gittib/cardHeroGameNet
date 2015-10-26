@@ -445,6 +445,22 @@
         }
     }
 
+    .click_ad {
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+        text-align: center;
+
+        a {
+            max-width: 90% !important;
+
+            > img {
+                width: 100% !important;
+                height: auto !important;
+            }
+        }
+    }
+
     #buttons_frame {
         width: 100%;
 

@@ -27,15 +27,6 @@
         ),
     );
 
-    // 1ターン前のフィールドを抽出した場合はturnの値を更新する
-    if ($this->bBefore) {
-        if ($aCardInfo['field_info']['turn'] == 1) {
-            $aCardInfo['field_info']['turn'] = 2;
-        } else {
-            $aCardInfo['field_info']['turn'] = 1;
-        }
-    }
-
     $aCards = array();
     foreach ($aCardInfo['field'] as $iGameCardId => $val) {
         if ($aCardInfo['field_info']['turn'] == $val['owner']) {
@@ -225,7 +216,7 @@ _eos_;
 
 _eos_;
 
-    if (isset($aCardInfo['deck']) && $aCardInfo['deck'] != '') {
+    if (!empty($aCardInfo['deck'])) {
         foreach ($aCardInfo['deck'] as $iGameCardId => $val) {
             $sOwner = ($aCardInfo['field_info']['turn'] == $val['owner']) ? 'my' : 'enemy';
             $aCards[$iGameCardId] = array(
@@ -238,7 +229,7 @@ _eos_;
         }
     }
 
-    if (isset($aCardInfo['used']) && $aCardInfo['used'] != '') {
+    if (!empty($aCardInfo['used'])) {
         foreach ($aCardInfo['used'] as $iGameCardId => $val) {
             $sOwner = ($aCardInfo['field_info']['turn'] == $val['owner']) ? 'my' : 'enemy';
             $aCards[$iGameCardId] = array(
@@ -297,6 +288,18 @@ _eos_;
         $sFieldHtml .= "                </tr>\n";
     }
     $sFieldHtml .= "            </table>\n";
+
+    if (!empty($this->sAd)) {
+        $sAd = <<<_eos_
+    <div class="click_ad">
+        {$this->sAd}
+        <div class="exp">↑↑↑こちらの広告は<a href="/user/login-input/">ログイン</a>すると消えます。↑↑↑<br />&nbsp;</div>
+    </div>
+
+_eos_;
+    } else {
+        $sAd = '';
+    }
 ?>
     <div id="game_infomation_frame">
         <div class="label">
@@ -330,6 +333,7 @@ _eos_;
             </div>
         </div>
     </div>
+    <?php echo $sAd; ?>
     <div id="buttons_frame">
         <div class="cancel_button">
             キャンセル

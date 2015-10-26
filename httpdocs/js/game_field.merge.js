@@ -2453,13 +2453,15 @@ function createGameFieldReactions() {
                                 game_card_id    : iGameCardId,
                             };
                         } else {
-                            if (val.sort_no < aFirstInfo.sort_no) {
+                            if (parseInt(val.sort_no) < parseInt(aFirstInfo.sort_no)) {
+                                console.log('first info upd');
+                                console.log(aFirstInfo);
                                 aFirstInfo = {
                                     sort_no         : val.sort_no,
                                     game_card_id    : iGameCardId,
                                 };
                             }
-                            if (aLastInfo.sort_no < val.sort_no) {
+                            if (parseInt(aLastInfo.sort_no) < parseInt(val.sort_no)) {
                                 aLastInfo = {
                                     sort_no         : val.sort_no,
                                     game_card_id    : iGameCardId,
@@ -5784,6 +5786,7 @@ new function () {
         //
         $(document).on('click', '.sort_card_target', function () {
             try {
+                console.log(g_field_data.sorting_cards);
                 var iRef = parseInt($(this).closest('[iref]').attr('iref'));
                 var iSortNo = g_field_data.sorting_cards[iRef].sort_no;
                 var bResolved = false;
@@ -5799,6 +5802,7 @@ new function () {
                 if (!bResolved) {
                     g_field_data.sorting_cards[iRef].bSelected = true;
                 }
+                console.log(g_field_data.sorting_cards);
             } catch(e) {
                 console.log(e.stack);
             }
@@ -7798,7 +7802,9 @@ new function () {
                                             break;
                                         case 'sort_card':
                                             // ソートカード発動時の処理
-                                            g_field_data.sort_card_flg = true;
+                                            if (!bOldQueue) {
+                                                g_field_data.sort_card_flg = true;
+                                            }
 
                                             // 対象カードをピックアップする
                                             var mon = g_field_data.cards[q.target_id];
