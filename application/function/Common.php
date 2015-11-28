@@ -23,7 +23,7 @@ class Common {
             $sLoginKey = Zend_Registry::get('current_login_key');
         }
         if ($sLoginKey == '') {
-            if (!isset($_COOKIE['login_key']) || $_COOKIE['login_key'] == '') {
+            if (empty($_COOKIE['login_key'])) {
                 return null;
             }
             $sLoginKey = $_COOKIE['login_key'];
@@ -45,7 +45,7 @@ class Common {
             ->where('tlk.temp_key = ?', (string)$sLoginKey)
             ->where('tlk.limit_time >= now()');
         $aUserInfo = $db->fetchRow($sel);
-        if (!isset($aUserInfo) || !$aUserInfo) {
+        if (empty($aUserInfo)) {
             // クッキー値がDBに載ってなかったら消しておく
             setcookie('login_key', '', time() - 1800, '/');
             Zend_Registry::set('current_login_key', '');
@@ -58,7 +58,7 @@ class Common {
         }
 
         $userId = $aUserInfo['user_id'];
-        for ($i = 0 ; $i < 100 ; $i++) {
+        for ($i = 0 ; $i < 10 ; $i++) {
             $sNewKey = md5(rand(1, 10000) . date('YmdHis') . rand(1,10000));
             $sel = "select count(*) from t_login_key where temp_key = '{$sNewKey}'";
             $cnt = $db->fetchOne($sel);
@@ -75,10 +75,10 @@ class Common {
                         $db->quoteInto('temp_key = ?', (string)$sLoginKey),
                     );
                     $db->update('t_login_key', $set, $where);
+
                     $db->commit();
                 } catch (Exception $e) {
                     $db->rollBack();
-                    return null;
                 }
 
                 setcookie('login_key', $sNewKey, time() + $nCookieLimitSec, '/');

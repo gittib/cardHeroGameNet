@@ -82,7 +82,7 @@ class CardController extends Zend_Controller_Action
     private function _echoScript() {
         return <<<_eos_
     $(function() {
-        $(".art_range").click(function() {
+        $(".art_range").on('click', function() {
             $("#explain>.range_name").text($(this).find(".range_type_name").text());
             $("#explain>.main").text($(this).find(".range_caption").text());
         })

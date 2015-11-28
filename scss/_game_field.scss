@@ -11,10 +11,10 @@
         div {
             border: $border_style;
             border-bottom: none;
-        }
 
-        div.info {
-            min-height: 1em;
+            &.info {
+                min-height: 1em;
+            }
         }
     }
 
@@ -108,15 +108,14 @@
 
         #game_field {
             width: 100%;
-            border: 1px solid;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 1px;
+            background-color: black;
 
             td {
                 width: 30%;
                 height: 51px;
-                border: 1px solid;
-                border-collapse: separate;
-                border-spacing: 1px;
+                background-color: white;
                 padding-top: 0;
                 padding-left: 0;
                 position: relative;
@@ -132,9 +131,10 @@
 
                 &.lvup_checking {
                     background-color: #888;
-                }
-                &.lvup_checking.lvup_ok {
-                    background-color: #fff;
+
+                    &.lvup_ok {
+                        background-color: #fff;
+                    }
                 }
 
                 .pict {
@@ -158,21 +158,23 @@
                     padding-left: 3px;
                     font-size: 12px;
 
-                    span.power {
-                        color: #ff0000;
-                    }
+                    span {
+                        &.power {
+                            color: #ff0000;
+                        }
 
-                    span.shield {
-                        color: #0060ff;
-                    }
+                        &.shield {
+                            color: #0060ff;
+                        }
 
-                    span.magic {
-                        color: #00aa00;
-                    }
+                        &.magic {
+                            color: #00aa00;
+                        }
 
-                    span.charge {
-                        color: #ffffff;
-                        background-color: #ff0000;
+                        &.charge {
+                            color: #ffffff;
+                            background-color: #ff0000;
+                        }
                     }
                 }
 

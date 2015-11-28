@@ -1,6 +1,6 @@
 (function() {
     var dt = new Date();
-    var aImg;
+    var aImg = {};
 
     (function _img_delay_load_main() {
         try {
@@ -33,16 +33,22 @@
 
     function _swapOriginalImages() {
         $(function() {
+            if (!aImg || typeof aImg != 'object') {
+                aImg = {};
+            }
             var sImg64 = 'data:image/jpg;base64,';
             $('img[original-src]').each(function() {
-                var t = $(this);
-                var k = t.attr('original-src');
-                if (aImg[k]) {
-                    t.attr('src', sImg64 + aImg[k]);
-                } else {
-                    t.attr('src', k);
-                }
-                t.removeAttr('original-src');
+                var $that = $(this);
+                setTimeout(function() {
+                    var t = $that;
+                    var k = t.attr('original-src');
+                    if (aImg[k]) {
+                        t.attr('src', sImg64 + aImg[k]);
+                    } else {
+                        t.attr('src', k);
+                    }
+                    t.removeAttr('original-src');
+                }, 1);
             });
         });
     }

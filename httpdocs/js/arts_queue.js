@@ -561,8 +561,17 @@ function createArtsQueue(m) {
                 ];
                 break;
             case 1024:
+                return [
+                    {
+                        queue_type_id   : 1026,
+                        target_id       : aArgs.targets[0].game_card_id,
+                        param1          : 101,
+                    },
+                ];
+                break;
+            case 1025:
                 var iSt = 101;
-                if (2 <= g_master_data.m_monster[aArgs.field_data.cards[aArgs.actor_id].monster_id].lv) {
+                if (bNoArrange) {
                     iSt = 130;
                 }
                 return [

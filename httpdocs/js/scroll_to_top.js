@@ -10,11 +10,9 @@ $(function() {
                         '#scroll_to_top_button {' +
                             'position: fixed; right: 10px; bottom: 5px; width: 52px; height: 52px; background-color: black; color: white; font-size: 44px; text-align: center; opacity: 0; z-index: 100; cursor: pointer;' +
                         '}' +
-                        '#footer {' +
-                            'margin-bottom: 65px;' +
-                        '}' +
                     '</style>' +
-                    '<div id="scroll_to_top_button">∧</div>'
+                    '<div id="scroll_to_top_button">∧</div>'+
+                    '<div style="height:65px">&nbsp;</div>'
                 );
             }
             $('#scroll_to_top_button').stop().animate({

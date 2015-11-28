@@ -87,13 +87,13 @@ if (!empty($this->bMine)) {
     // 自分宛てフィールド一覧
     $aUserInfo = Common::checkLogin();
     if (!$aUserInfo) {
-        $sUserName = '????????';
+        $sUserName = 'あなた';
     } else {
-        $sUserName = $aUserInfo['nick_name'];
+        $sUserName = $aUserInfo['nick_name'] . 'さん';
     }
     $sBackgroundStyle = '<style>#game_field_list_wrapper { background-color:#eeffee !important; }</style>';
     $sH1Text = 'あなたへの返信一覧';
-    $sDescription = $sUserName . 'さんの投稿に対して返信されたフィールドの一覧です。<br />さらにフィールドを返信して、対戦の続きをお楽しみ下さい。';
+    $sDescription = $sUserName . 'の投稿に対して返信されたフィールドの一覧です。<br />さらにフィールドを返信して、対戦の続きをお楽しみ下さい。';
     $sLastLink = "<a class='zabuton_blue' href='/game/'>全フィールド一覧はこちら</a>";
 } else if (!empty($this->bLobby)) {
     // 開始前フィールド一覧
@@ -124,7 +124,7 @@ if (!empty($this->bMine)) {
         $sDescription = '新規ゲームの投稿が完了しました。';
     }
     $sLastLink  = "<a class='zabuton_red' href='/game/last/'>未返信フィールドの一覧へ</a>";
-    $sLastLink .= "<a class='zabuton_yellow' href='/game/movie/'>決着した対戦一覧へ</a>";
+    $sLastLink .= "<a class='zabuton_yellow' href='/game/movie/'>対戦リプレイの鑑賞へ</a>";
     $sLastLink .= "<a class='zabuton_pink' href='/game/lobby/'>開始前フィールドの一覧へ</a>";
     $sLastLink .= "<a class='zabuton_green' href='/game/my-turn/'>あなたへの返信一覧へ</a>";
 }
