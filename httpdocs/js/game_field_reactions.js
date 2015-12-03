@@ -539,7 +539,7 @@ function createGameFieldReactions() {
                     '<div class="around_card_info">' +
                         '山札：' + iDeck + '枚&nbsp;&nbsp;' +
                         '墓地：'+iUsed+'枚<br />' +
-                        '<a href="javascript:$(\'.used_cards_div\').toggle();" class="check_used">墓地確認↓</a>' +
+                        '<a href="javascript:void(0);" class="check_used">墓地確認↓</a>' +
                         '<div class="used_cards_div" style="display:none;">' +
                             sUsedCards +
                         '</div>' +

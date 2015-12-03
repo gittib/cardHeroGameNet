@@ -22,6 +22,7 @@ class IndexController extends Zend_Controller_Action
                 );
 
         $layout->title = 'スマホで遊べるカードヒーロー！';
+        $layout->canonical = '/';
         $sExp = "カードヒーロー@スマホは、ブラウザ上でカードヒーローを遊べるサイトです。\nフィールド一覧から気になったフィールドを選ぶと、実際にカードヒーローをプレイする事ができます。%descend%\n投稿されたフィールドへ返信し合う事で、ゲーム同様に対戦する事もできます。";
         $layout->description = preg_replace("/(\r|\n|%descend%.*)/", '', $sExp);
         $this->view->assign('sExplain', str_replace('%descend%', '', $sExp));

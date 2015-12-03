@@ -374,6 +374,10 @@ new function () {
             }
         });
 
+        $(document).on('click', '.check_used', function () {
+            $('.used_cards_div').toggle();
+        });
+
         //
         // リプレイ再生周りのコントロール
         //
