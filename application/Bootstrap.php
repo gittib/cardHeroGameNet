@@ -12,7 +12,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
                     'password'  => $conf->database->password,
                     'dbname'    => $conf->database->dbname,
                     ));
-        if (APPLICATION_ENV != 'production') {
+        if ($conf->phpSettings->display_errors) {
             $db->getProfiler()->setEnabled(true);
         }
         Zend_Registry::set('db', $db);
@@ -37,6 +37,8 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
     protected function _initRoute()
     {
+        $this->_rejectRefererSpam();
+
         $this->bootstrap('frontController');
         $front = Zend_Controller_Front::getInstance();
         $router = $front->getRouter();
@@ -268,6 +270,24 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             )
         );
         $router->addRoute('api_index', $route);
+    }
+
+    private function _rejectRefererSpam()
+    {
+        if (!empty($_GET['from'])) {
+            if (preg_match(';https?//;', $_GET['from']) !== false) {
+                header( "HTTP/1.1 301 Moved Permanently" );
+                header( "Location: {$_GET['from']}" );
+                exit;
+            }
+        }
+        foreach ($_GET as $key => $val) {
+            if (preg_match(';https?//;', $val) !== false) {
+                header( "HTTP/1.1 301 Moved Permanently" );
+                header( "Location: {$val}" );
+                exit;
+            }
+        }
     }
 }
 

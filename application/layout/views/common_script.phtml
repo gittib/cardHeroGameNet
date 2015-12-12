@@ -9,7 +9,7 @@ $sJavascript = '';
 if (isSet($l->javascript)) {
     foreach ($l->javascript as $key => $val) {
         if ($val != '') {
-            $sJavascript .= "<script type=\"text/javascript\" src=\"{$val}\" charset=\"UTF-8\"></script>\n";
+            $sJavascript .= "<script src=\"{$val}\"></script>\n";
         }
     }
 }
@@ -24,9 +24,10 @@ if (isSet($l->javascriptCode)) {
 _eos_;
 }
 
-if (APPLICATION_ENV == 'production') {
-    // Googleアナリティクスタグ
-    $sJavascript .= <<<_eos_
+if (empty($_GET['from']) || preg_match(';https?//;', $_GET['from']) === false) {
+    if (APPLICATION_ENV == 'production') {
+        // Googleアナリティクスタグ
+        $sJavascript .= <<<_eos_
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -40,11 +41,12 @@ if (APPLICATION_ENV == 'production') {
 </script>
 
 _eos_;
-} else {
-    $sJavascript .= "<!-- Google Analytics -->\n";
+    } else {
+        $sJavascript .= "<!-- Google Analytics -->\n";
+    }
 }
 ?>
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-<script type="text/javascript" src="/js/jquery.color-2.1.2.min.js"></script>
-<script type="text/javascript" src="/js/to_kana_zenkaku.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="/js/jquery.color-2.1.2.min.js"></script>
+<script src="/js/to_kana_zenkaku.js"></script>
 <?php echo $sJavascript; ?>

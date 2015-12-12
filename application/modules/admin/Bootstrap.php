@@ -43,7 +43,7 @@ class Admin_Bootstrap extends Zend_Application_Module_Bootstrap
             'password'  => $conf->database->admin->password,
             'dbname'    => $conf->database->dbname,
         ));
-        if (APPLICATION_ENV != 'production') {
+        if ($conf->phpSettings->display_errors) {
             $db->getProfiler()->setEnabled(true);
         }
         Zend_Registry::set('db', $db);
