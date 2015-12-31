@@ -182,6 +182,21 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         );
         $router->addRoute('deck_ranking_detail', $route);
 
+        // 指定したマジックカードが積まれたデッキ一覧
+        $route = new Zend_Controller_Router_Route_Regex(
+            'ranking/deck/list/(\d+)',
+            array(
+                'module'        => 'ranking',
+                'controller'    => 'deck',
+                'action'        => 'list',
+                'card_id'       => 1,
+            ),
+            array(
+                1   => 'card_id',
+            )
+        );
+        $router->addRoute('ranking_deck_list', $route);
+
         // 画像が無かった時のリダイレクト用
         $route = new Zend_Controller_Router_Route_Regex(
             '.*/?([^/]+)\.(png|jpg|gif)',
@@ -278,13 +293,6 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             if (preg_match(';https?//;', $_GET['from']) !== false) {
                 header( "HTTP/1.1 301 Moved Permanently" );
                 header( "Location: {$_GET['from']}" );
-                exit;
-            }
-        }
-        foreach ($_GET as $key => $val) {
-            if (preg_match(';https?//;', $val) !== false) {
-                header( "HTTP/1.1 301 Moved Permanently" );
-                header( "Location: {$val}" );
                 exit;
             }
         }

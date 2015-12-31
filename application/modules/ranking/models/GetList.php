@@ -179,4 +179,65 @@ class Model_Ranking_GetList
         }
         return $aRet;
     }
+
+    public function getMagicUseRanking()
+    {
+        $sel = $this->_db->select()
+            ->from(
+                array('tqu' => 't_queue_unit'),
+                array(
+                    'cnt'   => new Zend_Db_Expr("count(*)")
+                )
+            )
+            ->join(
+                array('tq' => 't_queue'),
+                'tq.queue_id = tqu.queue_id',
+                array()
+            )
+            ->join(
+                array('tgc' => 't_game_card'),
+                'tgc.game_field_id = tq.game_field_id and tgc.game_card_id = tqu.target_card_id',
+                array()
+            )
+            ->join(
+                array('mc' => 'm_card'),
+                'mc.card_id = tgc.card_id',
+                array(
+                    'card_id',
+                    'card_name',
+                    'image_file_name',
+                )
+            )
+            ->join(
+                array('mm' => 'm_magic'),
+                'mm.card_id = mc.card_id',
+                array()
+            )
+            ->where('tqu.queue_type_id = ?', 1014)
+            ->where('tqu.cost_flg = ?', 1)
+            ->group(array(
+                'mc.card_id',
+                'mc.card_name',
+                'mc.image_file_name',
+            ))
+            ->order(array(
+                'cnt desc',
+                'card_id',
+            ));
+
+        return $this->_db->fetchAll($sel);
+    }
+
+    public function getCardName($iCardId)
+    {
+        $sel = $this->_db->select()
+            ->from(
+                array('mc' => 'm_card'),
+                array(
+                    'card_name',
+                )
+            )
+            ->where('mc.card_id = ?', $iCardId);
+        return $this->_db->fetchOne($sel);
+    }
 }

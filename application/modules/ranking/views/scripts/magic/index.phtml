@@ -3,10 +3,9 @@ $iRank = 1;
 $sRankingHtml = '';
 $iBeforeCnt = 0;
 $iSumCnt = 0;
-foreach ($this->aDeckCardList as $val) {
+foreach ($this->aMagicList as $val) {
     $sUrl = "/card/detail/{$val['card_id']}/";
-    $sDeckInfoUrl = $this->url(array('action' => 'detail')) . "/{$val['card_id']}/";
-    $sDeckListUrl = $this->url(array('action' => 'list')) . "/{$val['card_id']}/";
+    $sDeckInfoUrl = $this->url(array('controller' => 'deck', 'action' => 'list')) . "/{$val['card_id']}/";
     $sDetailLink ="<a href='{$sUrl}' target='_blank' class='blank_link'>{$val['card_name']}</a>";
     $sImg = "<img src='/images/card/card.jpg' original-src='/images/card/{$val['image_file_name']}' />";
     if ($val['cnt'] != $iBeforeCnt) {
@@ -27,28 +26,28 @@ foreach ($this->aDeckCardList as $val) {
         </div>
         <div class="card_summary">
             {$sDetailLink}<br />
-            <span class="b">{$val['cnt']}枚</span>
-            ({$val['decks']}デッキにて採用)
+            <span class="b">{$val['cnt']}回</span>
         </div>
         <div class="detail_link">
-            <span><a href="{$sDeckListUrl}" class="blank_link" target="_blank">{$val['card_name']}の搭載デッキ一覧</a></span><br />
-            <span class="deck num summary"><a href="{$sDeckInfoUrl}">{$val['card_name']}の搭載状況詳細</a></span>
+            <span>
+                <a href="{$sDeckInfoUrl}" target="_blank" class="blank_link">{$val['card_name']}の搭載されたデッキ一覧</a>
+            </span>
         </div>
     </div>
 
 _eos_;
     $iRank++;
-    $iBeforeCnt = $val['cnt'];
+    $iBeforeCnt =  $val['cnt'];
     $iSumCnt    += $val['cnt'];
 }
 $sRankingHtml .= '<div class="ranking_row"></div>';
 ?>
-<div id="deck_ranking" class="ranking_wrapper">
-    <h1>デッキ搭載枚数　ランキング</h1>
+<div id="magic_ranking" class="ranking_wrapper">
+    <h1>マジック使用回数　ランキング</h1>
     <div class="description">
-        デッキに積まれたカードの枚数ランキングです。<br />
-        現在、<strong><?php echo $this->iDeck; ?>個</strong>のデッキが登録されています。<br />
-        未だ積まれていないカードは一覧に載っていません。また、マスターも集計対象外です。
+        マジックカードの使用回数ランキングです。<br />
+        現在までの累計で、<strong><?php echo $iSumCnt; ?>回</strong>マジックが使用されています。<br />
+        なお、マスターの特技は集計対象外です。
     </div>
     <?php echo $sRankingHtml; ?>
 </div>

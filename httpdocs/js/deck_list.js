@@ -13,6 +13,9 @@ function loadMoreDeck (iPageNo) {
     if ($('#deck_list_for_edit').size()) {
         sUrl += 'stab/t/';
     }
+    if ($('[searching_card_id]').size()) {
+        sUrl += 'card_id/' + $('[searching_card_id]').attr('searching_card_id');
+    }
     $.getJSON(sUrl, function(json) {
         try {
             var sHtml = '';

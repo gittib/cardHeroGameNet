@@ -15,6 +15,7 @@ class model_Deck {
      * @param aArgs['page_no']
      * @param aArgs['mine']
      * @param aArgs['stab']
+     * @param aArgs['card_id']
      * @param aArgs['max_rare_max']
      * @param aArgs['sum_rare_max']
      *
@@ -27,7 +28,7 @@ class model_Deck {
         // ログインしてない時用に、絶対にヒットしないダミーIDで初期化しておく
         $userId = -1;
         $nPage = 1;
-        if (isset($aArgs['page_no']) && $aArgs['page_no'] != '') {
+        if (!empty($aArgs['page_no'])) {
             $nPage = $aArgs['page_no'];
         }
         $aUserInfo = Common::checkLogin();
@@ -46,7 +47,7 @@ class model_Deck {
                 'deck_id desc',
             ))
             ->limitPage($nPage, $iDecksInPage);
-        if (isset($aArgs['mine']) && $aArgs['mine'] != '') {
+        if (!empty($aArgs['mine'])) {
             $sub->where('td.user_id = ?', $userId);
         }
         if (!empty($aArgs['max_rare_max'])) {
@@ -86,6 +87,18 @@ class model_Deck {
                 ))
                 ->having('sum(tdc.num) = ?', 30);
             $sub->where('td.deck_id in(?)', $sub4);
+        }
+        if (!empty($aArgs['card_id'])) {
+            $sub5 = $this->_db->select()
+                ->distinct()
+                ->from(
+                    array('tdc' => 't_deck_card'),
+                    array(
+                        'deck_id',
+                    )
+                )
+                ->where('tdc.card_id = ?', $aArgs['card_id']);
+            $sub->where('td.deck_id in(?)', $sub5);
         }
 
         $sel = $this->_db->select()

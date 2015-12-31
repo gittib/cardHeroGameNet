@@ -17,6 +17,7 @@ class Api_DeckController extends Zend_Controller_Action
     {
         $request = $this->getRequest();
         $iPageNo = $request->getParam('p');
+        $iCardId = $request->getParam('card_id');
         $bMine   = false;
         if ($request->getParam('mine', 'f') == 't') {
             $bMine = true;
@@ -37,6 +38,9 @@ class Api_DeckController extends Zend_Controller_Action
         }
         if ($bStab) {
             $aParams['stab'] = true;
+        }
+        if ($iCardId) {
+            $aParams['card_id'] = $iCardId;
         }
 
         $aDeckInfo = $model->getDeckList($aParams);
