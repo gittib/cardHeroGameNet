@@ -2,9 +2,11 @@
 
 class model_Api_Index {
     private $_db;
+    private $_mvRefreshInterval;
 
     public function __construct() {
         $this->_db = Zend_Registry::get('db');
+        $this->_mvRefreshInterval = date('Y-m-d H:i:s', strtotime('-6 hour'));
     }
 
     public function getCardMasterData() {
@@ -526,7 +528,7 @@ class model_Api_Index {
                         'cnt' => new Zend_Db_Expr("count(*)"),
                     )
                 )
-                ->where('tf.ins_date > ?', date('Y-m-d H:i:s', strtotime('-6 hour')));
+                ->where('tf.ins_date > ?', $this->_mvRefreshInterval);
             $d = $this->_db->fetchOne($sel);
             if (!empty($d)) {
                 // 新しいレコードが存在しているなら、このテーブルは更新しない
@@ -624,7 +626,7 @@ class model_Api_Index {
                         'cnt' => new Zend_Db_Expr("count(*)"),
                     )
                 )
-                ->where('tmug.ins_date > ?', date('Y-m-d H:i:s', strtotime('-6 hour')));
+                ->where('tmug.ins_date > ?', $this->_mvRefreshInterval);
             $d = $this->_db->fetchOne($sel);
             if (!empty($d)) {
                 // 新しいレコードが存在しているなら、このテーブルは更新しない
