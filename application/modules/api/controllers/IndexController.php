@@ -3,11 +3,13 @@
 class Api_IndexController extends Zend_Controller_Action
 {
     private $_model;
+    private $_config;
 
     public function init()
     {
         /* Initialize action controller here */
         $this->_getModel();
+        $this->_config = Zend_Registry::get('config');
     }
 
     public function preDispatch()
@@ -95,11 +97,10 @@ class Api_IndexController extends Zend_Controller_Action
     {
         $this->_helper->viewRenderer->setNoRender(true);
 
-        if ($this->_model->checkRefreshed() == false) {
-            $this->_model->mvFinisherRefresh();
-        }
+        $this->_model->mvFinisherRefresh();
+        $this->_model->mvMagicUsedGameRefresh();
 
-        if (APPLICATION_ENV != 'production') {
+        if ($this->_config->web->footer->display_sql) {
             echo Common::checkSQL();
         }
     }

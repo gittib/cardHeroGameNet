@@ -402,51 +402,6 @@ class model_Api_Index {
         return $aUrls;
     }
 
-    /**
-     *  マテビュー扱いのテーブルのリフレッシュが必要かどうか判定する
-     *
-     */
-    public function checkRefreshed() {
-        $bRefreshed = true;
-        try {
-            $this->_db->beginTransaction();
-
-            $sSql = 'LOCK TABLE ONLY t_finisher NOWAIT';
-            $this->_db->query($sSql);
-
-            $sel = $this->_db->select()
-                ->from(
-                    array('tf' => 't_finisher'),
-                    array(
-                        'upd' => new Zend_Db_Expr("to_char(max(upd_date), 'yyyymmdd')")
-                    )
-                );
-            $d = $this->_db->fetchOne($sel);
-            if ($d == date('Ymd')) {
-                // リフレッシュ済み
-            } else {
-                // 今日はまだ更新してないっぽいので更新処理を行う
-                // 更新した事実を残すためにUPDATEは掛ける
-                $this->_db->delete('t_finisher', 'game_field_id = -1');
-                $this->_db->insert('t_finisher', array(
-                    'card_id'       => -1,
-                    'game_field_id' => -1,
-                ));
-                $bRefreshed = false;
-            }
-
-            $this->_db->commit();
-        } catch (Zend_Db_Statement_Exception $e) {
-            // 誰かロックしてるからリフレッシュ中なはずなので、済みとして扱う
-            $this->_db->rollBack();
-        } catch (Exception $e) {
-            $this->_db->rollBack();
-            throw $e;
-        }
-
-        return $bRefreshed;
-    }
-
     public function mvFinisherRefresh() {
 
         $sSubSelDead = $this->_db->select()
@@ -561,15 +516,126 @@ class model_Api_Index {
 
         try {
             $this->_db->beginTransaction();
-            $this->_db->query('LOCK TABLE ONLY t_finisher IN EXCLUSIVE MODE');
+
+            $this->_db->query('LOCK TABLE ONLY t_finisher IN EXCLUSIVE MODE NOWAIT');
+
+            $sel = $this->_db->select()
+                ->from(
+                    array('tf' => 't_finisher'),
+                    array(
+                        'cnt' => new Zend_Db_Expr("count(*)"),
+                    )
+                )
+                ->where('tf.ins_date > ?', date('Y-m-d H:i:s', strtotime('-6 hour')));
+            $d = $this->_db->fetchOne($sel);
+            if (!empty($d)) {
+                // 新しいレコードが存在しているなら、このテーブルは更新しない
+                throw new Exception('already refreshed');
+            }
+
             $this->_db->delete('t_finisher');
             $this->_db->query($sSql);
             $this->_db->query($sSqlSurrender);
             $this->_db->commit();
         } catch (Exception $e) {
             $this->_db->rollBack();
-            $this->_db->delete('t_finisher', 'game_field_id = -1');
-            echo 'failure!';
+        }
+        return 0;
+    }
+
+    public function mvMagicUsedGameRefresh() {
+
+        $subSelUsedField = $this->_db->select()
+            ->distinct()
+            ->from(
+                array('tq' => 't_queue'),
+                array(
+                    'game_field_id',
+                )
+            )
+            ->join(
+                array('tqu' => 't_queue_unit'),
+                'tqu.queue_id = tq.queue_id',
+                array()
+            )
+            ->join(
+                array('tgc' => 't_game_card'),
+                'tgc.game_card_id = tqu.target_card_id and tgc.game_field_id = tq.game_field_id',
+                array(
+                    'card_id',
+                )
+            )
+            ->join(
+                array('mm' => 'm_magic'),
+                'mm.card_id = tgc.card_id',
+                array()
+            )
+            ->where('tqu.queue_type_id = ?', 1014)
+            ->where('tqu.cost_flg = ?', 1);
+
+        $subSelFieldIdPath = $this->_db->select()
+            ->from(
+                array('tgf' => 't_game_field'),
+                array(
+                    'field_id_path',
+                )
+            )
+            ->join(
+                array('ssuf' => $subSelUsedField),
+                'ssuf.game_field_id = tgf.game_field_id',
+                array(
+                    'card_id',
+                )
+            );
+
+        $subSelLastField = $this->_db->select()
+            ->from(
+                array('vlf' => 'v_last_field')
+            );
+
+        $sel = $this->_db->select()
+            ->distinct()
+            ->from(
+                array('tgf' => 't_game_field'),
+                array(
+                    'game_field_id',
+                )
+            )
+            ->join(
+                array('ssfip' => $subSelFieldIdPath),
+                "tgf.field_id_path like ssfip.field_id_path || '%'",
+                array(
+                    'card_id',
+                )
+            )
+            ->where('tgf.game_field_id in(?)', $subSelLastField);
+
+        $sSql = "insert into t_magic_use_game(game_field_id, card_id) ({$sel})";
+
+        try {
+            $this->_db->beginTransaction();
+
+            $this->_db->query('LOCK TABLE ONLY t_magic_use_game IN EXCLUSIVE MODE NOWAIT');
+
+            $sel = $this->_db->select()
+                ->from(
+                    array('tmug' => 't_magic_use_game'),
+                    array(
+                        'cnt' => new Zend_Db_Expr("count(*)"),
+                    )
+                )
+                ->where('tmug.ins_date > ?', date('Y-m-d H:i:s', strtotime('-6 hour')));
+            $d = $this->_db->fetchOne($sel);
+            if (!empty($d)) {
+                // 新しいレコードが存在しているなら、このテーブルは更新しない
+                throw new Exception('already refreshed');
+            }
+
+            $this->_db->delete('t_magic_use_game');
+            $this->_db->query($sSql);
+            $this->_db->commit();
+        } catch (Exception $e) {
+            $this->_db->rollBack();
         }
         return 0;
     }
