@@ -18,7 +18,7 @@ class GameController extends Zend_Controller_Action
         $this->_config = Zend_Registry::get('config');
 
         $this->_jsUpdDate = array(
-            'game_list'     => '20150818',
+            'game_list'     => '20160109',
             'deck_list'     => '20151227',
             'game_field'    => '20151130',
         );

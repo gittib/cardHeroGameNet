@@ -1,5 +1,3 @@
-$.get("/api/mv-refresh/");
-
 (function() {
     try {
         if (sessionStorage.oMasterData) {
