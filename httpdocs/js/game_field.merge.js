@@ -6849,6 +6849,9 @@ new function () {
 
                                     var dam = q.param1;
                                     if (q.param2 == 'damage_noroi') {
+                                        if (!targetMon.status[124]) {
+                                            throw new Error('damage_noroi_inactive');
+                                        }
                                         dam = targetMon.hp - 1;
                                         if (dam <= 0) {
                                             throw new Error('argument_error');
@@ -6959,7 +6962,7 @@ new function () {
 
                                     $.each(targetMon.status, function(iStatusId, val) {
                                         var sStName = g_master_data.m_status[iStatusId].status_name;
-                                        g_field_data.queues.push({
+                                        var q = {
                                             actor_id            : targetMon.game_card_id,
                                             log_message         : '倒れたためステータス解除[' + sStName + ']',
                                             resolved_flg        : 0,
@@ -6970,7 +6973,28 @@ new function () {
                                                 target_id       : targetMon.game_card_id,
                                                 param1          : iStatusId,
                                             }],
-                                        });
+                                        };
+                                        switch (parseInt(iStatusId)) {
+                                        case 124:
+                                            if (targetMon.owner == 'my') {
+                                                var iMasterId = game_field_reactions.getGameCardId({
+                                                    pos_category    : 'field',
+                                                    pos_id          : 'myMaster',
+                                                });
+                                            } else if (targetMon.owner == 'enemy') {
+                                                var iMasterId = game_field_reactions.getGameCardId({
+                                                    pos_category    : 'field',
+                                                    pos_id          : 'enemyMaster',
+                                                });
+                                            }
+                                            q.queue_units.push({
+                                                queue_type_id   : 1006,
+                                                target_id       : iMasterId,
+                                                param1          : 1,
+                                            });
+                                            break;
+                                        }
+                                        g_field_data.queues.push(q);
                                     });
                                     if (!bOldQueue) {
                                         if (targetMon.pos_id == 'myMaster' || targetMon.pos_id == 'enemyMaster') {
