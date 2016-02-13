@@ -369,6 +369,7 @@ class model_Game {
      *      select_standby_field    : 対戦相手の存在するフィールドは抽出禁止
      *      select_finished         : マスターが既に倒されているフィールドのみ抽出する
      *      finisher_id             : 対象のカードがフィニッシュしたフィールドのみ抽出する
+     *      use_magic_id            : 対象のカードが使用されたフィールドから連なる、未返信フィールドを抽出する
      *      opponent_id             : 指定したIDのユーザーが対戦相手となっているフィールドのみ抽出する
      *
      *  @return sql フィールドIDを抽出するSQL
@@ -469,6 +470,16 @@ class model_Game {
                     array('game_field_id')
                 )
                 ->where('tf.card_id = ?', $aOption['finisher_id']);
+
+            $selField->where('t_game_field.game_field_id in(?)', $subSelFinisher);
+        }
+        if (!empty($aOption['use_magic_id'])) {
+            $subSelFinisher = $this->_db->select()
+                ->from(
+                    array('tmug' => 't_magic_use_game'),
+                    array('game_field_id')
+                )
+                ->where('tmug.card_id = ?', $aOption['use_magic_id']);
 
             $selField->where('t_game_field.game_field_id in(?)', $subSelFinisher);
         }

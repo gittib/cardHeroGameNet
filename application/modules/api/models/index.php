@@ -355,6 +355,10 @@ class model_Api_Index {
                 'loc'   => 'http://' . $_SERVER['SERVER_NAME'] . '/ranking/deck/',
                 'priority'  => 0.8,
             ),
+            array(
+                'loc'   => 'http://' . $_SERVER['SERVER_NAME'] . '/ranking/magic/',
+                'priority'  => 0.8,
+            ),
         );
 
         $subSelDeck = $this->_db->select()

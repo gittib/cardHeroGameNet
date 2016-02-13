@@ -167,6 +167,25 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         );
         $router->addRoute('finished_field_list', $route);
 
+        // 指定したマジックが使用されたゲーム一覧
+        $route = new Zend_Controller_Router_Route_Regex(
+            'ranking/magic/((finish-)?fields)/(\d+)(/(\d+))?',
+            array(
+                'module'        => 'ranking',
+                'controller'    => 'magic',
+                'action'        => 'fields',
+                'card_id'       => 1,
+                'page_no'       => 1,
+            ),
+            array(
+                1   => 'action',
+                3   => 'card_id',
+                5   => 'page_no',
+            ),
+            'ranking/magic/%s/'
+        );
+        $router->addRoute('magic_used_game_list', $route);
+
         // 指定したカードの採用状況詳細
         $route = new Zend_Controller_Router_Route_Regex(
             'ranking/deck/detail/(\d+)',
@@ -182,7 +201,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         );
         $router->addRoute('deck_ranking_detail', $route);
 
-        // 指定したマジックカードが積まれたデッキ一覧
+        // 指定したカードが積まれたデッキ一覧
         $route = new Zend_Controller_Router_Route_Regex(
             'ranking/deck/list/(\d+)',
             array(

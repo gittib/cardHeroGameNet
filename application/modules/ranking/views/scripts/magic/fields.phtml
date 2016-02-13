@@ -1,0 +1,113 @@
+<?php
+//
+// ページングリンク生成処理
+//
+$iFieldsInPage = 10;    // 1ページ当たりに表示されるフィールドの数
+$iDispLinkRange = 2;    // 前後何ページまでページングするか
+
+// 合計で何ページ存在してるか計算
+$iPages = (int)(($this->nFields - 1) / $iFieldsInPage) + 1;
+
+// ページング対象のページ番号の最大値・最小値を計算
+$aDispPageNum = array(
+    'min'   => max($this->nPage - $iDispLinkRange, 1),  // 1未満だったら1にする
+    'max'   => min($this->nPage + $iDispLinkRange, $iPages),    // 全ページ数を超えるならそれに合わせる
+);
+
+$sPageLinkTag = "<div class='page_link'>\n";
+$sUrlBase = $this->url() . "{$this->iMagicId}/";
+
+//if (1 < $this->nPage) {
+//    $iBeforePage = $this->nPage - 1;
+//    $sPageLinkTag .= <<<_eos_
+//    <span><a href="{$sUrlBase}{$iBeforePage}/">前へ</a></span>
+//
+//_eos_;
+//}
+
+if (1 < $aDispPageNum['min']) {
+    $sPageLinkTag .= <<<_eos_
+    <a href="{$sUrlBase}"><span class="first_page_link">1</span></a>...
+
+_eos_;
+}
+
+for ($i = $aDispPageNum['min'] ; $i <= $aDispPageNum['max'] ; $i++) {
+    if ($i == $this->nPage) {
+        $sPageLinkText = "<span><strong>{$i}</strong></span>";
+    } else {
+        if ($i == 1) {
+            $sUrl = $sUrlBase;
+        } else {
+            $sUrl = $sUrlBase . $i . '/';
+        }
+        $sPageLinkText = "<a href='{$sUrl}'><span>{$i}</span></a>";
+    }
+    $sPageLinkTag .= "{$sPageLinkText}\n";
+}
+
+//if ($aDispPageNum['max'] < $iPages) {
+//    $sPageLinkTag .= <<<_eos_
+//    ...<a href="{$sUrlBase}{$iPages}/"><span>{$iPages}</span></a>
+//
+//_eos_;
+//}
+
+if ($this->nPage < $iPages) {
+    $iNextPage = $this->nPage + 1;
+    $sPageLinkTag .= <<<_eos_
+    <a href="{$sUrlBase}{$iNextPage}/"><span class="next_page_link">次へ</span></a>
+
+_eos_;
+}
+
+$sPageLinkTag .= "</div>\n";
+//
+// ページングリンク生成処理終了
+//
+
+$sDescription = $this->sCardName . 'が使用された対戦の一覧です。';
+$url = $this->url(array('action' => 'finish-fields')) . "{$this->iMagicId}/";
+$sGameListLink = "<div class='game_list_link'><a class='zabuton_yellow' href='{$url}'>決着した対戦のみ表示</a></div>";
+if ($this->bFinishOnly) {
+    $url = $this->url(array('action' => 'fields')) . "{$this->iMagicId}/";
+    $sGameListLink = "<div class='game_list_link'><a class='zabuton_blue' href='{$url}'>継続中の対戦も表示</a></div>";
+}
+?>
+
+<div id="game_field_list_wrapper">
+<?php
+if (empty($this->aCardInfoArray)) {
+    echo "<div class='no-fields'>まだ{$this->sCardName}が使用された対戦はありません。</div>\n";
+} else {
+    echo "<h1>{$this->sCardName}の使用されたゲーム一覧</h1>";
+    echo "<div class='page_description'>";
+    echo $sDescription;
+    echo "</div>";
+    echo $sGameListLink;
+    echo $sPageLinkTag;
+    foreach ($this->aCardInfoArray as $aCardInfo) {
+        $this->aCardInfoInField = $aCardInfo;
+        $aFieldInfo = $aCardInfo['field_info'];
+        $sLinkTitle = "{$aFieldInfo['title_str']} [{$aFieldInfo['upd_date']}]";
+        $sHref = "/game/receive/{$aFieldInfo['game_field_id']}/";
+        if (isset($aFieldInfo['started_flg']) && $aFieldInfo['started_flg']) {
+            $sHref = "/game/field/{$aFieldInfo['game_field_id']}/";
+        }
+        if ($this->bLast) {
+            $sHref .= '?referer=last';
+        }
+        echo <<<_eos_
+<div class="game_field_info">
+    <div class="field_title">
+        <a href="{$sHref}">{$sLinkTitle}</a>
+    </div>
+    {$this->render('game_field_table.phtml')}
+</div>
+
+_eos_;
+    }
+    echo $sPageLinkTag;
+}
+?>
+</div>
