@@ -50,7 +50,10 @@ class Ranking_MagicController extends Zend_Controller_Action
         $this->_model = new Model_Ranking_GetList();
         $aCardInfo = $this->_model->getCardInfo($iMagicId);
         $sCardName = $aCardInfo['card_name'];
-        $this->_layout->title = $sCardName . 'が使われたゲーム一覧';
+        $sTitle = $sCardName . 'が使われているゲーム一覧';
+        if ($bFinishOnly) {
+            $sTitle = $sCardName . 'が使われたゲーム一覧';
+        }
 
         require_once APPLICATION_PATH . '/modules/default/models/game.php';
         $this->_model = new model_Game();
@@ -76,6 +79,8 @@ class Ranking_MagicController extends Zend_Controller_Action
         $this->view->assign('iMagicId', $iMagicId);
         $this->view->assign('bFinishOnly', $bFinishOnly);
         $this->view->assign('sCardName', $sCardName);
+        $this->view->assign('sTitle', $sTitle);
+        $this->_layout->title = $sTitle;
 
         $this->view->addScriptPath(APPLICATION_PATH . '/modules/default/views/scripts/');
     }
