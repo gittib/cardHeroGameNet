@@ -121,7 +121,7 @@ function loadMoreDeck (iPageNo) {
 
 $(function() {
     $('.card_list_frame').perfectScrollbar();
-    $(document).on('click', '#more_deck_list[page]', function (e) {
+    $('#deck_list_wrapper').on('click', '#more_deck_list[page]', function (e) {
         e.preventDefault();
 
         var iNextPage = Number($(this).attr('page')) + 1;

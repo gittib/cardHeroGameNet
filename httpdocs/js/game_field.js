@@ -58,7 +58,7 @@ new function () {
 
         initSpecialProc();
 
-        $(document).on('click', '#game_field td.monster_space', function () {
+        $('#game_field_wrapper').on('click', '#game_field td.monster_space', function () {
             var _updateActorInfo = function () {
                 var iGameCardId = game_field_reactions.getGameCardId({
                     pos_category    : 'field',
@@ -105,7 +105,7 @@ new function () {
             }
         });
 
-        $(document).on('click', '#hand_card div.hand_card', function () {
+        $('#game_field_wrapper').on('click', '#hand_card div.hand_card', function () {
             var _updateActorInfo = function () {
                 g_field_data.actor = {game_card_id : oDom.attr('game_card_id')};
 
@@ -217,7 +217,7 @@ new function () {
             }
         });
 
-        $(document).on('click', '.command_row', function () {
+        $('#game_field_wrapper').on('click', '.command_row', function () {
             var oDom = $(this);
             var aCard = g_field_data.cards[g_field_data.actor.game_card_id];
             switch (game_field_reactions.checkGameState()) {
@@ -294,7 +294,7 @@ new function () {
             game_field_reactions.updateGameInfoMessage();
         });
 
-        $(document).on('click', '.check_magic_effect[game_card_id]', function () {
+        $('#game_field_wrapper').on('click', '.check_magic_effect[game_card_id]', function () {
             try {
                 // 何の魔法効果を受けているのか、確認アラートメッセージを表示
                 var aCard = g_field_data.cards[Number($(this).attr('game_card_id'))];
@@ -316,7 +316,7 @@ new function () {
             game_field_reactions.updateGameInfoMessage();
         });
 
-        $(document).on('click', '#buttons_frame div.cancel_button', function () {
+        $('#game_field_wrapper').on('click', '#buttons_frame div.cancel_button', function () {
             var _delActorInfo = function() {
                 g_field_data.actor = {game_card_id : null};
                 $('.actor').removeClass('actor');
@@ -363,10 +363,11 @@ new function () {
             game_field_reactions.updateGameInfoMessage();
         });
 
-        $(document).on('click', '#buttons_frame div.turn_end_button', function () {
+        $('#game_field_wrapper').on('click', '#buttons_frame div.turn_end_button', function () {
             if (g_field_data.already_finished) {
                 alert('決着がついているので、ターンエンドはできません。');
             } else if (game_field_reactions.checkGameState() == 'sort_card') {
+            } else if (0 < g_field_data.old_queues.length) {
             } else {
                 if (confirm("ターンエンドしてもよろしいですか？")) {
                     turnEndProc();
@@ -374,7 +375,7 @@ new function () {
             }
         });
 
-        $(document).on('click', '.check_used', function () {
+        $('#game_field_wrapper').on('click', '.check_used', function () {
             $('.used_cards_div').toggle();
         });
 
@@ -543,13 +544,13 @@ new function () {
         arts_queue.setNoArrangeFlg(g_field_data.no_arrange);
         magic_queue.setNoArrangeFlg(g_field_data.no_arrange);
 
-        $(document).on('click', 'input.toggle_setting', function () {
+        $('#game_field_wrapper').on('click', 'input.toggle_setting', function () {
             $('div.settings').toggle();
             $('input.disp_button').toggle();
         });
 
         $.each (aRadioSettings, function (i, val) {
-            $(document).on('change', 'input[name=' + val + ']', function () {
+            $('#game_field_wrapper').on('change', 'input[name=' + val + ']', function () {
                 try {
                     var param = JSON.parse(localStorage.game_settings);
                     param[val] = $('input[name=' + val + ']:checked').val();
@@ -772,7 +773,7 @@ new function () {
         //
         // ソートカード
         //
-        $(document).on('click', '.sort_card_target', function () {
+        $('#game_field_wrapper').on('click', '.sort_card_target', function () {
             try {
                 console.log(g_field_data.sorting_cards);
                 var iRef = parseInt($(this).closest('[iref]').attr('iref'));
@@ -799,7 +800,7 @@ new function () {
             });
         });
 
-        $(document).on('click', '.sort_end_button', function () {
+        $('#game_field_wrapper').on('click', '.sort_end_button', function () {
             if (confirm('よろしいですか？')) {
                 var iMasterId = game_field_reactions.getGameCardId({
                     pos_category    : 'field',

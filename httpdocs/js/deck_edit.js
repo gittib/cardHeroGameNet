@@ -144,7 +144,7 @@ $(function() {
         $('div.master_image div[cardid=' + master_card_id + ']').show();
     });
 
-    $(document).on('click', '.insert_card a', function() {
+    $('#deck_frame').on('click', '.insert_card a', function() {
         var imgTag = $(this).parent().parent().children("div.card_image_frame").children('img');
         var card_id = imgTag.attr('cardid');
         var nIns = Number($(this).attr('num'));
@@ -174,7 +174,7 @@ $(function() {
         refreshDeckCardNum();
     });
 
-    $(document).on('click', '.card_list_in_deck img', function() {
+    $('#deck_frame').on('click', '.card_list_in_deck img', function() {
         $(this).remove();
         refreshDeckCardNum();
     });

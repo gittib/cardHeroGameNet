@@ -40,7 +40,7 @@ class DeckController extends Zend_Controller_Action
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/deck_list.js';
         } else {
-            $this->_javascript[] = '/js/deck_list.min.js?ver=20151227';
+            $this->_javascript[] = '/js/deck_list.min.js?ver=20160216';
         }
         $nPage = $request->getParam('page_no');
         $ret = $this->_model->getDeckList(array(
@@ -85,7 +85,7 @@ class DeckController extends Zend_Controller_Action
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/deck_list.js';
         } else {
-            $this->_javascript[] = '/js/deck_list.min.js?ver=20151227';
+            $this->_javascript[] = '/js/deck_list.min.js?ver=20160216';
         }
         $nPage = $request->getParam('page_no');
         $ret = $this->_model->getDeckList(array(
@@ -109,7 +109,7 @@ class DeckController extends Zend_Controller_Action
         $request = $this->getRequest();
         $deckId = $request->getParam('deck_id', '');
         $this->_layout->title = 'デッキ編集';
-        $this->_javascript[] = '/js/deck_edit.js?var=20150926';
+        $this->_javascript[] = '/js/deck_edit.js?var=20160216';
         $this->_javascript[] = '/js/img_delay_load.min.js';
 
         $aDeckInfo = $this->_model->initDeckCard($deckId);

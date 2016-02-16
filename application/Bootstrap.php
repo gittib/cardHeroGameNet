@@ -5,7 +5,6 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     protected function _initDB()
     {
         $conf = Zend_Registry::get('config');
-
         $db = Zend_Db::factory( 'PDO_PGSQL', array(
                     'host'      => $conf->database->host,
                     'username'  => $conf->database->username,
@@ -68,7 +67,8 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             array(
                 1   => 'action',
                 3   => 'page_no',
-            )
+            ),
+            'game\%s'
         );
         $router->addRoute('game_last', $route);
 
@@ -107,12 +107,12 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $route = new Zend_Controller_Router_Route_Regex(
             'game/receive/deck/mine/(\d+)(/(\d+))?',
             array(
-                'controller'    =>  'game',
-                'action'        =>  'receive',
+                'controller'    => 'game',
+                'action'        => 'receive',
                 'deck'          => 'mine',
-                1               =>  1,
-                2               =>  1,
-                3               =>  1,
+                1               => 1,
+                2               => 1,
+                3               => 1,
             ),
             array(
                 1   => 'game_field_id',
@@ -301,7 +301,8 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             ),
             array(
                 1   => 'action',
-            )
+            ),
+            'api/%s'
         );
         $router->addRoute('api_index', $route);
     }

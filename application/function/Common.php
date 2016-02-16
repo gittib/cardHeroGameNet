@@ -159,6 +159,25 @@ class Common {
     }
 
     /**
+     * メールの状況確認
+     *
+     * @return 最新のメール受信日時
+     */
+    public static function checkMail()
+    {
+        $db = Zend_Registry::get('db');
+        $sel = $db->select()
+            ->from(
+                array('tmr' => 't_mail_request'),
+                array(
+                    'max_date'  => new Zend_Db_Expr("max(upd_date)"),
+                )
+            )
+            ->where('tmr.del_flg = 0');
+        return $db->fetchOne($sel);
+    }
+
+    /**
      * 投げてるSQLの確認
      *
      * @return 投げてるSQL一覧のHTML

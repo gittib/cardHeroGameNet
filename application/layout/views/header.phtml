@@ -22,6 +22,10 @@ switch (APPLICATION_ENV) {
         $sEnv = '<span id="test_env">テスト環境</span>';
         break;
 }
+
+if ($aUserInfo['user_id'] == 1) {
+    $sLoginInfo .= '<br /><br /><a href="/admin/mail/">最新メール受信日時：' . Common::checkMail() . '</a>';
+}
 ?>
 <div id='header'>
     <div id="floating_wrapper">

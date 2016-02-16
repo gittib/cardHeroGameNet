@@ -259,6 +259,7 @@ function getQueueJson() {
 _eos_;
 
     $sMovieConsole = '';
+    $sTurnEndHtml = '';
     if ($this->bReplayFlg) {
         $sMovieConsole = <<<_eos_
 <div id="movie_controll">
@@ -272,6 +273,18 @@ _eos_;
                     </ul>
                 </div>
             </div>
+
+_eos_;
+    } else {
+        $sTurnEndHtml = <<<_eos_
+    <div id="buttons_frame">
+        <div class="cancel_button">
+            キャンセル
+        </div>
+        <div class="turn_end_button">
+            ターンエンド
+        </div>
+    </div>
 
 _eos_;
     }
@@ -334,14 +347,7 @@ _eos_;
         </div>
     </div>
     <?php echo $sAd; ?>
-    <div id="buttons_frame">
-        <div class="cancel_button">
-            キャンセル
-        </div>
-        <div class="turn_end_button">
-            ターンエンド
-        </div>
-    </div>
+    <?php echo $sTurnEndHtml; ?>
     <input type="BUTTON" class="disp_button toggle_setting" value="設定" />
     <div class="settings">
         <input type="BUTTON" class="toggle_setting first" value="設定非表示" />

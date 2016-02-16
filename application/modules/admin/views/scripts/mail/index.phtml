@@ -30,6 +30,7 @@ foreach ($this->aMailInfo as $requestId => $val) {
         $sMail = '';
     }
     $sDate = date('Y-m-d H:i:s', strtotime($val['ins_date']));
+    $sMessage = nl2br($this->escape($val['message']));
     $sRequests .= <<<_eos_
     <div class="request clearfix">
         <div class="request_id">{$val['request_id']}</div>
@@ -38,7 +39,7 @@ foreach ($this->aMailInfo as $requestId => $val) {
         {$sMail}
         <div class="ins_date">[{$sDate}]</div>
         <div class="message">
-            {$this->escape($val['message'])}
+            {$sMessage}
         </div>
     </div>
 
