@@ -11,7 +11,7 @@ class Admin_Bootstrap extends Zend_Application_Module_Bootstrap
 
     private function _adminInitValidate() {
         $aUserInfo = Common::checkLogin();
-        if (!$aUserInfo || $aUserInfo['user_id'] != 1) {
+        if (!Common::isAdmin()) {
             $this->_adminInitReplaceErrorRoute();
         }
     }
@@ -38,10 +38,10 @@ class Admin_Bootstrap extends Zend_Application_Module_Bootstrap
         $conf = Zend_Registry::get('config');
 
         $db = Zend_Db::factory('PDO_PGSQL', array(
-            'host'      => $conf->database->host,
-            'username'  => $conf->database->admin->username,
-            'password'  => $conf->database->admin->password,
-            'dbname'    => $conf->database->dbname,
+            'host'      => $conf->secret->database->host,
+            'username'  => $conf->secret->database->admin->username,
+            'password'  => $conf->secret->database->admin->password,
+            'dbname'    => $conf->secret->database->dbname,
         ));
         if ($conf->phpSettings->display_errors) {
             $db->getProfiler()->setEnabled(true);

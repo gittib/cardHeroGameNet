@@ -23,8 +23,9 @@ switch (APPLICATION_ENV) {
         break;
 }
 
-if ($aUserInfo['user_id'] == 1) {
-    $sLoginInfo .= '<br /><br /><a href="/admin/mail/">最新メール受信日時：' . Common::checkMail() . '</a>';
+$sAdminInfo = '';
+if (Common::isAdmin()) {
+    $sAdminInfo = '<br /><br /><a href="/admin/mail/">最新メール受信日時：' . Common::checkMail() . '</a>';
 }
 ?>
 <div id='header'>
@@ -53,6 +54,7 @@ if ($aUserInfo['user_id'] == 1) {
             </div>
             <div class="user_info">
                 <?php echo $sLoginInfo . "\n"; ?>
+                <?php echo $sAdminInfo . "\n"; ?>
             </div>
         </div>
     </div>

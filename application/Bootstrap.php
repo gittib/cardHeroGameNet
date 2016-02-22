@@ -6,11 +6,11 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     {
         $conf = Zend_Registry::get('config');
         $db = Zend_Db::factory( 'PDO_PGSQL', array(
-                    'host'      => $conf->database->host,
-                    'username'  => $conf->database->username,
-                    'password'  => $conf->database->password,
-                    'dbname'    => $conf->database->dbname,
-                    ));
+            'host'      => $conf->secret->database->host,
+            'username'  => $conf->secret->database->username,
+            'password'  => $conf->secret->database->password,
+            'dbname'    => $conf->secret->database->dbname,
+        ));
         if ($conf->phpSettings->display_errors) {
             $db->getProfiler()->setEnabled(true);
         }

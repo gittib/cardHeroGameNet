@@ -70,7 +70,7 @@ $aUserInfo = Common::checkLogin();
               <span>お問い合わせ</span>
           </div>
         </a>
-        <?php if (!empty($aUserInfo) && $aUserInfo['user_id'] == 1): ?>
+        <?php if (Common::isAdmin()): ?>
         <a href='/admin/'>
           <div class="support" style="background-color: pink;">
               <img src="/images/field_list_icon0.png" alt="管理画面" />

@@ -125,13 +125,13 @@ class Model_Support_Mail
 _eos_;
         $head = <<<_eos_
 From:gitti_abc@yahoo.co.jp\r
-To:{$this->_config->mail->admin}\r
+To:{$this->_config->secret->mail->admin}\r
 Return-Path:gitti_abc@yahoo.co.jp\r
 X-Mailer: PHP/Mail
 _eos_;
 
         return mb_send_mail(
-            $this->_config->mail->admin,
+            $this->_config->secret->mail->admin,
             $title,
             $body,
             $head

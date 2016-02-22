@@ -23,7 +23,19 @@ $autoloader->unregisterNamespace(array('Zend_', 'ZendX_'))
 
 /** Zend_Application */
 require_once 'Zend/Application.php';
-$configuration = new Zend_Config_Ini(APPLICATION_PATH . '/configs/application.ini', APPLICATION_ENV);
+$configuration = new Zend_Config_Ini(
+    APPLICATION_PATH . '/configs/application.ini',
+    APPLICATION_ENV, array(
+        'allowModifications'    => true,
+    )
+);
+foreach ($configuration->config as $key => $val) {
+    if (isset($configuration->$key)) {
+        throw new Exception("configuration key collision!");
+    }
+    $configuration->$key = new Zend_Config_Ini($val, APPLICATION_ENV);
+}
+unset($configuration->config);
 Zend_Registry::set('config', $configuration);
 
 // Create application, bootstrap, and run

@@ -9,7 +9,7 @@ class model_User {
     {
         $this->_db      = Zend_Registry::get('db');
         $this->_config  = Zend_Registry::get('config');
-        $this->_salt    = $this->_config->user->salt;
+        $this->_salt    = $this->_config->secret->user->salt;
     }
 
     public function updateFrontInfo($aInput)
@@ -83,11 +83,10 @@ class model_User {
                 );
                 $where = array($this->_db->quoteInto('user_id = ?', $aUserInfo['user_id']));
                 $this->_db->update('t_user', $set, $where);
-                $this->_db->delete('t_login_key', $where);
 
                 $set = array(
                     'user_id'       => $aUserInfo['user_id'],
-                    'temp_key'      => rand(1, 1000000000),
+                    'temp_key'      => md5(rand(1, 1000000000)),
                     'limit_time'    => date('Y-m-d H:i:s', time() + 3600),
                 );
                 $tmpKey = $set['temp_key'];

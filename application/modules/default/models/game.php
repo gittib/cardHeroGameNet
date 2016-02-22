@@ -1,6 +1,9 @@
 <?php
 
 class model_Game {
+
+    const _allowReplayMinDate = '2015-06-15';
+
     private $_db;
     private $_nFieldsInPage;
 
@@ -125,8 +128,13 @@ class model_Game {
                 )
             )
             ->joinLeft(
+                array('prime' => 't_game_field'),
+                "prime.field_id_path = '' and field.field_id_path like prime.game_field_id::text || '-%'",
+                array()
+            )
+            ->joinLeft(
                 array('tf' => 't_finisher'),
-                'tf.game_field_id = field.game_field_id',
+                'tf.game_field_id = field.game_field_id and prime.ins_date > ' . $this->_db->quote(self::_allowReplayMinDate),
                 array(
                     'finished_flg'  => new Zend_Db_Expr("case when tf.game_field_id is not null then 1 else 0 end"),
                 )
@@ -348,7 +356,7 @@ class model_Game {
     {
         $sel = $this->_getFieldIdSelectSql(array(
             'select_finished'   => true,
-            'min_start_date'    => '2015-06-15',
+            'min_start_date'    => self::_allowReplayMinDate,
             'game_field_id'     => $iGameFieldId,
         ));
         $rslt = $this->_db->fetchAll($sel);

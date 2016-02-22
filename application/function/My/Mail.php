@@ -29,7 +29,7 @@ class My_Mail {
                 throw new Exception('message is null.');
             }
             if (!isset($aArgs['from']) || !$aArgs['from']) {
-                $aArgs['from'] = $conf->mail->from;
+                $aArgs['from'] = $conf->secret->mail->from;
             }
             if (!isset($aArgs['subject']) || !$aArgs['subject']) {
                 $aArgs['subject'] = '無題';

@@ -1825,7 +1825,7 @@ new function () {
 
                                     var dam = q.param1;
                                     if (q.param2 == 'damage_noroi') {
-                                        if (!targetMon.status[124]) {
+                                        if (!targetMon.status[122]) {
                                             throw new Error('damage_noroi_inactive');
                                         }
                                         dam = targetMon.hp - 1;

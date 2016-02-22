@@ -59,7 +59,7 @@ class Common {
 
         $userId = $aUserInfo['user_id'];
         for ($i = 0 ; $i < 10 ; $i++) {
-            $sNewKey = md5(rand(1, 10000) . date('YmdHis') . rand(1,10000));
+            $sNewKey = md5(self::makeRandStr(20));
             $sel = "select count(*) from t_login_key where temp_key = '{$sNewKey}'";
             $cnt = $db->fetchOne($sel);
             if ($cnt <= 0) {
@@ -96,6 +96,19 @@ class Common {
         $db->delete('t_login_key', $where);
         setcookie('login_key', '', time() - 1800, '/');
         return null;
+    }
+
+    /**
+     * ランダム文字列生成 (英数字)
+     * $length: 生成する文字数
+     */
+    public static function makeRandStr($length = 8) {
+        static $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJLKMNOPQRSTUVWXYZ0123456789_-';
+        $str = '';
+        for ($i = 0; $i < $length; ++$i) {
+            $str .= $chars[mt_rand(0, 63)];
+        }
+        return $str;
     }
 
     public static function checkUA ()
@@ -155,6 +168,21 @@ class Common {
                 $sUrl = $_SERVER['REQUEST_URI'];
             }
             $oSession->sLastPageBeforeLogin = $sUrl;
+        }
+    }
+
+    /**
+     * 管理者か確認
+     *
+     * @return true:管理者 / false:管理者ではない
+     */
+    public static function isAdmin()
+    {
+        $aUserInfo = self::checkLogin();
+        if (!empty($aUserInfo)) {
+            return ($aUserInfo['user_id'] == 1);
+        } else {
+            return false;
         }
     }
 
