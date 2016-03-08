@@ -1465,6 +1465,27 @@ class model_Game {
                 $mdl = new model_Api_Index();
                 $mdl->mvFinisherRefresh();
             }
+
+            if (!empty($aField0['user_id'])) {
+                $sel = $this->_db->select()
+                    ->from(
+                        array('tu' => 't_user'),
+                        array(
+                            'twitter_id',
+                        )
+                    )
+                    ->where('user_id = ?', $aField0['user_id']);
+                $tw = $this->_db->fetchOne($sel);
+                if (!empty($tw)) {
+                    $tw = preg_replace('/^@/', '', $tw);
+                    $url = $_SERVER['SERVER_NAME'] . "/game/field/{$iGameFieldId}/";
+                    $sTweet = <<<_eos_
+@{$tw} さんのフィールド[{$aField0['game_field_id']}]への返信が投稿されました！
+{$url}
+_eos_;
+                    Common::tweetNotic($sTweet);
+                }
+            }
         } catch (Exception $ignore) {}
         return $aInsertFieldData;
     }

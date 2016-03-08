@@ -35,6 +35,7 @@ class Common {
                 array(
                     'user_id',
                     'nick_name',
+                    'twitter_id',
                 )
             )
             ->join(
