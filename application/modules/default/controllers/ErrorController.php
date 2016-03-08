@@ -70,6 +70,13 @@ class ErrorController extends Zend_Controller_Action
         $this->view->request = $errors->request;
     }
 
+    public function maintenanceAction()
+    {
+        $this->_layout = new Zend_Layout();
+        $this->_layout->title = 'メンテナンス中...';
+        $this->getResponse()->setHttpResponseCode(503);
+    }
+
     public function getLog()
     {
         $bootstrap = $this->getInvokeArg('bootstrap');

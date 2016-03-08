@@ -9,8 +9,19 @@ $sDivs = '';
 foreach ($this->aInput as $key => $val) {
     $sColName = '';
     $sDispVal = $val;
-    if ($key == 'password') {
+    switch ($key) {
+    case 'password':
         $sDispVal = preg_replace('/./', '*', $val);
+        break;
+    case 'twitter_id':
+        if (!empty($val)) {
+            if (preg_match('/^@/', $val)) {
+                $val = substr($val, 1);
+            }
+            $url = "https://twitter.com/{$val}";
+            $sDispVal = "<a href='{$url}' target='_blank' class='blank_link'>@{$val}</a>";
+        }
+        break;
     }
     if (isset($this->aCols[$key])) {
         $sColName = $this->aCols[$key];

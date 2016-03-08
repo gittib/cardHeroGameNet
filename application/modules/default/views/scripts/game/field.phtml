@@ -289,7 +289,7 @@ _eos_;
 _eos_;
     }
 
-    $sFieldHtml = "<table id=\"game_field\">\n";
+    $sFieldHtml = "<table id='game_field'>\n";
     foreach ($aPosId as $aLine) {
         $sFieldHtml .= "                <tr>\n";
         foreach ($aLine as $posId) {
@@ -398,3 +398,24 @@ _eos_;
         <input type="hidden" name="referer" value="<?php echo $this->sReferer; ?>" />
     </form>
 </div>
+<?php
+if ($this->bReplayFlg) {
+    $sTitle = preg_replace(';<span\s?.*?>(.*?)</span>;', '${1}', $aCardInfo['field_info']['title_str']);
+    $sTitle = preg_replace(';\s*\d+ターン目;', '', $sTitle);
+    $aRichSnipet = array(
+        '@context'  => 'http://schema.org',
+        '@type'     => 'Game',
+        'about'     => $sTitle,
+        'accountablePerson' => array(
+            array(
+                'name'  => $aCardInfo['field_info']['nick_name'],
+            ),
+            array(
+                'name'  => $aCardInfo['field_info']['opponent_name'],
+            ),
+        ),
+    );
+    $sRichSnipet = json_encode($aRichSnipet);
+    echo "<script type='application/ld+json'>{$sRichSnipet}</script>";
+}
+?>

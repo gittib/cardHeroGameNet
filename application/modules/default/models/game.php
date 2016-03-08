@@ -1243,6 +1243,8 @@ class model_Game {
      *  @param aArgs:
      *      field_id0   : 元フィールドのID
      *      field_data  : 入稿するフィールド情報
+     *
+     *  @return array   入稿したフィールド情報
      */
     public function insertFieldData($aArgs)
     {
@@ -1300,7 +1302,7 @@ class model_Game {
 
             $sql = "select nextval('t_game_field_game_field_id_seq')";
             $iGameFieldId = $this->_db->fetchOne($sql);
-            $set = array(
+            $aInsertFieldData = array(
                 'game_field_id'     => $iGameFieldId,
                 'field_id_path'     => $sFieldIdPath,
                 'before_field_id'   => $aField0['game_field_id'],
@@ -1312,11 +1314,11 @@ class model_Game {
                 'open_flg'          => 1,
                 'del_flg'           => 0,
             );
-            $this->_db->insert('t_game_field', $set);
+            $this->_db->insert('t_game_field', $aInsertFieldData);
             foreach ($aFieldData['cards'] as $val) {
                 $iGameCardId = $val['game_card_id'];
                 if ($val['owner'] == 'enemy') {
-                    // aFieldData['turn']はswwap済なのでenemyはそのまま、myをswapする
+                    // aFieldData['turn']はswap済なのでenemyはそのまま、myをswapする
                     $val['owner'] = $aFieldData['turn'];
                 } else {
                     if ($aFieldData['turn'] == 1) {
@@ -1437,31 +1439,34 @@ class model_Game {
             throw $e;
         }
 
-        $subSelMaster = $this->_db->select()
-            ->from(
-                array('mc' => 'm_card'),
-                array(
-                    'card_id',
+        try {
+            $subSelMaster = $this->_db->select()
+                ->from(
+                    array('mc' => 'm_card'),
+                    array(
+                        'card_id',
+                    )
                 )
-            )
-            ->where('mc.category = ?', 'master');
-        $sel = $this->_db->select()
-            ->from(
-                array('tgc' => 't_game_card'),
-                array(
-                    'cnt'   => new Zend_Db_Expr("count(*)"),
+                ->where('mc.category = ?', 'master');
+            $sel = $this->_db->select()
+                ->from(
+                    array('tgc' => 't_game_card'),
+                    array(
+                        'cnt'   => new Zend_Db_Expr("count(*)"),
+                    )
                 )
-            )
-            ->where('tgc.game_field_id = ?', $iGameFieldId)
-            ->where('tgc.position_category = ?', 'used')
-            ->where('tgc.card_id in (?)', $subSelMaster);
-        $cnt = $this->_db->fetchOne($sel);
-        if (0 < $cnt) {
-            // 決着したのでt_finisherを更新する
-            require_once APPLICATION_PATH . '/modules/api/models/index.php';
-            $mdl = new model_Api_Index();
-            $mdl->mvFinisherRefresh();
-        }
+                ->where('tgc.game_field_id = ?', $iGameFieldId)
+                ->where('tgc.position_category = ?', 'used')
+                ->where('tgc.card_id in (?)', $subSelMaster);
+            $cnt = $this->_db->fetchOne($sel);
+            if (0 < $cnt) {
+                // 決着したのでt_finisherを更新する
+                require_once APPLICATION_PATH . '/modules/api/models/index.php';
+                $mdl = new model_Api_Index();
+                $mdl->mvFinisherRefresh();
+            }
+        } catch (Exception $ignore) {}
+        return $aInsertFieldData;
     }
 
     /**

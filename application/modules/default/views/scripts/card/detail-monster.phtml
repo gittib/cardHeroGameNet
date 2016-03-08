@@ -19,51 +19,56 @@ _eos_;
                     continue;
                 }
                 $sArtsHtml .= <<<_eos_
-            <div class="special_attack clearfix">
+            <div class="special_attack clearfix" itemprop="gameItem" itemscope itemtype="http://schema.org/Game">
                 <div class="art_icon"><img src='/images/special_icon.png' alt='special' /></div>
-                <div class="art_name">{$vArt['art_name']}</div>
-                <div class="art_range">
-                    <span class="range_type_name">
+                <div class="art_name" itemprop="name">{$vArt['art_name']}</div>
+                <div class="art_range" itemprop="potentialAction" itemscope itemtype="http://schema.org/Action">
+                    <span class="range_type_name" itemprop="name">
                         <a href="javascript:void(0)">{$vArt['range_type_name']}</a>
                     </span>
                     <span class="range_caption">
                         {$vArt['range_caption']}
                     </span>
-                    <img height=9 src="/images/range/{$vArt['range_type_id']}.png" alt="{$vArt['range_type_name']}"/>
+                    <img height=9 src="/images/range/{$vArt['range_type_id']}.png" alt="{$vArt['range_type_name']}" />
                 </div>
                 <div class="art_stone">{$vArt['stone']}コ</div>
                 <div class="art_power">{$vArt['sArtPower']}</div>
-            </div>
 
 _eos_;
                 if (isset($vArt['caption']) && $vArt['caption'] != '') {
                     $sArtsHtml .= <<<_eos_
-            <div class="special_caption">
-                <span class="art_caption">{$vArt['caption']}</span>
-            </div>
+                <div class="special_caption" itemprop="description">
+                    {$vArt['caption']}
+                </div>
 
 _eos_;
                 }
+                $sArtsHtml .= <<<_eos_
+            </div>
+
+_eos_;
             }
         }
         if ($val['skill_name'] != '') {
             $sArtsHtml .= <<<_eos_
-            <div class="skill clearfix">
-                <div class="skill_name">性格「{$val['skill_name']}」</div>
-            </div>
-            <div class="skill_caption">
-                <span class="skill_caption">{$val['skill_caption']}</span>
+            <div itemprop="characterAttribute" itemscope itemtype="http://schema.org/Game">
+                <div class="skill clearfix">
+                    <div class="skill_name">性格「<span itemprop="name">{$val['skill_name']}</span>」</div>
+                </div>
+                <div class="skill_caption">
+                    <span class="skill_caption" itemprop="description">{$val['skill_caption']}</span>
+                </div>
             </div>
 
 _eos_;
         }
         echo <<<_eos_
-    <tr>
+    <tr class="arts" itemprop="characterAttribute" itemscope itemtype="http://schema.org/Game">
         <td class="basic">
-            {$val['monster_name']}
-            LV{$val['lv']}　HP{$val['hp']}
+            <span itemprop="name">{$val['monster_name']}</span>
+            LV<span itemprop="position">{$val['lv']}</span>　HP{$val['hp']}
         </td>
-        <td class="arts">
+        <td>
             {$sArtsHtml}
         </td>
     </tr>

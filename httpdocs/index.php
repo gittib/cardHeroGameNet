@@ -1,4 +1,5 @@
 <?php
+//define('MAINTENANCE_NOW', true);    // メンテナンス中はこのdefineを有効にする
 
 // Define path to application directory
 defined('APPLICATION_PATH')

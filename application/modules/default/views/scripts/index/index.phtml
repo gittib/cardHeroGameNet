@@ -21,81 +21,108 @@ foreach ($aSisterSite as $key => $val) {
 $aUserInfo = Common::checkLogin();
 ?>
 <div id="welcome">
-    <h1 class="top_page">カードヒーロー＠スマホ へようこそ！</h1>
-    <div id="what_is_this">
-        <p>
-        <?php echo nl2br($this->sExplain); ?>
-        </p>
+    <div class="left_column">
+        &nbsp;
     </div>
-    <div id="panel_frame" class="clearfix">
-        <a href='/card/'>
-          <div class="card_list">
-              <img src="/images/card_list_icon.png" alt="カードリスト" />
-              <span>カードリスト</span>
-          </div>
-        </a>
-        <a href='/game/'>
-          <div class="field_list">
-              <img src="/images/field_list_icon.png" alt="フィールドリスト" />
-              <span>フィールド一覧</span>
-          </div>
-        </a>
-        <a href='/deck/'>
-          <div class="deck_list">
-              <img src="/images/deck_icon.png" alt="デッキ一覧" />
-              <span>デッキ一覧</span>
-          </div>
-        </a>
-        <a href='/game/lobby/'>
-          <div class="new_game">
-              <img src="/images/new_game_icon.png" alt="新規ゲーム開始" />
-              <span>新規ゲーム開始</span>
-          </div>
-        </a>
-        <a href='/ranking/'>
-          <div class="rankings">
-              <img src="/images/ranking_icon.png" alt="ランキング" />
-              <span>ランキング</span>
-          </div>
-        </a>
-        <a href='/game/movie/'>
-          <div class="movie">
-              <img src="/images/replay_movie_icon.png" alt="ムービー" />
-              <span>リプレイ鑑賞</span>
-          </div>
-        </a>
-        <a href='/support/mail/input/'>
-          <div class="support">
-              <img src="/images/mail_icon.png" alt="メール" />
-              <span>お問い合わせ</span>
-          </div>
-        </a>
-        <?php if (Common::isAdmin()): ?>
-        <a href='/admin/'>
-          <div class="support" style="background-color: pink;">
-              <img src="/images/field_list_icon0.png" alt="管理画面" />
-              <span>管理画面</span>
-          </div>
-        </a>
-        <?php endif; ?>
-    </div>
-    <div id="update_history">
-        <h2>更新履歴・お知らせ</h2>
-        <div>
-            <?php echo $this->render('update_history.phtml'); ?>
-            <a class="more" href="javascript:void(0);">全部見る</a>
+    <div class="main_column">
+        <h1 class="top_page">カードヒーロー＠スマホ へようこそ！</h1>
+        <div id="what_is_this">
+            <p>
+            <?php echo nl2br($this->sExplain); ?>
+            </p>
+        </div>
+        <div id="panel_frame" class="clearfix">
+            <a href='/card/'>
+              <div class="card_list">
+                  <img src="/images/card_list_icon.png" alt="カードリスト" />
+                  <span>カードリスト</span>
+              </div>
+            </a>
+            <a href='/game/'>
+              <div class="field_list">
+                  <img src="/images/field_list_icon.png" alt="フィールドリスト" />
+                  <span>フィールド一覧</span>
+              </div>
+            </a>
+            <a href='/deck/'>
+              <div class="deck_list">
+                  <img src="/images/deck_icon.png" alt="デッキ一覧" />
+                  <span>デッキ一覧</span>
+              </div>
+            </a>
+            <a href='/game/lobby/'>
+              <div class="new_game">
+                  <img src="/images/new_game_icon.png" alt="新規ゲーム開始" />
+                  <span>新規ゲーム開始</span>
+              </div>
+            </a>
+            <a href='/ranking/'>
+              <div class="rankings">
+                  <img src="/images/ranking_icon.png" alt="ランキング" />
+                  <span>ランキング</span>
+              </div>
+            </a>
+            <a href='/game/movie/'>
+              <div class="movie">
+                  <img src="/images/replay_movie_icon.png" alt="ムービー" />
+                  <span>リプレイ鑑賞</span>
+              </div>
+            </a>
+            <a href='/support/mail/input/'>
+              <div class="support">
+                  <img src="/images/mail_icon.png" alt="メール" />
+                  <span>お問い合わせ</span>
+              </div>
+            </a>
+            <?php if (Common::isAdmin()): ?>
+            <a href='/admin/'>
+              <div class="support" style="background-color: pink;">
+                  <img src="/images/field_list_icon0.png" alt="管理画面" />
+                  <span>管理画面</span>
+              </div>
+            </a>
+            <?php endif; ?>
+        </div>
+        <div id="sub_infomation" class="clearfix">
+            <div id="update_history">
+                <h2>更新履歴・お知らせ</h2>
+                <div>
+                    <?php echo $this->render('update_history.phtml'); ?>
+                    <a class="more" href="javascript:void(0);">全部見る</a>
+                </div>
+            </div>
+            <div id="outbound_links">
+                <h2>カードヒーロー　関連リンク</h2>
+                <ul>
+                    <li><a class="blank_link" target="_blank" href="http://www.nintendo.co.jp/n02/dmg/ahhj/">カードヒーローBGC版　公式サイト</a></li>
+                    <li><a class="blank_link" target="_blank" href="http://www.nintendo.co.jp/ds/ychj/">カードヒーローDS版　公式サイト</a></li>
+                    <li><a class="blank_link" target="_blank" href="http://www.cardhero-bu.com/">カードヒーロー部.com</a></li>
+                </ul>
+                <h2>カードヒーロー＠スマホ カードセットバリエーション</h2>
+                <ul>
+                <?php echo $sSisterSite; ?>
+                </ul>
+            </div>
         </div>
     </div>
-    <div id="outbound_links">
-        <h2>カードヒーロー　関連リンク</h2>
-        <ul>
-            <li><a class="blank_link" target="_blank" href="http://www.nintendo.co.jp/n02/dmg/ahhj/">カードヒーローBGC版　公式サイト</a></li>
-            <li><a class="blank_link" target="_blank" href="http://www.nintendo.co.jp/ds/ychj/">カードヒーローDS版　公式サイト</a></li>
-            <li><a class="blank_link" target="_blank" href="http://www.cardhero-bu.com/">カードヒーロー部.com</a></li>
-        </ul>
-        <h2>カードヒーロー＠スマホ カードセットバリエーション</h2>
-        <ul>
-        <?php echo $sSisterSite; ?>
-        </ul>
+    <div class="right_column">
+        <div id="twitter_collect">
+            <a class="twitter-timeline" href="https://twitter.com/gittib_gittib/timelines/704334380739592192" height=400 data-border-color="#000088" data-widget-id="705390012133584896">せーぞんほーこく</a>
+            <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+        </div>
     </div>
 </div>
+<script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+            "@id": "/",
+            "name": "TOP"
+        }
+    }]
+}
+</script>

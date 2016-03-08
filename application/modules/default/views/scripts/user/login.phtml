@@ -1,24 +1,21 @@
-<div id="login_input">
-    <h1>ログインフォーム</h1>
-    <form name="login_form" action="/user/login/" method="post">
-        <div id="message"><?php
-        if (isset($this->message)) {
-            echo $this->message;
-        }
-        ?></div>
 <?php
+$message = '';
+if (isset($this->message)) {
+    $message = $this->message;
+}
 
 $aCols = array(
     'login_id'  => 'ログインID',
     'password'  => 'パスワード',
 );
 
+$sLoginInputs = '';
 foreach ($aCols as $key => $val) {
     $sType = 'text';
     if ($key == 'password') {
         $sType = 'password';
     }
-    echo <<<_eos_
+    $sLoginInputs .= <<<_eos_
         <div class="item_row clearfix">
             <div class="column_name">{$val}：</div>
             <div class="input_box">
@@ -29,6 +26,11 @@ foreach ($aCols as $key => $val) {
 _eos_;
 }
 ?>
+<div id="login_input">
+    <h1>ログインフォーム</h1>
+    <form name="login_form" action="/user/login/" method="post">
+        <div id="message"><?=$message?></div>
+        <?=$sLoginInputs?>
         <div class="submit"><input type="submit" value="ログイン" /></div>
     </form>
     <div class="regist_link">

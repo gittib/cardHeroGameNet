@@ -42,6 +42,20 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $front = Zend_Controller_Front::getInstance();
         $router = $front->getRouter();
 
+        if (defined('MAINTENANCE_NOW')) {
+            // サーバーメンテナンス中なのでメンテページに全て飛ばす
+            $route = new Zend_Controller_Router_Route_Regex(
+                '^.*$',
+                array(
+                    'controller'    =>  'error',
+                    'action'        =>  'maintenance',
+                ),
+                array()
+            );
+            $router->addRoute('maintenance', $route);
+            return;
+        }
+
         // デッキ編集
         $route = new Zend_Controller_Router_Route_Regex(
             'deck/edit(/(\d+))?',

@@ -428,7 +428,7 @@ class GameController extends Zend_Controller_Action
 
         $aFieldData = json_decode($request->field_data, true);
 
-        $this->_model->insertFieldData(array(
+        $aInsertFieldData = $this->_model->insertFieldData(array(
             'field_id0'     => $request->game_field_id,
             'field_data'    => $aFieldData,
         ));

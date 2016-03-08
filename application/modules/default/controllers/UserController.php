@@ -22,12 +22,14 @@ class UserController extends Zend_Controller_Action
 
         $this->_aInput = array();
         $this->_aRegistCols = array(
-            'login_id'  => 'ログインID',
-            'password'  => 'パスワード',
-            'nick_name' => 'ユーザー名',
+            'login_id'      => 'ログインID',
+            'password'      => 'パスワード',
+            'nick_name'     => 'ユーザー名',
+            'twitter_id'    => 'Twitter ID',
         );
         $this->_aUpdateCols = array(
-            'nick_name' => 'ユーザー名',
+            'nick_name'     => 'ユーザー名',
+            'twitter_id'    => 'Twitter ID',
         );
     }
 
@@ -66,6 +68,20 @@ class UserController extends Zend_Controller_Action
 
         $this->_aCols = $this->_aUpdateCols;
         $this->_aInput = $this->_model->getUserData($this->_aCols);
+        if ($this->_aInput == null) {
+            $this->setParam('bLoginInfoInvalid', true);
+            $this->_forward('login-input');
+            return;
+        }
+        $oSession = Zend_Registry::get('session');
+        if (!empty($oSession->oUserInfo)) {
+            foreach ($oSession->oUserInfo as $key => $val) {
+                if (!empty($val)) {
+                    $this->_aCols[$key] = $val;
+                }
+            }
+            unset($oSession->oUserInfo);
+        }
         $this->view->assign('aCols', $this->_aCols);
     }
 
@@ -76,6 +92,16 @@ class UserController extends Zend_Controller_Action
 
         $this->_aCols = $this->_aUpdateCols;
         $this->view->assign('aCols', $this->_aCols);
+        $oSession = Zend_Registry::get('session');
+        $oSession->oUserInfo = $this->_aCols;
+
+        $sTwitterId = $this->getRequest()->getPost('twitter_id', '');
+        if ($sTwitterId != '') {
+            $url = 'https://twitter.com/' . preg_replace('/^@/', '', $sTwitterId);
+            if (!preg_match(';^@?[a-zA-Z_-]*$;', $sTwitterId) || Common::getStatusCode($url) != 200) {
+                $this->view->assign('sConfirmErrorMessage', 'Twitter ID が不正です');
+            }
+        }
     }
 
     public function updateAction()
@@ -84,18 +110,15 @@ class UserController extends Zend_Controller_Action
 
         $this->_getModel();
         $request = $this->getRequest();
-        $this->_aCols = array(
-                'nick_name' => 'ユーザー名',
-                );
         $aInput = array();
-        foreach ($this->_aCols as $key => $val) {
+        foreach ($this->_aUpdateCols as $key => $val) {
             $aInput[$key] = $request->getPost($key, '');
         }
         $ret = $this->_model->updateFrontInfo($aInput);
         $this->view->assign('updateOk', $ret);
 
-        $this->_aCols = $this->_aUpdateCols;
-        $this->view->assign('aCols', $this->_aCols);
+        $this->view->assign('aCols', $this->_aUpdateCols);
+        $this->view->assign('aInput', $aInput);
     }
 
     public function registInputAction()
@@ -149,6 +172,12 @@ class UserController extends Zend_Controller_Action
                 'password'  => 'パスワード',
                 );
         $this->view->assign('aCols', $this->_aCols);
+
+        $bInvalid = $this->getParam('bLoginInfoInvalid', null);
+        if (!empty($bInvalid)) {
+            $this->view->assign('message', 'ログイン情報を確認できませんでした。お手数ですが、再度ログインをお願いします。');
+        }
+
         $this->render('login');
     }
 
@@ -162,7 +191,7 @@ class UserController extends Zend_Controller_Action
         if ($bRet) {
             $oSession = Zend_Registry::get('session');
             $sUrl = '/';
-            if (isset($oSession->sLastPageBeforeLogin) && $oSession->sLastPageBeforeLogin) {
+            if (!empty($oSession->sLastPageBeforeLogin)) {
                 $sUrl = $oSession->sLastPageBeforeLogin;
             }
             $oSession->sLastPageBeforeLogin;

@@ -9,16 +9,28 @@ class model_User {
     {
         $this->_db      = Zend_Registry::get('db');
         $this->_config  = Zend_Registry::get('config');
-        $this->_salt    = $this->_config->secret->user->salt;
+        $this->_salt    = $this->_config->secret->password->salt;
     }
 
     public function updateFrontInfo($aInput)
     {
         try {
+            $aHankaku = array(
+                'twitter_id',
+            );
+            foreach ($aHankaku as $val) {
+                if (!empty($aInput[$val])) {
+                    if (preg_match('/[^a-zA-Z0-9_-]/', $aInput[$val])) {
+                        return false;
+                    }
+                }
+            }
+
             $aLoginInfo = Common::checkLogin();
             $where = array($this->_db->quoteInto('user_id = ?', $aLoginInfo['user_id']));
             $set = array(
-                'nick_name' => htmlspecialchars($aInput['nick_name'], ENT_QUOTES),
+                'nick_name'     => htmlspecialchars($aInput['nick_name'], ENT_QUOTES),
+                'twitter_id'    => $aInput['twitter_id'],
             );
 
             $this->_db->update('t_user', $set, $where);
@@ -34,6 +46,18 @@ class model_User {
             if (!isset($aUserInfo) || !is_array($aUserInfo)) {
                 throw new Exception('ユーザー情報未取得');
             }
+
+            $aHankaku = array(
+                'twitter_id',
+            );
+            foreach ($aHankaku as $val) {
+                if (!empty($aInput[$val])) {
+                    if (preg_match('/[^a-zA-Z0-9_-]/', $aInput[$val])) {
+                        return false;
+                    }
+                }
+            }
+
             $sel = $this->_db->select()
                 ->from(
                     't_user',
@@ -47,9 +71,10 @@ class model_User {
             }
 
             $set = array(
-                'login_id'  => $aUserInfo['login_id'],
-                'password'  => md5($aUserInfo['password'] . $this->_salt),
-                'nick_name' => htmlspecialchars($aUserInfo['nick_name'], ENT_QUOTES),
+                'login_id'      => $aUserInfo['login_id'],
+                'password'      => md5($aUserInfo['password'] . $this->_salt),
+                'nick_name'     => htmlspecialchars($aUserInfo['nick_name'], ENT_QUOTES),
+                'twitter_id'    => $aInput['twitter_id'],
             );
 
             $this->_db->insert('t_user', $set);
@@ -61,6 +86,11 @@ class model_User {
 
     public function login($loginId, $password)
     {
+        $oSession = Zend_Registry::get('session');
+        if ($oSession->iLoginFailed >= $this->_config->secret->password->trial) {
+            return array(false, null);
+        }
+
         $sel = $this->_db->select()
             ->from(
                 't_user',
@@ -76,7 +106,7 @@ class model_User {
         $tmpKey = '';
         try {
             $this->_db->beginTransaction();
-            if (isset($aUserInfo) && $aUserInfo !== FALSE) {
+            if (!empty($aUserInfo)) {
 
                 $set = array(
                     'last_login_date'   => date('Y-m-d H:i:s'),
@@ -86,7 +116,7 @@ class model_User {
 
                 $set = array(
                     'user_id'       => $aUserInfo['user_id'],
-                    'temp_key'      => md5(rand(1, 1000000000)),
+                    'temp_key'      => md5(Common::makeRandStr(12)),
                     'limit_time'    => date('Y-m-d H:i:s', time() + 3600),
                 );
                 $tmpKey = $set['temp_key'];
@@ -116,6 +146,10 @@ class model_User {
     public function getUserData ($aCols)
     {
         $aUserInfo = Common::checkLogin();
+        if (empty($aUserInfo)) {
+            return null;
+        }
+
         $aSelectCols = array();
         foreach ($aCols as $key => $val) {
             $aSelectCols[] = $key;

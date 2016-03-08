@@ -1,4 +1,4 @@
-<div id="card_detail_wrapper">
+<div id="card_detail_wrapper" itemprop="gameItem" itemscope itemtype="http://schema.org/Game">
 <div class="card_data clearfix">
 <?php
     foreach ($this->aCardInfo['image_info'] as $val) {
@@ -9,16 +9,24 @@
 
 _eos_;
     }
+
+    $sStar = '★';
 ?>
     <div class="card_text">
-        <h1><?php echo $this->aCardInfo['card_name']; ?></h1>
-        <div class="card_type"><?php
-            echo '★' . $this->aCardInfo['rare'] . '　';
-            echo $this->aCardInfo['category_name'];
-            if (isset($this->aCardInfo['before_monster_name'])) {
-                echo "　<span class='before_monsters'>{$this->aCardInfo['before_monster_name']}</span>から進化";
-            }
-        ?></div>
+        <h1 itemprop="name"><?php
+            echo $this->aCardInfo['card_name'];
+        ?></h1>
+        <div class="card_type">
+            <?php
+                echo $sStar;
+                echo $this->aCardInfo['rare'];
+                echo '　';
+                echo $this->aCardInfo['category_name'];
+                if (isset($this->aCardInfo['before_monster_name'])) {
+                    echo "　<span class='before_monsters'>{$this->aCardInfo['before_monster_name']}</span>から進化";
+                }
+            ?>
+        </div>
         <div class="card_caption"><?php echo $this->aCardInfo['caption']; ?></div>
     </div>
 </div>
@@ -32,7 +40,7 @@ if (trim($sDescription) != '') {
         <div class="label">
             ＜カード紹介＞
         </div>
-        <div class="card_description">
+        <div class="card_description" itemprop="description">
             {$sDescription}
         </div>
     </div>
@@ -41,3 +49,31 @@ _eos_;
 }
 ?>
 </div>
+<script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+            "@id": "/",
+            "name": "TOP"
+        }
+    }, {
+        "@type": "ListItem",
+        "position": 2,
+        "item": {
+            "@id": "/card/",
+            "name": "カード一覧"
+        }
+    }, {
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+            "@id": "/card/detail/<?php echo $this->aCardInfo['card_id']; ?>/",
+            "name": "<?php echo $this->aCardInfo['card_name']; ?>"
+        }
+    }]
+}
+</script>

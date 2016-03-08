@@ -6,8 +6,12 @@
         <a href="https://twitter.com.display/share" class="twitter-share-button" data-via="" data-lang="ja" data-count="none" data-hashtags="カードヒーロー">ツイート</a>
         <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
         <?php endif; ?>
-        <span>
-            カードヒーロー＠スマホ　制作/gitti <a class="blank_link" href="https://twitter.com/gittib_gittib" target="_blank">@gittib_gittib</a>
+        <span itemscope itemtype="http://schema.org/Game">
+            <span itemprop="name">カードヒーロー＠スマホ</span>&nbsp;
+            制作 /<span itemprop="creator" itemscope itemtype="http://schema.org/Person">
+                <span itemprop="name">gitti</span>
+                <a itemprop="url" class="blank_link" href="https://twitter.com/gittib_gittib" target="_blank">@gittib_gittib</a>
+            </span>
         </span>
     </div>
     <?php include 'footer_ad.phtml'; ?>

@@ -2,164 +2,234 @@
 
 #welcome {
     $buttonMargine : 30px;
-    margin: $buttonMargine / 2;
+    max-width: 660px;
+    margin: ($buttonMargine / 2) auto;
     font-family:'メイリオ', 'ヒラギノ角ゴ ProN W3', 'Hiragino Kaku Gothic ProN', 'Lucida Grande', 'Meiryo', 'メイリオ', sans-serif;
+
+    $thrTweetMinWidth: 900px;
+    $thrTweetMaxWidth: 1150px;
+    @media screen and (min-width: $thrTweetMinWidth) and (max-width: $thrTweetMaxWidth) {
+        width: 880px;
+        max-width: 880px;
+    }
+    @media screen and (min-width: $thrTweetMaxWidth+1) {
+        width: 1100px;
+        max-width: 1100px;
+    }
 
     $divSize : 120px;
     $infoWindowMaxWidth : 590px;
 
     $textColor: rgb(0, 135, 255);
 
-    > h1.top_page {
-        text-align: center;
-        color: $textColor;
-        text-shadow: 2px 2px 7px;
-        font-size: 18px;
-    }
-
-    #what_is_this {
-        width: 100%;
-        max-width: $infoWindowMaxWidth;
-        margin: 0 auto;
-
-        h2 {
-            color: $textColor;
-            text-shadow: rgb(100, 100, 155) 1px 1px 3px;
-        }
-
-        p {
-            margin: 5px;
-            padding: 5px;
-            border: solid 1px;
-            background-color: #eeffee;
-        }
-    }
-
-    #panel_frame {
-        max-width: 624px;
-        margin: 0 auto;
-        padding-left: 5px;
-
-        @media screen and (max-width: 350px) {
-            width: 158px;
-        }
-        @media screen and (min-width: 351px) and (max-width: 520px) {
-            width: 312px;
-        }
-        @media screen and (min-width: 521px) and (max-width: 678px) {
-            width: 468px;
-        }
-
-        div {
+    @media screen and (min-width: $thrTweetMinWidth) {
+        > div {
             float: left;
-            width: $divSize;
-            height: $divSize;
-            margin: $buttonMargine / 2;
-            border: solid 3px;
-            position: relative;
-
-            &.card_list {
-                background-color: #e0eeff;
-            }
-            &.field_list, &.rankings {
-                background-color: #efe;
-            }
-            &.deck_list, &.movie {
-                background-color: #ffe;
-            }
-            &.new_game {
-                background-color: #fee;
-            }
-
-
-            * {
-                position: absolute;
-            }
-
-            img {
-                $imgMargin : 15px;
-                top: 5px;
-                left: $imgMargin;
-                width: $divSize - ($imgMargin * 2);
-                max-height: $divSize - ($imgMargin * 2);
-            }
-
-            span {
-                bottom: 0;
-                width: 100%;
-                text-align: center;
-            }
         }
     }
 
-    #update_history {
-        width: 100%;
-        max-width: $infoWindowMaxWidth;
-        margin: 0 auto;
+    .left_column {
+        width: 220px;
+        @media screen and (max-width: $thrTweetMaxWidth) {
+            display: none;
+        }
+    }
 
-        $iSpace : 5px;
+    .main_column {
 
-        h2 {
-            margin: $iSpace;
-            font-size: 14px;
+        > h1.top_page {
+            text-align: center;
+            color: $textColor;
+            text-shadow: 2px 2px 7px;
+            font-size: 18px;
         }
 
-        >div {
-            margin: $iSpace;
-            padding: $iSpace;
-            border: solid 1px;
-            background-color: #eeeeff;
-            overflow: hidden;
+        #what_is_this {
+            width: 100%;
+            max-width: $infoWindowMaxWidth;
+            margin: 0 auto;
 
-            ul {
-                margin: 0;
-                padding-left: 0;
+            h2 {
+                color: $textColor;
+                text-shadow: rgb(100, 100, 155) 1px 1px 3px;
+            }
 
-                li {
-                    $liBorderStyle : solid 1px #aaaadd;
+            p {
+                margin: 5px;
+                padding: 5px;
+                border: solid 1px;
+                background-color: #eeffee;
+            }
+        }
 
-                    display: none;
-                    margin: 3px;
-                    border-bottom: $liBorderStyle;
+        #panel_frame {
+            max-width: 624px;
+            margin: 0 auto;
+            padding-left: 5px;
 
-                    &:first-child {
-                        display: block;
-                        border-top: $liBorderStyle;
+            @media screen and (max-width: 350px) {
+                width: 158px;
+            }
+            @media screen and (min-width: 351px) and (max-width: 520px) {
+                width: 312px;
+            }
+            @media screen and (min-width: 521px) and (max-width: 678px) {
+                width: 468px;
+            }
+
+            div {
+                float: left;
+                width: $divSize;
+                height: $divSize;
+                margin: $buttonMargine / 2;
+                border: solid 3px;
+                position: relative;
+
+                &.card_list {
+                    background-color: #e0eeff;
+                }
+                &.field_list, &.rankings {
+                    background-color: #efe;
+                }
+                &.deck_list, &.movie {
+                    background-color: #ffe;
+                }
+                &.new_game {
+                    background-color: #fee;
+                }
+
+
+                * {
+                    position: absolute;
+                }
+
+                img {
+                    $imgMargin : 15px;
+                    top: 5px;
+                    left: $imgMargin;
+                    width: $divSize - ($imgMargin * 2);
+                    max-height: $divSize - ($imgMargin * 2);
+                }
+
+                span {
+                    bottom: 0;
+                    width: 100%;
+                    text-align: center;
+                }
+            }
+        }
+
+        #sub_infomation {
+            margin: 0 auto;
+            max-width: 624px;
+
+            #update_history {
+                width: 100%;
+                max-width: $infoWindowMaxWidth;
+                margin: 0 auto;
+
+                $iSpace : 5px;
+
+                h2 {
+                    margin: $iSpace;
+                    font-size: 14px;
+                }
+
+                >div {
+                    margin: $iSpace;
+                    padding: $iSpace;
+                    border: solid 1px;
+                    background-color: #eeeeff;
+                    overflow: hidden;
+
+                    ul {
+                        margin: 0;
+                        padding-left: 0;
+
+                        li {
+                            $liBorderStyle : solid 1px #aaaadd;
+
+                            display: none;
+                            margin: 3px;
+                            border-bottom: $liBorderStyle;
+
+                            &:first-child {
+                                display: block;
+                                border-top: $liBorderStyle;
+                            }
+
+                            &.important {
+                                display: block;
+                            }
+
+                            &.red {
+                                color: red;
+                            }
+                        }
                     }
 
-                    &.important {
+                    a.more {
                         display: block;
-                    }
-
-                    &.red {
-                        color: red;
+                        width: 100%;
+                        text-align: center;
                     }
                 }
             }
 
-            a.more {
-                display: block;
+            #outbound_links {
                 width: 100%;
-                text-align: center;
+                max-width: 360px;
+                margin: 0 auto;
+
+                h2 {
+                    text-align: center;
+                    font-size: 14px;
+                }
+
+                ul {
+                    padding-left: 16px;
+                    li {
+                        a {
+                            line-height: 30px;
+                        }
+                    }
+                }
             }
         }
     }
 
-    #outbound_links {
-        width: 100%;
-        max-width: 360px;
-        margin: 0 auto;
+    .right_column {
+        padding-top: 32px;
 
-        h2 {
-            text-align: center;
-            font-size: 14px;
+        #twitter_collect {
+            border-width: 3px;
+            border-radius: 6px;
+            border: ridge;
+            border-color: cornflowerblue;
         }
 
-        ul {
-            padding-left: 16px;
-            li {
-                a {
-                    line-height: 30px;
+        @media screen and (max-width: $thrTweetMinWidth - 1) {
+            clear: both;
+
+            #twitter_collect {
+                max-width: 570px;
+                margin: 0 auto;
+                text-align: center;
+            }
+        }
+        @media screen and (min-width: $thrTweetMinWidth) {
+            $tweet_width: 220px;
+            $tweet_height: 706px;
+
+            width: $tweet_width;
+            height: $tweet_height;
+
+            #twitter_collect {
+                width: $tweet_width;
+                height: $tweet_height;
+
+                > iframe {
+                    height: $tweet_height !important;
                 }
             }
         }

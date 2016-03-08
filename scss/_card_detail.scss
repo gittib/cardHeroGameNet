@@ -34,6 +34,10 @@
 
             &.special_attack {
                 border-top:$dot_sep;
+
+                .special_caption {
+                    clear: both;
+                }
             }
 
             &.skill {

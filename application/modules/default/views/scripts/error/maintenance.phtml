@@ -1,0 +1,24 @@
+<?php
+$conf = Zend_Registry::get('config');
+$sExp = <<<_eos_
+すみませんが、もうしばらくお待ち下さい。
+「聞いてないよ！」という方は、お手数ですが下記のお知らせか<a href="https://twitter.com/gittib_gittib/timelines/704334380739592192">twitterの更新情報フィード</a>をご確認願います。（更新してなかったらごめんなさい）
+
+_eos_;
+?>
+<style>
+#maintenance {
+    font-size: 1.2em;
+}
+#maintenance h1 {
+    font-size: 1.2em;
+}
+#maintenance p {
+    margin: 15px;
+}
+</style>
+<div id="maintenance">
+    <h1>サーバーメンテナンス中です。</h1>
+    <p><?php echo nl2br($sExp); ?></p>
+    <ul><?php echo $this->render('update_history.phtml'); ?></ul>
+</div>
