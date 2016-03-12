@@ -1481,7 +1481,7 @@ class model_Game {
                     $url = $_SERVER['SERVER_NAME'] . "/game/field/{$iGameFieldId}/";
                     $sTweet = <<<_eos_
 @{$tw} さんのフィールド[{$aField0['game_field_id']}]への返信が投稿されました！
-{$url}
+{$url} #カードヒーロー
 _eos_;
                     Common::tweetNotic($sTweet);
                 }
