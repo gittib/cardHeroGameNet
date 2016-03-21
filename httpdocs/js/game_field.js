@@ -150,6 +150,7 @@ new function () {
                             break;
                         }
                     } catch (e) {
+                        console.log(e);
                         // actor情報取れない時はスルー
                         break;
                     }
@@ -312,7 +313,9 @@ new function () {
                     });
                     alert(sMessage);
                 }
-            } catch (e) {}
+            } catch (e) {
+                ;;; throw e;
+            }
             game_field_reactions.updateGameInfoMessage();
         });
 
@@ -539,6 +542,7 @@ new function () {
             });
         } catch (e) {
             console.log(e);
+            ;;; throw e;
         }
 
         arts_queue.setNoArrangeFlg(g_field_data.no_arrange);
@@ -557,6 +561,7 @@ new function () {
                     localStorage.setItem('game_settings', JSON.stringify(param));
                 } catch (e) {
                     console.log(e);
+                    ;;; throw e;
                 }
             });
         });
@@ -564,7 +569,7 @@ new function () {
 
     // log_messageの追記
     function addLogMessage (sLog, sClass) {
-        if (typeof sClass == 'string') {
+        if (typeof sClass == 'string' && sClass) {
             sClass = ' class="'+sClass+'"';
         } else {
             sClass = '';
@@ -1581,19 +1586,23 @@ new function () {
                             if (a) {
                                 t = a;
                             }
-                        } catch (e) {}
+                        } catch (e) {
+                            ;;; throw e;
+                        }
                         return t;
                     };
 
                     var sActorLog = '';
-                    var sMainLog = aExecAct.log_message;
+                    var sMainLog = aExecAct.log_message || '';
                     var aFollowLog = [];
                     (function () {
                         try {
                             var mon = g_field_data.cards[aExecAct.actor_id];
                             var aMonsterData = g_master_data.m_monster[mon.monster_id];
                             sActorLog = game_field_utility.getPosCodeFromPosId(mon.pos_id) + aMonsterData.name + 'が';
-                        } catch (e) {}
+                        } catch (e) {
+                            ;;; throw e;
+                        }
                         if (sMainLog.indexOf('が前進') != -1) {
                             sMainLog = 'ターン開始時の前進処理';
                             sActorLog = '';
@@ -1628,7 +1637,9 @@ new function () {
                                     if (aMonsterData.skill.id == 32) {
                                         return true;
                                     }
-                                } catch (e) {}
+                                } catch (e) {
+                                    ;;; throw e;
+                                }
                                 return false;
                             })();
                             if (bAsphyxia) {
@@ -1706,7 +1717,9 @@ new function () {
                                                         return true;
                                                     }
                                                 }
-                                            } catch (e) {}
+                                            } catch (e) {
+                                                ;;; throw e;
+                                            }
 
                                             return false;
                                         };
@@ -2077,6 +2090,17 @@ new function () {
                                     _insertDrawAnimation(q);
                                     break;
                                 case 1009:
+                                    if (g_field_data.cards[q.target_id].before_game_card_id) {
+                                        var iGameCardId = g_field_data.cards[q.target_id].before_game_card_id;
+                                        g_field_data.cards[q.target_id].pos_category = 'used';
+                                        g_field_data.cards[iGameCardId].pos_category = 'hand';
+                                    } else if (g_field_data.cards[q.target_id].before_game_card_id) {
+                                        var iGameCardId = g_field_data.cards[q.target_id].before_game_card_id;
+                                        g_field_data.cards[q.target_id].pos_category = 'hand';
+                                        g_field_data.cards[iGameCardId].pos_category = 'used';
+                                    }
+                                    _insertDrawAnimation(q);
+                                    break;
                                 case 1015:
                                     g_field_data.cards[q.target_id].pos_category = 'hand';
                                     _insertDrawAnimation(q);
@@ -2977,6 +3001,9 @@ new function () {
                     }
 
                     var bDisp = (function () {
+                        if (!aExecAct.log_message) {
+                            return false;
+                        }
                         if (aExecAct.log_message.indexOf('行動回数をリセット') != -1) {
                             return false;
                         }
@@ -3006,6 +3033,7 @@ new function () {
                     delete aExecAct.failure_flg;
                 } catch (e) {
                     console.log(e.stack);
+                    ;;; alert('コケた');
                     g_field_data = backupFieldWhileSingleActionProcessing;
 
                     // (function() {
@@ -3443,7 +3471,10 @@ new function () {
                 return true;
             }
 
-        } catch (e) {}
+        } catch (e) {
+            console.error('isGameEnd() Error!');
+            console.error(e);
+        }
 
         return false;
     }

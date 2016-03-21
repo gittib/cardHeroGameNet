@@ -28,14 +28,8 @@
         }
     }
 
-    .left_column {
-        width: 220px;
-        @media screen and (max-width: $thrTweetMaxWidth) {
-            display: none;
-        }
-    }
-
-    .main_column {
+    .top_column {
+        width: 100%;
 
         > h1.top_page {
             text-align: center;
@@ -61,6 +55,16 @@
                 background-color: #eeffee;
             }
         }
+    }
+
+    .left_column {
+        width: 220px;
+        @media screen and (max-width: $thrTweetMaxWidth) {
+            display: none;
+        }
+    }
+
+    .main_column {
 
         #panel_frame {
             max-width: 624px;
@@ -175,31 +179,11 @@
                     }
                 }
             }
-
-            #outbound_links {
-                width: 100%;
-                max-width: 360px;
-                margin: 0 auto;
-
-                h2 {
-                    text-align: center;
-                    font-size: 14px;
-                }
-
-                ul {
-                    padding-left: 16px;
-                    li {
-                        a {
-                            line-height: 30px;
-                        }
-                    }
-                }
-            }
         }
     }
 
     .right_column {
-        padding-top: 32px;
+        padding-top: 14px;
 
         #twitter_collect {
             border-width: 3px;
@@ -210,6 +194,7 @@
 
         @media screen and (max-width: $thrTweetMinWidth - 1) {
             clear: both;
+            padding: 14px 24px 0;
 
             #twitter_collect {
                 max-width: 570px;
@@ -221,7 +206,7 @@
             $tweet_width: 220px;
             $tweet_height: 706px;
 
-            width: $tweet_width;
+            width: $tweet_width + 8;
             height: $tweet_height;
 
             #twitter_collect {
@@ -230,6 +215,30 @@
 
                 > iframe {
                     height: $tweet_height !important;
+                }
+            }
+        }
+    }
+
+    .bottom_column {
+        width: 100%;
+    }
+
+    #outbound_links {
+        width: 100%;
+        max-width: 360px;
+        margin: 0 auto;
+
+        h2 {
+            text-align: center;
+            font-size: 14px;
+        }
+
+        ul {
+            padding-left: 16px;
+            li {
+                a {
+                    line-height: 30px;
                 }
             }
         }

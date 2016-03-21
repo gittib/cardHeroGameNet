@@ -28,7 +28,7 @@ class ErrorController extends Zend_Controller_Action
             default:
                 // application error
                 $code = $errors->exception->getCode();
-                if (!isset($code) || !$code) {
+                if (empty($code)) {
                     $code = 500;
                 }
                 $this->view->code = $code;

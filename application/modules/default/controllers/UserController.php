@@ -98,7 +98,7 @@ class UserController extends Zend_Controller_Action
         $sTwitterId = $this->getRequest()->getPost('twitter_id', '');
         if ($sTwitterId != '') {
             $url = 'https://twitter.com/' . preg_replace('/^@/', '', $sTwitterId);
-            if (!preg_match(';^@?[a-zA-Z_-]*$;', $sTwitterId) || Common::getStatusCode($url) != 200) {
+            if (!preg_match(';^@?[a-zA-Z0-9_-]*$;', $sTwitterId) || Common::getStatusCode($url) != 200) {
                 $this->view->assign('sConfirmErrorMessage', 'Twitter ID が不正です');
             }
         }

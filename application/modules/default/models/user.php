@@ -15,17 +15,6 @@ class model_User {
     public function updateFrontInfo($aInput)
     {
         try {
-            $aHankaku = array(
-                'twitter_id',
-            );
-            foreach ($aHankaku as $val) {
-                if (!empty($aInput[$val])) {
-                    if (preg_match('/[^a-zA-Z0-9_-]/', $aInput[$val])) {
-                        return false;
-                    }
-                }
-            }
-
             $aLoginInfo = Common::checkLogin();
             $where = array($this->_db->quoteInto('user_id = ?', $aLoginInfo['user_id']));
             $set = array(
@@ -45,17 +34,6 @@ class model_User {
         try {
             if (!isset($aUserInfo) || !is_array($aUserInfo)) {
                 throw new Exception('ユーザー情報未取得');
-            }
-
-            $aHankaku = array(
-                'twitter_id',
-            );
-            foreach ($aHankaku as $val) {
-                if (!empty($aInput[$val])) {
-                    if (preg_match('/[^a-zA-Z0-9_-]/', $aInput[$val])) {
-                        return false;
-                    }
-                }
             }
 
             $sel = $this->_db->select()

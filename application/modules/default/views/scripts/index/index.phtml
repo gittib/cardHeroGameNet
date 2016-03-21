@@ -21,16 +21,18 @@ foreach ($aSisterSite as $key => $val) {
 $aUserInfo = Common::checkLogin();
 ?>
 <div id="welcome">
-    <div class="left_column">
-        &nbsp;
-    </div>
-    <div class="main_column">
+    <div class="top_column">
         <h1 class="top_page">カードヒーロー＠スマホ へようこそ！</h1>
         <div id="what_is_this">
             <p>
             <?php echo nl2br($this->sExplain); ?>
             </p>
         </div>
+    </div>
+    <div class="left_column">
+        &nbsp;
+    </div>
+    <div class="main_column">
         <div id="panel_frame" class="clearfix">
             <a href='/card/'>
               <div class="card_list">
@@ -91,24 +93,26 @@ $aUserInfo = Common::checkLogin();
                     <a class="more" href="javascript:void(0);">全部見る</a>
                 </div>
             </div>
-            <div id="outbound_links">
-                <h2>カードヒーロー　関連リンク</h2>
-                <ul>
-                    <li><a class="blank_link" target="_blank" href="http://www.nintendo.co.jp/n02/dmg/ahhj/">カードヒーローBGC版　公式サイト</a></li>
-                    <li><a class="blank_link" target="_blank" href="http://www.nintendo.co.jp/ds/ychj/">カードヒーローDS版　公式サイト</a></li>
-                    <li><a class="blank_link" target="_blank" href="http://www.cardhero-bu.com/">カードヒーロー部.com</a></li>
-                </ul>
-                <h2>カードヒーロー＠スマホ カードセットバリエーション</h2>
-                <ul>
-                <?php echo $sSisterSite; ?>
-                </ul>
-            </div>
         </div>
     </div>
     <div class="right_column">
         <div id="twitter_collect">
             <a class="twitter-timeline" href="https://twitter.com/gittib_gittib/timelines/704334380739592192" height=400 data-border-color="#000088" data-widget-id="705390012133584896">せーぞんほーこく</a>
             <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+        </div>
+    </div>
+    <div class="bottom_column clearfix">
+        <div id="outbound_links">
+            <h2>カードヒーロー　関連リンク</h2>
+            <ul>
+                <li><a class="blank_link" target="_blank" href="http://www.nintendo.co.jp/n02/dmg/ahhj/">カードヒーローBGC版　公式サイト</a></li>
+                <li><a class="blank_link" target="_blank" href="http://www.nintendo.co.jp/ds/ychj/">カードヒーローDS版　公式サイト</a></li>
+                <li><a class="blank_link" target="_blank" href="http://www.cardhero-bu.com/">カードヒーロー部.com</a></li>
+            </ul>
+            <h2>カードヒーロー＠スマホ カードセットバリエーション</h2>
+            <ul>
+            <?php echo $sSisterSite; ?>
+            </ul>
         </div>
     </div>
 </div>

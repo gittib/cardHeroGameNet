@@ -82,7 +82,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
                 1   => 'action',
                 3   => 'page_no',
             ),
-            'game\%s'
+            'game/%s/'
         );
         $router->addRoute('game_last', $route);
 
