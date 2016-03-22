@@ -115,10 +115,14 @@ class model_User {
     public function logout()
     {
         $aUserInfo = Common::checkLogin();
-        $where = array($this->_db->quoteInto('user_id = ?', $aUserInfo['user_id']));
-        $this->_db->delete('t_login_key', $where);
-        setcookie('login_key', '', time() - 1800, '/');
-        Common::checkLogin(Common::$logoutMessage);
+        if (!empty($aUserInfo)) {
+            $where = array($this->_db->quoteInto('user_id = ?', $aUserInfo['user_id']));
+            $this->_db->delete('t_login_key', $where);
+            setcookie('login_key', '', time() - 1800, '/');
+            Common::checkLogin(Common::$logoutMessage);
+            return true;
+        }
+        return false;
     }
 
     public function getUserData ($aCols)

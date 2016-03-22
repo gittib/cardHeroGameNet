@@ -1,19 +1,15 @@
-<div id="update_input">
-    <h1>ユーザー情報更新</h1>
-    <form name="regist_form" action="/user/update-confirm/" method="post">
-        <div id="message"><?php
-        if (isset($this->message)) {
-            echo $this->message;
-        }
-        ?></div>
 <?php
+if (empty($this->message)) {
+    $this->message = '';
+}
 
+$sInput = '';
 foreach ($this->aCols as $key => $val) {
     $sAttrValue = '';
     if (isset($this->aInput[$key])) {
         $sAttrValue = $this->aInput[$key];
     }
-    echo <<<_eos_
+    $sInput .= <<<_eos_
         <div class="item_row clearfix">
             <div class="column_name">{$val}：</div>
             <div class="input_box">
@@ -24,6 +20,14 @@ foreach ($this->aCols as $key => $val) {
 _eos_;
 }
 ?>
+<div id="update_input">
+    <h1>ユーザー情報更新</h1>
+    <form name="regist_form" action="/user/update-confirm/" method="post">
+        <div id="message"><?=$this->message?></div>
+        <?=$sInput?>
         <div class="submit"><input type="button" value="確認画面へ" /></div>
     </form>
+    <ul class="warning">
+        <li>Twitter IDを入力すると、<a href="<?=$this->sTwitterBotUrl?>" target="_blank">bot</a>から＠ツイートが飛びます。<br /> 他人に見せたくないIDは登録しないでください。</li>
+    </ul>
 </div>

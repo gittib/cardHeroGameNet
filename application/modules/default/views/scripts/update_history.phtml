@@ -1,7 +1,10 @@
+<?php
+$conf = Zend_Registry::get('config');
+?>
 <ul>
     <li>[2016/03/12]対戦リプレイのログメッセージ表示内容を最適化</li>
     <li>[2016/03/08]TOPページにツイッターフィードを導入</li>
-    <li class="important">[2016/03/08]<a href="/user/">ユーザー情報管理画面</a>からツイッターID登録機能を導入。登録しておくと、自分のフィールドへの返信時に<a href="https://twitter.com/gittic_gittic">bot</a>から＠ツイートが飛びます</li>
+    <li class="important">[2016/03/08]<a href="/user/">ユーザー情報管理画面</a>からツイッターID登録機能を導入。登録しておくと、自分のフィールドへの返信時に<a href="<?=$conf->twitter->bot->url?>">bot</a>から＠ツイートが飛びます</li>
     <li class="important">[2016/03/06]<a href="/card/detail/145/">ヴァルテル</a>と<a href="/card/detail/18/">ルージュ</a>のカード性能を強化</li>
     <li>[2016/02/16]<a href="/ranking/magic/">マジックランキング</a>に使用されたゲーム一覧へのリンクを追加</li>
     <li>[2016/01/17]<a href="/card/detail/125/">かげ呪い</a>および<a href="/card/detail/48/">グリフォン</a>のカード性能を修正</li>

@@ -35,8 +35,10 @@ class UserController extends Zend_Controller_Action
 
     public function preDispatch()
     {
+        $conf = Zend_Registry::get('config');
         $this->_layout->noindex = true;
         $this->view->assign('no_ad', true);
+        $this->view->assign('sTwitterBotUrl', $conf->twitter->bot->url);
     }
 
     public function postDispatch()
@@ -207,8 +209,9 @@ class UserController extends Zend_Controller_Action
     public function logoutAction()
     {
         $this->_getModel();
-        $this->_model->logout();
+        $ret = $this->_model->logout();
         $this->_layout->title = 'ログアウト';
+        $this->view->assign('rslt', $ret);
     }
 
     private function _getModel() {

@@ -1586,9 +1586,7 @@ new function () {
                             if (a) {
                                 t = a;
                             }
-                        } catch (e) {
-                            ;;; throw e;
-                        }
+                        } catch (ignore) {}
                         return t;
                     };
 
@@ -1600,9 +1598,7 @@ new function () {
                             var mon = g_field_data.cards[aExecAct.actor_id];
                             var aMonsterData = g_master_data.m_monster[mon.monster_id];
                             sActorLog = game_field_utility.getPosCodeFromPosId(mon.pos_id) + aMonsterData.name + 'が';
-                        } catch (e) {
-                            ;;; throw e;
-                        }
+                        } catch (ignore) {}
                         if (sMainLog.indexOf('が前進') != -1) {
                             sMainLog = 'ターン開始時の前進処理';
                             sActorLog = '';
@@ -1633,13 +1629,14 @@ new function () {
                                         return false;
                                     }
                                     var mon = g_field_data.cards[q.target_id];
+                                    if (!mon.monster_id) {
+                                        return false;
+                                    }
                                     var aMonsterData = g_master_data.m_monster[mon.monster_id];
                                     if (aMonsterData.skill.id == 32) {
                                         return true;
                                     }
-                                } catch (e) {
-                                    ;;; throw e;
-                                }
+                                } catch (ignore) {}
                                 return false;
                             })();
                             if (bAsphyxia) {
@@ -2093,11 +2090,17 @@ new function () {
                                     if (g_field_data.cards[q.target_id].before_game_card_id) {
                                         var iGameCardId = g_field_data.cards[q.target_id].before_game_card_id;
                                         g_field_data.cards[q.target_id].pos_category = 'used';
+                                        delete g_field_data.cards[q.target_id].before_game_card_id;
                                         g_field_data.cards[iGameCardId].pos_category = 'hand';
-                                    } else if (g_field_data.cards[q.target_id].before_game_card_id) {
-                                        var iGameCardId = g_field_data.cards[q.target_id].before_game_card_id;
+                                        delete g_field_data.cards[iGameCardId].next_game_card_id;
+                                    } else if (g_field_data.cards[q.target_id].next_game_card_id) {
+                                        var iGameCardId = g_field_data.cards[q.target_id].next_game_card_id;
                                         g_field_data.cards[q.target_id].pos_category = 'hand';
+                                        delete g_field_data.cards[q.target_id].next_game_card_id;
                                         g_field_data.cards[iGameCardId].pos_category = 'used';
+                                        delete g_field_data.cards[iGameCardId].before_game_card_id;
+                                    } else {
+                                        g_field_data.cards[q.target_id].pos_category = 'hand';
                                     }
                                     _insertDrawAnimation(q);
                                     break;
@@ -3032,8 +3035,7 @@ new function () {
                     }
                     delete aExecAct.failure_flg;
                 } catch (e) {
-                    console.log(e.stack);
-                    ;;; alert('コケた');
+                    console.error(e.stack);
                     g_field_data = backupFieldWhileSingleActionProcessing;
 
                     // (function() {

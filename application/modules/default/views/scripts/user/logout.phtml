@@ -1,1 +1,8 @@
-<h2>ログアウトしました</h2>
+<?php
+if ($this->rslt) {
+    $sMessage = 'ログアウトしました。';
+} else {
+    $sMessage = 'すでにログアウト済みです。';
+}
+?>
+<h2><?=$sMessage?></h2>

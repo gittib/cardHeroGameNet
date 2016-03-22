@@ -1,9 +1,8 @@
 <?php
 $conf = Zend_Registry::get('config');
-$url = 'https://twitter.com/gittib_gittib/timelines/704334380739592192';
 $sExp = <<<_eos_
 すみませんが、もうしばらくお待ち下さい。
-「聞いてないよ！」という方は、お手数ですが<a href="{$url}">twitterの更新情報フィード</a>をご確認願います。（更新してなかったらごめんなさい）
+「聞いてないよ！」という方は、お手数ですが以下のTwitterフィードより告知情報をご確認願います。（更新してなかったらごめんなさい）
 
 _eos_;
 ?>
@@ -14,8 +13,23 @@ _eos_;
 #maintenance p {
     margin: 15px;
 }
+#maintenance .twitter_collect_wrapper {
+    margin: 0 auto;
+    max-width: 525px;
+}
+#maintenance .twitter_collect_wrapper .twitter_collect {
+    margin: 30px;
+    border: solid 3px cornflowerblue;
+    border-radius: 10px;
+}
 </style>
 <div id="maintenance">
     <h1>ただ今、サーバーメンテナンス中です。</h1>
     <p><?= nl2br($sExp) ?></p>
+    <div class="twitter_collect_wrapper">
+        <div class="twitter_collect">
+            <a class="twitter-timeline" href="<?=$conf->twitter->collect->url?>" height=400 data-border-color="#000088" data-widget-id="705390012133584896">せーぞんほーこく</a>
+            <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+        </div>
+    </div>
 </div>
