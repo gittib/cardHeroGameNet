@@ -52,7 +52,7 @@ class model_User {
                 'login_id'      => $aUserInfo['login_id'],
                 'password'      => md5($aUserInfo['password'] . $this->_salt),
                 'nick_name'     => htmlspecialchars($aUserInfo['nick_name'], ENT_QUOTES),
-                'twitter_id'    => $aInput['twitter_id'],
+                'twitter_id'    => $aUserInfo['twitter_id'],
             );
 
             $this->_db->insert('t_user', $set);

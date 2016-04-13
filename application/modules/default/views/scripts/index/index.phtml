@@ -18,14 +18,25 @@ foreach ($aSisterSite as $key => $val) {
     }
 }
 
-$aUserInfo = Common::checkLogin();
+$sPanelHtml = '';
+foreach ($this->aPanelInfo as $key => $val) {
+    $sPanelHtml .= <<<_eos_
+            <a href="{$val['url']}">
+              <div class="{$val['class']}">
+                  <img src="/images/{$val['img']}" alt="{$val['alt']}" />
+                  <span>{$val['text']}</span>
+              </div>
+            </a>
+
+_eos_;
+}
 ?>
 <div id="welcome">
     <div class="top_column">
         <h1 class="top_page">カードヒーロー＠スマホ へようこそ！</h1>
         <div id="what_is_this">
             <p>
-            <?php echo nl2br($this->sExplain); ?>
+                <?=nl2br($this->sExplain)?>
             </p>
         </div>
     </div>
@@ -34,62 +45,13 @@ $aUserInfo = Common::checkLogin();
     </div>
     <div class="main_column">
         <div id="panel_frame" class="clearfix">
-            <a href='/card/'>
-              <div class="card_list">
-                  <img src="/images/card_list_icon.png" alt="カードリスト" />
-                  <span>カードリスト</span>
-              </div>
-            </a>
-            <a href='/game/'>
-              <div class="field_list">
-                  <img src="/images/field_list_icon.png" alt="フィールドリスト" />
-                  <span>フィールド一覧</span>
-              </div>
-            </a>
-            <a href='/deck/'>
-              <div class="deck_list">
-                  <img src="/images/deck_icon.png" alt="デッキ一覧" />
-                  <span>デッキ一覧</span>
-              </div>
-            </a>
-            <a href='/game/lobby/'>
-              <div class="new_game">
-                  <img src="/images/new_game_icon.png" alt="新規ゲーム開始" />
-                  <span>新規ゲーム開始</span>
-              </div>
-            </a>
-            <a href='/ranking/'>
-              <div class="rankings">
-                  <img src="/images/ranking_icon.png" alt="ランキング" />
-                  <span>ランキング</span>
-              </div>
-            </a>
-            <a href='/game/movie/'>
-              <div class="movie">
-                  <img src="/images/replay_movie_icon.png" alt="ムービー" />
-                  <span>リプレイ鑑賞</span>
-              </div>
-            </a>
-            <a href='/support/mail/input/'>
-              <div class="support">
-                  <img src="/images/mail_icon.png" alt="メール" />
-                  <span>お問い合わせ</span>
-              </div>
-            </a>
-            <?php if (Common::isAdmin()): ?>
-            <a href='/admin/'>
-              <div class="support" style="background-color: pink;">
-                  <img src="/images/field_list_icon0.png" alt="管理画面" />
-                  <span>管理画面</span>
-              </div>
-            </a>
-            <?php endif; ?>
+            <?=$sPanelHtml?>
         </div>
         <div id="sub_infomation" class="clearfix">
             <div id="update_history">
                 <h2>更新履歴・お知らせ</h2>
                 <div>
-                    <?php echo $this->render('update_history.phtml'); ?>
+                    <?=$this->render('update_history.phtml')?>
                     <a class="more" href="javascript:void(0);">全部見る</a>
                 </div>
             </div>
@@ -111,7 +73,7 @@ $aUserInfo = Common::checkLogin();
             </ul>
             <h2>カードヒーロー＠スマホ カードセットバリエーション</h2>
             <ul>
-            <?php echo $sSisterSite; ?>
+                <?=$sSisterSite?>
             </ul>
         </div>
     </div>

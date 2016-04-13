@@ -1,0 +1,39 @@
+<?php
+$sPanelHtml = '';
+foreach ($this->aPanelInfo as $key => $val) {
+    $sPanelHtml .= <<<_eos_
+            <a href="{$val['url']}" target="_top">
+              <div class="{$val['class']}">
+                  <img src="/images/{$val['img']}" alt="{$val['alt']}" />
+                  <span>{$val['text']}</span>
+              </div>
+            </a>
+
+_eos_;
+}
+?>
+<style>
+#lightbox_mainmenu .main_column {
+    float: initial;
+    margin: auto;
+}
+#lightbox_mainmenu .main_column #panel_frame {
+    min-width: 320px;
+}
+#lightbox_mainmenu .main_column #panel_frame div {
+    background-color: white;
+}
+</style>
+<div id="lightbox_mainmenu">
+    <div class="main_column">
+        <div id="panel_frame" class="clearfix">
+            <?=$sPanelHtml?>
+            <a href="/" target="_top">
+              <div class="top_page">
+                  <img src="/images/favicon.ico" alt="トップページ" />
+                  <span>トップページ</span>
+              </div>
+            </a>
+        </div>
+    </div>
+</div>

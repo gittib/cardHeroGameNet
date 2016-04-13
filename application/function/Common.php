@@ -382,6 +382,7 @@ class Common {
         $html .= '<small style="display:block; border-top:1px solid #555; padding-top:12px; margin-top:72px; text-align:center; font-weight:700;">プログラムの説明: <a href="https://syncer.jp/twitter-api-matome/post/statuses/update" target="_blank">SYNCER</a></small>' ;
 
         // 出力 (本稼働時はHTMLのヘッダー、フッターを付けよう)
+        $html = '<html><body>' . $html . '</body></html>';
         return $ret;
     }
 

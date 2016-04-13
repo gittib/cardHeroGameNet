@@ -38,13 +38,37 @@ if (isSet($l->stylesheet)) {
         }
     }
 }
+
+$sAnalytics = '';
+if ((empty($_GET['from']) || preg_match(';https?//;', $_GET['from']) === false) && empty($l->bPreventAnalytics)) {
+    if (APPLICATION_ENV == 'production') {
+        // Googleアナリティクスタグ
+        $sAnalytics = <<<_eos_
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-53206929-1', 'auto');
+  ga('require', 'linkid', 'linkid.js');
+  ga('send', 'pageview');
+
+</script>
+
+_eos_;
+    } else {
+        $sAnalytics = "<!-- Google Analytics -->\n";
+    }
+}
 ?>
 <meta charset="UTF-8" />
-<title><?php echo $sTitle; ?>カードヒーロー@スマホ</title>
+<title><?=$sTitle?>カードヒーロー@スマホ</title>
 <meta name="keywords" content="カードヒーロー,スマホ" />
-<meta name="description" content="<?php echo $sDescription; ?>" />
+<meta name="description" content="<?=$sDescription?>" />
 <meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1,minimum-scale=1" />
 <link rel="shortcut icon" href="/images/favicon.ico" />
-<?php echo $sNoIndex; ?>
-<?php echo $sCanonical; ?>
+<?=$sNoIndex?>
+<?=$sCanonical?>
 <link rel="stylesheet" type="text/css" href="/css/screen.css?ver=20160314" media="all" />
+<?=$sAnalytics?>
