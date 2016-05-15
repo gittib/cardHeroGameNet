@@ -9,6 +9,9 @@ foreach ($this->aAd as $iAdId => $val) {
     else {
         $sTrClass .= ' term_over ';
     }
+    if (empty($val['ad_comment'])) {
+        $val['ad_comment'] = 'コメント無し';
+    }
 
     $sCode = $this->escape($val['code']);
     $sStart = date('Y-m-d H:i', strtotime($val['start_date']));
@@ -18,10 +21,9 @@ foreach ($this->aAd as $iAdId => $val) {
             <td><a href="/admin/ad/?ad_group_id={$val['ad_group_id']}">{$val['ad_group_id']}</a></td>
             <td>{$val['ad_id']}</td>
             <td>{$val['ad_type']}</td>
-            <td class="comment">{$val['ad_comment']}</td>
+            <td class="comment"><a href='/admin/ad/edit/?ad_id={$val['ad_id']}' target='_blank'>{$val['ad_comment']}</a></td>
             <td class="term from">{$sStart}</td>
             <td class="term to">{$sEnd}</td>
-            <td><a href='/admin/ad/edit/?ad_id={$val['ad_id']}' target='_blank'>編集</a></td>
         </tr>
 
 _eos_;
@@ -41,7 +43,6 @@ _eos_;
                 <th>コメント</th>
                 <th class="term from">開始日時</th>
                 <th class="term to">終了日時</th>
-                <th>編集</th>
             </tr>
             <?php echo $sAdContents; ?>
         </table>

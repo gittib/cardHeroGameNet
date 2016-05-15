@@ -399,9 +399,7 @@ function createGameFieldReactions() {
         if (typeof aArgs == 'undefined') {
             aArgs = {'field_data' : g_field_data};
         }
-        if (typeof aArgs.game_state == 'undefined') {
-            aArgs.game_state = checkGameState();
-        }
+        aArgs.game_state = checkGameState();
         g_field_data = aArgs.field_data;
         try {
             var _buildArtsRow = function (mon) {
@@ -413,6 +411,7 @@ function createGameFieldReactions() {
                     sImgSrc = game_field_utility.getImg(sImgSrc);
                     var sRange = '<img src="' + sImgSrc + '" alt="" />';
                     var iStone = val.stone;
+                    var sCommandRowClass = 'command_row';
                     if (val.damage_type_flg == 'P' && typeof mon.status != 'undefined') {
                         $.each(mon.status, function(sid, aSt) {
                             switch (Number(sid)) {
@@ -445,9 +444,12 @@ function createGameFieldReactions() {
                                 break;
                         }
                     } else if (val.script_id == 1041) {
-                        sPower = '2?';
+                        sPower = iPow + '?';
                     }
                     if (typeof mon.status != 'undefined') {
+                        if (typeof mon.status[110] != 'undefined' && mon.status[110].param1 == val.id) {
+                            sCommandRowClass += ' invalid';
+                        }
                         if (typeof mon.status[120] != 'undefined' && mon.status[120].param1 == val.id) {
                             iStone *= 2;
                         }
@@ -456,7 +458,7 @@ function createGameFieldReactions() {
                         }
                     }
                     sCommandsHtml +=
-                        '<div class="command_row" art_id="' + val.id + '" act_type="arts">' +
+                        '<div class="'+sCommandRowClass+'" art_id="' + val.id + '" act_type="arts">' +
                             val.name +
                             '<div class="num_info">' +
                                 '<span class="range_pic">' +
@@ -2040,6 +2042,8 @@ function createGameFieldReactions() {
 
             // 自分自身は原則として対象にできない
             switch (aArgs.range_type_id) {
+                case 21:
+                    break;
                 default:
                     if (aArgs.actor_id == aArgs.target_id) {
                         return false;
@@ -2169,11 +2173,13 @@ function createGameFieldReactions() {
                         return false;
                     }
                     var nMaxAct = 1;
-                    var aMonsterData = g_master_data.m_monster[targetMon.monster_id];
-                    if (aMonsterData.skill.id == 4) {
-                        nMaxAct = 2;
-                    } else if (aMonsterData.skill.id == 5) {
-                        nMaxAct = 3;
+                    if (!bNoArrange) {
+                        var aMonsterData = g_master_data.m_monster[targetMon.monster_id];
+                        if (aMonsterData.skill.id == 4) {
+                            nMaxAct = 2;
+                        } else if (aMonsterData.skill.id == 5) {
+                            nMaxAct = 3;
+                        }
                     }
                     if (targetMon.act_count < nMaxAct) {
                         return true;
@@ -2363,9 +2369,9 @@ function createGameFieldReactions() {
             return 'select_actor';
         })();
 
-        if (sState != 'select_actor') {
-            console.log('checkGameState : ' + sState);
-        }
+        ;;; if (sState != 'select_actor') {
+        ;;;     console.log('checkGameState : ' + sState);
+        ;;; }
         return sState;
     }
 

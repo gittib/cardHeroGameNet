@@ -984,6 +984,40 @@ function createArtsQueue(m) {
                 }
                 return aRet;
                 break;
+            case 1044:
+                var aRet = [{
+                    queue_type_id   : 1026,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 112,
+                }];
+                return aRet;
+                break;
+            case 1045:
+                var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var aValidTargets = [];
+                $.each(aArgs.field_data.cards, function(iGameCardId, val) {
+                    if (val.owner != mon.owner) {
+                        return true;
+                    }
+                    if (val.pos_category != 'deck') {
+                        return true;
+                    }
+                    var d = g_master_data.m_card[val.card_id];
+                    if (d.category != 'super_front' && d.category != 'super_back') {
+                        return true;
+                    }
+                    aValidTargets.push(iGameCardId);
+                });
+                if (aValidTargets.length <= 0) {
+                    return [{
+                        queue_type_id   : 1003,
+                    }];
+                }
+                return [{
+                    queue_type_id   : 1011,
+                    target_id       : aValidTargets[rand_gen.rand(0, aValidTargets.length-1)],
+                }];
+                break;
             default:
                 throw new Error('unknown script_id posted.');
         }

@@ -313,6 +313,12 @@ class model_Game {
                         case 1003:
                             $sMaster = '<span style="display:none;">白</span>';
                             break;
+                        case 1005:
+                            $sMaster = '<span style="display:none;">赤</span>';
+                            break;
+                        default:
+                            $sMaster = '<span style="display:none;">???</span>';
+                            break;
                     }
                     $iGameFieldId = $val['game_field_id'];
                     $sOwner = $val['owner'];
@@ -1380,6 +1386,7 @@ class model_Game {
                     }
                 }
             }
+            $nQueue = 0;
             foreach ($aFieldData['resolved_queues'] as $val) {
                 $sql = "select nextval('t_queue_queue_id_seq')";
                 $iQueueId = $this->_db->fetchOne($sql);
@@ -1409,6 +1416,9 @@ class model_Game {
                     'actor_anime_disable'   => $val['actor_anime_disable'],
                 );
                 $this->_db->insert('t_queue', $set);
+                if ($val['priority'] == 'command') {
+                    $nQueue++;
+                }
                 foreach ($val['queue_units'] as $q) {
                     if (!isset($q['target_id'])) {
                         $q['target_id'] = null;

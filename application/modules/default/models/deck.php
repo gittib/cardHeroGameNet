@@ -349,6 +349,15 @@ class model_Deck {
         try {
             $this->_db->beginTransaction();
 
+            // 必要最低限のバリデーションチェック
+            if (!Common::checkLogin()) {
+                $aDeckInfo['open_flg'] = 1;
+            } else if ($aDeckInfo['open_flg'] && $aDeckInfo['open_flg'] == 'on') {
+                $aDeckInfo['open_flg'] = 1;
+            } else {
+                $aDeckInfo['open_flg'] = 0;
+            }
+
             $deckId = '';
             try {
                 if ($aDeckInfo['user_id'] == '') {
@@ -356,13 +365,6 @@ class model_Deck {
                 }
                 if ($aDeckInfo['deck_id'] == '') {
                     throw new newDeckInsertException();
-                }
-                if (!Common::checkLogin()) {
-                    $aDeckInfo['open_flg'] = 1;
-                } else if ($aDeckInfo['open_flg'] && $aDeckInfo['open_flg'] == 'on') {
-                    $aDeckInfo['open_flg'] = 1;
-                } else {
-                    $aDeckInfo['open_flg'] = 0;
                 }
                 $deckId = $aDeckInfo['deck_id'];
 

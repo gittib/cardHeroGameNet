@@ -3,8 +3,12 @@ $(function () {
         '<style>' +
         '<!--' +
         'table#my_console_window {' +
-          'width : 100%' +
+          'width : 100%;' +
           'border: solid 1px;' +
+          'overflow-x: scroll;' +
+        '}' +
+        'table#my_console_window tr {' +
+          'overflow-x: scroll;' +
         '}' +
         'table#my_console_window th {' +
           'border: solid 1px #eeeeee;' +
@@ -15,6 +19,7 @@ $(function () {
           'border: solid 1px #eeeeee;' +
           'background-color: #ffffff;' +
           'font-size: 10px;' +
+          'word-break: break-all;' +
         '}' +
         'table#my_console_window tr.error td {' +
           'background-color: #ffcccc;' +
@@ -32,7 +37,7 @@ $(function () {
         '-->' +
         '</style>' +
         '<div id="my_console_log_cnt"></div>' +
-        '<table id="my_console_window"><tr><th colspan=2>console.log() Output</th></tr></table>'
+        '<table id="my_console_window"><tr><td style="width:24px;"> </td><th>console.log() Output</th></tr></table>'
     );
 
     var _fnConsole = function (dbg_msg, sClass) {

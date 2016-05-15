@@ -16,7 +16,6 @@ class Model_Admin
             ->from('t_ad')
             ->order(array(
                 'ad_group_id',
-                'ins_date desc',
                 'ad_id',
             ));
         if (!empty($aOptions['ad_id'])) {

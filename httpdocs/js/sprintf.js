@@ -11,10 +11,10 @@ function sprintf() {
 	var result = "";
 	var format = argv[0];
 	var format_length = format.length;
-	
+
 	var flag, width, precision;
 	flag = 0;
-	
+
 	var index = 1;
 	var mode = 0;
 	var tmpresult;
@@ -189,11 +189,11 @@ function sprintf() {
 		default:
 			return "error";
 		}
-		
+
 		if(mode)
 			buff += c;
 	}
-	
+
 	return result;
 }
 
@@ -207,9 +207,9 @@ function toInteger(n, f, w, p) {
 		else
 			n = 0;
 	}
-	
+
 	var str = n.toString();
-	
+
 	//to integer if decimal
 	if(-1 < n && n < 1)
 		str = "0";
@@ -238,7 +238,7 @@ function toInteger(n, f, w, p) {
 				str = str.substring(0, pos_dot);
 		}
 	}
-	
+
 	//精度
 	var len = str.length;
 	if(len < p) {
@@ -247,7 +247,7 @@ function toInteger(n, f, w, p) {
 			str = c + str;
 		len = p;
 	}
-	
+
 	//フラグの処理
 	return ProcFlag(str, f, w - len, n >= 0);
 }
@@ -262,20 +262,20 @@ function toFloatingPoint(n, f, w, p) {
 		else
 			n = 0;
 	}
-	
+
 	var bpositive = (n >= 0);
 	if(!bpositive)
 		n = -n;
-	
+
 	str = toFloatingPoint2(n, f, p);
-	
+
 	//フラグの処理
 	return ProcFlag(str, f, w - str.length, bpositive);
 }
 
 function toFloatingPoint2(n, f, p) {
 	var str = n.toString();
-	
+
 	//to decimal if exponential
 	var pos_e = str.indexOf('e');
 	if(pos_e != -1) {
@@ -320,7 +320,7 @@ function toFloatingPoint2(n, f, p) {
 			}
 		}
 	}
-	
+
 	//精度で整形
 	var len = str.length;
 	var pos_dot = str.indexOf(".");
@@ -372,7 +372,7 @@ function toFloatingPoint2(n, f, p) {
 				str += "0";
 		}
 	}
-	
+
 	return str;
 }
 
@@ -386,17 +386,17 @@ function toExponential(n, f, w, p, e) {
 		else
 			n = 0;
 	}
-	
+
 	var bpositive = n >= 0;
 	if(!bpositive)
 		n = -n;
-	
+
 	var str = n.toString();
 	var pos_dot = str.indexOf(".");
 	var pos_e = str.indexOf("e");
 	var type = ((pos_e != -1) << 1) + (pos_dot != -1);
 	var exp;
-	
+
 	//仮数部と指数部に分ける
 	if(type == 0) {			//整数
 		if(exp = str.length - 1)
@@ -426,26 +426,26 @@ function toExponential(n, f, w, p, e) {
 		exp = parseInt(str.substring(pos_e + 1));
 		str = str.substring(0, pos_e);
 	}
-	
+
 	//仮数部の整形
 	str = toFloatingPoint2(parseFloat(str), f, p);
-	
+
 	//指数部の整形
 	if(exp >= 0)
 		str += e + (exp < 10 ? "+0" : "+") + exp;
 	else
 		str += e + (exp > -10 ? "-0" + (-exp) : exp);
-	
+
 	//フラグの処理
 	str = ProcFlag(str, f, w - str.length, bpositive);
-	
+
 	return str;
 }
 
 function toFormatString(s, w, p) {
 	if(typeof s != "string")
 		s = s.toString();
-	
+
 	var len = s.length;
 	if(p >= 0) {
 		if(p < len) {
@@ -458,7 +458,7 @@ function toFormatString(s, w, p) {
 		for(var i = w - len; i; i--)
 			s = c + s;
 	}
-	
+
 	return s;
 }
 
@@ -498,6 +498,6 @@ function ProcFlag(str, f, extra, b) {
 	}
 	if(space)
 		str = " " + str;
-	
+
 	return str;
 }

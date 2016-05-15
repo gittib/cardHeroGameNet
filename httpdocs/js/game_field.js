@@ -411,7 +411,7 @@ new function () {
     function _preload() {
         (function() {
             var df = $.Deferred();
-            var _version = 1.1;
+            var _version = 1.2;
             try {
                 if (sessionStorage.oMasterData) {
                     var d = JSON.parse(sessionStorage.oMasterData);
@@ -1313,6 +1313,10 @@ new function () {
                         actor.aTargets.push(aTargetInfo);
                         _addActionFromActorInfo();
                         return true;
+                    } else {
+                        game_field_utility.myAlertInField({
+                            message : '適正な対象を選んでください',
+                        });
                     }
                     break;
                 case 'arts':
@@ -1325,7 +1329,9 @@ new function () {
                         art_flg         : true,
                     });
                     if (!bRangeOk) {
-                        console.log('range check NG');
+                        game_field_utility.myAlertInField({
+                            message : '適正な対象を選んでください',
+                        });
                         return false;
                     }
                     $('#game_field #' + aTargetInfo.pos_id).addClass('target');
@@ -1343,7 +1349,9 @@ new function () {
                         target_order    : actor.aTargets.length,
                     });
                     if (!bRangeOk) {
-                        console.log('range check NG');
+                        game_field_utility.myAlertInField({
+                            message : '適正な対象を選んでください',
+                        });
                         return false;
                     }
                     if (game_field_reactions.isProvoked({
@@ -1370,6 +1378,9 @@ new function () {
                         range_type_id   : 12,
                     });
                     if (!bRangeOk) {
+                        game_field_utility.myAlertInField({
+                            message : 'そこには移動できません',
+                        });
                         return false;
                     }
                     actor.param1 = aTargetInfo.pos_id;

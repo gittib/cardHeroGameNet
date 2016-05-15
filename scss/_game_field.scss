@@ -421,10 +421,15 @@
                         border-top:solid 1px;
                         padding: 12px 3px;
                         font-size: $cmd_font_size;
-                    }
 
-                    div.command_row.selected_act {
-                        background-color: #ffff00;
+                        &.selected_act {
+                            background-color: #ffff00;
+                        }
+
+                        &.invalid {
+                            // 選択状態のハイライトよりも特技封じの無効化の方を優先する
+                            background-color: #808080;
+                        }
                     }
 
                     div.around_card_info {

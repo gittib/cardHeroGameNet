@@ -212,19 +212,21 @@ class Common {
      *
      * @param   String  sTweet  ツイートする文字列
      * @param   Array   aOption オプションパラメータ
-     *  'in_reply_to_status_id' リプライ先のツイートID 
-     *  'possibly_sensitive'    不適切な可能性のある画像とするか？ 
-     *  'lat'                   緯度 
-     *  'long'                  経度 
-     *  'place_id'              場所ID 
-     *  'display_coordinates'   位置情報を範囲指定にするか？ 
-     *  'trim_user'             ユーザーオブジェクトの省略 
-     *  'media_ids'             メディアID 
+     *  'in_reply_to_status_id' リプライ先のツイートID
+     *  'possibly_sensitive'    不適切な可能性のある画像とするか？
+     *  'lat'                   緯度
+     *  'long'                  経度
+     *  'place_id'              場所ID
+     *  'display_coordinates'   位置情報を範囲指定にするか？
+     *  'trim_user'             ユーザーオブジェクトの省略
+     *  'media_ids'             メディアID
      *
      * @return bool trueならツイート成功
      */
     public static function tweetNotic($sTweet, $aOption = array())
     {
+        return;
+
         $conf = Zend_Registry::get('config');
 
         // 設定
@@ -237,14 +239,14 @@ class Common {
 
         // パラメータA (オプション)
         $aParam = array(
-            'in_reply_to_status_id' => null,    // リプライ先のツイートID              
-            'possibly_sensitive'    => null,    // 不適切な可能性のある画像とするか？  
-            'lat'                   => null,    // 緯度                                
-            'long'                  => null,    // 経度                                
-            'place_id'              => null,    // 場所ID 
-            'display_coordinates'   => null,    // 位置情報を範囲指定にするか？ 
-            'trim_user'             => null,    // ユーザーオブジェクトの省略 
-            'media_ids'             => null,    // メディアID 
+            'in_reply_to_status_id' => null,    // リプライ先のツイートID
+            'possibly_sensitive'    => null,    // 不適切な可能性のある画像とするか？
+            'lat'                   => null,    // 緯度
+            'long'                  => null,    // 経度
+            'place_id'              => null,    // 場所ID
+            'display_coordinates'   => null,    // 位置情報を範囲指定にするか？
+            'trim_user'             => null,    // ユーザーオブジェクトの省略
+            'media_ids'             => null,    // メディアID
         );
         foreach ($aParam as $key => $val) {
             if (empty($aOption[$key])) {
@@ -323,7 +325,7 @@ class Common {
         // cURLを使ってリクエスト
         $curl = curl_init() ;
         curl_setopt( $curl , CURLOPT_URL , $request_url ) ;
-        curl_setopt( $curl , CURLOPT_HEADER, 1 ) ; 
+        curl_setopt( $curl , CURLOPT_HEADER, 1 ) ;
         curl_setopt( $curl , CURLOPT_CUSTOMREQUEST , $context['http']['method'] ) ;			// メソッド
         curl_setopt( $curl , CURLOPT_SSL_VERIFYPEER , false ) ;								// 証明書の検証を行わない
         curl_setopt( $curl , CURLOPT_RETURNTRANSFER , true ) ;								// curl_execの結果を文字列で返す
@@ -388,7 +390,7 @@ class Common {
 
     /**
      * HTTPステータスコードを取得する
-     * 
+     *
      * 正常な場合は200が返却され、異常な場合はそのステータスが、
      * そして存在しないURLの場合は返ってくる値はnullとなる。
      *

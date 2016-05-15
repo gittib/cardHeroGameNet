@@ -1055,9 +1055,7 @@ function createGameFieldReactions() {
         if (typeof aArgs == 'undefined') {
             aArgs = {'field_data' : g_field_data};
         }
-        if (typeof aArgs.game_state == 'undefined') {
-            aArgs.game_state = checkGameState();
-        }
+        aArgs.game_state = checkGameState();
         g_field_data = aArgs.field_data;
         try {
             var _buildArtsRow = function (mon) {
@@ -1069,6 +1067,7 @@ function createGameFieldReactions() {
                     sImgSrc = game_field_utility.getImg(sImgSrc);
                     var sRange = '<img src="' + sImgSrc + '" alt="" />';
                     var iStone = val.stone;
+                    var sCommandRowClass = 'command_row';
                     if (val.damage_type_flg == 'P' && typeof mon.status != 'undefined') {
                         $.each(mon.status, function(sid, aSt) {
                             switch (Number(sid)) {
@@ -1101,9 +1100,12 @@ function createGameFieldReactions() {
                                 break;
                         }
                     } else if (val.script_id == 1041) {
-                        sPower = '2?';
+                        sPower = iPow + '?';
                     }
                     if (typeof mon.status != 'undefined') {
+                        if (typeof mon.status[110] != 'undefined' && mon.status[110].param1 == val.id) {
+                            sCommandRowClass += ' invalid';
+                        }
                         if (typeof mon.status[120] != 'undefined' && mon.status[120].param1 == val.id) {
                             iStone *= 2;
                         }
@@ -1112,7 +1114,7 @@ function createGameFieldReactions() {
                         }
                     }
                     sCommandsHtml +=
-                        '<div class="command_row" art_id="' + val.id + '" act_type="arts">' +
+                        '<div class="'+sCommandRowClass+'" art_id="' + val.id + '" act_type="arts">' +
                             val.name +
                             '<div class="num_info">' +
                                 '<span class="range_pic">' +
@@ -2696,6 +2698,8 @@ function createGameFieldReactions() {
 
             // 自分自身は原則として対象にできない
             switch (aArgs.range_type_id) {
+                case 21:
+                    break;
                 default:
                     if (aArgs.actor_id == aArgs.target_id) {
                         return false;
@@ -2825,11 +2829,13 @@ function createGameFieldReactions() {
                         return false;
                     }
                     var nMaxAct = 1;
-                    var aMonsterData = g_master_data.m_monster[targetMon.monster_id];
-                    if (aMonsterData.skill.id == 4) {
-                        nMaxAct = 2;
-                    } else if (aMonsterData.skill.id == 5) {
-                        nMaxAct = 3;
+                    if (!bNoArrange) {
+                        var aMonsterData = g_master_data.m_monster[targetMon.monster_id];
+                        if (aMonsterData.skill.id == 4) {
+                            nMaxAct = 2;
+                        } else if (aMonsterData.skill.id == 5) {
+                            nMaxAct = 3;
+                        }
                     }
                     if (targetMon.act_count < nMaxAct) {
                         return true;
@@ -3019,9 +3025,9 @@ function createGameFieldReactions() {
             return 'select_actor';
         })();
 
-        if (sState != 'select_actor') {
-            console.log('checkGameState : ' + sState);
-        }
+        ;;; if (sState != 'select_actor') {
+        ;;;     console.log('checkGameState : ' + sState);
+        ;;; }
         return sState;
     }
 
@@ -4059,6 +4065,40 @@ function createArtsQueue(m) {
                     }
                 }
                 return aRet;
+                break;
+            case 1044:
+                var aRet = [{
+                    queue_type_id   : 1026,
+                    target_id       : aArgs.targets[0].game_card_id,
+                    param1          : 112,
+                }];
+                return aRet;
+                break;
+            case 1045:
+                var mon = aArgs.field_data.cards[aArgs.targets[0].game_card_id];
+                var aValidTargets = [];
+                $.each(aArgs.field_data.cards, function(iGameCardId, val) {
+                    if (val.owner != mon.owner) {
+                        return true;
+                    }
+                    if (val.pos_category != 'deck') {
+                        return true;
+                    }
+                    var d = g_master_data.m_card[val.card_id];
+                    if (d.category != 'super_front' && d.category != 'super_back') {
+                        return true;
+                    }
+                    aValidTargets.push(iGameCardId);
+                });
+                if (aValidTargets.length <= 0) {
+                    return [{
+                        queue_type_id   : 1003,
+                    }];
+                }
+                return [{
+                    queue_type_id   : 1011,
+                    target_id       : aValidTargets[rand_gen.rand(0, aValidTargets.length-1)],
+                }];
                 break;
             default:
                 throw new Error('unknown script_id posted.');
@@ -5436,7 +5476,7 @@ new function () {
     function _preload() {
         (function() {
             var df = $.Deferred();
-            var _version = 1.1;
+            var _version = 1.2;
             try {
                 if (sessionStorage.oMasterData) {
                     var d = JSON.parse(sessionStorage.oMasterData);
@@ -6338,6 +6378,10 @@ new function () {
                         actor.aTargets.push(aTargetInfo);
                         _addActionFromActorInfo();
                         return true;
+                    } else {
+                        game_field_utility.myAlertInField({
+                            message : '適正な対象を選んでください',
+                        });
                     }
                     break;
                 case 'arts':
@@ -6350,7 +6394,9 @@ new function () {
                         art_flg         : true,
                     });
                     if (!bRangeOk) {
-                        console.log('range check NG');
+                        game_field_utility.myAlertInField({
+                            message : '適正な対象を選んでください',
+                        });
                         return false;
                     }
                     $('#game_field #' + aTargetInfo.pos_id).addClass('target');
@@ -6368,7 +6414,9 @@ new function () {
                         target_order    : actor.aTargets.length,
                     });
                     if (!bRangeOk) {
-                        console.log('range check NG');
+                        game_field_utility.myAlertInField({
+                            message : '適正な対象を選んでください',
+                        });
                         return false;
                     }
                     if (game_field_reactions.isProvoked({
@@ -6395,6 +6443,9 @@ new function () {
                         range_type_id   : 12,
                     });
                     if (!bRangeOk) {
+                        game_field_utility.myAlertInField({
+                            message : 'そこには移動できません',
+                        });
                         return false;
                     }
                     actor.param1 = aTargetInfo.pos_id;

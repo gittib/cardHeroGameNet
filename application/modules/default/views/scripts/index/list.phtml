@@ -1,4 +1,23 @@
 <?php
+$aSisterSite = array(
+    'production' => array(
+        'url'   => '//cardhero-game.net/',
+        'title' => 'カードヒーロー＠スマホ カードセット',
+    ),
+    'ds_original' => array(
+        'url'   => '//ds-original.cardhero-game.net/',
+        'title' => 'DS版オリジナルカードセット',
+    ),
+);
+$sSisterSite = '';
+foreach ($aSisterSite as $key => $val) {
+    if ($key == APPLICATION_ENV) {
+        $sSisterSite .= "<li>{$val['title']}</li>\n";
+    } else {
+        $sSisterSite .= "<li><a href='{$val['url']}' target='_top'>{$val['title']}</a></li>\n";
+    }
+}
+
 $sPanelHtml = '';
 foreach ($this->aPanelInfo as $key => $val) {
     $sPanelHtml .= <<<_eos_
@@ -34,6 +53,20 @@ _eos_;
                   <span>トップページ</span>
               </div>
             </a>
+        </div>
+    </div>
+    <div class="bottom_column clearfix">
+        <div id="outbound_links">
+            <h2>カードヒーロー　関連リンク</h2>
+            <ul>
+                <li><a class="blank_link" target="_blank" href="http://www.nintendo.co.jp/n02/dmg/ahhj/">カードヒーローBGC版　公式サイト</a></li>
+                <li><a class="blank_link" target="_blank" href="http://www.nintendo.co.jp/ds/ychj/">カードヒーローDS版　公式サイト</a></li>
+                <li><a class="blank_link" target="_blank" href="http://www.cardhero-bu.com/">カードヒーロー部.com</a></li>
+            </ul>
+            <h2>カードヒーロー＠スマホ カードセットバリエーション</h2>
+            <ul>
+                <?=$sSisterSite?>
+            </ul>
         </div>
     </div>
 </div>
