@@ -2829,7 +2829,7 @@ function createGameFieldReactions() {
                         return false;
                     }
                     var nMaxAct = 1;
-                    if (!bNoArrange) {
+                    if (!g_field_data.no_arrange) {
                         var aMonsterData = g_master_data.m_monster[targetMon.monster_id];
                         if (aMonsterData.skill.id == 4) {
                             nMaxAct = 2;

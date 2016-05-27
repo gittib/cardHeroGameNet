@@ -9,7 +9,7 @@ class model_Card {
     }
 
     public function getCardDetailInfo($cardId) {
-        if (!isset($cardId) || $cardId == '') {
+        if (empty($cardId)) {
             throw new Zend_Controller_Action_Exception('no card_id.', 404);
         }
         $sel = $this->_db->select()
@@ -58,7 +58,7 @@ class model_Card {
                 $this->_aCardInfo['cardInfo']['before_monster_name'] = $this->_getBeforeMonsters($cardId);
                 break;
             case 'magic':
-                $this->_aCardInfo['cardInfo']['category_name'] = '魔法';
+                $this->_aCardInfo['cardInfo']['category_name'] = 'マジック';
                 break;
         }
         $this->_aCardInfo['magicInfo'] = array();
@@ -134,7 +134,7 @@ class model_Card {
                     $aRet[$key]['before_monster_name'] = $this->_getBeforeMonsters($val['card_id']);
                     break;
                 case 'magic':
-                    $aRet[$key]['category_name'] = '魔法';
+                    $aRet[$key]['category_name'] = 'マジック';
                     break;
             }
         }

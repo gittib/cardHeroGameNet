@@ -1311,7 +1311,7 @@ function createGameFieldReactions() {
                     default:
                         g_field_data.queues.push({
                             actor_id            : act.game_card_id,
-                            log_message         : targetMonsterData.name + 'は倒れた',
+                            log_message         : targetMonsterData.name + 'を倒した',
                             resolved_flg        : 0,
                             actor_anime_disable : true,
                             priority            : 'react_system',
@@ -1325,7 +1325,7 @@ function createGameFieldReactions() {
             } else {
                 g_field_data.queues.push({
                     actor_id            : act.game_card_id,
-                    log_message         : targetMonsterData.name + 'は倒れた',
+                    log_message         : targetMonsterData.name + 'を倒した',
                     resolved_flg        : 0,
                     actor_anime_disable : true,
                     priority            : 'react_system',
@@ -2172,16 +2172,7 @@ function createGameFieldReactions() {
                     if (targetMon.owner != 'my' || targetMon.pos_id == 'myMaster') {
                         return false;
                     }
-                    var nMaxAct = 1;
-                    if (!bNoArrange) {
-                        var aMonsterData = g_master_data.m_monster[targetMon.monster_id];
-                        if (aMonsterData.skill.id == 4) {
-                            nMaxAct = 2;
-                        } else if (aMonsterData.skill.id == 5) {
-                            nMaxAct = 3;
-                        }
-                    }
-                    if (targetMon.act_count < nMaxAct) {
+                    if (targetMon.act_count < 1) {
                         return true;
                     }
                     break;
