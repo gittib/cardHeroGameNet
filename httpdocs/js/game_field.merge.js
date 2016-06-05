@@ -1967,7 +1967,7 @@ function createGameFieldReactions() {
                     default:
                         g_field_data.queues.push({
                             actor_id            : act.game_card_id,
-                            log_message         : targetMonsterData.name + 'は倒れた',
+                            log_message         : targetMonsterData.name + 'を倒した',
                             resolved_flg        : 0,
                             actor_anime_disable : true,
                             priority            : 'react_system',
@@ -1981,7 +1981,7 @@ function createGameFieldReactions() {
             } else {
                 g_field_data.queues.push({
                     actor_id            : act.game_card_id,
-                    log_message         : targetMonsterData.name + 'は倒れた',
+                    log_message         : targetMonsterData.name + 'を倒した',
                     resolved_flg        : 0,
                     actor_anime_disable : true,
                     priority            : 'react_system',
@@ -2828,16 +2828,7 @@ function createGameFieldReactions() {
                     if (targetMon.owner != 'my' || targetMon.pos_id == 'myMaster') {
                         return false;
                     }
-                    var nMaxAct = 1;
-                    if (!g_field_data.no_arrange) {
-                        var aMonsterData = g_master_data.m_monster[targetMon.monster_id];
-                        if (aMonsterData.skill.id == 4) {
-                            nMaxAct = 2;
-                        } else if (aMonsterData.skill.id == 5) {
-                            nMaxAct = 3;
-                        }
-                    }
-                    if (targetMon.act_count < nMaxAct) {
+                    if (targetMon.act_count < 1) {
                         return true;
                     }
                     break;
@@ -5476,7 +5467,7 @@ new function () {
     function _preload() {
         (function() {
             var df = $.Deferred();
-            var _version = 1.2;
+            var _version = 1.3;
             try {
                 if (sessionStorage.oMasterData) {
                     var d = JSON.parse(sessionStorage.oMasterData);
@@ -7905,6 +7896,35 @@ new function () {
                                         });
                                     }
                                     delete mon.status[q.param1];
+                                    if (q.param1 == 121) {
+                                        // エクスチェンジだったら全ての効果を解除する
+                                        g_field_data.queues.push({
+                                            actor_id            : mon.game_card_id,
+                                            log_message         : 'エクスチェンジの効果で全てのPSM効果を解除',
+                                            resolved_flg        : 0,
+                                            priority            : 'follow',
+                                            actor_anime_disable : true,
+                                            queue_units : (function () {
+                                                var q = [];
+                                                $.each(mon.status, function (i, val) {
+                                                    var iSt = Number(i);
+                                                    var aSt = g_master_data.m_status[iSt];
+                                                    switch (aSt.status_type) {
+                                                        case 'P':
+                                                        case 'S':
+                                                        case 'M':
+                                                        q.push({
+                                                            queue_type_id   : 1027,
+                                                            target_id       : mon.game_card_id,
+                                                            param1          : iSt,
+                                                        });
+                                                        break;
+                                                    }
+                                                });
+                                                return q;
+                                            })(),
+                                        });
+                                    }
                                     break;
                                 case 1028:
                                     g_field_data.cards[q.target_id].skill_disable_flg = 1;
