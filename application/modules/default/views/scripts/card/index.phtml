@@ -1,40 +1,22 @@
-<div id="card_list_wrapper">
-<h1>カードリスト</h1>
 <?php
 $conf = Zend_Registry::get('config');
-?>
-<?php if ($conf->web->no_arrange) : ?>
-    <p class="explain">
-        当サイトで使う事ができるカードのリストです。<br />
-        こちらのカードリストは、DS版カードヒーローの物と同一のものになっています。
-    </p>
-<?php else: ?>
-    <p class="explain">
-        当サイトで使う事ができるカードのリストです。<br />
-        DS版カードヒーローのカードをベースにしていますが、効果や性能をアレンジしているカードもあります。<br />
-        アレンジされているカードには、右上に「Arranged」と表示されます。
-    </p>
-    <div class="narrow_area">
-        絞り込み<br />
+if ($conf->web->no_arrange) {
+    $sExplain = '当サイトで使う事ができるカードのリストです。<br />こちらのカードリストは、DS版カードヒーローの物と同一のものになっています。';
+    $sSelectArrangeHtml = '';
+} else {
+    $sExplain = '当サイトで使う事ができるカードのリストです。<br />DS版カードヒーローのカードをベースにしていますが、効果や性能をアレンジしているカードもあります。<br />アレンジされているカードには、右上に「Arranged」と表示されます。';
+    $sSelectArrangeHtml = <<<_eos_
         アレンジ：
         <select class="arranged_disp_switch">
             <option value="both">すべて表示</option>
             <option value="only_arranged">アレンジのみ表示</option>
             <option value="only_original">アレンジを非表示</option>
         </select><br />
-        カードカテゴリ：
-        <select class="category_disp_switch">
-            <option value="all">すべて表示</option>
-            <option value="only_front">前衛のみ表示</option>
-            <option value="only_back">後衛のみ表示</option>
-            <option value="only_magic">マジックのみ表示</option>
-            <option value="only_super">スーパーのみ表示</option>
-        </select><br />
-    </div>
-<?php endif; ?>
-    <div class="line_width_adjust"></div>
-<?php
 
+_eos_;
+}
+
+$sListHtml = '';
 foreach ($this->aCardInfo as $val) {
     $sArrangedClass = 'original';
     $sProposer = '';
@@ -45,7 +27,7 @@ foreach ($this->aCardInfo as $val) {
     if (strpos($val['category'], 'super_') !== FALSE) {
         $val['category'] .= ' super';
     }
-    echo <<<_eos_
+    $sListHtml .= <<<_eos_
     <div class="card_data card_list_row {$val['category']} clearfix {$sArrangedClass}">
         <div class="card_image">
             <img src="/images/card/card.jpg" original-src="{$val['image_file_name']}" width=50 height=50 alt="{$val['card_name']}" />
@@ -67,6 +49,23 @@ foreach ($this->aCardInfo as $val) {
 _eos_;
 }
 ?>
+<div id="card_list_wrapper">
+    <h1>カードリスト</h1>
+    <p class="explain"><?=$sExplain?></p>
+    <div class="narrow_area">
+        絞り込み<br />
+        <?=$sSelectArrangeHtml?>
+        カードカテゴリ：
+        <select class="category_disp_switch">
+            <option value="all">すべて表示</option>
+            <option value="only_front">前衛のみ表示</option>
+            <option value="only_back">後衛のみ表示</option>
+            <option value="only_magic">マジックのみ表示</option>
+            <option value="only_super">スーパーのみ表示</option>
+        </select><br />
+    </div>
+    <div class="line_width_adjust"></div>
+    <?=$sListHtml?>
 </div>
 <script type="application/ld+json">
 {

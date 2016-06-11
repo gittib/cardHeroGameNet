@@ -5,8 +5,9 @@ if (isset($aUserInfo)) {
     $sLoginInfo = "ようこそ{$aUserInfo['nick_name']}さん <a href=\"/user/\">管理</a>";
 }
 
+$sEvalEnv = '';
 if (APPLICATION_ENV == 'evaluate') {
-    echo '<div style="color:red;font-size:22px;"><br />ここは評価環境です。カードヒーロー@スマホにお越しの方は、下記リンクより通常サイトをご利用下さい。<br /><br /><a style="font-size:22px;" href="http://cardhero-game.net/">カードヒーロー@スマホ 通常サイト</a><br /><br /></div>';
+    $sEvalEnv = '<div style="color:red;font-size:22px;"><br />ここは評価環境です。カードヒーロー@スマホにお越しの方は、下記リンクより通常サイトをご利用下さい。<br /><br /><a style="font-size:22px;" href="http://cardhero-game.net/">カードヒーロー@スマホ 通常サイト</a><br /><br /></div>';
 }
 
 $sEnv = '';
@@ -29,13 +30,14 @@ if (Common::isAdmin()) {
 }
 ?>
 <div id='header'>
+    <?=$sEvalEnv?>
     <div id="floating_wrapper">
         <div class="links floating_links">
             <div class="top_link">
                 <a href="/index/list/" class="colorbox-iframe">メインメニュー</a>
             </div>
             <div class="user_info">
-                <?php echo $sLoginInfo . "\n"; ?>
+                <?=$sLoginInfo?>
             </div>
         </div>
     </div>
@@ -53,8 +55,8 @@ if (Common::isAdmin()) {
                 <a href="/index/list/" class="colorbox-iframe">メインメニュー</a>
             </div>
             <div class="user_info">
-                <?php echo $sLoginInfo . "\n"; ?>
-                <?php echo $sAdminInfo . "\n"; ?>
+                <?=$sLoginInfo?>
+                <?=$sAdminInfo?>
             </div>
         </div>
     </div>

@@ -15,7 +15,7 @@
 _eos_;
         if (isset($val['m_arts'])) {
             foreach ($val['m_arts'] as $vArt) {
-                if (!isset($vArt['art_name']) || $vArt['art_name'] == '') {
+                if (empty($vArt['art_name'])) {
                     continue;
                 }
                 $sArtsHtml .= <<<_eos_
@@ -35,7 +35,7 @@ _eos_;
                 <div class="art_power">{$vArt['sArtPower']}</div>
 
 _eos_;
-                if (isset($vArt['caption']) && $vArt['caption'] != '') {
+                if (!empty($vArt['caption'])) {
                     $sArtsHtml .= <<<_eos_
                 <div class="special_caption" itemprop="description">
                     {$vArt['caption']}

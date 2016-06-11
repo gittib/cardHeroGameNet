@@ -1,41 +1,26 @@
-<div id="card_detail_wrapper" itemprop="gameItem" itemscope itemtype="http://schema.org/Game">
-<div class="card_data clearfix">
 <?php
-    foreach ($this->aCardInfo['image_info'] as $val) {
-        echo <<<_eos_
+$sImageHtml = '';
+foreach ($this->aCardInfo['image_info'] as $val) {
+        $sImageHtml .= <<<_eos_
     <div class="card_image">
         <img src="{$val['image_file_name']}" width=50 height=50 alt="{$val['card_name']}" />
     </div>
 
 _eos_;
-    }
+}
 
-    $sStar = '★';
-?>
-    <div class="card_text">
-        <h1 itemprop="name"><?php
-            echo $this->aCardInfo['card_name'];
-        ?></h1>
-        <div class="card_type">
-            <?php
-                echo $sStar;
-                echo $this->aCardInfo['rare'];
-                echo '　';
-                echo $this->aCardInfo['category_name'];
-                if (isset($this->aCardInfo['before_monster_name'])) {
-                    echo "　<span class='before_monsters'>{$this->aCardInfo['before_monster_name']}</span>から進化";
-                }
-            ?>
-        </div>
-        <div class="card_caption"><?php echo $this->aCardInfo['caption']; ?></div>
-    </div>
-</div>
-<?php
-echo $this->render($this->template);
+$sRareCategory = '★';
+$sRareCategory .= $this->aCardInfo['rare'];
+$sRareCategory .= '　';
+$sRareCategory .= $this->aCardInfo['category_name'];
+if (!empty($this->aCardInfo['before_monster_name'])) {
+    $sRareCategory .= "　<span class='before_monsters'>{$this->aCardInfo['before_monster_name']}</span>から進化";
+}
+
 $sDescription = str_replace('%descstart%', '', $this->aCardInfo['description']);
 $sDescription = str_replace('%descend%', '', $sDescription);
 if (trim($sDescription) != '') {
-    echo <<<_eos_
+    $sDescription = <<<_eos_
     <div class="card_description_frame">
         <div class="label">
             ＜カード紹介＞
@@ -48,6 +33,19 @@ if (trim($sDescription) != '') {
 _eos_;
 }
 ?>
+<div id="card_detail_wrapper" itemprop="gameItem" itemscope itemtype="http://schema.org/Game">
+    <div class="card_data clearfix">
+        <?=$sImageHtml?>
+        <div class="card_text">
+            <h1 itemprop="name"><?=$this->aCardInfo['card_name']?></h1>
+            <div class="card_type">
+                <?=$sRareCategory?>
+            </div>
+            <div class="card_caption"><?=$this->aCardInfo['caption']?></div>
+        </div>
+    </div>
+    <?=$this->render($this->template)?>
+    <?=$sDescription?>
 </div>
 <script type="application/ld+json">
 {
@@ -71,8 +69,8 @@ _eos_;
         "@type": "ListItem",
         "position": 3,
         "item": {
-            "@id": "/card/detail/<?php echo $this->aCardInfo['card_id']; ?>/",
-            "name": "<?php echo $this->aCardInfo['card_name']; ?>"
+            "@id": "/card/detail/<?=$this->aCardInfo['card_id']?>/",
+            "name": "<?=$this->aCardInfo['card_name']?>"
         }
     }]
 }

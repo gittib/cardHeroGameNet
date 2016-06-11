@@ -1,4 +1,3 @@
-<div id="game_field_wrapper">
 <?php
     $aConf = Zend_Registry::get('config');
 
@@ -242,6 +241,17 @@ _eos_;
         }
     }
 
+    $sConditionInfoDiv = <<<_eos_
+        <div
+            turn_num='{$aCardInfo['field_info']['turn']}'
+            turn_count='{$aCardInfo['field_info']['turn_count']}'
+            replay_flg='{$this->bReplayFlg}'
+            no_arrange='{$aConf->web->no_arrange}'
+            initial_deck='{$aConf->game->deck->max}'
+        ></div>
+
+_eos_;
+
     $layout = Zend_Registry::get('layout');
     if (!isset($layout->javascriptCode)) {
         $layout->javascriptCode = '';
@@ -314,6 +324,7 @@ _eos_;
         $sAd = '';
     }
 ?>
+<div id="game_field_wrapper">
     <div id="game_infomation_frame">
         <div class="label">
             Game Infomation
@@ -323,11 +334,11 @@ _eos_;
     </div>
     <div id="responcive_frame" class="clearfix">
         <div id="primary_part">
-            <?php echo $sFieldHtml; ?>
+            <?=$sFieldHtml?>
             <div id="hand_card" class="clearfix">
-                <?php echo $sMyHandHtml; ?>
+                <?=$sMyHandHtml?>
             </div>
-            <?php echo $sMovieConsole; ?>
+            <?=$sMovieConsole?>
         </div>
         <div id="secondary_part">
             <div id="card_info">
@@ -346,8 +357,8 @@ _eos_;
             </div>
         </div>
     </div>
-    <?php echo $sAd; ?>
-    <?php echo $sTurnEndHtml; ?>
+    <?=$sAd?>
+    <?=$sTurnEndHtml?>
     <input type="BUTTON" class="disp_button toggle_setting" value="設定" />
     <div class="settings">
         <input type="BUTTON" class="toggle_setting first" value="設定非表示" />
@@ -381,21 +392,11 @@ _eos_;
     </div>
 
     <div class="hidden_cards_info">
-<?php
-    echo <<<_eos_
-        <div
-            turn_num='{$aCardInfo['field_info']['turn']}'
-            turn_count='{$aCardInfo['field_info']['turn_count']}'
-            replay_flg='{$this->bReplayFlg}'
-            no_arrange='{$aConf->web->no_arrange}'
-        ></div>
-
-_eos_;
-?>
+        <?=$sConditionInfoDiv?>
     </div>
     <form name="form_current_field" method="post" action="/game/turn-end/">
-        <input type="hidden" name="game_field_id" value="<?php echo $this->iGameFieldId; ?>" />
-        <input type="hidden" name="referer" value="<?php echo $this->sReferer; ?>" />
+        <input type="hidden" name="game_field_id" value="<?=$this->iGameFieldId?>" />
+        <input type="hidden" name="referer" value="<?=$this->sReferer?>" />
     </form>
 </div>
 <?php

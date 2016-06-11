@@ -1,9 +1,6 @@
 <?php
-$sH1Text = '';
-if (isset($this->sH1Text) && $this->sH1Text) {
-    $sH1Text = '<h1>' . $this->sH1Text . '</h1>';
-} else {
-    $sH1Text = '<h1>デッキ一覧</h1>';
+if (empty($this->sH1Text)) {
+    $this->sH1Text = 'デッキ一覧';
 }
 
 $aUserInfo = Common::checkLogin();
@@ -213,7 +210,6 @@ _eos_;
 }
 
 $sHtml = '';
-$sHtml .= $sH1Text;
 $sHtml .= $this->sExplain;
 $sHtml .= $sGameStartHtml;
 $sHtml .= $sMessageHtml;
@@ -226,5 +222,6 @@ $sHtml .= $sMydeckLink;
 $sHtml .= $sPageInfoHtml;
 ?>
 <div id="deck_list_wrapper">
-<?php echo $sHtml; ?>
+    <h1><?=$this->sH1Text?></h1>
+    <?=$sHtml?>
 </div>
