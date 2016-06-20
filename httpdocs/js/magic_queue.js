@@ -162,7 +162,13 @@ function createMagicQueue(m) {
                         param1          : 'invalid_target',
                     }];
                 }
-                if (rand_gen.rand(0, 1)) {
+
+                var bLvup = (mon.owner != 'my');
+                if (bNoArrange) {
+                    bLvup = rand_gen.rand(0, 1);
+                }
+
+                if (bLvup) {
                     aRet.push({
                         queue_type_id   : 1017,
                         target_id       : mon.game_card_id,
