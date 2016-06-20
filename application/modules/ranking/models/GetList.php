@@ -4,9 +4,11 @@ class Model_Ranking_GetList
 {
 
     private $_db;
+    private $_conf;
 
     public function __construct() {
         $this->_db = Zend_Registry::get('db');
+        $this->_conf = Zend_Registry::get('config');
     }
 
     public function getFinisherRanking ($aParams = array()) {
@@ -53,7 +55,7 @@ class Model_Ranking_GetList
             ->group(array(
                 'deck_id',
             ))
-            ->having('sum(tdc.num) = ?', 30);
+            ->having('sum(tdc.num) = ?', $this->_conf->game->deck->max);
 
         $sel = $this->_db->select()
             ->from(

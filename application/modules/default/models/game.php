@@ -1224,6 +1224,7 @@ class model_Game {
     /**
      *  @param aArgs:
      *      game_field_id   :
+     *      allow_no_field  :
      */
     public function isGameReceived($aArgs)
     {
@@ -1236,7 +1237,13 @@ class model_Game {
             )
             ->where('game_field_id = ?', $aArgs['game_field_id']);
         $cnt = $this->_db->fetchOne($sel);
-        if ($cnt < 2) {
+        if ($cnt <= 0) {
+            // フィールドが無い
+            if (empty($aArgs['allow_no_field'])) {
+                throw new Zend_Controller_Action_Exception('Field data not found', 404);
+            }
+            return false;
+        } else if ($cnt == 1) {
             // not received
             return false;
         } else {

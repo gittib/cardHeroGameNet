@@ -5,10 +5,12 @@ Class newDeckInsertException extends Exception {};
 class model_Deck {
     private $_db;
     private $_view;
+    private $_conf;
 
     public function __construct() {
         $this->_db = Zend_Registry::get('db');
         $this->_view = new Zend_View();
+        $this->_conf = Zend_Registry::get('config');
     }
 
     /**
@@ -85,7 +87,7 @@ class model_Deck {
                 ->group(array(
                     'tdc.deck_id',
                 ))
-                ->having('sum(tdc.num) = ?', 30);
+                ->having('sum(tdc.num) = ?', $this->_conf->game->deck->max);
             $sub->where('td.deck_id in(?)', $sub4);
         }
         if (!empty($aArgs['card_id'])) {
@@ -163,7 +165,7 @@ class model_Deck {
         foreach ($stmt as $key => $val) {
             $deckId = $val['deck_id'];
             if (!isset($aDeck[$deckId])) {
-                if (!isset($val['nick_name']) || $val['nick_name'] == '') {
+                if (empty($val['nick_name'])) {
                     $val['nick_name'] = 'Guest';
                 } else {
                     $val['nick_name'] = $this->_view->escape($val['nick_name']);

@@ -13,6 +13,8 @@ new function () {
         turn                : null,
         my_stone            : 0,
         enemy_stone         : 0,
+        replay_flg          : 0,
+        initial_deck        : 30,
         no_arrange          : 0,
         lvup_assist         : 0,
         tokugi_fuuji_flg    : false,
@@ -470,6 +472,7 @@ new function () {
         g_field_data.my_stone       = Number($('#myPlayersInfo div.stone span').text());
         g_field_data.enemy_stone    = Number($('#enemyPlayersInfo div.stone span').text());
         g_field_data.replay_flg     = Number($('div[replay_flg]').attr('replay_flg'));
+        g_field_data.initial_deck   = Number($('div[initial_deck]').attr('initial_deck'));
 
         rand_gen.srand(g_field_data.game_field_id, 100);
 
@@ -596,9 +599,9 @@ new function () {
                 if (g_field_data.my_stone != 0 || g_field_data.enemy_stone != 0) {
                     throw 'not_initial';
                 }
-                var iInitialDeckCards = 60;
+                var iInitialDeckCards = g_field_data.initial_deck * 2;
                 var iDeckCards = 0;
-                $.each (g_field_data.cards, function(iGameCardId, val) {
+                $.each (g_field_data.cards, function(i, val) {
                     switch (val.pos_category) {
                         case 'deck':
                             iDeckCards++;

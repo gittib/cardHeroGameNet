@@ -270,7 +270,14 @@ class GameController extends Zend_Controller_Action
             'game_field_id'         => $iGameFieldId,
             'open_flg'              => 1,
             'select_standby_field'  => true,
+            'allow_no_field'        => true,
         ));
+        if (empty($aCardInfoArray)) {
+            $this->_redirect("/game/field/{$iGameFieldId}/", array(
+                'code'  => 303,
+                'exit'  => true,
+            ));
+        }
         $aDeckList = $modelDeck->getDeckList(array(
             'page_no'   => $iPage,
             'mine'      => $bMine,
@@ -326,7 +333,7 @@ class GameController extends Zend_Controller_Action
 
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/js_debug.js';
-            //*
+            /*
             $this->_javascript[] = '/js/game_field.min.js';
             /*/
             $this->_javascript[] = '/js/rand_gen.js';
