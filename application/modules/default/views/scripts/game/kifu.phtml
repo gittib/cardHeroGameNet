@@ -1,41 +1,42 @@
 <?php
 $sFinishedMessage = '';
-if (isset($this->bFinished) && $this->bFinished) {
+if (!empty($this->bFinished)) {
     $sFinishedMessage = '決着がついているログの場合、味方の伏せモンスターと手札が開示されます。<br />';
 }
-?>
-<style>
-body, #game_field_list_wrapper {
-    background-color:#eeffee !important;
+
+$sLastLinkHtml = '';
+if (!empty($this->aLastFieldId)) {
+    $sLastLinkHtml .= '<div class="last_link clearfix">';
+    $sLastLinkHtml .= "フィールド[{$this->iGameFieldId}]の続きのフィールドが投稿されています。";
+    $sLastLinkHtml .= '<ul>';
+    foreach ($this->aLastFieldId as $val) {
+        if (!empty($val['finish_field_id'])) {
+            $sFinished = ' (決着済み)';
+        } else {
+            $sFinished = '(対戦中)';
+        }
+        $sLastLinkHtml .= "<li><a href=\"/game/kifu/{$val['game_field_id']}/\">[{$val['game_field_id']}]$sFinished {$val['turn_count']}ターン目</a></li>";
+    }
+    $sLastLinkHtml .= '</ul>';
+    $sLastLinkHtml .= '</div>';
 }
-#kifu_message {
-    max-width: 640px;
-    margin: 0 auto;
-}
-</style>
-<h1>対戦棋譜[<?php echo $this->iGameFieldId; ?>]</h1>
-<div id="kifu_message">
-    ゲームフィールド[<?php echo $this->iGameFieldId; ?>]までのプレイログ一覧です。<br />
-    <?php echo $sFinishedMessage; ?>
-    対戦の反省や戦術の研究にどうぞ。
-</div>
-<div id="game_field_list_wrapper">
-<?php
+
+$sFieldHtml = '';
 if (empty($this->aCardInfoArray)) {
-    echo '<div class="no-fields">まだフィールドが投稿されていません。</div>' . "\n";
+    $sFieldHtml = '<div class="no-fields">まだフィールドが投稿されていません。</div>' . "\n";
 } else {
     foreach ($this->aCardInfoArray as $aCardInfo) {
         $this->aCardInfoInField = $aCardInfo;
         $aFieldInfo = $aCardInfo['field_info'];
         $sLinkTitle = "{$aFieldInfo['title_str']} [{$aFieldInfo['upd_date']}]";
         $sHref = "/game/receive/{$aFieldInfo['game_field_id']}/";
-        if (isset($aFieldInfo['started_flg']) && $aFieldInfo['started_flg']) {
+        if (!empty($aFieldInfo['started_flg'])) {
             $sHref = "/game/field/{$aFieldInfo['game_field_id']}/";
         }
         if ($this->bLast) {
             $sHref .= '?referer=last';
         }
-        echo <<<_eos_
+        $sFieldHtml .= <<<_eos_
 <div class="game_field_info">
     <div class="field_title">
         <a href="{$sHref}">{$sLinkTitle}</a>
@@ -47,4 +48,22 @@ _eos_;
     }
 }
 ?>
+<style>
+body, #game_field_list_wrapper {
+    background-color:#eeffee !important;
+}
+#kifu_message {
+    max-width: 640px;
+    margin: 0 auto;
+}
+</style>
+<h1>対戦棋譜[<?=$this->iGameFieldId?>]</h1>
+<div id="kifu_message">
+    ゲームフィールド[<?=$this->iGameFieldId?>]までのプレイログ一覧です。<br />
+    <?=$sFinishedMessage?>
+    対戦の反省や戦術の研究にどうぞ。
+    <?=$sLastLinkHtml?>
+</div>
+<div id="game_field_list_wrapper">
+    <?=$sFieldHtml?>
 </div>

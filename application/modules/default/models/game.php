@@ -1222,9 +1222,13 @@ class model_Game {
     }
 
     /**
+     *  対戦相手が決まってるか確認
+     *
      *  @param aArgs:
      *      game_field_id   :
      *      allow_no_field  :
+     *
+     *  @return true:対戦相手決定済み、 false:対戦相手未決定
      */
     public function isGameReceived($aArgs)
     {
@@ -1250,6 +1254,48 @@ class model_Game {
             // received
             return true;
         }
+    }
+
+    /**
+     *  @param iGameFieldId
+     *
+     *  @return array   未返信フィールドID
+     */
+    public function getLastFieldIds($iGameFieldId)
+    {
+        $sub = $this->_db->select()
+            ->from(
+                't_game_field',
+                array(
+                    new Zend_Db_Expr("field_id_path || '-' || game_field_id || '-%'")
+                )
+            )
+            ->where('game_field_id = ?', $iGameFieldId);
+
+        $sel = $this->_db->select()
+            ->from(
+                array('tgf' => 't_game_field'),
+                array(
+                    'game_field_id',
+                    'turn_count' => new Zend_Db_Expr("case when tgf.field_id_path = '' then 0 else length(regexp_replace(tgf.field_id_path, '[^-]', '', 'g')) + 1 end"),
+                )
+            )
+            ->join(
+                array('vlf' => 'v_last_field'),
+                'vlf.game_field_id = tgf.game_field_id',
+                array()
+            )
+            ->joinLeft(
+                array('tf' => 't_finisher'),
+                'tf.game_field_id = tgf.game_field_id',
+                array(
+                    'finish_field_id'   => 'game_field_id',
+                )
+            )
+            ->where("tgf.game_field_id > ?", $iGameFieldId)
+            ->where("tgf.field_id_path || '-' like ?", $sub);
+
+        return $this->_db->fetchAll($sel);
     }
 
     /**

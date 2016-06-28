@@ -255,7 +255,7 @@ foreach ($aPosId as $i => $aLine) {
                 $sLabel = 'このフィールドを詳しく見る';
             }
             $sButtonHtml .= "<a href='{$sUrl}'><div class='button game_play'>{$sLabel}</div></a>";
-            if (empty($this->bKifu)) {
+            if (empty($this->bKifu) && 1 <= $aCardInfo['field_info']['turn_count']) {
                 $sUrl = "/game/kifu/{$iGameFieldId}/";
                 $sButtonHtml .= "<a href='{$sUrl}'><div class='button view_log' game_field_id='{$iGameFieldId}'>プレイログを見る</div></a>";
             }

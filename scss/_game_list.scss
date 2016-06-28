@@ -1,5 +1,25 @@
 @charset "utf-8";
 
+#kifu_message {
+
+    .last_link {
+        margin-top: 1em;
+        padding: 3px;
+        background-color: lightpink;
+        color: darkgreen;
+
+        ul {
+            padding: 0;
+
+            li {
+                float: left;
+                list-style-type: none;
+                margin: 16px;
+            }
+        }
+    }
+}
+
 #game_field_list_wrapper {
 
     $game_field_max_width : 640px;

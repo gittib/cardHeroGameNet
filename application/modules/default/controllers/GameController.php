@@ -20,7 +20,7 @@ class GameController extends Zend_Controller_Action
         $this->_jsUpdDate = array(
             'game_list'     => '20160109',
             'deck_list'     => '20151227',
-            'game_field'    => '20160528',
+            'game_field'    => '20160626',
         );
     }
 
@@ -153,8 +153,14 @@ class GameController extends Zend_Controller_Action
             'open_flg'              => 1,
         ));
 
+        $aLastFieldId = $this->_model->getLastFieldIds($iGameFieldId);
+        if (!empty($aLastFieldId)) {
+            $this->_layout->noindex = true;
+        }
+
         $this->view->assign('aCardInfoArray', $aCardInfoArray);
         $this->view->assign('iGameFieldId', $iGameFieldId);
+        $this->view->assign('aLastFieldId', $aLastFieldId);
         $this->view->assign('bKifu', true);
         $this->view->assign('bFinished', $bFinished);
     }
@@ -333,7 +339,7 @@ class GameController extends Zend_Controller_Action
 
         if ($this->_config->web->js->debug) {
             $this->_javascript[] = '/js/js_debug.js';
-            /*
+            //*
             $this->_javascript[] = '/js/game_field.min.js';
             /*/
             $this->_javascript[] = '/js/rand_gen.js';

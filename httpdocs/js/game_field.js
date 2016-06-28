@@ -54,11 +54,11 @@ new function () {
         background  : '#fff',
     };
 
+    // プリロードは先に呼び出す
+    _preload();
+
+    // イベントリスナの登録
     $(function () {
-
-        _preload();
-
-        initSpecialProc();
 
         $('#game_field_wrapper').on('click', '#game_field td.monster_space', function () {
             var _updateActorInfo = function () {
@@ -411,9 +411,9 @@ new function () {
     });
 
     function _preload() {
-        (function() {
+        var fnLoadData = function() {
             var df = $.Deferred();
-            var _version = 1.3;
+            var _version = 20160625;
             try {
                 if (sessionStorage.oMasterData) {
                     var d = JSON.parse(sessionStorage.oMasterData);
@@ -438,7 +438,18 @@ new function () {
                 });
             }
             return df.promise();
-        })().done(function(json) {
+        };
+
+        var fnOnLoad = function() {
+            var df = $.Deferred();
+            $(function () {
+                df.resolve();
+            });
+            return df.promise();
+        };
+
+        $.when(fnLoadData(), fnOnLoad()).done(function(json) {
+
             g_master_data           = json;
             arts_queue              = createArtsQueue(g_master_data);
             magic_queue             = createMagicQueue(g_master_data);
@@ -447,10 +458,12 @@ new function () {
 
             initSetting();
             initField();
+            initSpecialProc();
 
             setTimeout(function () {
                 execQueue({ resolve_all : true });
             }, 333);
+
         }).fail(function () {
             alert('ゲーム情報の読み込みに失敗しました。\nページを更新して下さい。');
         });
