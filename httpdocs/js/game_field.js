@@ -1847,25 +1847,27 @@ new function () {
                                         throw new Error('target already dead');
                                     }
 
-                                    switch (q.param2) {
-                                        case 'drill_break':
-                                            var p = game_field_utility.getXYFromPosId(g_field_data.cards[aExecAct.actor_id].pos_id);
-                                            if (p.x == 0) {
-                                                p.x = 2;
-                                            } else {
-                                                p.x = 0;
-                                            }
-                                            var sPartnerId = game_field_reactions.getGameCardId({
-                                                'pos_category'  : 'field',
-                                                'pos_id'        : game_field_utility.getPosIdFromXY(p),
-                                            });
-                                            var pow = calcPow(aExecAct.actor_id, targetMon.game_card_id, q.param1);
-                                            pow = calcPow(sPartnerId, null, pow);
-                                            break;
-                                        default:
-                                            pow = calcPow(aExecAct.actor_id, targetMon.game_card_id, q.param1);
-                                            break;
+                                    var pow;
+                                    if (q.param2 == 'drill_break') {
+                                        var p = game_field_utility.getXYFromPosId(g_field_data.cards[aExecAct.actor_id].pos_id);
+                                        if (p.x == 0) {
+                                            p.x = 2;
+                                        } else {
+                                            p.x = 0;
+                                        }
+                                        var sPartnerId = game_field_reactions.getGameCardId({
+                                            'pos_category'  : 'field',
+                                            'pos_id'        : game_field_utility.getPosIdFromXY(p),
+                                        });
+                                        pow = calcPow(aExecAct.actor_id, targetMon.game_card_id, q.param1);
+                                        pow = calcPow(sPartnerId, null, pow);
+                                    } else if (typeof q.param2 == 'string' && q.param2.match(/^dist_\d+$/)) {
+                                        var iDist = Number(q.param2.substr(5));
+                                        pow = calcPow(aExecAct.actor_id, targetMon.game_card_id, q.param1, {'dist' : iDist});
+                                    } else {
+                                        pow = calcPow(aExecAct.actor_id, targetMon.game_card_id, q.param1);
                                     }
+
                                     if (0 < pow) {
                                         targetMon.hp -= pow;
                                     }
@@ -3212,13 +3214,18 @@ new function () {
         }
     }
 
-    function calcPow(actorId, targetId, pow) {
+    function calcPow(actorId, targetId, pow, aOption) {
         try {
             pow = Number(pow);
             if (isNaN(pow) || pow < 0) {
-                // 元々のパワーが0なのは何かがおかしい
+                // 元々のパワーが0未満なのは何かがおかしい
                 throw new Error('minus_power');
             }
+
+            if (typeof aOption == 'undefined') {
+                aOption = {};
+            }
+
             var act = g_field_data.cards[actorId];
 
             if (targetId) {
@@ -3279,6 +3286,9 @@ new function () {
                 }
                 if (act.status[103] != null) {
                     pow = 2;
+                    if (!isNaN(aOption.dist)) {
+                        pow += 1 - aOption.dist;
+                    }
                     g_field_data.queues.push({
                         actor_id            : actorId,
                         log_message         : 'パワー２効果発揮',

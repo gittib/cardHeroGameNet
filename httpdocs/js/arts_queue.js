@@ -142,15 +142,20 @@ function createArtsQueue(m) {
                     for (var i = 1 ; i <= 3 ; i++) {
                         var p = {x:df.x*i,y:df.y*i};
                         if (game_field_utility.getRelativePosId(aActor.pos_id, p) == val.pos_id) {
+                            var iDist = game_field_utility.getDistance(val.pos_id, aActor.pos_id);
                             aRet.push({
                                 queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
                                 target_id       : val.game_card_id,
-                                param1          : aArtInfo.power + 1 - game_field_utility.getDistance(val.pos_id, aActor.pos_id),
+                                param1          : aArtInfo.power + 1 - iDist,
+                                param2          : 'dist_' + iDist,
                             });
                         }
                     }
                 });
                 if (aRet.length) {
+                    aRet.sort(function(a,b) {
+                        return b.param1 - a.param1;
+                    });
                     return aRet;
                 }
                 break;
@@ -163,6 +168,7 @@ function createArtsQueue(m) {
                         queue_type_id   : (aArtInfo.damage_type_flg == 'D' ? 1006 : 1005),
                         target_id       : aArgs.targets[0].game_card_id,
                         param1          : aArtInfo.power + 1 - iDist,
+                        param2          : 'dist_' + iDist,
                     },
                 ];
                 break;
@@ -205,6 +211,12 @@ function createArtsQueue(m) {
                     }
                 });
                 if (aRet.length > 0) {
+                    aRet.sort(function(a,b) {
+                        var f = aArgs.field_data.cards;
+                        var aa = game_field_utility.getXYFromPosId(f[a.target_id].pos_id);
+                        var bb = game_field_utility.getXYFromPosId(f[b.target_id].pos_id);
+                        return bb.y - aa.y;
+                    });
                     return aRet;
                 }
                 break;

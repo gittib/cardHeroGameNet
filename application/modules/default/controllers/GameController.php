@@ -20,7 +20,7 @@ class GameController extends Zend_Controller_Action
         $this->_jsUpdDate = array(
             'game_list'     => '20160109',
             'deck_list'     => '20151227',
-            'game_field'    => '20160626',
+            'game_field'    => '20160709',
         );
     }
 
