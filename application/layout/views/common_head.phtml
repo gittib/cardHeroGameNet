@@ -68,7 +68,22 @@ _eos_;
 <meta name="description" content="<?=$sDescription?>" />
 <meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1,minimum-scale=1" />
 <link rel="shortcut icon" href="/images/favicon.ico" />
+<link rel="manifest" href="/static/maniefst.json" />
 <?=$sNoIndex?>
 <?=$sCanonical?>
 <link rel="stylesheet" type="text/css" href="/css/screen.css?ver=20160625" media="all" />
 <?=$sAnalytics?>
+<? /*
+<script>
+window.addEventListener('load', function() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register("/serviceWorker.js")
+            .then(function(registration) {
+                console.log("serviceWorker registed.");
+            }).catch(function(error) {
+                console.warn("serviceWorker error.", error);
+            });
+    }
+});
+</script>
+ */ ?>

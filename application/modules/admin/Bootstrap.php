@@ -10,7 +10,6 @@ class Admin_Bootstrap extends Zend_Application_Module_Bootstrap
     }
 
     private function _adminInitValidate() {
-        $aUserInfo = Common::checkLogin();
         if (!Common::isAdmin()) {
             $this->_adminInitReplaceErrorRoute();
         }
