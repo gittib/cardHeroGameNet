@@ -31,19 +31,7 @@ foreach ($this->aPanelInfo as $key => $val) {
 _eos_;
 }
 ?>
-<style>
-#lightbox_mainmenu .main_column {
-    float: initial;
-    margin: auto;
-}
-#lightbox_mainmenu .main_column #panel_frame {
-    min-width: 320px;
-}
-#lightbox_mainmenu .main_column #panel_frame div {
-    background-color: white;
-}
-</style>
-<div id="lightbox_mainmenu">
+<div id="lightbox_mainmenu" class="welcome_frame">
     <div class="main_column">
         <div id="panel_frame" class="clearfix">
             <?=$sPanelHtml?>

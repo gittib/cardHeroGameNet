@@ -18,7 +18,7 @@ class IndexController extends Zend_Controller_Action
 
         $layout = new Zend_Layout();
         $layout->javascript = array(
-                '/js/top.js?ver=20150207',
+                '/js/top.js?ver=20160922',
                 );
 
         $layout->title = 'スマホで遊べるカードヒーロー！';
@@ -35,7 +35,6 @@ class IndexController extends Zend_Controller_Action
         $layout->bHideHeader = true;
         $layout->bPreventAnalytics = true;
         $this->view->assign('aPanelInfo', $this->_getPanelList());
-        $this->view->assign('bLightBox', true);
     }
 
     public function memoAction()

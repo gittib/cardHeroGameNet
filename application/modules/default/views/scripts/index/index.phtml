@@ -22,7 +22,7 @@ $sPanelHtml = '';
 foreach ($this->aPanelInfo as $key => $val) {
     $sPanelHtml .= <<<_eos_
             <a href="{$val['url']}">
-              <div class="{$val['class']}">
+              <div class="{$val['class']} top_page_panel">
                   <img src="/images/{$val['img']}" alt="{$val['alt']}" />
                   <span>{$val['text']}</span>
               </div>
@@ -31,7 +31,7 @@ foreach ($this->aPanelInfo as $key => $val) {
 _eos_;
 }
 ?>
-<div id="welcome">
+<div id="welcome" class="welcome_frame">
     <div class="top_column">
         <h1 class="top_page">カードヒーロー＠スマホ へようこそ！</h1>
         <div id="what_is_this">
