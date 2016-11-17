@@ -77,13 +77,13 @@
                         'param1'=>$aStatusVal['param1'],
                         'param2'=>$aStatusVal['param2'],
                 );
-                $sStatusDetail .= <<<_eos_
+                $sStatusDetail .= <<<_html_
                                 <div class="status_row"
                                     status_id="{$aStatusVal['id']}"
                                     turn_count="{$aStatusVal['turn']}"
                                     param1="{$aStatusVal['param1']}"
                                     param2="{$aStatusVal['param2']}"></div>
-_eos_;
+_html_;
             }
             $sStatusDetail = preg_replace('/^\s+/', '', $sStatusDetail);
         }
@@ -99,7 +99,7 @@ _eos_;
         if (isset($aEffectFlags['magic'])) {
             $sEffect = str_replace('"magic">', '"magic">M', $sEffect);
         }
-        $aMonsterData[$pos] = <<<_eos_
+        $aMonsterData[$pos] = <<<_html_
                     <td id="{$pos}" class="monster_space" monster_id="{$val['monster_id']}" card_id="{$val['card_id']}" game_card_id="{$iGameCardId}">
                         <div class="pict">
                             <img class="card_image" src="/images/card/card.jpg" original-src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
@@ -113,7 +113,7 @@ _eos_;
                         </div>
                     </td>
 
-_eos_;
+_html_;
         $aCards[$iGameCardId] = array(
             'game_card_id'      => $iGameCardId,
             'card_id'           => $val['card_id'],
@@ -144,21 +144,21 @@ _eos_;
     foreach ($this->aCardInfo['hand'] as $iGameCardId => $val) {
         $sOwner = ($aCardInfo['field_info']['turn'] == $val['owner']) ? 'my' : 'enemy';
         if ($sOwner == 'my') {
-            $sMyHandHtml .= <<<_eos_
+            $sMyHandHtml .= <<<_html_
                 <div class="hand_card" game_card_id="{$iGameCardId}" card_id="{$val['card_id']}">
                     <img src="/images/card/card.jpg" original-src="/images/card/{$val['image_file_name']}" alt="{$val['card_name']}"/>
                 </div>
 
-_eos_;
+_html_;
         }
         $aHandCount[$sOwner]++;
-        $sHandCards .= <<<_eos_
+        $sHandCards .= <<<_html_
 <div class="hand_card"
     game_card_id="{$iGameCardId}"
     card_id="{$val['card_id']}"
     owner="{$val['owner']}" ></div>
 
-_eos_;
+_html_;
         $aCards[$iGameCardId] = array(
             'game_card_id'  => $iGameCardId,
             'card_id'       => $val['card_id'],
@@ -180,7 +180,7 @@ _eos_;
             'enemy' => $aCardInfo['field_info']['stone1'],
         );
     }
-    $aMonsterData['enemyPlayersInfo'] = <<<_eos_
+    $aMonsterData['enemyPlayersInfo'] = <<<_html_
                     <td id="enemyPlayersInfo">
                         <div class="num_info stone">
                             <img src="/images/stone.png" alt="stone" />：
@@ -196,8 +196,8 @@ _eos_;
                         </div>
                     </td>
 
-_eos_;
-    $aMonsterData['myPlayersInfo'] = <<<_eos_
+_html_;
+    $aMonsterData['myPlayersInfo'] = <<<_html_
                     <td id="myPlayersInfo">
                         <div class="num_info stone">
                             <img src="/images/stone.png" alt="stone" />：
@@ -213,7 +213,7 @@ _eos_;
                         </div>
                     </td>
 
-_eos_;
+_html_;
 
     if (!empty($aCardInfo['deck'])) {
         foreach ($aCardInfo['deck'] as $iGameCardId => $val) {
@@ -241,7 +241,7 @@ _eos_;
         }
     }
 
-    $sConditionInfoDiv = <<<_eos_
+    $sConditionInfoDiv = <<<_html_
         <div
             turn_num='{$aCardInfo['field_info']['turn']}'
             turn_count='{$aCardInfo['field_info']['turn_count']}'
@@ -250,7 +250,7 @@ _eos_;
             initial_deck='{$aConf->game->deck->max}'
         ></div>
 
-_eos_;
+_html_;
 
     $layout = Zend_Registry::get('layout');
     if (!isset($layout->javascriptCode)) {
@@ -258,7 +258,7 @@ _eos_;
     }
     $sCardsInfoJson = json_encode($aCards);
     $sQueueInfoJson = json_encode($this->aQueue);
-    $layout->javascriptCode .= <<<_eos_
+    $layout->javascriptCode .= <<<_javascript_
 function getCardsJson() {
     return JSON.parse('{$sCardsInfoJson}');
 }
@@ -266,12 +266,12 @@ function getQueueJson() {
     return JSON.parse('{$sQueueInfoJson}');
 }
 
-_eos_;
+_javascript_;
 
     $sMovieConsole = '';
     $sTurnEndHtml = '';
     if ($this->bReplayFlg) {
-        $sMovieConsole = <<<_eos_
+        $sMovieConsole = <<<_html_
 <div id="movie_controll">
                 <div>
                     <input type="button" class="play" value="▶再生" />
@@ -284,9 +284,9 @@ _eos_;
                 </div>
             </div>
 
-_eos_;
+_html_;
     } else {
-        $sTurnEndHtml = <<<_eos_
+        $sTurnEndHtml = <<<_html_
     <div id="buttons_frame">
         <div class="cancel_button">
             キャンセル
@@ -296,7 +296,7 @@ _eos_;
         </div>
     </div>
 
-_eos_;
+_html_;
     }
 
     $sFieldHtml = "<table id='game_field'>\n";
@@ -313,13 +313,13 @@ _eos_;
     $sFieldHtml .= "            </table>\n";
 
     if (!empty($this->sAd)) {
-        $sAd = <<<_eos_
+        $sAd = <<<_html_
     <div class="click_ad">
         {$this->sAd}
         <div class="exp">↑↑↑こちらの広告は<a href="/user/login-input/">ログイン</a>すると消えます。↑↑↑<br />&nbsp;</div>
     </div>
 
-_eos_;
+_html_;
     } else {
         $sAd = '';
     }

@@ -2,8 +2,6 @@ application/configs/secret.ini
 httpdocs/images/
 httpdocs/reject/
 httpdocs/static/
-httpdocs/wordpress
-httpdocs/wp
 httpdocs/css/screen.css
 httpdocs/css/screen.css.map
 httpdocs/js/game_field.merge.js
