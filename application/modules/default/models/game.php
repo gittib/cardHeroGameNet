@@ -360,14 +360,19 @@ class model_Game {
 
     public function isFinished($iGameFieldId)
     {
-        $sel = $this->_getFieldIdSelectSql(array(
-            'select_finished'   => true,
-            'min_start_date'    => self::_allowReplayMinDate,
-            'game_field_id'     => $iGameFieldId,
-        ));
+        $sel = $this->_db->select()
+            ->from(array('tgc' => 't_game_card'))
+            ->join(
+                array('mc' => 'm_card'),
+                'mc.card_id = tgc.card_id',
+                array()
+            )
+            ->where('tgc.position_category = ?', 'used')
+            ->where('mc.category = ?', 'master')
+            ;
         $rslt = $this->_db->fetchAll($sel);
         if (count($rslt) <= 0) {
-            throw new Zend_Controller_Action_Exception('this field is invalid.', 404);
+            throw new Zend_Controller_Action_Exception('this field is not finished yet.', 404);
         }
     }
 

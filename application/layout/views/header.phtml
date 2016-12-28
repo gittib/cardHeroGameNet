@@ -34,7 +34,7 @@ if (Common::isAdmin()) {
     <div id="floating_wrapper">
         <div class="links floating_links">
             <div class="top_link">
-                <a href="/index/list/" class="colorbox-iframe">メインメニュー</a>
+                <a href="#mainmenu_inline" class="colorbox-inline">メインメニュー</a>
             </div>
             <div class="user_info">
                 <?=$sLoginInfo?>
@@ -46,13 +46,13 @@ if (Common::isAdmin()) {
             <div class="img_wrap">
                 <img src="/images/cardhero-game.net.jpg" alt="カードヒーロー@スマホ" />
                 <div class="env_echo">
-                    <?php echo $sEnv; ?>
+                    <?=$sEnv?>
                 </div>
             </div>
         </div>
         <div class="links clearfix">
             <div class="top_link">
-                <a href="/index/list/" class="colorbox-iframe">メインメニュー</a>
+                <a href="#mainmenu_inline" class="colorbox-inline">メインメニュー</a>
             </div>
             <div class="user_info">
                 <?=$sLoginInfo?>
@@ -65,3 +65,6 @@ if (Common::isAdmin()) {
     ※Javascriptが無効になっています。
     ブラウザの設定からjavascriptを有効にしてください。
 </noscript>
+<div style="display:none;">
+    <div id="mainmenu_inline"></div>
+</div>
