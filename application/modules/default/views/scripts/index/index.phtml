@@ -20,7 +20,7 @@ foreach ($aSisterSite as $key => $val) {
 
 $sPanelHtml = '';
 foreach ($this->aPanelInfo as $key => $val) {
-    $sPanelHtml .= <<<_eos_
+    $sPanelHtml .= <<<_html_
             <a href="{$val['url']}">
               <div class="{$val['class']} top_page_panel">
                   <img src="/images/{$val['img']}" alt="{$val['alt']}" />
@@ -28,7 +28,7 @@ foreach ($this->aPanelInfo as $key => $val) {
               </div>
             </a>
 
-_eos_;
+_html_;
 }
 ?>
 <div id="welcome" class="welcome_frame">

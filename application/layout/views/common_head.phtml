@@ -43,7 +43,7 @@ $sAnalytics = '';
 if ((empty($_GET['from']) || preg_match(';https?//;', $_GET['from']) === false) && empty($l->bPreventAnalytics)) {
     if (APPLICATION_ENV == 'production') {
         // Googleアナリティクスタグ
-        $sAnalytics = <<<_eos_
+        $sAnalytics = <<<_javascript_
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -56,7 +56,7 @@ if ((empty($_GET['from']) || preg_match(';https?//;', $_GET['from']) === false) 
 
 </script>
 
-_eos_;
+_javascript_;
     } else {
         $sAnalytics = "<!-- Google Analytics -->\n";
     }

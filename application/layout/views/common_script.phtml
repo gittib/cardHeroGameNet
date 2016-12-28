@@ -14,14 +14,14 @@ if (isSet($l->javascript)) {
     }
 }
 if (isSet($l->javascriptCode)) {
-    $sJavascript .= <<<_eos_
+    $sJavascript .= <<<_html_
 <script type="text/javascript">
 <!--
 {$l->javascriptCode}
 -->
 </script>
 
-_eos_;
+_html_;
 }
 ?>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -29,6 +29,13 @@ _eos_;
 <script src="/js/to_kana_zenkaku.js"></script>
 <script src="/js/jquery.colorbox-min.js"></script>
 <script>
+$('#mainmenu_inline').load('/index/list/');
+$('.colorbox-inline').colorbox({
+    inline: true,
+    width: '90%',
+    height: '90%',
+    maxWidth: '720px',
+});
 $(function () {
     $('.colorbox-iframe').colorbox({
         iframe: true,
@@ -36,6 +43,6 @@ $(function () {
         height: '90%',
         maxWidth: '720px',
     });
-})
+});
 </script>
 <?=$sJavascript?>
