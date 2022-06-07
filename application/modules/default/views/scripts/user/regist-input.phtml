@@ -9,7 +9,7 @@ foreach ($this->aCols as $key => $val) {
     if (isset($this->aInput[$key])) {
         $sAttrValue = $this->aInput[$key];
     }
-    $sInput .= <<<_eos_
+    $sInput .= <<<_html_
         <div class="clearfix">
             <div class="column_name">{$val}：</div>
             <div class="input_box">
@@ -17,7 +17,7 @@ foreach ($this->aCols as $key => $val) {
             </div>
         </div>
 
-_eos_;
+_html_;
 }
 ?>
 <div id="regist_input">
@@ -28,6 +28,7 @@ _eos_;
         <div class="submit"><input type="button" value="確認画面へ" /></div>
     </form>
     <ul class="warning">
-    <li>Twitter IDを入力すると、<a href="<?=$this->sTwitterBotUrl?>" target="_blank">bot</a>から＠ツイートが飛びます。<br /> 他人に見せたくないIDは登録しないでください。</li>
+        <!-- <li>Twitter IDを入力すると、<a href="<?=$this->sTwitterBotUrl?>" target="_blank">bot</a>から＠ツイートが飛びます。</li> -->
+        <li>他人に見せたくないTwitter IDは登録しないでください。</li>
     </ul>
 </div>
